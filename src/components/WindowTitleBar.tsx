@@ -40,21 +40,54 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
 
   const handleToggleFullscreen = async () => {
     try {
+      const win = (window as unknown as { __TAURI__?: { window?: { getCurrentWindow?: () => { toggleMaximize?: () => Promise<void> } } } });
+      if (win.__TAURI__?.window?.getCurrentWindow) {
+        const appWin = win.__TAURI__.window.getCurrentWindow();
+        if (appWin?.toggleMaximize) {
+          await appWin.toggleMaximize();
+          setIsFullscreen(!isFullscreen);
+          return;
+        }
+      }
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
       } else {
         await document.exitFullscreen();
       }
     } catch (err) {
-      console.warn('Fullscreen request failed:', err);
+      console.warn('Fullscreen/Maximize request failed:', err);
     }
   };
 
-  const handleMinimize = () => {
+  const handleMinimize = async () => {
+    try {
+      const win = (window as unknown as { __TAURI__?: { window?: { getCurrentWindow?: () => { minimize?: () => Promise<void> } } } });
+      if (win.__TAURI__?.window?.getCurrentWindow) {
+        const appWin = win.__TAURI__.window.getCurrentWindow();
+        if (appWin?.minimize) {
+          await appWin.minimize();
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Minimize failed:', err);
+    }
     setIsMinimized(!isMinimized);
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
+    try {
+      const win = (window as unknown as { __TAURI__?: { window?: { getCurrentWindow?: () => { close?: () => Promise<void> } } } });
+      if (win.__TAURI__?.window?.getCurrentWindow) {
+        const appWin = win.__TAURI__.window.getCurrentWindow();
+        if (appWin?.close) {
+          await appWin.close();
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Tauri close failed:', err);
+    }
     if (onClose) {
       onClose();
     } else {
@@ -70,6 +103,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
     return (
       <div className="w-full select-none font-sans text-xs shadow-md border-b border-sky-300/30">
         <div 
+          data-tauri-drag-region
           className="h-8 px-3 flex items-center justify-between text-white relative overflow-hidden"
           style={{
             background: 'linear-gradient(180deg, rgba(160, 205, 240, 0.85) 0%, rgba(65, 125, 175, 0.9) 45%, rgba(15, 55, 90, 0.95) 50%, rgba(30, 85, 130, 0.95) 100%)',
@@ -80,9 +114,10 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
           <div className="absolute top-0 left-0 right-0 h-3.5 bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
 
           {/* Left: Vista Orb Icon + AppLogo + Glowing Title */}
-          <div className="flex items-center space-x-2 z-10">
+          <div data-tauri-drag-region className="flex items-center space-x-2 z-10 cursor-default">
             <AppLogo className="h-5 w-5 rounded-md shadow-xs drop-shadow-xs" />
             <span 
+              data-tauri-drag-region
               className="font-bold tracking-wide text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)]"
               style={{ fontFamily: "'Segoe UI', Tahoma, sans-serif" }}
             >
@@ -136,6 +171,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
     return (
       <div className="w-full select-none font-mono text-[11px] bg-[#1a1e22] border-b-2 border-[#0a0d0f]">
         <div 
+          data-tauri-drag-region
           className="h-7 px-2 flex items-center justify-between text-emerald-400 relative"
           style={{
             background: 'linear-gradient(180deg, #444f59 0%, #2c343b 50%, #1a1e22 100%)',
@@ -146,11 +182,11 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
           }}
         >
           {/* Left: Winamp Lightning Bolt Icon + Retro LCD Text */}
-          <div className="flex items-center space-x-2">
+          <div data-tauri-drag-region className="flex items-center space-x-2 cursor-default">
             <div className="h-4 w-4 bg-[#0a0d0f] border border-[#00ff66]/50 flex items-center justify-center text-amber-400">
               <Zap className="h-3 w-3 fill-amber-400" />
             </div>
-            <span className="font-mono font-bold tracking-widest text-[#00ff66] drop-shadow-[0_0_4px_rgba(0,255,100,0.6)] uppercase">
+            <span data-tauri-drag-region className="font-mono font-bold tracking-widest text-[#00ff66] drop-shadow-[0_0_4px_rgba(0,255,100,0.6)] uppercase">
               *** WINAMP - {title} ***
             </span>
           </div>
@@ -196,10 +232,10 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
   if (theme === 'dark') {
     return (
       <div className="w-full select-none font-sans text-xs bg-[#0b0f19] border-b border-slate-800">
-        <div className="h-7 px-3 flex items-center justify-between text-slate-300 bg-[#111827]/90">
-          <div className="flex items-center space-x-2">
+        <div data-tauri-drag-region className="h-7 px-3 flex items-center justify-between text-slate-300 bg-[#111827]/90">
+          <div data-tauri-drag-region className="flex items-center space-x-2 cursor-default">
             <AppLogo className="h-4 w-4 rounded-xs shrink-0" />
-            <span className="font-semibold text-slate-200 text-[11px]">
+            <span data-tauri-drag-region className="font-semibold text-slate-200 text-[11px]">
               {title}
             </span>
           </div>
@@ -238,10 +274,10 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
   // 4. STANDAR (BRAND BARU) THEMED TITLE BAR: #011627 with #2EC4B6 accent
   return (
     <div className="w-full select-none font-sans text-xs bg-[#011627] border-b border-[#0d2a45]">
-      <div className="h-7 px-3 flex items-center justify-between text-[#F6F7F8] bg-[#021f37]">
-        <div className="flex items-center space-x-2">
+      <div data-tauri-drag-region className="h-7 px-3 flex items-center justify-between text-[#F6F7F8] bg-[#021f37]">
+        <div data-tauri-drag-region className="flex items-center space-x-2 cursor-default">
           <AppLogo className="h-4 w-4 rounded-xs shrink-0" />
-          <span className="font-semibold text-[#F6F7F8] text-[11px]">
+          <span data-tauri-drag-region className="font-semibold text-[#F6F7F8] text-[11px]">
             {title}
           </span>
         </div>
