@@ -1,0 +1,340 @@
+@import "tailwindcss";
+
+:root {
+  --bg-app: #E6E6E6;
+  --bg-card: #FFFFFF;
+  --bg-card-subtle: #F8FAFC;
+  --text-main: #39393A;
+  --text-muted: #64748B;
+  --border-color: #E2E8F0;
+  --header-bg: #297373;
+}
+
+/* =========================================================
+   CURSOR FIX FOR EXE / DESKTOP WEBVIEW / COMPILATION
+   Ensures text cursors never disappear over inputs/textareas
+   ========================================================= */
+html, body {
+  cursor: default;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="time"],
+input[type="password"],
+input[type="search"],
+textarea,
+[contenteditable="true"] {
+  cursor: text !important;
+  caret-color: auto !important;
+}
+
+button, [role="button"], a, label[for], input[type="checkbox"], input[type="radio"], select, .cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Ensure text selection remains visible and cursor doesn't disappear */
+::selection {
+  background-color: #297373;
+  color: #ffffff;
+}
+
+[data-theme="dark"] ::selection {
+  background-color: #38bdf8;
+  color: #0f172a;
+}
+
+[data-theme="vista"] ::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+[data-theme="winamp"] ::selection {
+  background-color: #00ff00;
+  color: #000000;
+}
+
+/* =========================================================
+   THEME 1: DARK MODE (Automatic Revert / Invert Filter & Clean Contrast)
+   ========================================================= */
+[data-theme="dark"] {
+  --bg-app: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-subtle: #0f172a;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --header-bg: #111827;
+  color-scheme: dark;
+}
+
+[data-theme="dark"] body,
+[data-theme="dark"] .bg-\[\#E6E6E6\] {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .bg-slate-50,
+[data-theme="dark"] .bg-slate-50\/50,
+[data-theme="dark"] .bg-slate-50\/60 {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .bg-slate-100,
+[data-theme="dark"] .bg-slate-100\/80,
+[data-theme="dark"] .bg-slate-100\/90 {
+  background-color: #1a2333 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .text-slate-900,
+[data-theme="dark"] .text-slate-800,
+[data-theme="dark"] .text-\[\#39393A\] {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .text-slate-700,
+[data-theme="dark"] .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .text-slate-500,
+[data-theme="dark"] .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-slate-100 {
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select:not(.shift-select),
+[data-theme="dark"] textarea {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+/* =========================================================
+   THEME 2: WINDOWS VISTA (Aero Glass Aesthetic)
+   ========================================================= */
+[data-theme="vista"] {
+  --bg-app: #18334a;
+  --bg-card: rgba(235, 245, 255, 0.85);
+  --text-main: #0c1e2e;
+}
+
+[data-theme="vista"] body,
+[data-theme="vista"] .bg-\[\#E6E6E6\] {
+  background: radial-gradient(circle at 50% 0%, #3a759c 0%, #1c3c54 45%, #0d1e2b 100%) fixed !important;
+  color: #0f172a !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+[data-theme="vista"] header {
+  background: linear-gradient(180deg, rgba(82, 144, 185, 0.95) 0%, rgba(35, 78, 108, 0.95) 50%, rgba(13, 38, 58, 0.98) 100%) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+[data-theme="vista"] .bg-white {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(240, 246, 252, 0.90) 100%) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 8px 32px rgba(0, 20, 40, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  border-radius: 12px !important;
+}
+
+[data-theme="vista"] .bg-slate-50,
+[data-theme="vista"] .bg-slate-100 {
+  background: rgba(220, 235, 248, 0.6) !important;
+  border: 1px solid rgba(170, 205, 235, 0.5) !important;
+}
+
+[data-theme="vista"] button {
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.15s ease;
+}
+
+[data-theme="vista"] button:hover {
+  filter: brightness(1.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 10px rgba(80, 180, 255, 0.5);
+}
+
+[data-theme="vista"] input[type="text"],
+[data-theme="vista"] select:not(.shift-select) {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid #7eb4ea !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 5px rgba(100, 180, 255, 0.2) !important;
+}
+
+/* =========================================================
+   THEME 3: WINAMP CLASSIC (Retro 2.9 Winamp Chassis & LCD)
+   ========================================================= */
+[data-theme="winamp"] {
+  --bg-app: #121518;
+  --bg-card: #202428;
+  --text-main: #00FF00;
+}
+
+[data-theme="winamp"] body,
+[data-theme="winamp"] .bg-\[\#E6E6E6\] {
+  background-color: #14171A !important;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px) !important;
+  background-size: 20px 20px !important;
+  color: #00FF00 !important;
+  font-family: 'Courier New', Courier, monospace !important;
+}
+
+[data-theme="winamp"] header {
+  background: linear-gradient(180deg, #38424B 0%, #20262B 50%, #15191C 100%) !important;
+  border-top: 2px solid #687B8C !important;
+  border-left: 2px solid #687B8C !important;
+  border-right: 2px solid #080A0C !important;
+  border-bottom: 2px solid #080A0C !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="winamp"] .bg-white {
+  background: #1e2328 !important;
+  border-top: 2px solid #48545e !important;
+  border-left: 2px solid #48545e !important;
+  border-right: 2px solid #0a0d0f !important;
+  border-bottom: 2px solid #0a0d0f !important;
+  border-radius: 4px !important;
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.6) !important;
+}
+
+[data-theme="winamp"] .bg-slate-50,
+[data-theme="winamp"] .bg-slate-100,
+[data-theme="winamp"] .bg-slate-100\/80,
+[data-theme="winamp"] .bg-slate-100\/90 {
+  background: #14181c !important;
+  border: 1px solid #333d45 !important;
+}
+
+[data-theme="winamp"] .text-slate-900,
+[data-theme="winamp"] .text-slate-800,
+[data-theme="winamp"] .text-\[\#39393A\] {
+  color: #00FF66 !important;
+  text-shadow: 0 0 4px rgba(0, 255, 100, 0.4);
+}
+
+[data-theme="winamp"] .text-slate-700,
+[data-theme="winamp"] .text-slate-600 {
+  color: #00E5FF !important;
+}
+
+[data-theme="winamp"] .text-slate-500,
+[data-theme="winamp"] .text-slate-400 {
+  color: #88A0B0 !important;
+}
+
+[data-theme="winamp"] button {
+  border-radius: 3px !important;
+  font-family: inherit !important;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="winamp"] button:active {
+  transform: translateY(1px);
+  filter: brightness(0.85);
+}
+
+[data-theme="winamp"] input[type="text"],
+[data-theme="winamp"] select:not(.shift-select),
+[data-theme="winamp"] textarea {
+  background: #0d1012 !important;
+  color: #00FF00 !important;
+  border: 1px solid #00AA50 !important;
+  font-family: 'Courier New', monospace !important;
+  box-shadow: inset 0 0 5px rgba(0, 255, 0, 0.2) !important;
+}
+
+/* =========================================================
+   SHIFT PILL & SELECT STATIC OVERRIDES (IMMUNE TO THEMES)
+   Shift background and text colors must be strictly static
+   and cannot be overridden by theme dark/vista/winamp classes.
+   ========================================================= */
+select.shift-select,
+.shift-select,
+[data-theme="dark"] select.shift-select,
+[data-theme="vista"] select.shift-select,
+[data-theme="winamp"] select.shift-select {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+/* Option dropdown styling across themes */
+.shift-select option {
+  padding: 4px 8px;
+}
+[data-theme="dark"] .shift-select option {
+  background-color: #1E1E1E !important;
+  color: #FFFFFF !important;
+}
+[data-theme="vista"] .shift-select option {
+  background-color: #0F172A !important;
+  color: #FFFFFF !important;
+}
+[data-theme="winamp"] .shift-select option {
+  background-color: #000000 !important;
+  color: #00FF00 !important;
+  font-family: 'Courier New', monospace !important;
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+}
+
+/* =========================================================
+   RUNNING TEXT / MARQUEE ANIMATION FOR DESKTOP NOTES
+   ========================================================= */
+@keyframes note-marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.note-marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+.note-marquee-content {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: note-marquee 12s linear infinite;
+  will-change: transform;
+}
+
+.note-marquee-container:hover .note-marquee-content {
+  animation-play-state: paused;
+}
+

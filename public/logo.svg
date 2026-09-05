@@ -1,0 +1,75 @@
+<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7AD1E8" />
+      <stop offset="50%" stop-color="#F7B267" />
+      <stop offset="100%" stop-color="#F4845F" />
+    </linearGradient>
+    <linearGradient id="pageGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E2F3FC" />
+      <stop offset="35%" stop-color="#F9F5EA" />
+      <stop offset="75%" stop-color="#FCD5A4" />
+      <stop offset="100%" stop-color="#F9A06C" />
+    </linearGradient>
+    <linearGradient id="redHeader" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF4B4B" />
+      <stop offset="100%" stop-color="#E63946" />
+    </linearGradient>
+    <linearGradient id="cyanHeader" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2EC4B6" />
+      <stop offset="100%" stop-color="#20A4F3" />
+    </linearGradient>
+    <linearGradient id="standGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2F2A4A" />
+      <stop offset="50%" stop-color="#211A36" />
+      <stop offset="100%" stop-color="#151024" />
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#CED4DA" />
+      <stop offset="50%" stop-color="#6C757D" />
+      <stop offset="100%" stop-color="#212529" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Squircle -->
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="#011627" />
+  <rect x="5" y="5" width="118" height="118" rx="27" fill="url(#skyGrad)" opacity="0.2" />
+
+  <!-- Calendar Stand Backing -->
+  <polygon points="20,40 40,24 104,24 108,102 18,102" fill="url(#standGrad)" />
+
+  <!-- Front Calendar Sheet -->
+  <path d="M 28 26 L 102 26 C 105 26 108 28 108 32 L 102 98 C 102 101 99 104 95 104 L 32 104 C 28 104 26 101 26 98 L 26 30 C 26 27 28 26 28 26 Z" fill="url(#pageGrad)" stroke="#1E1B2E" stroke-width="2.5" stroke-linejoin="round"/>
+
+  <!-- Top Bars -->
+  <path d="M 26.5 29 C 26.5 27 28 26 30 26 L 100 26 C 102 26 103.5 27 103.5 29 L 102.5 39 L 26.5 39 Z" fill="url(#redHeader)" />
+  <rect x="26.5" y="39" width="76" height="8" fill="url(#cyanHeader)" />
+
+  <!-- Grid Lines -->
+  <g stroke="#3A405A" stroke-width="0.8" stroke-opacity="0.35">
+    <line x1="28" y1="56" x2="102" y2="56" />
+    <line x1="29" y1="67" x2="101" y2="67" />
+    <line x1="30" y1="78" x2="100" y2="78" />
+    <line x1="31" y1="89" x2="98" y2="89" />
+    <line x1="42" y1="47" x2="43" y2="102" />
+    <line x1="57" y1="47" x2="57" y2="102" />
+    <line x1="72" y1="47" x2="72" y2="101" />
+    <line x1="87" y1="47" x2="87" y2="100" />
+  </g>
+
+  <!-- Blue Selected Date -->
+  <rect x="31" y="49" width="8.5" height="5.5" rx="1.5" fill="#20A4F3" />
+
+  <!-- Rings -->
+  <path d="M 41 27 C 41 16 48 16 48 27" stroke="url(#ringGrad)" stroke-width="3.2" stroke-linecap="round" />
+  <path d="M 62 27 C 62 16 69 16 69 27" stroke="url(#ringGrad)" stroke-width="3.2" stroke-linecap="round" />
+  <path d="M 83 27 C 83 16 90 16 90 27" stroke="url(#ringGrad)" stroke-width="3.2" stroke-linecap="round" />
+
+  <!-- Miniature House -->
+  <g transform="translate(10, 80)">
+    <circle cx="5" cy="28" r="4" fill="#2A7B4C" />
+    <rect x="7" y="15" width="14" height="13" rx="1" fill="#C25953" />
+    <rect x="11.5" y="20" width="5" height="8" rx="1" fill="#201A18" />
+    <polygon points="5,16 14,7 23,16" fill="#2EC4B6" />
+  </g>
+</svg>

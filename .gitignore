@@ -1,0 +1,34 @@
+# IDE & Lock Files (Wajib agar tidak Permission Denied)
+.vs/
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Node & Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Hasil Build
+dist/
+dist-ssr/
+build/
+*.exe
+*.msi
+*.apk
+*.aab
+
+# Tauri Build Cache
+src-tauri/target/
+
+# Android Build Cache
+android/.gradle/
+android/app/build/
+android/app/*.jks
+*.jks
+*.keystore
+
+# File Rahasia / Environment
+*.pfx
+.env
+.env.local

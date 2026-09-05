@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "shiftRecord": {
+      "title": "Shift Record",
+      "description": "Daily shift schedule, work hours, overtime, and status record per day",
+      "type": "object",
+      "properties": {
+        "dateKey": {
+          "type": "string",
+          "description": "The date string key in format YYYY-M-D, e.g. 2026-8-2",
+          "pattern": "^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$"
+        },
+        "shift": {
+          "type": "string",
+          "description": "Shift type code or name",
+          "enum": ["Graha", "NPCT", "TPSL", "OFF", "SM", "PM", "Malam", "CUTI", "G", "L", "N", "S2", "M", "C", "CT", ""]
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Whether the shift dropdown is locked"
+        },
+        "note": {
+          "type": "string",
+          "description": "Short note or remark",
+          "maxLength": 200
+        },
+        "isMasuk": {
+          "type": "boolean",
+          "description": "Whether the employee attended work"
+        },
+        "tipeMasukLibur": {
+          "type": "string",
+          "description": "Holiday duty type: piket or lembur",
+          "enum": ["piket", "lembur"]
+        },
+        "isHoldDokumen": {
+          "type": "boolean",
+          "description": "Hold document flag"
+        },
+        "jamMasuk": {
+          "type": "string",
+          "description": "Clock in time HH:mm",
+          "maxLength": 10
+        },
+        "jamPulang": {
+          "type": "string",
+          "description": "Clock out time HH:mm",
+          "maxLength": 10
+        },
+        "absenCeisa": {
+          "type": "string",
+          "description": "CEISA attendance time HH:mm",
+          "maxLength": 10
+        },
+        "isSuratTugasTambahan": {
+          "type": "boolean",
+          "description": "Additional assignment on holiday generating substitute leave (cuti pengganti)"
+        },
+        "isManualHoliday": {
+          "type": "boolean",
+          "description": "National holiday on a weekday flag"
+        },
+        "isGunakanOffGeser": {
+          "type": "boolean",
+          "description": "Taking off day on a regular working day (Geser OFF)"
+        },
+        "referensiTglOff": {
+          "type": "string",
+          "description": "Reference date for swapped off day",
+          "maxLength": 100
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when this record was last modified"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user ID"
+        }
+      },
+      "required": ["dateKey", "shift", "isMasuk"]
+    }
+  },
+  "firestore": {
+    "/shifts/{shiftId}": {
+      "schema": "shiftRecord",
+      "description": "Collection of daily shift records"
+    },
+    "/users/{userId}/shifts/{shiftId}": {
+      "schema": "shiftRecord",
+      "description": "User-specific collection of daily shift records"
+    }
+  }
+}

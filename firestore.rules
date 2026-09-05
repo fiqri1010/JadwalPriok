@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidShiftRecord(data) {
+      return data.dateKey is string &&
+        data.dateKey.size() <= 20 &&
+        data.shift is string &&
+        data.shift in ['Graha', 'NPCT', 'TPSL', 'OFF', 'SM', 'PM', 'Malam', 'CUTI', 'G', 'L', 'N', 'S2', 'M', 'C', 'CT', ''] &&
+        data.isMasuk is bool &&
+        (!('isLocked' in data) || data.isLocked is bool) &&
+        (!('note' in data) || (data.note is string && data.note.size() <= 200)) &&
+        (!('isHoldDokumen' in data) || data.isHoldDokumen is bool) &&
+        (!('jamMasuk' in data) || (data.jamMasuk is string && data.jamMasuk.size() <= 10)) &&
+        (!('jamPulang' in data) || (data.jamPulang is string && data.jamPulang.size() <= 10)) &&
+        (!('absenCeisa' in data) || (data.absenCeisa is string && data.absenCeisa.size() <= 10)) &&
+        (!('tipeMasukLibur' in data) || (data.tipeMasukLibur is string && data.tipeMasukLibur in ['piket', 'lembur'])) &&
+        (!('isSuratTugasTambahan' in data) || data.isSuratTugasTambahan is bool) &&
+        (!('isManualHoliday' in data) || data.isManualHoliday is bool) &&
+        (!('isGunakanOffGeser' in data) || data.isGunakanOffGeser is bool) &&
+        (!('referensiTglOff' in data) || (data.referensiTglOff is string && data.referensiTglOff.size() <= 100)) &&
+        (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 60)) &&
+        (!('userId' in data) || (data.userId is string && data.userId.size() <= 128));
+    }
+
+    // Connection test document
+    match /test/{testId} {
+      allow read: if true;
+    }
+
+    // Public / shared shifts collection
+    match /shifts/{shiftId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(shiftId) && isValidShiftRecord(incoming());
+      allow delete: if isSignedIn();
+    }
+
+    // User-scoped shifts collection
+    match /users/{userId}/shifts/{shiftId} {
+      allow get, list: if isSignedIn() && request.auth.uid == userId;
+      allow create, update: if isSignedIn() && request.auth.uid == userId && isValidId(shiftId) && isValidShiftRecord(incoming());
+      allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(shiftId);
+    }
+  }
+}
+
