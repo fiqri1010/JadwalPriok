@@ -5,7 +5,11 @@ import {
   Square, 
   X, 
   Copy, 
+  Sparkles, 
   Zap, 
+  Moon, 
+  Sun, 
+  Calendar as CalendarIcon,
   Maximize2,
   Minimize2
 } from 'lucide-react';
@@ -17,9 +21,10 @@ interface WindowTitleBarProps {
   subtitle?: string;
 }
 
-// Helper untuk mengambil instance window aktif di Tauri v1 / v2
+// Helper to safely get the active Tauri window instance if available
 async function getTauriWindow() {
   try {
+    // 1. Check window.__TAURI__ (v1 or v2 with global enabled)
     const win = window as unknown as {
       __TAURI__?: {
         window?: {
@@ -45,17 +50,18 @@ async function getTauriWindow() {
       return win.__TAURI__.window.appWindow;
     }
 
+    // 2. Check if running inside Tauri environment and dynamically import API
     if (win.__TAURI_INTERNALS__ || win.__TAURI__) {
       const { getCurrentWindow } = await import('@tauri-apps/api/window');
       return getCurrentWindow();
     }
   } catch (err) {
-    console.debug('Tauri window API not available:', err);
+    console.debug('Tauri window API not available in current environment:', err);
   }
   return null;
 }
 
-// Helper jika menggunakan Electron IPC
+// Helper to get Electron IPC API if available
 function getElectronAPI() {
   const win = window as unknown as {
     electronAPI?: {
@@ -87,6 +93,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
 
   const handleToggleFullscreen = async () => {
     try {
+      // 1. Check Electron IPC
       const electron = getElectronAPI();
       if (electron?.toggleMaximize) {
         electron.toggleMaximize();
@@ -99,6 +106,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
         return;
       }
 
+      // 2. Check Tauri IPC
       const appWin = await getTauriWindow();
       if (appWin?.toggleMaximize) {
         await appWin.toggleMaximize();
@@ -106,24 +114,27 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
         return;
       }
 
+      // 3. Fallback Web Fullscreen API
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
       } else {
         await document.exitFullscreen();
       }
     } catch (err) {
-      console.warn('Fullscreen/Maximize failed:', err);
+      console.warn('Fullscreen/Maximize request failed:', err);
     }
   };
 
   const handleMinimize = async () => {
     try {
+      // 1. Check Electron IPC
       const electron = getElectronAPI();
       if (electron?.minimize) {
         electron.minimize();
         return;
       }
 
+      // 2. Check Tauri IPC
       const appWin = await getTauriWindow();
       if (appWin?.minimize) {
         await appWin.minimize();
@@ -137,12 +148,14 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
 
   const handleClose = async () => {
     try {
+      // 1. Check Electron IPC
       const electron = getElectronAPI();
       if (electron?.close) {
         electron.close();
         return;
       }
 
+      // 2. Check Tauri IPC
       const appWin = await getTauriWindow();
       if (appWin?.close) {
         await appWin.close();
@@ -152,7 +165,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
       console.warn('Close failed:', err);
     }
 
-    // Tutup langsung tanpa window.confirm / beforeunload popup
+    // Direct close without any beforeunload or confirm dialog popup
     if (onClose) {
       onClose();
     }
@@ -166,7 +179,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
     WebkitAppRegion: 'no-drag'
   } as React.CSSProperties;
 
-  // 1. TEMA VISTA GLASS
+  // 1. WINDOWS VISTA (ALPHA) THEMED TITLE BAR
   if (theme === 'vista') {
     return (
       <div 
@@ -183,8 +196,10 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0, 20, 40, 0.4)'
           }}
         >
+          {/* Glass reflection top highlight */}
           <div className="absolute top-0 left-0 right-0 h-3.5 bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
 
+          {/* Left: Vista Orb Icon + AppLogo + Glowing Title */}
           <div data-tauri-drag-region className="flex items-center space-x-2 z-10 cursor-default">
             <span style={noDragStyle}>
               <AppLogo className="h-5 w-5 rounded-md shadow-xs drop-shadow-xs" />
@@ -198,7 +213,9 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             </span>
           </div>
 
+          {/* Right: Authentic Windows Vista 3 Window Buttons */}
           <div style={noDragStyle} className="flex items-center space-x-1 z-10 -mr-1">
+            {/* Minimize */}
             <button
               type="button"
               style={noDragStyle}
@@ -208,6 +225,8 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             >
               <Minus className="h-3 w-3 drop-shadow-xs" />
             </button>
+
+            {/* Maximize / Restore */}
             <button
               type="button"
               style={noDragStyle}
@@ -221,6 +240,8 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                 <Square className="h-2.5 w-2.5 drop-shadow-xs" />
               )}
             </button>
+
+            {/* Vista Glossy Red Close Button */}
             <button
               type="button"
               style={noDragStyle}
@@ -236,7 +257,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
     );
   }
 
-  // 2. TEMA WINAMP CLASSIC
+  // 2. WINAMP CLASSIC (ALPHA) THEMED TITLE BAR
   if (theme === 'winamp') {
     return (
       <div 
@@ -256,6 +277,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)'
           }}
         >
+          {/* Left: Winamp Lightning Bolt Icon + Retro LCD Text */}
           <div data-tauri-drag-region className="flex items-center space-x-2 cursor-default">
             <div style={noDragStyle} className="h-4 w-4 bg-[#0a0d0f] border border-[#00ff66]/50 flex items-center justify-center text-amber-400">
               <Zap className="h-3 w-3 fill-amber-400" />
@@ -265,7 +287,9 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             </span>
           </div>
 
+          {/* Right: Retro Winamp 3D Buttons */}
           <div style={noDragStyle} className="flex items-center space-x-1">
+            {/* Minimize */}
             <button
               type="button"
               style={noDragStyle}
@@ -275,6 +299,8 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             >
               _
             </button>
+
+            {/* Windowshade / Maximize */}
             <button
               type="button"
               style={noDragStyle}
@@ -284,6 +310,8 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             >
               {isFullscreen ? '▼' : '▲'}
             </button>
+
+            {/* Close */}
             <button
               type="button"
               style={noDragStyle}
@@ -299,7 +327,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
     );
   }
 
-  // 3. TEMA DARK MODE
+  // 3. DARK MODE (ALPHA) THEMED TITLE BAR
   if (theme === 'dark') {
     return (
       <div 
@@ -355,7 +383,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
     );
   }
 
-  // 4. TEMA STANDAR (DEFAULT)
+  // 4. STANDAR (BRAND BARU) THEMED TITLE BAR: #011627 with #2EC4B6 accent
   return (
     <div 
       data-tauri-drag-region 
