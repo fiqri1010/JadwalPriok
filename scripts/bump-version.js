@@ -23,6 +23,20 @@ pkg.version = newVersion;
 fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
 console.log(`\n📦 Versi aplikasi otomatis dinaikkan ke: v${newVersion}`);
 
+// Sinkronkan src/types.ts
+const typesPath = path.resolve('src/types.ts');
+if (fs.existsSync(typesPath)) {
+  try {
+    let types = fs.readFileSync(typesPath, 'utf8');
+    types = types.replace(/export const APP_VERSION = '[^']+';/, `export const APP_VERSION = '${newVersion}';`);
+    types = types.replace(/export const APP_VERSION_DISPLAY = '[^']+';/, `export const APP_VERSION_DISPLAY = 'v${newVersion}';`);
+    fs.writeFileSync(typesPath, types);
+    console.log(`✓ src/types.ts disinkronkan ke v${newVersion}`);
+  } catch (err) {
+    console.warn('Gagal memperbarui types.ts:', err.message);
+  }
+}
+
 // Sinkronkan src-tauri/tauri.conf.json jika ada
 const tauriPath = path.resolve('src-tauri/tauri.conf.json');
 if (fs.existsSync(tauriPath)) {

@@ -884,9 +884,6 @@ export default function App() {
                     <h1 className={themeConfig.titleClass}>
                       JadwalPriok
                     </h1>
-                    <span className={themeConfig.versionBadgeClass}>
-                      {APP_VERSION_DISPLAY}
-                    </span>
                   </div>
                 <p className={themeConfig.subtitleClass}>
                   Jadwal Pemeriksa Fisik dan Performance View
@@ -1055,9 +1052,6 @@ export default function App() {
                   <h1 className={themeConfig.titleClass}>
                     JadwalPriok
                   </h1>
-                  <span className={themeConfig.versionBadgeClass}>
-                    {APP_VERSION_DISPLAY}
-                  </span>
                 </div>
                 <p className={themeConfig.subtitleClass}>
                   Jadwal Pemeriksa Fisik & Perform
