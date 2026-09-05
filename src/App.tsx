@@ -34,7 +34,7 @@ import {
   Sparkles,
   Radio
 } from 'lucide-react';
-import { SHIFT_OPTIONS, DayData, ShiftType, EXCEL_SHIFT_MAPPING, LiburNasional, AppTheme } from './types';
+import { SHIFT_OPTIONS, DayData, ShiftType, EXCEL_SHIFT_MAPPING, LiburNasional, AppTheme, APP_VERSION_DISPLAY } from './types';
 import { getThemeConfig } from './themeConfig';
 import { calculateDayResult, calculateMonthSummary } from './lib/calculator';
 import { DayCell } from './components/DayCell';
@@ -857,33 +857,37 @@ export default function App() {
   };
 
   return (
-    <div className={themeConfig.wrapperClass}>
-      {/* Desktop Window Title Bar that dynamically matches the active theme */}
+    <div className={`h-screen w-screen overflow-hidden flex flex-col ${themeConfig.wrapperClass.replace('min-h-screen', 'h-full')}`}>
+      {/* 1. Desktop Window Title Bar: Fixed / Static at top, never scrolls */}
       {!isMobile && (
-        <WindowTitleBar 
-          theme={currentTheme} 
-          title="JadwalPriok v1.0.0"
-          subtitle="Jadwal Pemeriksa Fisik dan Performance View"
-        />
+        <div className="shrink-0 z-50">
+          <WindowTitleBar 
+            theme={currentTheme} 
+            title={`JadwalPriok ${APP_VERSION_DISPLAY}`}
+            subtitle="Jadwal Pemeriksa Fisik dan Performance View"
+          />
+        </div>
       )}
 
-      {/* Top Navbar: Desktop Header */}
-      {!isMobile && (
-        <header className={themeConfig.navbarClass}>
-          <div className={`flex items-center justify-between py-1.5 sm:py-2 ${desktopContainerClass}`}>
-            <div className="flex items-center space-x-2 sm:space-x-2.5 min-w-0">
-              <div className={themeConfig.logoContainerClass}>
-                <AppLogo className="h-4 w-4 sm:h-5 sm:w-5" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <h1 className={themeConfig.titleClass}>
-                    JadwalPriok
-                  </h1>
-                  <span className={themeConfig.versionBadgeClass}>
-                    v1.0.0
-                  </span>
+      {/* 2. Scrollable Body: Content scrolls inside here, strictly below the Title Bar */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col">
+        {/* Top Navbar: Desktop Header */}
+        {!isMobile && (
+          <header className={themeConfig.navbarClass}>
+            <div className={`flex items-center justify-between py-1.5 sm:py-2 ${desktopContainerClass}`}>
+              <div className="flex items-center space-x-2 sm:space-x-2.5 min-w-0">
+                <div className={themeConfig.logoContainerClass}>
+                  <AppLogo className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h1 className={themeConfig.titleClass}>
+                      JadwalPriok
+                    </h1>
+                    <span className={themeConfig.versionBadgeClass}>
+                      {APP_VERSION_DISPLAY}
+                    </span>
+                  </div>
                 <p className={themeConfig.subtitleClass}>
                   Jadwal Pemeriksa Fisik dan Performance View
                 </p>
@@ -1052,7 +1056,7 @@ export default function App() {
                     JadwalPriok
                   </h1>
                   <span className={themeConfig.versionBadgeClass}>
-                    v1.0.0
+                    {APP_VERSION_DISPLAY}
                   </span>
                 </div>
                 <p className={themeConfig.subtitleClass}>
@@ -1878,6 +1882,7 @@ export default function App() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }
