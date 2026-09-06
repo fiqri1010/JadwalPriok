@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "JadwalPriok",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "identifier": "com.priok.jadwalshift",
   "build": {
     "frontendDist": "../dist",
@@ -36,7 +36,12 @@
       "icons/icon.ico"
     ],
     "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": false
+      },
       "nsis": {
+        "installerHooks": "installer.nsh",
         "installMode": "both",
         "displayLanguageSelector": false
       }

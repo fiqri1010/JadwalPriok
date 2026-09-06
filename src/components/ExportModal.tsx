@@ -441,44 +441,46 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     }
   };
 
-  // 3. Ekspor PNG Screenshot
-  const handleExportPNG = async () => {
-    try {
-      setLoadingType('png');
-      const element = document.getElementById(targetRefId);
-      if (!element) {
-        throw new Error('Element kalender tidak ditemukan');
-      }
+    // 3. Ekspor PNG Screenshot
+    const handleExportPNG = async () => {
+        try {
+            setLoadingType('png');
+            const element = document.getElementById(targetRefId);
+            if (!element) {
+                throw new Error('Element kalender tidak ditemukan');
+            }
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      });
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+            });
 
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          const res = await saveFileWithDialog({
-            blob,
-            filename: `Kalender_Shift_${monthName}_${selectedYear}.png`,
-            description: 'PNG Image',
-            mimeType: 'image/png',
-            extension: 'png',
-          });
+            const blob = await new Promise<Blob | null>((resolve) =>
+                canvas.toBlob(resolve, 'image/png')
+            );
 
-          if (res.success) {
-            setSuccessType('png');
-            setTimeout(() => setSuccessType(null), 2500);
-          }
+            if (blob) {
+                const res = await saveFileWithDialog({
+                    blob,
+                    filename: `Kalender_Shift_${monthName}_${selectedYear}.png`,
+                    description: 'PNG Image',
+                    mimeType: 'image/png',
+                    extension: 'png',
+                });
+
+                if (res.success) {
+                    setSuccessType('png');
+                    setTimeout(() => setSuccessType(null), 2500);
+                }
+            }
+        } catch (e) {
+            console.error('Export PNG failed:', e);
+        } finally {
+            setLoadingType(null);
         }
-      }, 'image/png');
-    } catch (e) {
-      console.error('Export PNG failed:', e);
-    } finally {
-      setLoadingType(null);
-    }
-  };
+    };
 
   // 4. Ekspor JSON (.json) dengan filter rentang
   const handleExportJSON = async () => {

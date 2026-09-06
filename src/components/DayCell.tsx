@@ -382,80 +382,77 @@ export const DayCell: React.FC<DayCellProps> = ({
         )}
       </div>
 
-      {/* 4. Catatan Ringkas dengan Animasi Running Text pada Desktop jika > 7 Karakter */}
-      <div className="mt-0.5 hidden sm:block">
-        {data.note && !isEditingNote ? (
-          isRunningTextActive ? (
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditingNote(true);
-              }}
-              className={`w-full rounded border px-1 py-0.5 text-[7.5px] sm:text-[8px] font-medium transition-colors cursor-text note-marquee-container flex items-center h-[17px] ${
-                isWinamp
-                  ? 'rounded-none border-[#00FF00]/40 bg-black text-[#00FF00] font-mono hover:border-[#00FF00]'
-                  : isVista
-                  ? 'border-white/60 bg-white/70 backdrop-blur-xs text-slate-900 font-bold drop-shadow-sm hover:bg-white'
-                  : isDark
-                  ? 'border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-500'
-                  : 'border-slate-200/80 bg-slate-50/80 text-slate-800 hover:border-indigo-400 hover:bg-white'
-              }`}
-              title={`Catatan: ${data.note} (Klik untuk mengedit)`}
-            >
-              <div className="note-marquee-content">
-                <span className="pr-3">{data.note}</span>
-                <span className="pr-3 opacity-60">&bull;</span>
-                <span className="pr-3">{data.note}</span>
-                <span className="pr-3 opacity-60">&bull;</span>
-              </div>
-            </div>
-          ) : (
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditingNote(true);
-              }}
-              className={`w-full rounded border px-1 py-0.5 text-[7.5px] sm:text-[8px] font-medium transition-colors cursor-text flex items-center justify-center truncate h-[17px] ${
-                isWinamp
-                  ? 'rounded-none border-[#00FF00]/40 bg-black text-[#00FF00] font-mono hover:border-[#00FF00]'
-                  : isVista
-                  ? 'border-white/60 bg-white/70 backdrop-blur-xs text-slate-900 font-bold drop-shadow-sm hover:bg-white'
-                  : isDark
-                  ? 'border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-500'
-                  : 'border-slate-200/80 bg-slate-50/80 text-slate-800 hover:border-indigo-400 hover:bg-white'
-              }`}
-              title={`Catatan: ${data.note} (Klik untuk mengedit)`}
-            >
-              <span className="truncate">{data.note}</span>
-            </div>
-          )
-        ) : (
-          <input
-            autoFocus={isEditingNote}
-            type="text"
-            placeholder="Catatan..."
-            maxLength={33}
-            value={data.note}
-            onClick={(e) => e.stopPropagation()}
-            onBlur={() => setIsEditingNote(false)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === 'Escape') {
-                setIsEditingNote(false);
-              }
-            }}
-            onChange={(e) => onUpdate({ note: e.target.value })}
-            className={`w-full rounded border px-1 py-0.5 text-[7.5px] sm:text-[8px] font-medium transition-colors focus:outline-none h-[17px] ${
-              isWinamp
-                ? 'rounded-none border-[#00AA50] bg-black text-[#00FF00] placeholder:text-[#00AA50]/60 font-mono focus:bg-black focus:border-[#00FF00]'
-                : isVista
-                ? 'border-white/70 bg-white/80 backdrop-blur-xs text-slate-900 placeholder:text-slate-500 font-bold drop-shadow-sm focus:bg-white focus:border-blue-400'
-                : isDark
-                ? 'border-slate-700 bg-slate-800 text-slate-100 placeholder:text-slate-500 focus:bg-slate-900 focus:border-indigo-400'
-                : 'border-slate-200 bg-slate-50/60 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-indigo-500'
-            }`}
-          />
-        )}
-      </div>
+          {/* 4. Catatan Ringkas dengan Animasi Running Text pada Desktop jika > 7 Karakter */}
+          <div className="mt-0.5 hidden sm:block">
+              {data.note && !isEditingNote ? (
+                  isRunningTextActive ? (
+                      <div
+                          onClick={(e) => {
+                              e.stopPropagation();
+                              setIsEditingNote(true);
+                          }}
+                          className={`w-full rounded border px-1.5 py-0.5 text-[8.5px] sm:text-[9.5px] font-medium transition-colors cursor-text note-marquee-container flex items-center h-[19px] ${isWinamp
+                                  ? 'rounded-none border-[#00FF00]/40 bg-black text-[#00FF00] font-mono hover:border-[#00FF00]'
+                                  : isVista
+                                      ? 'border-white/60 bg-white/70 backdrop-blur-xs text-slate-900 font-bold drop-shadow-sm hover:bg-white'
+                                      : isDark
+                                          ? 'border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-500'
+                                          : 'border-slate-200/80 bg-slate-50/80 text-slate-800 hover:border-indigo-400 hover:bg-white'
+                              }`}
+                          title={`Catatan: ${data.note} (Klik untuk mengedit)`}
+                      >
+                          <div className="note-marquee-content">
+                              <span className="pr-3">{data.note}</span>
+                              <span className="pr-3 opacity-60">&bull;</span>
+                              <span className="pr-3">{data.note}</span>
+                              <span className="pr-3 opacity-60">&bull;</span>
+                          </div>
+                      </div>
+                  ) : (
+                      <div
+                          onClick={(e) => {
+                              e.stopPropagation();
+                              setIsEditingNote(true);
+                          }}
+                          className={`w-full rounded border px-1.5 py-0.5 text-[8.5px] sm:text-[9.5px] font-medium transition-colors cursor-text flex items-center justify-center truncate h-[19px] ${isWinamp
+                                  ? 'rounded-none border-[#00FF00]/40 bg-black text-[#00FF00] font-mono hover:border-[#00FF00]'
+                                  : isVista
+                                      ? 'border-white/60 bg-white/70 backdrop-blur-xs text-slate-900 font-bold drop-shadow-sm hover:bg-white'
+                                      : isDark
+                                          ? 'border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-500'
+                                          : 'border-slate-200/80 bg-[#f8fafc] text-slate-800 hover:border-indigo-400 hover:bg-white'
+                              }`}
+                          title={`Catatan: ${data.note} (Klik untuk mengedit)`}
+                      >
+                          <span className="truncate">{data.note}</span>
+                      </div>
+                  )
+              ) : (
+                  <input
+                      autoFocus={isEditingNote}
+                      type="text"
+                      placeholder="Catatan..."
+                      maxLength={33}
+                      value={data.note}
+                      onClick={(e) => e.stopPropagation()}
+                      onBlur={() => setIsEditingNote(false)}
+                      onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === 'Escape') {
+                              setIsEditingNote(false);
+                          }
+                      }}
+                      onChange={(e) => onUpdate({ note: e.target.value })}
+                      className={`w-full rounded border px-1.5 py-0.5 text-[8.5px] sm:text-[9.5px] font-medium transition-colors focus:outline-none h-[19px] ${isWinamp
+                              ? 'rounded-none border-[#00AA50] bg-black text-[#00FF00] placeholder:text-[#00AA50]/60 font-mono focus:bg-black focus:border-[#00FF00]'
+                              : isVista
+                                  ? 'border-white/70 bg-white/80 backdrop-blur-xs text-slate-900 placeholder:text-slate-500 font-bold drop-shadow-sm focus:bg-white focus:border-blue-400'
+                                  : isDark
+                                      ? 'border-slate-700 bg-slate-800 text-slate-100 placeholder:text-slate-500 focus:bg-slate-900 focus:border-indigo-400'
+                                      : 'border-slate-200 bg-slate-50/60 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-indigo-500'
+                          }`}
+                  />
+              )}
+          </div>
 
       {/* 5. Form Detail Inline (Hanya bila di-expand pada Desktop) */}
       {isExpanded && (
