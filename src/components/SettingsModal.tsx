@@ -50,6 +50,17 @@ const MONTH_NAMES = [
 
 const INDONESIAN_DAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
+interface ExportEntry {
+  day: number;
+  month: number;
+  year: number;
+  dateKey: string;
+  dateObj: Date;
+  dayName: string;
+  data: DayData;
+  calc: ReturnType<typeof calculateDayResult>;
+}
+
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -70,25 +81,26 @@ interface SettingsModalProps {
   theme?: string;
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({
-  isOpen,
-  onClose,
-  daysState,
-  selectedMonth,
-  selectedYear,
-  monthName,
-  supabaseUrl,
-  supabaseKey,
-  isAutoSync,
-  onSaveSupabaseConfig,
-  onImportDays,
-  onRefreshData,
-  onClearAllData,
-  onShowToast,
-  targetRefId = 'calendar-grid-capture',
-  initialTab = 'storage',
-  theme = 'default',
-}) => {
+export const SettingsModal: React.FC<SettingsModalProps> = (props: SettingsModalProps) => {
+  const {
+    isOpen,
+    onClose,
+    daysState,
+    selectedMonth,
+    selectedYear,
+    monthName,
+    supabaseUrl,
+    supabaseKey,
+    isAutoSync,
+    onSaveSupabaseConfig,
+    onImportDays,
+    onRefreshData,
+    onClearAllData,
+    onShowToast,
+    targetRefId = 'calendar-grid-capture',
+    initialTab = 'storage',
+    theme = 'default',
+  } = props;
   const isDark = theme === 'dark';
   const isVista = theme === 'vista';
   const isWinamp = theme === 'winamp';
@@ -137,10 +149,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [isProcessingImport, setIsProcessingImport] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Export PNG States
+  const [isExportingPNG, setIsExportingPNG] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
   // Derivasi bulan yang memiliki data di tahun terpilih
   const filledMonths = useMemo(() => {
     const months = new Set<number>();
-    Object.keys(daysState).forEach((key) => {
+    Object.keys(daysState).forEach((key: string) => {
       const parts = key.split('-');
       if (parts.length >= 3) {
         const y = parseInt(parts[0], 10);
@@ -210,11 +226,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       }
     } else if (rangeType === 'month_filled') {
       const activeMonthsList = filledMonths.length > 0 ? filledMonths : [selectedMonth];
-      const monthLabels = activeMonthsList.map((m) => MONTH_NAMES[m - 1]).join(', ');
+      const monthLabels = activeMonthsList.map((m: number) => MONTH_NAMES[m - 1]).join(', ');
       label = `Bulan Terisi Data (${monthLabels}) ${selectedYear}`;
       suffix = `Bulan_Terisi_${selectedYear}`;
 
-      activeMonthsList.forEach((m) => {
+      activeMonthsList.forEach((m: number) => {
         const daysCount = new Date(selectedYear, m, 0).getDate();
         for (let d = 1; d <= daysCount; d++) {
           const dateKey = `${selectedYear}-${m}-${d}`;
@@ -244,7 +260,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       label = `Kuartal ${selectedQuarter} (Q${selectedQuarter}) ${selectedYear}`;
       suffix = `Kuartal_${selectedQuarter}_${selectedYear}`;
 
-      qMonths.forEach((m) => {
+      qMonths.forEach((m: number) => {
         const daysCount = new Date(selectedYear, m, 0).getDate();
         for (let d = 1; d <= daysCount; d++) {
           const dateKey = `${selectedYear}-${m}-${d}`;
@@ -267,7 +283,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       label = `Semester ${selectedSemester} (S${selectedSemester}) ${selectedYear}`;
       suffix = `Semester_${selectedSemester}_${selectedYear}`;
 
-      sMonths.forEach((m) => {
+      sMonths.forEach((m: number) => {
         const daysCount = new Date(selectedYear, m, 0).getDate();
         for (let d = 1; d <= daysCount; d++) {
           const dateKey = `${selectedYear}-${m}-${d}`;
@@ -414,10 +430,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   // --- EXPORT ACTIONS ---
-  const handleExportExcel = async () => {
+  const handleExportExcel = async (): Promise<void> => {
     try {
       setExportLoading('xlsx');
-      const rows = filteredEntries.map((item) => {
+      const rows = filteredEntries.map((item: ExportEntry) => {
         const { day, month, year, dayName, data, calc, dateObj } = item;
         return {
           'Tanggal': `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`,
@@ -561,15 +577,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
-  const handleExportPNG = async () => {
+  const handleExportPNG = async (): Promise<void> => {
     try {
-      setExportLoading('png');
-      const el = document.getElementById(targetRefId);
+      setIsExportingPNG(true);
+
+      // Target elemen kalender
+      const el =
+        calendarRef?.current ||
+        document.getElementById(targetRefId) ||
+        document.getElementById('calendar-grid-container') ||
+        document.getElementById('main-calendar-content') ||
+        document.querySelector('main') ||
+        document.querySelector('.calendar-view-container');
+
       if (!el) {
-        alert('Elemen kalender tidak ditemukan.');
-        return;
+        throw new Error('Element kalender tidak ditemukan di DOM. Pastikan kalender sedang aktif.');
       }
 
+      // Render elemen kalender menjadi canvas
       const canvas = await html2canvas(el, {
         scale: 2,
         useCORS: true,
@@ -577,35 +602,146 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         logging: false,
       });
 
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          const res = await saveFileWithDialog({
-            blob,
-            filename: `Tampilan_Kalender_${monthName}_${selectedYear}.png`,
-            description: 'PNG Image',
-            mimeType: 'image/png',
-            extension: 'png',
-          });
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, 'image/png')
+      );
 
-          if (res.success) {
-            setExportSuccess('png');
-            setTimeout(() => setExportSuccess(null), 2500);
-            if (res.message) onShowToast(res.message);
-          }
+      if (blob) {
+        const res = await saveFileWithDialog({
+          blob,
+          filename: `Kalender_Shift_${filenameSuffix || `${monthName}_${selectedYear}`}.png`,
+          description: 'PNG Image',
+          mimeType: 'image/png',
+          extension: 'png',
+        });
+
+        if (res.success) {
+          onShowToast('File PNG berhasil diunduh!');
         }
-      });
+      }
     } catch (e) {
       console.error('Export PNG failed:', e);
-      onShowToast('Gagal mengekspor gambar kalender.');
+      onShowToast('Gagal mengekspor file PNG.');
     } finally {
-      setExportLoading(null);
+      setIsExportingPNG(false);
     }
   };
+
+    const base64ToUint8Array = (base64: string): Uint8Array => {
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes;
+    };
+
+    // 2. Fungsi Utama Ekspor PNG Kalender
+    const handleExportCalendarPNG = async () => {
+        try {
+            setIsExportingPNG(true);
+
+            // Target elemen kalender utama yang berada di luar modal
+            const el =
+                calendarRef?.current ||
+                document.getElementById('calendar-grid-container') ||
+                document.getElementById('main-calendar-content') ||
+                document.querySelector('main') ||
+                document.querySelector('.calendar-view-container');
+
+            if (!el) {
+                throw new Error('Element kalender tidak ditemukan di DOM. Pastikan kalender sedang aktif.');
+            }
+
+            // Render elemen kalender menjadi canvas
+            const canvas = await html2canvas(el, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+            });
+
+            const defaultFileName = `Tampilan_Kalender_${monthName}_${selectedYear}.png`;
+
+            // Konversi canvas -> data URL Base64 murni -> Uint8Array
+            const rawBase64 = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, '');
+            const imageBytes = base64ToUint8Array(rawBase64);
+
+            // Cek apakah aplikasi berjalan di lingkungan Desktop Tauri
+            const win = window as any;
+            if (win.__TAURI__ || win.__TAURI_INTERNALS__) {
+                let saveFn: any = win.__TAURI__?.dialog?.save;
+                let writeFn: any = win.__TAURI__?.fs?.writeFile || win.__TAURI__?.fs?.writeBinaryFile;
+
+                // Dynamic fallback jika modul plugin terinstal
+                if (!saveFn) {
+                    try {
+                        const dialogMod = await import(/* @vite-ignore */ '@tauri-apps/' + 'plugin-dialog');
+                        saveFn = dialogMod.save;
+                    } catch (e) {
+                        console.debug('Tauri plugin-dialog import fallback:', e);
+                    }
+                }
+
+                if (!writeFn) {
+                    try {
+                        const fsMod = await import(/* @vite-ignore */ '@tauri-apps/' + 'plugin-fs');
+                        writeFn = fsMod.writeFile;
+                    } catch (e) {
+                        console.debug('Tauri plugin-fs import fallback:', e);
+                    }
+                }
+
+                // Jalankan dialog Save As native Windows
+                if (saveFn && writeFn) {
+                    const filePath = await saveFn({
+                        filters: [{ name: 'Image', extensions: ['png'] }],
+                        defaultPath: defaultFileName,
+                    });
+
+                    // Jika pengguna memilih path dan klik "Save"
+                    if (filePath) {
+                        await writeFn(filePath, imageBytes);
+                        setExportSuccess('png');
+                        setTimeout(() => setExportSuccess(null), 2500);
+                        onShowToast(`Gambar kalender berhasil disimpan ke: ${filePath}`);
+                        return;
+                    } else {
+                        // Pengguna membatalkan (klik Cancel)
+                        return;
+                    }
+                }
+            }
+
+            // Fallback untuk Web Browser / File System Access API biasa
+            canvas.toBlob(async (blob) => {
+                if (!blob) return;
+                await saveFileWithDialog({
+                    blob,
+                    filename: defaultFileName,
+                    description: 'PNG Image',
+                    mimeType: 'image/png',
+                    extension: 'png',
+                });
+                setExportSuccess('png');
+                setTimeout(() => setExportSuccess(null), 2500);
+                onShowToast('Gambar kalender berhasil diunduh!');
+            }, 'image/png');
+
+        } catch (error) {
+            // Menampilkan detail error lengkap di Console DevTools untuk debugging
+            console.error('Detail Error PNG:', error);
+            onShowToast(`Gagal mengekspor gambar kalender: ${(error as any)?.message || 'Kesalahan tak dikenal'}`);
+        } finally {
+            setIsExportingPNG(false);
+        }
+    };
 
   const handleExportJSON = async () => {
     try {
       const exportPayload: Record<string, DayData> = {};
-      filteredEntries.forEach((item) => {
+      filteredEntries.forEach((item: ExportEntry) => {
         exportPayload[item.dateKey] = item.data;
       });
 
@@ -651,7 +787,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       let sql = `-- Backup Data Shifts SQL (${rangeLabel})\n`;
       sql += `INSERT INTO public.shifts (id, date_key, shift, is_masuk, jam_masuk, jam_pulang, absen_ceisa, is_hold_dokumen, is_locked, is_manual_holiday, is_surat_tugas_tambahan, is_gunakan_off_geser, referensi_tgl_off, is_gunakan_cp, referensi_tgl_cp, note, tipe_masuk_libur)\nVALUES\n`;
 
-      const valuesArr = filteredEntries.map((item) => {
+      const valuesArr = filteredEntries.map((item: ExportEntry) => {
         const key = item.dateKey;
         const d = item.data;
         return `  ('${key}', '${key}', '${d.shift}', ${d.isMasuk}, '${d.jamMasuk || ''}', '${d.jamPulang || ''}', '${d.absenCeisa || ''}', ${d.isHoldDokumen}, ${d.isLocked}, ${d.isManualHoliday}, ${d.isSuratTugasTambahan}, ${d.isGunakanOffGeser || false}, '${d.referensiTglOff || ''}', ${d.isGunakanCP || false}, '${d.referensiTglCP || ''}', '${(d.note || '').replace(/'/g, "''")}', '${d.tipeMasukLibur || 'piket'}')`;
@@ -699,14 +835,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         } else if (typeof parsed === 'object' && !Array.isArray(parsed)) {
           resultDays = parsed;
         } else if (Array.isArray(parsed)) {
-          parsed.forEach((item) => {
+          parsed.forEach((item: Record<string, unknown>) => {
             const key = item.date_key || item.dateKey || item.id || item.Tanggal;
             if (key) resultDays[key] = item;
           });
         }
 
         const cleanResult: Record<string, DayData> = {};
-        Object.keys(resultDays).forEach((key) => {
+        Object.keys(resultDays).forEach((key: string) => {
           const item = resultDays[key];
           if (item && typeof item === 'object') {
             cleanResult[key] = {
@@ -738,7 +874,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         // SQL Parse
         const cleanResult: Record<string, DayData> = {};
         const lines = pastedText.split('\n');
-        lines.forEach((line) => {
+        lines.forEach((line: string) => {
           const dateMatch = line.match(/'(\d{4}-\d{1,2}-\d{1,2})'/);
           if (dateMatch) {
             const dateKey = dateMatch[1];
@@ -1019,7 +1155,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <input
                       type="text"
                       value={urlInput}
-                      onChange={(e) => setUrlInput(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrlInput(e.target.value)}
                       placeholder="https://xyzcompany.supabase.co"
                       className={`w-full px-3.5 py-2 text-xs font-medium focus:outline-none ${isWinamp ? 'rounded-none border-2 border-zinc-700 bg-black text-[#00FF00] focus:border-[#00FF00] placeholder:text-zinc-600' : isDark ? 'rounded-xl border border-[#3a3a3a] bg-[#2a2a2a] text-slate-100 focus:bg-[#303030] focus:ring-2 focus:ring-emerald-500/30 placeholder:text-slate-500' : 'rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#601700]/30'}`}
                     />
@@ -1032,7 +1168,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <input
                       type="text"
                       value={keyInput}
-                      onChange={(e) => setKeyInput(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setKeyInput(e.target.value)}
                       placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                       className={`w-full px-3.5 py-2 text-xs font-mono focus:outline-none ${isWinamp ? 'rounded-none border-2 border-zinc-700 bg-black text-[#00FF00] focus:border-[#00FF00] placeholder:text-zinc-600' : isDark ? 'rounded-xl border border-[#3a3a3a] bg-[#2a2a2a] text-slate-100 focus:bg-[#303030] focus:ring-2 focus:ring-emerald-500/30 placeholder:text-slate-500' : 'rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#601700]/30'}`}
                     />
@@ -1043,7 +1179,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <input
                         type="checkbox"
                         checked={autoSyncInput}
-                        onChange={(e) => setAutoSyncInput(e.target.checked)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAutoSyncInput(e.target.checked)}
                         className={`h-4 w-4 rounded ${isWinamp ? 'accent-[#00FF00]' : isDark ? 'accent-emerald-500' : 'border-slate-300 text-[#601700] focus:ring-[#601700]'} cursor-pointer`}
                       />
                       <span className={`text-xs font-bold ${isWinamp ? 'text-zinc-300' : isDark ? 'text-slate-300' : 'text-slate-700'}`}>
@@ -1300,7 +1436,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {rangeType === 'quarter' && (
                   <div className="flex items-center space-x-2 pt-1">
                     <span className={`text-xs font-bold ${isWinamp ? 'text-zinc-300' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>Pilih Kuartal:</span>
-                    {[1, 2, 3, 4].map((q) => (
+                    {[1, 2, 3, 4].map((q: number) => (
                       <button
                         key={q}
                         type="button"
@@ -1322,7 +1458,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {rangeType === 'semester' && (
                   <div className="flex items-center space-x-2 pt-1">
                     <span className={`text-xs font-bold ${isWinamp ? 'text-zinc-300' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>Pilih Semester:</span>
-                    {[1, 2].map((s) => (
+                    {[1, 2].map((s: number) => (
                       <button
                         key={s}
                         type="button"

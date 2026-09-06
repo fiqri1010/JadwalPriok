@@ -5,6 +5,7 @@ use tauri::Manager;
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         // Inisialisasi Plugin Single Instance: Mencegah aplikasi dibuka lebih dari 1 kali
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
