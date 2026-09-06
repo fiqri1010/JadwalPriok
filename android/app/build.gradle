@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
     namespace = "com.jadwalpriok.app"
     compileSdk = rootProject.ext.compileSdkVersion
+    
     defaultConfig {
         applicationId "com.jadwalpriok.app"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -16,10 +17,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+
+    signingConfigs {
+        release {
+            storeFile file('my-release-key.jks')
+            storePassword 'priok12345'     // Ganti dengan password yang Anda buat di Langkah 1
+            keyAlias 'my-key-alias'
+            keyPassword 'priok12345'       // Ganti dengan password yang Anda buat di Langkah 1
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
