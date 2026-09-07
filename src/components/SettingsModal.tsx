@@ -30,7 +30,8 @@ import {
     Bell,
     Smartphone,
     Volume2,
-    Clock
+    Clock,
+    Plus
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -49,6 +50,10 @@ import {
 } from '../lib/piketNotification';
 import {
     getWidgetShiftData,
+    getSavedWidgetTheme,
+    saveWidgetTheme,
+    syncWidgetShiftData,
+    requestPinWidgetToHomeScreen,
 } from '../lib/androidWidgetSync';
 import {
     SUPABASE_SQL_SETUP_SCRIPT,
@@ -143,8 +148,56 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const [isTestingNotif, setIsTestingNotif] = useState(false);
 
     // States: Android Widget
-    const widgetData = useMemo(() => getWidgetShiftData(daysState), [daysState]);
+    const [preferredWidgetTheme, setPreferredWidgetTheme] = useState<'default' | 'dark' | 'vista' | 'winamp' | 'auto'>(() => getSavedWidgetTheme());
+    const activeAppThemeCast = (theme === 'dark' || theme === 'vista' || theme === 'winamp') ? theme : 'default';
+    const effectiveWidgetTheme = preferredWidgetTheme === 'auto' ? activeAppThemeCast : preferredWidgetTheme;
+    const widgetData = useMemo(() => getWidgetShiftData(daysState, effectiveWidgetTheme), [daysState, effectiveWidgetTheme]);
     const [widgetWidth, setWidgetWidth] = useState<number>(360);
+    const [isSyncingWidget, setIsSyncingWidget] = useState(false);
+    const [isPinningWidget, setIsPinningWidget] = useState(false);
+    const [widgetSyncMessage, setWidgetSyncMessage] = useState<string | null>(null);
+    const [showTroubleshooting, setShowTroubleshooting] = useState(false);
+
+    // Widget Actions Handlers
+    const handleSyncWidget = async () => {
+        setIsSyncingWidget(true);
+        try {
+            const res = await syncWidgetShiftData(daysState, effectiveWidgetTheme);
+            setWidgetSyncMessage(res.message);
+            onShowToast(res.message);
+        } catch (err: any) {
+            onShowToast('Gagal menyinkronkan data widget: ' + (err?.message || 'Error'));
+        } finally {
+            setIsSyncingWidget(false);
+        }
+    };
+
+    const handlePinWidget = async () => {
+        setIsPinningWidget(true);
+        try {
+            await syncWidgetShiftData(daysState, effectiveWidgetTheme);
+            const res = await requestPinWidgetToHomeScreen();
+            if (res.supported) {
+                onShowToast(res.message);
+                setWidgetSyncMessage(res.message);
+            } else {
+                onShowToast('Panduan: Buka Home Screen Android > Tahan layar > Widget > JadwalPriok');
+                setWidgetSyncMessage(res.message);
+            }
+        } catch (err: any) {
+            onShowToast('Gagal memicu pemasangan: ' + (err?.message || 'Error'));
+        } finally {
+            setIsPinningWidget(false);
+        }
+    };
+
+    const handleWidgetThemeChange = (newTheme: 'default' | 'dark' | 'vista' | 'winamp' | 'auto') => {
+        setPreferredWidgetTheme(newTheme);
+        saveWidgetTheme(newTheme);
+        const effective = newTheme === 'auto' ? activeAppThemeCast : newTheme;
+        syncWidgetShiftData(daysState, effective);
+        onShowToast(`Tema widget diatur ke: ${newTheme === 'auto' ? 'Otomatis (Ikuti Aplikasi)' : newTheme.toUpperCase()}`);
+    };
 
     // Daftar Piket Mendatang
     const upcomingPikets = useMemo(() => getUpcomingPikets(daysState, daftarLibur, 8), [daysState, daftarLibur]);
@@ -1297,25 +1350,147 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               ========================================================= */}
                     {!isPCApp && activeTab === 'widget' && (
                         <div className="space-y-6 animate-in fade-in duration-150">
-                            {/* Header Info */}
+                            {/* Header Info & Actions */}
                             <div className={`p-4 sm:p-5 border transition-all ${isWinamp
                                     ? 'rounded-none border-2 border-zinc-700 bg-black text-[#00FF00]'
                                     : isDark
                                         ? 'rounded-2xl border-[#333333] bg-[#202020]'
                                         : 'rounded-2xl border-slate-200 bg-white shadow-xs'
                                 }`}>
-                                <div className="flex items-start space-x-3.5">
-                                    <span className={`p-2.5 shrink-0 ${isWinamp ? 'bg-zinc-900 border border-[#00FF00] text-[#00FF00]' : 'bg-[#297373]/10 text-[#297373] rounded-xl'}`}>
-                                        <Smartphone className="h-5 w-5" />
-                                    </span>
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div className="flex items-start space-x-3.5">
+                                        <span className={`p-2.5 shrink-0 ${isWinamp ? 'bg-zinc-900 border border-[#00FF00] text-[#00FF00]' : 'bg-[#297373]/10 text-[#297373] rounded-xl'}`}>
+                                            <Smartphone className="h-5 w-5" />
+                                        </span>
+                                        <div>
+                                            <h3 className={`text-sm sm:text-base font-black ${isWinamp ? 'text-[#00FF00]' : isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                Widget Layar Utama Android 12+ (Shift Hari Ini & Besok)
+                                            </h3>
+                                            <p className={`text-xs mt-1 leading-relaxed ${isWinamp ? 'text-zinc-400' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                                                Dioptimalkan untuk Android 12 hingga Android terbaru (Android 12, 13, 14, 15+ / API 31 - 35+). Pantau jadwal dinas hari ini & besok langsung dari Home Screen smartphone Anda.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Tombol Aksi Trigger Widget */}
+                                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                                        <button
+                                            type="button"
+                                            onClick={handlePinWidget}
+                                            disabled={isPinningWidget}
+                                            className={`px-3.5 py-2 text-xs font-bold transition-all flex items-center space-x-1.5 shadow-sm cursor-pointer ${isWinamp
+                                                    ? 'bg-[#00FF00] text-black font-mono border border-[#00FF00] hover:bg-emerald-400 active:scale-95'
+                                                    : isDark
+                                                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl active:scale-95'
+                                                        : isVista
+                                                            ? 'bg-sky-600 hover:bg-sky-500 text-white rounded-xl active:scale-95'
+                                                            : 'bg-[#297373] hover:bg-[#205c5c] text-white rounded-xl active:scale-95'
+                                                }`}
+                                            title="Pasang widget langsung ke layar depan handphone"
+                                        >
+                                            <Plus className={`h-4 w-4 ${isPinningWidget ? 'animate-spin' : ''}`} />
+                                            <span>{isPinningWidget ? 'Memproses...' : 'Pasang ke Layar Depan'}</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={handleSyncWidget}
+                                            disabled={isSyncingWidget}
+                                            className={`px-3 py-2 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${isWinamp
+                                                    ? 'bg-zinc-900 text-[#00FF00] border border-[#00FF00]/60 hover:bg-zinc-800'
+                                                    : isDark
+                                                        ? 'bg-[#2D2D2D] hover:bg-[#383838] text-slate-200 border border-[#404040] rounded-xl'
+                                                        : isVista
+                                                            ? 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl'
+                                                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl'
+                                                }`}
+                                            title="Kirim pembaruan jadwal dan tema terbaru ke widget Android"
+                                        >
+                                            <RefreshCw className={`h-3.5 w-3.5 ${isSyncingWidget ? 'animate-spin' : ''}`} />
+                                            <span>{isSyncingWidget ? 'Sinkron...' : 'Sinkronkan Data'}</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Status Message Alert */}
+                                {widgetSyncMessage && (
+                                    <div className={`mt-3.5 p-2.5 text-xs flex items-center space-x-2 rounded-lg border ${isWinamp
+                                            ? 'bg-black border-[#00FF00] text-[#00FF00]'
+                                            : isDark
+                                                ? 'bg-emerald-950/50 border-emerald-800 text-emerald-300'
+                                                : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                                        }`}>
+                                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                                        <span>{widgetSyncMessage}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Pilihan Tema Widget (Memilih Tema yang Ditampilkan Widget) */}
+                            <div className={`p-4 sm:p-5 border transition-all ${isWinamp
+                                    ? 'rounded-none border-2 border-zinc-700 bg-black text-[#00FF00]'
+                                    : isDark
+                                        ? 'rounded-2xl border-[#333333] bg-[#202020]'
+                                        : 'rounded-2xl border-slate-200 bg-white shadow-xs'
+                                }`}>
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                                     <div>
-                                        <h3 className={`text-sm sm:text-base font-black ${isWinamp ? 'text-[#00FF00]' : isDark ? 'text-white' : 'text-slate-900'}`}>
-                                            Widget Layar Utama Android (Shift Hari Ini & Besok)
-                                        </h3>
-                                        <p className={`text-xs mt-1 leading-relaxed ${isWinamp ? 'text-zinc-400' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                                            Widget interaktif layar depan Android untuk memantau jadwal shift hari ini dan besok secara real-time langsung di beranda perangkat tanpa harus membuka aplikasi.
+                                        <h4 className={`text-xs sm:text-sm font-bold ${isWinamp ? 'text-[#00FF00]' : isDark ? 'text-white' : 'text-slate-900'}`}>
+                                            🎨 Pilihan Tema Tampilan Widget
+                                        </h4>
+                                        <p className={`text-[11px] mt-0.5 ${isWinamp ? 'text-zinc-400' : isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                            Pilih tema visual yang akan digunakan oleh widget di Home Screen Android Anda.
                                         </p>
                                     </div>
+                                    <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${isWinamp
+                                            ? 'text-[#00FF00] bg-zinc-900 border border-[#00FF00]/40'
+                                            : isDark
+                                                ? 'text-emerald-400 bg-emerald-950/40 border border-emerald-800'
+                                                : 'text-teal-700 bg-teal-50 border border-teal-200'
+                                        }`}>
+                                        Tema Aktif: {effectiveWidgetTheme.toUpperCase()}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1">
+                                    {[
+                                        { id: 'auto', label: 'Otomatis', desc: 'Ikuti Aplikasi' },
+                                        { id: 'default', label: 'Terang', desc: 'Classic Light' },
+                                        { id: 'dark', label: 'Gelap', desc: 'Night Dark' },
+                                        { id: 'vista', label: 'Vista', desc: 'Sky Glass' },
+                                        { id: 'winamp', label: 'Winamp', desc: 'Retro Neon' },
+                                    ].map((tItem) => {
+                                        const isSelected = preferredWidgetTheme === tItem.id;
+                                        return (
+                                            <button
+                                                key={tItem.id}
+                                                type="button"
+                                                onClick={() => handleWidgetThemeChange(tItem.id as any)}
+                                                className={`p-2.5 text-left transition-all cursor-pointer border ${isWinamp
+                                                        ? isSelected
+                                                            ? 'bg-[#00FF00] text-black font-mono border-[#00FF00]'
+                                                            : 'bg-zinc-950 text-[#00FF00] border-zinc-800 hover:border-[#00FF00]'
+                                                        : isDark
+                                                            ? isSelected
+                                                                ? 'bg-emerald-950 text-emerald-200 border-emerald-500 rounded-xl shadow-xs'
+                                                                : 'bg-[#282828] text-slate-300 border-[#383838] hover:border-slate-500 rounded-xl'
+                                                            : isVista
+                                                                ? isSelected
+                                                                    ? 'bg-sky-50 text-sky-900 border-sky-500 rounded-xl shadow-xs'
+                                                                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-sky-300 rounded-xl'
+                                                                : isSelected
+                                                                    ? 'bg-teal-50 text-teal-900 border-[#297373] rounded-xl shadow-xs'
+                                                                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-[#297373] rounded-xl'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs font-bold">{tItem.label}</span>
+                                                    {isSelected && <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />}
+                                                </div>
+                                                <span className="text-[10px] opacity-75 block mt-0.5">{tItem.desc}</span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
@@ -1337,7 +1512,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     }`}>
                                     <div className="flex items-center space-x-2">
                                         <span className={`text-xs font-bold ${isWinamp ? 'text-[#00FF00] font-mono' : isDark ? 'text-white' : 'text-slate-800'
-                                            }`}>Ukuran Bebas:</span>
+                                            }`}>Ukuran Simulasi:</span>
                                         <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-md ${isWinamp
                                                 ? 'text-[#00FF00] bg-black border border-[#00FF00]/40'
                                                 : isDark
@@ -1399,35 +1574,49 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     </div>
                                 </div>
 
-                                {/* Resizable Widget Shell */}
+                                {/* Resizable Widget Shell - Rendered based on effectiveWidgetTheme */}
                                 <div
                                     style={{ width: `${widgetWidth}px`, maxWidth: '100%' }}
-                                    className={`transition-all duration-200 ease-out p-4 overflow-hidden ${isWinamp
+                                    className={`transition-all duration-200 ease-out p-4 overflow-hidden ${effectiveWidgetTheme === 'winamp'
                                             ? 'bg-black rounded-none border-2 border-[#00FF00] font-mono text-[#00FF00]'
-                                            : isDark
-                                                ? 'bg-[#202020] rounded-2xl shadow-lg border border-[#3A3A3A] text-white'
-                                                : isVista
-                                                    ? 'bg-white/95 rounded-2xl shadow-lg border border-white/60 text-slate-900'
+                                            : effectiveWidgetTheme === 'dark'
+                                                ? 'bg-[#1E293B] rounded-2xl shadow-lg border border-[#334155] text-white'
+                                                : effectiveWidgetTheme === 'vista'
+                                                    ? 'bg-[#0C2340] rounded-2xl shadow-lg border border-[#38BDF8] text-white'
                                                     : 'bg-white rounded-2xl shadow-lg border border-slate-200 text-slate-900'
                                         }`}
                                 >
                                     {/* Widget Top Title */}
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center space-x-2">
-                                            <span className={`text-sm font-black tracking-tight ${isWinamp ? 'text-[#00FF00]' : isDark ? 'text-emerald-400' : 'text-[#297373]'
+                                            <span className={`text-sm font-black tracking-tight ${effectiveWidgetTheme === 'winamp'
+                                                    ? 'text-[#00FF00]'
+                                                    : effectiveWidgetTheme === 'dark'
+                                                        ? 'text-emerald-400'
+                                                        : effectiveWidgetTheme === 'vista'
+                                                            ? 'text-sky-300'
+                                                            : 'text-[#0F766E]'
                                                 }`}>
                                                 Shift
                                             </span>
-                                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${isWinamp
+                                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${effectiveWidgetTheme === 'winamp'
                                                     ? 'bg-black text-[#00FF00] border border-[#00FF00]'
-                                                    : isDark
+                                                    : effectiveWidgetTheme === 'dark'
                                                         ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                                                        : 'bg-teal-50 text-teal-700 border border-teal-200'
+                                                        : effectiveWidgetTheme === 'vista'
+                                                            ? 'bg-sky-950 text-sky-200 border border-sky-700'
+                                                            : 'bg-teal-50 text-teal-700 border border-teal-200'
                                                 }`}>
                                                 Priok
                                             </span>
                                         </div>
-                                        <span className={`text-[10px] font-mono ${isWinamp ? 'text-[#00FF00]/80' : isDark ? 'text-slate-400' : 'text-slate-400'
+                                        <span className={`text-[10px] font-mono ${effectiveWidgetTheme === 'winamp'
+                                                ? 'text-[#00FF00]/80'
+                                                : effectiveWidgetTheme === 'dark'
+                                                    ? 'text-slate-400'
+                                                    : effectiveWidgetTheme === 'vista'
+                                                        ? 'text-sky-200/80'
+                                                        : 'text-slate-400'
                                             }`}>
                                             {widgetWidth <= 320 ? '2x1' : widgetWidth <= 440 ? '3x2' : '4x2'}
                                         </span>
@@ -1438,52 +1627,90 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                         /* Two side-by-side columns when enlarged */
                                         <div className="grid grid-cols-2 gap-3 pt-1">
                                             {/* Hari Ini Column */}
-                                            <div className={`p-2.5 rounded-xl space-y-2 border ${isWinamp
+                                            <div className={`p-2.5 rounded-xl space-y-2 border ${effectiveWidgetTheme === 'winamp'
                                                     ? 'bg-zinc-950 border-zinc-800'
-                                                    : isDark
-                                                        ? 'bg-[#181818] border-[#303030]'
-                                                        : 'bg-slate-50 border-slate-100'
+                                                    : effectiveWidgetTheme === 'dark'
+                                                        ? 'bg-[#0F172A] border-[#334155]'
+                                                        : effectiveWidgetTheme === 'vista'
+                                                            ? 'bg-[#07192F] border-[#1E3A8A]'
+                                                            : 'bg-slate-50 border-slate-100'
                                                 }`}>
                                                 <div className="flex items-center justify-between">
-                                                    <span className={`text-xs font-bold ${isWinamp ? 'text-[#00FF00]' : isDark ? 'text-white' : 'text-slate-900'}`}>Hari Ini</span>
-                                                    <span className={`text-xs font-mono ${isWinamp ? 'text-emerald-400' : isDark ? 'text-slate-300' : 'text-slate-500'}`}>{widgetData.today.mmdd}</span>
+                                                    <span className={`text-xs font-bold ${effectiveWidgetTheme === 'winamp'
+                                                            ? 'text-[#00FF00]'
+                                                            : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                ? 'text-white'
+                                                                : 'text-slate-900'
+                                                        }`}>Hari Ini</span>
+                                                    <span className={`text-xs font-mono ${effectiveWidgetTheme === 'winamp'
+                                                            ? 'text-emerald-400'
+                                                            : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                ? 'text-slate-300'
+                                                                : 'text-slate-500'
+                                                        }`}>{widgetData.today.mmdd}</span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <span className={`text-xs font-black px-2.5 py-1 rounded-md border ${isWinamp
+                                                    <span className={`text-xs font-black px-2.5 py-1 rounded-md border ${effectiveWidgetTheme === 'winamp'
                                                             ? 'bg-black text-[#00FF00] border-[#00FF00]'
-                                                            : isDark
+                                                            : effectiveWidgetTheme === 'dark'
                                                                 ? 'bg-sky-950 text-sky-200 border-sky-700'
-                                                                : 'bg-sky-100 text-sky-800 border-sky-200'
+                                                                : effectiveWidgetTheme === 'vista'
+                                                                    ? 'bg-sky-900/60 text-sky-200 border-sky-500'
+                                                                    : 'bg-sky-100 text-sky-800 border-sky-200'
                                                         }`}>
                                                         {widgetData.today.shift}
                                                     </span>
-                                                    <span className={`text-[11px] font-mono ${isWinamp ? 'text-emerald-400' : isDark ? 'text-slate-200' : 'text-slate-600'}`}>
+                                                    <span className={`text-[11px] font-mono ${effectiveWidgetTheme === 'winamp'
+                                                            ? 'text-emerald-400'
+                                                            : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                ? 'text-slate-200'
+                                                                : 'text-slate-600'
+                                                        }`}>
                                                         {widgetData.today.jamMasuk ? `${widgetData.today.jamMasuk} - ${widgetData.today.jamPulang}` : 'Off'}
                                                     </span>
                                                 </div>
                                             </div>
 
                                             {/* Besok Column */}
-                                            <div className={`p-2.5 rounded-xl space-y-2 border ${isWinamp
+                                            <div className={`p-2.5 rounded-xl space-y-2 border ${effectiveWidgetTheme === 'winamp'
                                                     ? 'bg-zinc-950 border-zinc-800'
-                                                    : isDark
-                                                        ? 'bg-[#181818] border-[#303030]'
-                                                        : 'bg-slate-50 border-slate-100'
+                                                    : effectiveWidgetTheme === 'dark'
+                                                        ? 'bg-[#0F172A] border-[#334155]'
+                                                        : effectiveWidgetTheme === 'vista'
+                                                            ? 'bg-[#07192F] border-[#1E3A8A]'
+                                                            : 'bg-slate-50 border-slate-100'
                                                 }`}>
                                                 <div className="flex items-center justify-between">
-                                                    <span className={`text-xs font-bold ${isWinamp ? 'text-[#00FF00]' : isDark ? 'text-white' : 'text-slate-900'}`}>Besok</span>
-                                                    <span className={`text-xs font-mono ${isWinamp ? 'text-emerald-400' : isDark ? 'text-slate-300' : 'text-slate-500'}`}>{widgetData.tomorrow.mmdd}</span>
+                                                    <span className={`text-xs font-bold ${effectiveWidgetTheme === 'winamp'
+                                                            ? 'text-[#00FF00]'
+                                                            : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                ? 'text-white'
+                                                                : 'text-slate-900'
+                                                        }`}>Besok</span>
+                                                    <span className={`text-xs font-mono ${effectiveWidgetTheme === 'winamp'
+                                                            ? 'text-emerald-400'
+                                                            : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                ? 'text-slate-300'
+                                                                : 'text-slate-500'
+                                                        }`}>{widgetData.tomorrow.mmdd}</span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <span className={`text-xs font-black px-2.5 py-1 rounded-md border ${isWinamp
+                                                    <span className={`text-xs font-black px-2.5 py-1 rounded-md border ${effectiveWidgetTheme === 'winamp'
                                                             ? 'bg-black text-[#FACC15] border-[#FACC15]'
-                                                            : isDark
+                                                            : effectiveWidgetTheme === 'dark'
                                                                 ? 'bg-amber-950 text-amber-200 border-amber-700'
-                                                                : 'bg-amber-100 text-amber-800 border-amber-200'
+                                                                : effectiveWidgetTheme === 'vista'
+                                                                    ? 'bg-amber-950/70 text-amber-200 border-amber-500'
+                                                                    : 'bg-amber-100 text-amber-800 border-amber-200'
                                                         }`}>
                                                         {widgetData.tomorrow.shift}
                                                     </span>
-                                                    <span className={`text-[11px] font-mono ${isWinamp ? 'text-emerald-400' : isDark ? 'text-slate-200' : 'text-slate-600'}`}>
+                                                    <span className={`text-[11px] font-mono ${effectiveWidgetTheme === 'winamp'
+                                                            ? 'text-emerald-400'
+                                                            : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                ? 'text-slate-200'
+                                                                : 'text-slate-600'
+                                                        }`}>
                                                         {widgetData.tomorrow.jamMasuk ? `${widgetData.tomorrow.jamMasuk} - ${widgetData.tomorrow.jamPulang}` : 'Off'}
                                                     </span>
                                                 </div>
@@ -1493,23 +1720,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                         /* Stacked Rows when compact / medium */
                                         <div className="space-y-2">
                                             {/* Row 1: Hari Ini */}
-                                            <div className={`flex items-center justify-between py-1.5 border-b ${isWinamp ? 'border-zinc-800' : isDark ? 'border-[#303030]' : 'border-slate-100'
+                                            <div className={`flex items-center justify-between py-1.5 border-b ${effectiveWidgetTheme === 'winamp'
+                                                    ? 'border-zinc-800'
+                                                    : effectiveWidgetTheme === 'dark'
+                                                        ? 'border-[#334155]'
+                                                        : effectiveWidgetTheme === 'vista'
+                                                            ? 'border-[#1E3A8A]'
+                                                            : 'border-slate-100'
                                                 }`}>
                                                 <div className="flex items-center space-x-2">
-                                                    <span className={`text-xs font-bold ${isWinamp ? 'text-[#00FF00]' : isDark ? 'text-white' : 'text-slate-900'}`}>Hari Ini</span>
-                                                    <span className={`text-xs font-mono ${isWinamp ? 'text-emerald-400' : isDark ? 'text-slate-300' : 'text-slate-500'}`}>{widgetData.today.mmdd}</span>
+                                                    <span className={`text-xs font-bold ${effectiveWidgetTheme === 'winamp'
+                                                            ? 'text-[#00FF00]'
+                                                            : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                ? 'text-white'
+                                                                : 'text-slate-900'
+                                                        }`}>Hari Ini</span>
+                                                    <span className={`text-xs font-mono ${effectiveWidgetTheme === 'winamp'
+                                                            ? 'text-emerald-400'
+                                                            : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                ? 'text-slate-300'
+                                                                : 'text-slate-500'
+                                                        }`}>{widgetData.today.mmdd}</span>
                                                 </div>
                                                 <div className="flex items-center space-x-2">
                                                     {widgetWidth > 340 && widgetData.today.jamMasuk && (
-                                                        <span className={`text-[10px] font-mono ${isWinamp ? 'text-emerald-400' : isDark ? 'text-slate-300' : 'text-slate-500'}`}>
+                                                        <span className={`text-[10px] font-mono ${effectiveWidgetTheme === 'winamp'
+                                                                ? 'text-emerald-400'
+                                                                : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                    ? 'text-slate-300'
+                                                                    : 'text-slate-500'
+                                                            }`}>
                                                             {widgetData.today.jamMasuk}-{widgetData.today.jamPulang}
                                                         </span>
                                                     )}
-                                                    <span className={`text-xs font-black px-2.5 py-0.5 rounded-md border ${isWinamp
+                                                    <span className={`text-xs font-black px-2.5 py-0.5 rounded-md border ${effectiveWidgetTheme === 'winamp'
                                                             ? 'bg-black text-[#00FF00] border-[#00FF00]'
-                                                            : isDark
+                                                            : effectiveWidgetTheme === 'dark'
                                                                 ? 'bg-sky-950 text-sky-200 border-sky-700'
-                                                                : 'bg-sky-100 text-sky-800 border-sky-200'
+                                                                : effectiveWidgetTheme === 'vista'
+                                                                    ? 'bg-sky-900/60 text-sky-200 border-sky-500'
+                                                                    : 'bg-sky-100 text-sky-800 border-sky-200'
                                                         }`}>
                                                         {widgetData.today.shift}
                                                     </span>
@@ -1519,20 +1769,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                             {/* Row 2: Besok */}
                                             <div className="flex items-center justify-between py-1.5 pt-1">
                                                 <div className="flex items-center space-x-2">
-                                                    <span className={`text-xs font-bold ${isWinamp ? 'text-[#00FF00]' : isDark ? 'text-white' : 'text-slate-900'}`}>Besok</span>
-                                                    <span className={`text-xs font-mono ${isWinamp ? 'text-emerald-400' : isDark ? 'text-slate-300' : 'text-slate-500'}`}>{widgetData.tomorrow.mmdd}</span>
+                                                    <span className={`text-xs font-bold ${effectiveWidgetTheme === 'winamp'
+                                                            ? 'text-[#00FF00]'
+                                                            : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                ? 'text-white'
+                                                                : 'text-slate-900'
+                                                        }`}>Besok</span>
+                                                    <span className={`text-xs font-mono ${effectiveWidgetTheme === 'winamp'
+                                                            ? 'text-emerald-400'
+                                                            : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                ? 'text-slate-300'
+                                                                : 'text-slate-500'
+                                                        }`}>{widgetData.tomorrow.mmdd}</span>
                                                 </div>
                                                 <div className="flex items-center space-x-2">
                                                     {widgetWidth > 340 && widgetData.tomorrow.jamMasuk && (
-                                                        <span className={`text-[10px] font-mono ${isWinamp ? 'text-emerald-400' : isDark ? 'text-slate-300' : 'text-slate-500'}`}>
+                                                        <span className={`text-[10px] font-mono ${effectiveWidgetTheme === 'winamp'
+                                                                ? 'text-emerald-400'
+                                                                : effectiveWidgetTheme === 'dark' || effectiveWidgetTheme === 'vista'
+                                                                    ? 'text-slate-300'
+                                                                    : 'text-slate-500'
+                                                            }`}>
                                                             {widgetData.tomorrow.jamMasuk}-{widgetData.tomorrow.jamPulang}
                                                         </span>
                                                     )}
-                                                    <span className={`text-xs font-black px-2.5 py-0.5 rounded-md border ${isWinamp
+                                                    <span className={`text-xs font-black px-2.5 py-0.5 rounded-md border ${effectiveWidgetTheme === 'winamp'
                                                             ? 'bg-black text-[#FACC15] border-[#FACC15]'
-                                                            : isDark
+                                                            : effectiveWidgetTheme === 'dark'
                                                                 ? 'bg-amber-950 text-amber-200 border-amber-700'
-                                                                : 'bg-amber-100 text-amber-800 border-amber-200'
+                                                                : effectiveWidgetTheme === 'vista'
+                                                                    ? 'bg-amber-950/70 text-amber-200 border-amber-500'
+                                                                    : 'bg-amber-100 text-amber-800 border-amber-200'
                                                         }`}>
                                                         {widgetData.tomorrow.shift}
                                                     </span>
@@ -1546,6 +1813,61 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     Widget Android ini mendukung fitur resize bebas (<code>android:resizeMode="horizontal|vertical"</code>).
                                     Di handphone Anda, tekan dan tahan widget di Home Screen lalu seret titik sudutnya untuk menyesuaikan ukuran sesuka hati.
                                 </p>
+                            </div>
+
+                            {/* Troubleshooting Accordion Box: Solusi "Tidak Dapat Menambahkan Widget" */}
+                            <div className={`p-4 border transition-all ${isWinamp
+                                    ? 'rounded-none border-2 border-zinc-700 bg-black text-[#00FF00]'
+                                    : isDark
+                                        ? 'rounded-2xl border-[#333333] bg-[#1E1E1E]'
+                                        : 'rounded-2xl border-slate-200 bg-amber-50/50'
+                                }`}>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTroubleshooting(!showTroubleshooting)}
+                                    className="w-full flex items-center justify-between text-left cursor-pointer"
+                                >
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-amber-500 font-bold text-sm">🛠️</span>
+                                        <span className={`text-xs sm:text-sm font-bold ${isWinamp ? 'text-[#00FF00]' : isDark ? 'text-amber-300' : 'text-amber-900'
+                                            }`}>
+                                            Solusi Jika Muncul Pesan "Tidak Dapat Menambahkan Widget" di Android
+                                        </span>
+                                    </div>
+                                    <span className={`text-xs font-bold px-2 py-0.5 rounded ${isWinamp ? 'bg-zinc-900 text-[#00FF00]' : isDark ? 'bg-[#2A2A2A] text-slate-300' : 'bg-amber-100 text-amber-800'
+                                        }`}>
+                                        {showTroubleshooting ? 'Tutup ▲' : 'Buka Panduan ▼'}
+                                    </span>
+                                </button>
+
+                                {showTroubleshooting && (
+                                    <div className="mt-3.5 pt-3 border-t border-amber-200/40 text-xs space-y-2.5 leading-relaxed">
+                                        <p className={`font-semibold ${isWinamp ? 'text-[#00FF00]' : isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                                            Penyebab pesan tersebut muncul di Android Launcher adalah karena launcher gagal me-render komponen widget. Periksa 3 hal berikut di project Android Studio Anda:
+                                        </p>
+                                        <ol className={`list-decimal list-inside space-y-1.5 pl-1 ${isWinamp ? 'text-zinc-300' : isDark ? 'text-slate-300' : 'text-slate-700'
+                                            }`}>
+                                            <li>
+                                                <strong>Target SDK Android 12+ (API 31 - 35+):</strong> Pastikan pada <code>android/app/build.gradle</code> sudah disetel <code>minSdkVersion 31</code> dan <code>targetSdkVersion 34</code> (atau 35).
+                                            </li>
+                                            <li>
+                                                <strong>Salin Semua File Drawable:</strong> Pastikan file <code>widget_bg.xml</code>, <code>widget_bg_dark.xml</code>, <code>widget_bg_vista.xml</code>, <code>widget_bg_winamp.xml</code>, dan <code>badge_shift_rounded.xml</code> ada di <code>android/app/src/main/res/drawable/</code>.
+                                            </li>
+                                            <li>
+                                                <strong>Package Class Kotlin:</strong> Pastikan file <code>ShiftWidgetProvider.kt</code> diletakkan pada folder <code>android/app/src/main/java/com/jadwalpriok/app/widget/ShiftWidgetProvider.kt</code> dengan deklarasi <code>package com.jadwalpriok.app.widget</code>.
+                                            </li>
+                                            <li>
+                                                <strong>Receiver di AndroidManifest.xml:</strong> Pastikan receiver terdaftar di dalam <code>&lt;application&gt;</code>:
+                                                <code className="block mt-1 p-2 bg-black text-[#00FF00] font-mono text-[11px] rounded overflow-x-auto">
+                                                    &lt;receiver android:name=".widget.ShiftWidgetProvider" android:exported="true"&gt;...&lt;/receiver&gt;
+                                                </code>
+                                            </li>
+                                        </ol>
+                                        <p className={`text-[11px] pt-1 ${isWinamp ? 'text-zinc-400' : isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                                            Setelah file disalin, lakukan <strong>Build &gt; Clean Project</strong> lalu <strong>Build &gt; Rebuild Project</strong> di Android Studio.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

@@ -85,10 +85,10 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             isWinamp: false,
 
             // 1. Kanvas Utama: #121212 bg, #E0E0E0 text
-            wrapperClass: 'min-h-screen bg-[#121212] text-[#E0E0E0] flex flex-col font-sans relative selection:bg-slate-700 selection:text-white',
+            wrapperClass: 'h-screen max-h-screen w-full bg-[#121212] text-[#E0E0E0] flex flex-col font-sans relative selection:bg-slate-700 selection:text-white overflow-hidden',
 
             // 2. Top Header / Navbar: #1A1A1A, border #333333
-            navbarClass: 'sticky top-0 z-40 bg-[#1A1A1A] text-[#E0E0E0] border-b border-[#333333] shadow-[0_4px_20px_rgba(0,0,0,0.8)]',
+            navbarClass: 'sticky top-0 z-40 bg-[#1A1A1A] text-[#E0E0E0] border-b border-[#333333] shadow-[0_4px_20px_rgba(0,0,0,0.8)] shrink-0',
             logoContainerClass: 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-[#252525] text-white shadow-sm ring-1 ring-white/10 shrink-0',
             titleClass: 'text-xs sm:text-sm md:text-base font-extrabold tracking-tight truncate text-[#FFFFFF]',
             versionBadgeClass: 'bg-[#2A2A2A] text-slate-300 border border-[#444444] text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-full font-bold',
@@ -157,10 +157,10 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             isWinamp: false,
 
             // 1. Kanvas Utama: Radial gradient aero glass
-            wrapperClass: 'min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100 via-blue-200 to-emerald-100 text-[#0F172A] flex flex-col font-sans relative selection:bg-sky-200 selection:text-sky-900',
+            wrapperClass: 'h-screen max-h-screen w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100 via-blue-200 to-emerald-100 text-[#0F172A] flex flex-col font-sans relative selection:bg-sky-200 selection:text-sky-900 overflow-hidden',
 
             // 2. Top Header / Navbar: Slate-900/60 backdrop-blur-lg
-            navbarClass: 'sticky top-0 z-40 bg-slate-900/70 backdrop-blur-lg text-white border-b border-white/20 shadow-lg',
+            navbarClass: 'sticky top-0 z-40 bg-slate-900/70 backdrop-blur-lg text-white border-b border-white/20 shadow-lg shrink-0',
             logoContainerClass: 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-600 to-sky-400 text-white shadow-xs border border-white/40 shrink-0',
             titleClass: 'text-xs sm:text-sm md:text-base font-extrabold tracking-tight truncate text-white drop-shadow-xs',
             versionBadgeClass: 'bg-white/20 text-sky-200 border border-white/30 text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-full font-bold backdrop-blur-xs',
@@ -229,10 +229,10 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             isWinamp: true,
 
             // 1. Kanvas Utama: #2C2E3B, text #00FF00, font-mono, rounded-none!
-            wrapperClass: 'min-h-screen bg-[#2C2E3B] text-[#00FF00] flex flex-col font-mono relative rounded-none selection:bg-[#00FF00] selection:text-black',
+            wrapperClass: 'h-screen max-h-screen w-full bg-[#2C2E3B] text-[#00FF00] flex flex-col font-mono relative rounded-none selection:bg-[#00FF00] selection:text-black overflow-hidden',
 
             // 2. Top Header / Navbar: Gradient #4A4D64 -> #2D2E40, border #000000
-            navbarClass: 'sticky top-0 z-40 bg-gradient-to-b from-[#4A4D64] to-[#2D2E40] text-[#FACC15] border-b-2 border-[#000000] font-mono shadow-none',
+            navbarClass: 'sticky top-0 z-40 bg-gradient-to-b from-[#4A4D64] to-[#2D2E40] text-[#FACC15] border-b-2 border-[#000000] font-mono shadow-none shrink-0',
             logoContainerClass: 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-none bg-[#000000] text-[#FACC15] border border-[#555555] shrink-0',
             titleClass: 'text-xs sm:text-sm md:text-base font-bold tracking-tight truncate text-[#FACC15] font-mono',
             versionBadgeClass: 'bg-[#000000] text-[#00FF00] border border-[#00FF00]/50 text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-none font-mono font-bold',
@@ -301,10 +301,10 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
         isWinamp: false,
 
         // 1. Kanvas Utama: #F6F7F8 bg, #011627 text
-        wrapperClass: 'min-h-screen bg-[#F6F7F8] text-[#011627] flex flex-col font-sans relative selection:bg-[#2EC4B6]/30 selection:text-[#011627]',
+        wrapperClass: 'h-screen max-h-screen w-full bg-[#F6F7F8] text-[#011627] flex flex-col font-sans relative selection:bg-[#2EC4B6]/30 selection:text-[#011627] overflow-hidden',
 
         // 2. Top Header / Navbar: #011627 (Ink Black) dengan teks #F6F7F8 (Bright Snow)
-        navbarClass: 'sticky top-0 z-40 bg-[#011627] text-[#F6F7F8] border-b border-[#0d2a45] shadow-md',
+        navbarClass: 'sticky top-0 z-40 bg-[#011627] text-[#F6F7F8] border-b border-[#0d2a45] shadow-md shrink-0',
         logoContainerClass: 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-[#2EC4B6]/20 text-[#2EC4B6] shadow-sm ring-1 ring-[#2EC4B6]/40 shrink-0',
         titleClass: 'text-xs sm:text-sm md:text-base font-extrabold tracking-tight truncate text-[#F6F7F8]',
         versionBadgeClass: 'bg-[#0d2a45] text-[#2EC4B6] border border-[#2EC4B6]/30 text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-full font-bold',

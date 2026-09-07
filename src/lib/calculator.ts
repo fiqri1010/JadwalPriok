@@ -5,9 +5,28 @@ import {
     CeisaScoreResult,
     PeriodPerformanceSummary,
     normalizeShift,
-    LiburNasional
+    LiburNasional,
+    CeisaRule
 } from '../types';
 import { getIndonesianHoliday } from '../data/holidays';
+
+export const DEFAULT_CEISA_RULE: CeisaRule = {
+    id: 'default-ceisa-rule',
+    nama_rule: 'Aturan CEISA Default',
+    tanggal_berlaku_efektif: '2020-01-01',
+    metode_kalkulasi: 'AVERAGE',
+    tipe_nilai: 'SKALA',
+    rule_detail: {
+        shifts: {
+            Graha: { multiplier: 1, thresholds: [] },
+            NPCT: { multiplier: 1, thresholds: [] },
+            TPSL: { multiplier: 1, thresholds: [] },
+            SM: { multiplier: 1, thresholds: [] },
+            PM: { multiplier: 1, thresholds: [] },
+            Malam: { multiplier: 1, thresholds: [] },
+        },
+    },
+};
 
 export function calculateWorkDuration(jamMasuk: string, jamPulang: string): number {
     if (!jamMasuk || !jamPulang || !jamMasuk.includes(':') || !jamPulang.includes(':')) {

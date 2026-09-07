@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/widget_background_rounded"
+    android:background="@drawable/widget_bg"
     android:padding="12dp">
 
-	<!-- Header Judul: Shift -->
+	<!-- Header Judul: Shift Priok -->
 	<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,6 +27,7 @@
             android:textStyle="bold" />
 
 		<TextView
+            android:id="@+id/tv_widget_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Priok"
@@ -45,6 +46,7 @@
         android:paddingBottom="4dp">
 
 		<TextView
+            android:id="@+id/tv_today_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hari Ini"
@@ -69,6 +71,7 @@
             android:layout_height="wrap_content"
             android:text="Graha"
             android:textColor="#0369A1"
+            android:background="@drawable/badge_shift_rounded"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:paddingTop="2dp"
@@ -79,6 +82,7 @@
 
 	<!-- Divider Pemisah -->
 	<View
+        android:id="@+id/divider_line"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#E2E8F0"
@@ -96,6 +100,7 @@
         android:paddingBottom="2dp">
 
 		<TextView
+            android:id="@+id/tv_tomorrow_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Besok"
@@ -120,6 +125,7 @@
             android:layout_height="wrap_content"
             android:text="NPCT"
             android:textColor="#C2410C"
+            android:background="@drawable/badge_shift_rounded"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:paddingTop="2dp"

@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- res/xml/widget_shift_info.xml -->
+<!-- res/xml/widget_shift_info.xml (Spesifikasi Modern Android 12, 13, 14, 15+) -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="140dp"
-    android:minHeight="70dp"
+    android:minWidth="130dp"
+    android:minHeight="65dp"
     android:minResizeWidth="110dp"
-    android:minResizeHeight="60dp"
+    android:minResizeHeight="55dp"
     android:targetCellWidth="2"
     android:targetCellHeight="1"
-    android:maxResizeWidth="400dp"
-    android:maxResizeHeight="300dp"
+    android:maxResizeWidth="480dp"
+    android:maxResizeHeight="360dp"
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/widget_shift_compact"
+    android:previewLayout="@layout/widget_shift_compact"
     android:resizeMode="horizontal|vertical"
-    android:widgetFeatures="reconfigurable"
+    android:widgetFeatures="reconfigurable|configuration_optional"
     android:widgetCategory="home_screen"
     android:description="@string/widget_shift_description">
 </appwidget-provider>

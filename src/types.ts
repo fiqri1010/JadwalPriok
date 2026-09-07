@@ -147,7 +147,46 @@ export interface PeriodPerformanceSummary {
     predikat: string;
 }
 
-export const APP_VERSION = '1.2.3';
-export const APP_VERSION_DISPLAY = 'v1.2.3';
+export interface CustomShiftType {
+    id: string;
+    name: string;
+    shortCode: string;
+    bgColor: string;
+    textColor: string;
+    orderIndex: number;
+    isActive: boolean;
+}
+
+export type CalculationMode = 'AVERAGE' | 'SUM';
+export type ValueType = 'SKALA' | 'PERSENTASE';
+
+export interface CeisaThreshold {
+    max_time: string;
+    score: number;
+    name: string;
+}
+
+export interface CeisaShiftRule {
+    multiplier: number;
+    thresholds: CeisaThreshold[];
+    is_exempt?: boolean;
+    is_auto_max?: boolean;
+}
+
+export interface CeisaRuleDetail {
+    shifts: Record<string, CeisaShiftRule>;
+}
+
+export interface CeisaRule {
+    id: string;
+    nama_rule: string;
+    tanggal_berlaku_efektif: string;
+    metode_kalkulasi: CalculationMode;
+    tipe_nilai: ValueType;
+    rule_detail: CeisaRuleDetail;
+}
+
+export const APP_VERSION = '1.2.4';
+export const APP_VERSION_DISPLAY = 'v1.2.4';
 
 

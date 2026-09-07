@@ -53,7 +53,9 @@ import { HolidayManagerModal } from './components/HolidayManagerModal';
 import { GuideView } from './components/GuideView';
 import { PasteExcelModal } from './components/PasteExcelModal';
 import { WindowTitleBar } from './components/WindowTitleBar';
+import { FULL_APP_TITLE } from './version';
 import { AppLogo } from './components/AppLogo';
+import { centerAppWindow } from './lib/tauriBridge';
 import {
     syncTwoWaySupabase,
     pushSingleDaySupabase,
@@ -135,14 +137,6 @@ export default function App() {
         }
         return new Date().getFullYear();
     });
-
-    useEffect(() => {
-        localStorage.setItem('last_active_month', selectedMonth.toString());
-    }, [selectedMonth]);
-
-    useEffect(() => {
-        localStorage.setItem('last_active_year', selectedYear.toString());
-    }, [selectedYear]);
     const [pageTab, setPageTab] = useState<'calendar' | 'recap' | 'performance' | 'guide'>('calendar');
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [settingsInitialTab, setSettingsInitialTab] = useState<'storage' | 'reminders' | 'widget' | 'export' | 'import'>('storage');
@@ -155,10 +149,17 @@ export default function App() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
     const [lastResetBackupState, setLastResetBackupState] = useState<ResetBackup | null>(null);
-
     const [isMobile, setIsMobile] = useState<boolean>(() => {
         return typeof window !== 'undefined' ? window.innerWidth < 640 : false;
     });
+
+    useEffect(() => {
+        localStorage.setItem('last_active_month', selectedMonth.toString());
+    }, [selectedMonth]);
+
+    useEffect(() => {
+        localStorage.setItem('last_active_year', selectedYear.toString());
+    }, [selectedYear]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -166,6 +167,14 @@ export default function App() {
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Set judul dokumen & otomatis center window pada saat inisialisasi awal PC / Desktop
+    useEffect(() => {
+        if (typeof document !== 'undefined') {
+            document.title = FULL_APP_TITLE;
+        }
+        centerAppWindow();
     }, []);
 
     // Time Picker Modal State
@@ -419,14 +428,14 @@ export default function App() {
 
     // Dynamic container class for desktop view based on screen ratio & physical resolution
     const desktopContainerClass = useMemo(() => {
-        if (isMobile) return 'w-full px-1.5 sm:px-2.5';
+        if (isMobile) return 'w-full px-1.5 sm:px-2.5 py-1.5 pb-24';
         const { cssWidth, physicalWidth } = desktopScreenMetrics;
         if (physicalWidth >= 1920 || cssWidth >= 1600) {
-            return 'max-w-[1700px] mx-auto px-4 lg:px-6';
+            return 'max-w-[1700px] mx-auto px-4 lg:px-6 py-2 sm:py-3 pb-10';
         } else if (physicalWidth >= 1400 || cssWidth >= 1366) {
-            return 'max-w-[1500px] mx-auto px-3 lg:px-5';
+            return 'max-w-[1500px] mx-auto px-3 lg:px-5 py-2 sm:py-2.5 pb-10';
         }
-        return 'max-w-7xl mx-auto px-2 sm:px-3 lg:px-4';
+        return 'max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 py-2 pb-10';
     }, [isMobile, desktopScreenMetrics]);
 
     // LocalStorage persistence
@@ -878,7 +887,7 @@ export default function App() {
             {!isMobile && (
                 <WindowTitleBar
                     theme={currentTheme}
-                    title="JadwalPriok v1.2.1"
+                    title={FULL_APP_TITLE}
                     subtitle="Jadwal Pemeriksa Fisik dan Performance View"
                 />
             )}
@@ -892,11 +901,9 @@ export default function App() {
                                 <AppLogo className="h-4 w-4 sm:h-5 sm:w-5" />
                             </div>
                             <div className="min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                    <h1 className={themeConfig.titleClass}>
-                                        JadwalPriok
-                                    </h1>
-                                </div>
+                                <h1 className={themeConfig.titleClass}>
+                                    JadwalPriok
+                                </h1>
                                 <p className={themeConfig.subtitleClass}>
                                     Jadwal Pemeriksa Fisik dan Performance View
                                 </p>
@@ -1061,11 +1068,9 @@ export default function App() {
                         <div className="flex items-center space-x-2 min-w-0">
                             <AppLogo className="h-7 w-7 rounded-lg shadow-xs shrink-0" />
                             <div className="min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                    <h1 className={themeConfig.titleClass}>
-                                        JadwalPriok
-                                    </h1>
-                                </div>
+                                <h1 className={themeConfig.titleClass}>
+                                    JadwalPriok
+                                </h1>
                                 <p className={themeConfig.subtitleClass}>
                                     Jadwal Pemeriksa Fisik & Perform
                                 </p>
@@ -1100,7 +1105,7 @@ export default function App() {
                     </div>
                 </header>
             )}
-            <main className={`flex-1 w-full ${desktopContainerClass}`}>
+            <main id="app-main-content" className={`flex-1 w-full overflow-y-auto overflow-x-hidden ${desktopContainerClass}`}>
                 <div className="space-y-1.5 sm:space-y-2 lg:space-y-2.5">
                     {/* View Switcher Frame: Kalender vs Rekapitulasi vs Perform CEISA vs Petunjuk + Month Selector */}
                     <div className={themeConfig.viewSwitcherCardClass}>

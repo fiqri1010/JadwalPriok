@@ -1,4 +1,5 @@
 import java.text.SimpleDateFormat
+import groovy.json.JsonSlurper
 
 apply plugin: 'com.android.application'
 
@@ -15,17 +16,21 @@ def getDateTimeVersionCode() {
     return Integer.parseInt(df.format(new Date()))
 }
 
+def packageJson = new JsonSlurper().parseText(rootProject.file('../package.json').getText('UTF-8'))
+def appVersion = packageJson.version.toString()
 def appBaseName = "JadwalPriok"
-def currentVersionName = "1.2.1." + getDateTimeVersion() // Contoh hasil: 1.2.1.20260907.2240
+def currentVersionName = "${appVersion} build ${getDateTimeVersion()}"
 
 android {
     namespace = "com.jadwalpriok.app"
-    compileSdk = rootProject.ext.compileSdkVersion
+    // Target & Compile SDK untuk Android 12 (API 31) hingga Android terbaru (Android 14 API 34 / Android 15 API 35)
+    compileSdk = rootProject.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 34
     
     defaultConfig {
         applicationId "com.jadwalpriok.app"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        // Min SDK 31 (Mulai Android 12 ke atas)
+        minSdkVersion 31
+        targetSdkVersion rootProject.hasProperty('targetSdkVersion') ? rootProject.ext.targetSdkVersion : 34
         
         // --- 2. PASANG VERSION CODE & VERSION NAME OTOMATIS ---
         versionCode getDateTimeVersionCode()
@@ -42,9 +47,9 @@ android {
     signingConfigs {
         release {
             storeFile file('my-release-key.jks')
-            storePassword 'priok12345'     // Ganti dengan password yang Anda buat di Langkah 1
+            storePassword 'priok12345'     // Ganti dengan password keystore Anda
             keyAlias 'my-key-alias'
-            keyPassword 'priok12345'       // Ganti dengan password yang Anda buat di Langkah 1
+            keyPassword 'priok12345'       // Ganti dengan password alias Anda
         }
     }
 
@@ -60,7 +65,7 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
             def buildType = variant.buildType.name // 'debug' atau 'release'
-            // Format nama: JadwalPriok 1.2.1.20260907.2240 (release).apk
+            // Format nama: JadwalPriok 1.2.3 build 20260907.2240 (release).apk
             def newFileName = "${appBaseName} ${currentVersionName} (${buildType}).apk"
             outputFileName = new File(newFileName)
         }

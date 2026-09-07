@@ -33,7 +33,7 @@ const dd = pad(now.getDate());
 const hh = pad(now.getHours());
 const min = pad(now.getMinutes());
 const buildTimestamp = `${yyyy}${mm}${dd}.${hh}${min}`;
-const fullTitle = `JadwalPriok v${newVersion} (Build ${buildTimestamp})`;
+const fullTitle = `JadwalPriok v${newVersion} build ${buildTimestamp}`;
 
 // 3. Sinkronkan src/types.ts (aman: jika belum ada, otomatis ditambahkan)
 const typesPath = path.resolve('src/types.ts');
@@ -88,7 +88,7 @@ export const BUILD_TIMESTAMP: string =
  * Format judul lengkap aplikasi pada titlebar:
  * Contoh: "${fullTitle}"
  */
-export const FULL_APP_TITLE: string = \`JadwalPriok v\${APP_VERSION} (Build \${BUILD_TIMESTAMP})\`;
+export const FULL_APP_TITLE: string = \`JadwalPriok v\${APP_VERSION} build \${BUILD_TIMESTAMP}\`;
 `;
     fs.writeFileSync(versionTsPath, versionTsContent, 'utf8');
     console.log(`✓ src/version.ts disinkronkan -> ${fullTitle}`);
