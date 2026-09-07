@@ -1,8 +1,9 @@
-<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Jadwal Priok</string>
-    <string name="title_activity_main">Jadwal Priok</string>
-    <string name="package_name">com.jadwalpriok.app</string>
-    <string name="custom_url_scheme">com.jadwalpriok.app</string>
-    <string name="widget_shift_description">Jadwal shift Jadwal Priok</string>
+	<string name="app_name">JadwalPriok</string>
+	<string name="title_activity_main">JadwalPriok</string>
+	<string name="package_name">com.jadwalpriok.app</string>
+	<string name="custom_url_scheme">com.jadwalpriok.app</string>
+
+	<!-- Tambahkan baris ini -->
+	<string name="widget_shift_description">Widget Jadwal Shift Priok Hari Ini dan Besok</string>
 </resources>

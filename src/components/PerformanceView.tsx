@@ -366,7 +366,7 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({
             for (let d = 1; d <= daysInMonth; d++) {
                 const key = `${selectedYear}-${m}-${d}`;
                 const data = daysState[key] || {
-                    shift: 'G',
+                    shift: 'Graha',
                     isMasuk: true,
                     jamMasuk: '',
                     jamPulang: '',
@@ -454,8 +454,8 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({
                     bVal = b.isHoldDokumen ? -1 : (b.scoreResult.isEligible ? b.scoreResult.score : 0);
                     break;
                 case 'category':
-                    aVal = a.scoreResult.category || '';
-                    bVal = b.scoreResult.category || '';
+                    aVal = (a.scoreResult as any).category || a.scoreResult.grade || '';
+                    bVal = (b.scoreResult as any).category || b.scoreResult.grade || '';
                     break;
                 case 'ruleDescription':
                     aVal = a.scoreResult.ruleDescription || '';
