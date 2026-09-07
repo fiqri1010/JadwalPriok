@@ -1,5 +1,5 @@
-export const APP_VERSION = '1.0.6';
-export const APP_VERSION_DISPLAY = 'v1.0.6';
+export const APP_VERSION = '1.2.2';
+export const APP_VERSION_DISPLAY = 'v1.2.2';
 
 export const SHIFT_OPTIONS = ['Graha', 'NPCT', 'TPSL', 'OFF', 'SM', 'PM', 'Malam', 'CUTI'] as const;
 export type ShiftType = typeof SHIFT_OPTIONS[number] | '';

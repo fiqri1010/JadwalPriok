@@ -1,4 +1,22 @@
+import java.text.SimpleDateFormat
+
 apply plugin: 'com.android.application'
+
+// --- 1. FUNGSI VERSIONING OTOMATIS BERDASARKAN WAKTU (WIB) ---
+def getDateTimeVersion() {
+    def df = new SimpleDateFormat("yyyyMMdd.HHmm")
+    df.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"))
+    return df.format(new Date())
+}
+
+def getDateTimeVersionCode() {
+    def df = new SimpleDateFormat("yyMMddHH")
+    df.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"))
+    return Integer.parseInt(df.format(new Date()))
+}
+
+def appBaseName = "JadwalPriok"
+def currentVersionName = "1.2.1." + getDateTimeVersion() // Contoh hasil: 1.2.1.20260907.2240
 
 android {
     namespace = "com.jadwalpriok.app"
@@ -8,8 +26,11 @@ android {
         applicationId "com.jadwalpriok.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        
+        // --- 2. PASANG VERSION CODE & VERSION NAME OTOMATIS ---
+        versionCode getDateTimeVersionCode()
+        versionName currentVersionName
+        
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -32,6 +53,16 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // --- 3. UBAH NAMA OUTPUT FILE APK SESUAI NAMA APP + VERSI (BUKAN app-debug LAGI) ---
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def buildType = variant.buildType.name // 'debug' atau 'release'
+            // Format nama: JadwalPriok 1.2.1.20260907.2240 (release).apk
+            def newFileName = "${appBaseName} ${currentVersionName} (${buildType}).apk"
+            outputFileName = new File(newFileName)
         }
     }
 }

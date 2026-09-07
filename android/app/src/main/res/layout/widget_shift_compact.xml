@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/widget_shift_compact.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background_rounded"
+    android:padding="12dp">
+
+	<!-- Header Judul: Shift -->
+	<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp">
+
+		<TextView
+            android:id="@+id/tv_widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Shift"
+            android:textColor="#0F766E"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+		<TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Priok"
+            android:textColor="#94A3B8"
+            android:textSize="10sp" />
+	</LinearLayout>
+
+	<!-- Baris 1: Hari Ini mmdd <Shift> -->
+	<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="2dp"
+        android:paddingBottom="4dp">
+
+		<TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hari Ini"
+            android:textColor="#0F172A"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="6dp" />
+
+		<TextView
+            android:id="@+id/tv_today_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="09/07"
+            android:textColor="#64748B"
+            android:textSize="12sp"
+            android:layout_marginEnd="8dp" />
+
+		<TextView
+            android:id="@+id/tv_today_shift"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Graha"
+            android:textColor="#0369A1"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+	</LinearLayout>
+
+	<!-- Divider Pemisah -->
+	<View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E2E8F0"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp" />
+
+	<!-- Baris 2: Besok mmdd <Shift> -->
+	<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="4dp"
+        android:paddingBottom="2dp">
+
+		<TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Besok"
+            android:textColor="#0F172A"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="6dp" />
+
+		<TextView
+            android:id="@+id/tv_tomorrow_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="09/08"
+            android:textColor="#64748B"
+            android:textSize="12sp"
+            android:layout_marginEnd="8dp" />
+
+		<TextView
+            android:id="@+id/tv_tomorrow_shift"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NPCT"
+            android:textColor="#C2410C"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+	</LinearLayout>
+</LinearLayout>
