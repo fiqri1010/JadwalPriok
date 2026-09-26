@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Outer Calendar Card -->
+  <rect x="110" y="112" width="292" height="308" rx="44" fill="#FFFFFF" stroke="#D3DAE6" stroke-width="6" />
+  
+  <!-- Calendar Blue Header Bar -->
+  <path d="M 113 186 L 113 156 C 113 132 132 115 156 115 L 356 115 C 380 115 399 132 399 156 L 399 186 Z" fill="#4366FA" />
+
+  <!-- 3 Top Binder Loops -->
+  <rect x="154" y="92" width="24" height="48" rx="12" fill="#242F40" stroke="#FFFFFF" stroke-width="4" />
+  <rect x="244" y="92" width="24" height="48" rx="12" fill="#242F40" stroke="#FFFFFF" stroke-width="4" />
+  <rect x="334" y="92" width="24" height="48" rx="12" fill="#242F40" stroke="#FFFFFF" stroke-width="4" />
+
+  <!-- 6 Sub-header Dots -->
+  <rect x="152" y="204" width="12" height="18" rx="6" fill="#93A4BA" />
+  <rect x="192" y="204" width="12" height="18" rx="6" fill="#93A4BA" />
+  <rect x="232" y="204" width="12" height="18" rx="6" fill="#93A4BA" />
+  <rect x="272" y="204" width="12" height="18" rx="6" fill="#93A4BA" />
+  <rect x="312" y="204" width="12" height="18" rx="6" fill="#93A4BA" />
+  <rect x="350" y="204" width="12" height="18" rx="6" fill="#93A4BA" />
+
+  <!-- Inner Dark Display Area -->
+  <rect x="139" y="240" width="234" height="148" rx="20" fill="#121624" />
+
+  <!-- Schedule Bars Row 1 -->
+  <rect x="149" y="250" width="103" height="22" rx="11" fill="#2AB8FA" />
+  <rect x="324" y="250" width="40" height="22" rx="11" fill="#F43B66" />
+
+  <!-- Schedule Bars Row 2 -->
+  <rect x="216" y="282" width="67" height="22" rx="11" fill="#0EBE7F" />
+  <rect x="293" y="282" width="71" height="22" rx="11" fill="#6362FC" />
+
+  <!-- Schedule Bars Row 3 -->
+  <rect x="149" y="314" width="117" height="22" rx="11" fill="#FAA307" />
+
+  <!-- Schedule Bars Row 4 -->
+  <rect x="192" y="346" width="108" height="22" rx="11" fill="#F0388A" />
+  <rect x="310" y="346" width="54" height="22" rx="11" fill="#05B6D5" />
+</svg>

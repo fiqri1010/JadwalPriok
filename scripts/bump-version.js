@@ -106,6 +106,9 @@ if (fs.existsSync(tauriPath)) {
         } else if (tauri.package?.version !== undefined) {
             tauri.package.version = newVersion;
         }
+        if (tauri.app?.windows?.[0]) {
+            tauri.app.windows[0].title = `JadwalPriok v${newVersion}`;
+        }
         fs.writeFileSync(tauriPath, JSON.stringify(tauri, null, 2) + '\n');
         console.log(`✓ src-tauri/tauri.conf.json disinkronkan ke v${newVersion}`);
     } catch (err) {

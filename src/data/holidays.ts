@@ -1,8 +1,4 @@
-// Data Hari Libur Nasional Indonesia (2024, 2025, 2026)
-export interface HolidayInfo {
-  date: string; // YYYY-MM-DD
-  name: string;
-}
+import { LiburNasional } from '../types';
 
 export const INDONESIAN_HOLIDAYS: Record<string, string> = {
   // 2024
@@ -82,6 +78,14 @@ export const INDONESIAN_HOLIDAYS: Record<string, string> = {
   '2026-08-25': 'Maulid Nabi Muhammad SAW',
   '2026-12-25': 'Hari Raya Natal',
 };
+
+export const DEFAULT_HOLIDAYS: LiburNasional[] = Object.entries(INDONESIAN_HOLIDAYS).map(
+  ([tanggal, keterangan]) => ({
+    tanggal,
+    keterangan,
+    isCutiBersama: keterangan.toLowerCase().includes('cuti bersama'),
+  })
+);
 
 export function getIndonesianHoliday(
   yearOrDate: number | Date,

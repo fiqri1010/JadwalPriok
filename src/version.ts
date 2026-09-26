@@ -14,13 +14,13 @@ function getFallbackBuildTime(): string {
 }
 
 export const APP_VERSION: string = 
-  typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.2.4';
+  typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.3.24-beta';
 
 export const BUILD_TIMESTAMP: string = 
-  typeof __BUILD_TIMESTAMP__ !== 'undefined' ? __BUILD_TIMESTAMP__ : '20260908.0223';
+  typeof __BUILD_TIMESTAMP__ !== 'undefined' ? __BUILD_TIMESTAMP__ : getFallbackBuildTime();
 
 /**
  * Format judul lengkap aplikasi pada titlebar:
- * Contoh: "JadwalPriok v1.2.4 build 20260908.0223"
+ * Contoh: "JadwalPriok v0.1.0-alpha build 20260923.0001"
  */
 export const FULL_APP_TITLE: string = `JadwalPriok v${APP_VERSION} build ${BUILD_TIMESTAMP}`;

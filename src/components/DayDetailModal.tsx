@@ -1,561 +1,623 @@
-import React from 'react';
-import {
-    X,
-    Clock,
-    Calendar,
-    Sparkles,
-    ShieldCheck,
-    Palmtree,
-    Zap,
-    Check,
-    FileCheck,
-    AlertCircle
-} from 'lucide-react';
-import { DayData, DayCalculationResult, SHIFT_OPTIONS, SHIFT_COLORS, ShiftType, normalizeShift, LiburNasional, AppTheme } from '../types';
-import { getIndonesianHoliday } from '../data/holidays';
+import React, { useEffect } from 'react';
+import { DayData, normalizeShift, LiburNasional, isPiketShift } from '../types';
+import { PiketMatchInfo, OffMatchInfo } from '../utils/piket';
+import { Clock, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence, PanInfo } from 'motion/react';
+import { ShiftDropdown } from './ShiftDropdown';
+import { OffRelaxIcon } from './OffRelaxIcon';
+import { BriefcaseIcon } from './BriefcaseIcon';
+import { AutoResizingTextarea } from './DayCell';
+import { calculateDayLembur } from '../utils/lembur';
 
-interface DayDetailModalProps {
+export interface DayDetailModalProps {
     isOpen: boolean;
-    onClose: () => void;
     dayNumber: number;
-    month: number;
     year: number;
+    month: number;
+    daysInMonth: number;
     data: DayData;
-    calculation: DayCalculationResult;
-    liburNasional?: LiburNasional;
-    sisaKuotaOff?: number;
-    sisaKuotaCP?: number;
-    theme?: AppTheme;
-    onUpdate: (partial: Partial<DayData>) => void;
-    onRequestTimePick: (field: 'jamMasuk' | 'jamPulang' | 'absenCeisa', title: string, currentValue: string) => void;
+    nextDayData?: DayData | null;
+    isLocked: boolean;
+    holiday?: LiburNasional;
+    theme: string;
+    onClose: () => void;
+    onNavigateDay: (targetDay: number) => void;
+    onUpdate: (newData: Partial<DayData>) => void;
+    onRequestTimePick?: (field: 'jamMasuk' | 'jamPulang' | 'absenCeisa', title: string, currentValue: string) => void;
+    piketMatchInfo?: PiketMatchInfo;
+    offMatchInfo?: OffMatchInfo;
 }
-
-const INDONESIAN_DAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-const INDONESIAN_MONTHS = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-];
 
 export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     isOpen,
-    onClose,
     dayNumber,
-    month,
     year,
+    month,
+    daysInMonth,
     data,
-    calculation,
-    liburNasional,
-    sisaKuotaOff = 0,
-    sisaKuotaCP = 0,
-    theme = 'default',
+    nextDayData,
+    isLocked,
+    holiday,
+    theme,
+    onClose,
+    onNavigateDay,
     onUpdate,
     onRequestTimePick,
+    piketMatchInfo,
+    offMatchInfo,
 }) => {
+    const dateObj = new Date(year, month - 1, dayNumber);
+    const dayOfWeek = dateObj.getDay(); // 0 = Sun, 6 = Sat
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isHoliday = Boolean(holiday) || Boolean(data?.isManualHoliday);
+    const isWeekendOrHoliday = isWeekend || isHoliday;
+    const isPiket = isPiketShift(data?.shift, isWeekendOrHoliday);
+
+    const isWinamp = theme === 'winamp';
+    const isDarkFluid = theme === 'darkFluid';
+    const isDark = theme === 'dark';
+    const isVista = theme === 'vista';
+
+    const normalizedShift = normalizeShift(data?.shift || '');
+
+    const indonesianDayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const indonesianMonthNames = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    const fullDateLabel = `${indonesianDayNames[dayOfWeek]}, ${dayNumber} ${indonesianMonthNames[month - 1]} ${year}`;
+
+    const dateNumberColor = isHoliday || isWeekend
+        ? 'text-rose-500 font-black'
+        : isWinamp
+        ? 'text-[#00FF00] font-black'
+        : isDarkFluid
+        ? 'text-[#E6E0E9] font-black'
+        : isDark
+        ? 'text-white font-black'
+        : 'text-slate-900 font-black';
+
+    // Theme-specific modal card styles
+    const getCardStyle = (): React.CSSProperties => {
+        if (isWinamp) {
+            return {
+                borderRadius: '0px',
+                backgroundColor: '#121212',
+                color: '#00FF00',
+                boxShadow: 'inset 2px 2px 0 #2a2a2a, inset -2px -2px 0 #000000, 6px 6px 0px #000000',
+                border: '2px solid #00FF00',
+            };
+        }
+        if (isDark || isDarkFluid) {
+            return {
+                borderRadius: '12px',
+                backgroundColor: isDarkFluid ? '#1D1B20' : '#1E1E24',
+                backgroundImage: isDarkFluid
+                    ? 'linear-gradient(139deg, #25232A 0%, #1D1B20 100%)'
+                    : 'linear-gradient(139deg, #262732 0%, #1A1A20 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                color: isDarkFluid ? '#E6E0E9' : '#F1F5F9',
+            };
+        }
+        if (isVista) {
+            return {
+                borderRadius: '12px',
+                backgroundColor: 'rgba(235, 245, 255, 0.85)',
+                backgroundImage:
+                    'linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(224, 242, 254, 0.82) 35%, rgba(186, 230, 253, 0.70) 70%, rgba(215, 238, 255, 0.90) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.9)',
+                boxShadow:
+                    '0 30px 60px -12px rgba(10, 45, 95, 0.42), 0 12px 28px -6px rgba(14, 116, 224, 0.26), inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.98), inset 0 0 24px rgba(186, 230, 253, 0.45)',
+                backdropFilter: 'blur(28px) saturate(210%) brightness(104%)',
+                WebkitBackdropFilter: 'blur(28px) saturate(210%) brightness(104%)',
+                color: '#0F172A',
+            };
+        }
+        // Default light theme
+        return {
+            borderRadius: '12px',
+            backgroundColor: '#ffffff',
+            backgroundImage: 'linear-gradient(139deg, #ffffff 0%, #f8fafc 100%)',
+            border: '1px solid #cbd5e1',
+            boxShadow: '0 20px 45px -10px rgba(50, 50, 93, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+            color: '#0F172A',
+        };
+    };
+
+    const handlePrev = () => {
+        if (dayNumber > 1) {
+            onNavigateDay(dayNumber - 1);
+        }
+    };
+
+    const handleNext = () => {
+        if (dayNumber < daysInMonth) {
+            onNavigateDay(dayNumber + 1);
+        }
+    };
+
+    // Keyboard navigation (ArrowLeft & ArrowRight & Escape)
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowLeft') {
+                handlePrev();
+            } else if (e.key === 'ArrowRight') {
+                handleNext();
+            } else if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, dayNumber, daysInMonth]);
+
+    // High performance Framer Motion Drag Handler
+    const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+        const threshold = 35;
+        const velocityThreshold = 200;
+
+        if (info.offset.x < -threshold || info.velocity.x < -velocityThreshold) {
+            handleNext();
+        } else if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
+            handlePrev();
+        }
+    };
+
     if (!isOpen) return null;
 
-    const dateObj = new Date(year, month - 1, dayNumber);
-    const dayOfWeek = dateObj.getDay();
-    const dayName = INDONESIAN_DAYS[dayOfWeek];
-    const monthName = INDONESIAN_MONTHS[month - 1];
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    const holidayName = liburNasional?.keterangan || getIndonesianHoliday(year, month, dayNumber);
-    const isTanggalMerah = isWeekend || Boolean(data.isManualHoliday) || Boolean(holidayName) || Boolean(liburNasional);
-
-    const normalizedCurrentShift = normalizeShift(data.shift);
-    const shiftTheme = SHIFT_COLORS[normalizedCurrentShift] || SHIFT_COLORS.Graha;
-
-    const canHaveST = isTanggalMerah;
-    const isOffDisabled = (sisaKuotaOff <= 0 && !data.isGunakanOffGeser);
-    const isCPDisabled = (sisaKuotaCP <= 0 && !data.isGunakanCP);
-
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in duration-150">
+        <AnimatePresence>
             <div
-                className="w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl border border-slate-200 overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
-                onClick={(e) => e.stopPropagation()}
+                className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm select-none"
+                onClick={onClose}
             >
-                {/* Modal Header */}
-                <div className="relative bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-4 sm:p-5 text-white">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-slate-200 hover:bg-white/20 hover:text-white transition-colors cursor-pointer"
-                        aria-label="Tutup form"
-                    >
-                        <X className="h-5 w-5" />
-                    </button>
-
-                    <div className="flex items-start space-x-3">
+                {/* Hardware-accelerated Swipeable Card */}
+                <motion.div
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.12}
+                    onDragEnd={handleDragEnd}
+                    initial={{ opacity: 0, scale: 0.96, y: 6 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.96, y: 6 }}
+                    transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                        ...getCardStyle(),
+                        willChange: 'transform, opacity',
+                    }}
+                    className={`w-[92vw] max-w-[325px] sm:max-w-[345px] p-4 sm:p-5 flex flex-col justify-between space-y-3 relative overflow-visible transform-gpu cursor-grab active:cursor-grabbing ${
+                        isWinamp
+                            ? 'text-[#00FF00] font-mono'
+                            : isDark || isDarkFluid
+                            ? 'text-[#E6E0E9]'
+                            : isVista
+                            ? 'text-sky-950'
+                            : 'text-slate-900'
+                    }`}
+                >
+                    {/* Vista Aero Glass Specular Sheen Overlay */}
+                    {isVista && (
                         <div
-                            style={liburNasional ? { borderColor: '#BE1A1A', backgroundColor: 'rgba(190, 26, 26, 0.25)', color: '#FF9E9E' } : undefined}
-                            className={`flex flex-col items-center justify-center rounded-2xl px-3.5 py-2 shadow-inner border ${isTanggalMerah ? 'bg-rose-500/20 border-rose-400/40 text-rose-300' : 'bg-white/10 border-white/15 text-white'
+                            aria-hidden="true"
+                            className="absolute inset-x-0 top-0 h-2/5 bg-gradient-to-b from-white/60 via-white/20 to-transparent rounded-t-[11px] pointer-events-none"
+                        />
+                    )}
+
+                    {/* Header Navigasi Tanggal */}
+                    <div className={`flex items-start justify-between pb-2 border-b relative z-10 ${
+                        isWinamp
+                            ? 'border-zinc-800'
+                            : isDark || isDarkFluid
+                            ? 'border-white/10'
+                            : isVista
+                            ? 'border-sky-300/40'
+                            : 'border-slate-200'
+                    }`}>
+                        <div className="flex items-center space-x-2 min-w-0">
+                            {/* Tombol Navigasi Tanggal Sebelumnya */}
+                            <button
+                                type="button"
+                                disabled={dayNumber <= 1}
+                                onClick={handlePrev}
+                                className={`p-1.5 rounded-[6px] border transition-colors cursor-pointer shrink-0 ${
+                                    dayNumber <= 1
+                                        ? 'opacity-25 cursor-not-allowed border-transparent'
+                                        : isWinamp
+                                        ? 'border-zinc-700 bg-black text-[#00FF00] hover:border-[#00FF00]'
+                                        : isDark || isDarkFluid
+                                        ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white'
+                                        : isVista
+                                        ? 'border-sky-300/80 bg-white/80 hover:bg-white text-sky-900 shadow-xs'
+                                        : 'border-slate-300 bg-white/90 hover:bg-white text-slate-700 shadow-2xs'
                                 }`}
-                        >
-                            <span className="text-2xl sm:text-3xl font-black leading-none">{dayNumber}</span>
-                            <span className="text-[10px] font-bold uppercase tracking-wider mt-0.5">{dayName.slice(0, 3)}</span>
-                        </div>
+                                title="Tanggal sebelumnya (Geser kanan)"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                            </button>
 
-                        <div className="flex-1 pr-6">
-                            <div className="flex items-center space-x-2">
-                                <h2 className="text-base sm:text-lg font-black text-white">
-                                    {dayName}, {dayNumber} {monthName} {year}
-                                </h2>
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                {isTanggalMerah && (
-                                    <span
-                                        style={liburNasional ? { backgroundColor: '#BE1A1A', borderColor: '#FF4D4D', color: '#FFFFFF' } : undefined}
-                                        className="inline-flex items-center rounded-md bg-rose-500/30 border border-rose-400/40 px-2 py-0.5 text-[10px] font-black text-rose-200 shadow-2xs"
-                                    >
-                                        🚩 {liburNasional?.keterangan || holidayName || (data.isManualHoliday ? 'Libur Manual' : 'Hari Libur / Weekend')}
+                            <div className="min-w-0">
+                                <h3 className={`text-xs sm:text-sm font-black leading-tight truncate ${dateNumberColor}`}>
+                                    {fullDateLabel}
+                                </h3>
+                                {holiday && (
+                                    <span className="inline-block mt-0.5 text-[9.5px] px-1.5 py-0.5 rounded-[4px] bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold truncate max-w-[160px] mr-1">
+                                        {holiday.keterangan}
                                     </span>
                                 )}
-                                {data.isLocked && (
-                                    <span className="inline-flex items-center rounded-md bg-amber-500/30 border border-amber-400/40 px-2 py-0.5 text-[10px] font-bold text-amber-200">
-                                        🔒 Terkunci
+                                {isPiket && (
+                                    <span className={`inline-flex items-center gap-1 mt-0.5 text-[9.5px] px-1.5 py-0.5 rounded-[4px] font-bold border ${
+                                        piketMatchInfo?.status === 'no_off_entitlement'
+                                            ? 'bg-slate-500/20 text-slate-700 dark:text-slate-300 border-slate-500/30'
+                                            : piketMatchInfo?.status === 'matched'
+                                            ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                                            : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                                    }`}>
+                                        <BriefcaseIcon theme={theme} className="w-3.5 h-3.5 shrink-0" />
+                                        <span>
+                                            Piket {
+                                                piketMatchInfo?.status === 'no_off_entitlement'
+                                                    ? '(Tanpa OFF)'
+                                                    : piketMatchInfo?.status === 'matched'
+                                                    ? `(OFF: ${piketMatchInfo.offDateLabel})`
+                                                    : '(OFF Dijatahkan)'
+                                            }
+                                        </span>
                                     </span>
                                 )}
-                                <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-black border ${shiftTheme.bg} ${shiftTheme.text} ${shiftTheme.border}`}>
-                                    Shift {normalizedCurrentShift || 'Kosong'}
-                                </span>
+                                {offMatchInfo && (
+                                    <span className="inline-flex items-center gap-1 mt-0.5 text-[9.5px] px-1.5 py-0.5 rounded-[4px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30 ml-1">
+                                        <OffRelaxIcon theme={theme} className="w-3.5 h-3.5 shrink-0" />
+                                        <span>OFF Pengganti Piket ({offMatchInfo.piketDateLabel})</span>
+                                    </span>
+                                )}
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                {/* Scrollable Content Body */}
-                <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-slate-50/50">
-                    {/* Status Kalkulasi Banner */}
-                    {calculation.keteranganStatus && (
-                        <div className={`rounded-2xl p-3 border shadow-xs flex items-center justify-between ${calculation.isLembur
-                                ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
-                                : calculation.isPiket
-                                    ? 'bg-blue-50 border-blue-300 text-blue-950'
-                                    : calculation.isDapatGeserOff
-                                        ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
-                                        : calculation.isOffDiambil
-                                            ? 'bg-amber-50 border-amber-300 text-amber-950'
-                                            : calculation.isCPDiambil
-                                                ? 'bg-purple-50 border-purple-300 text-purple-950'
-                                                : 'bg-white border-slate-200 text-slate-800'
-                            }`}>
-                            <div className="flex items-center space-x-2.5">
-                                <div className={`rounded-xl p-2 ${calculation.isLembur
-                                        ? 'bg-emerald-600 text-white'
-                                        : calculation.isPiket
-                                            ? 'bg-blue-600 text-white'
-                                            : calculation.isDapatGeserOff
-                                                ? 'bg-emerald-600 text-white'
-                                                : calculation.isOffDiambil
-                                                    ? 'bg-amber-600 text-white'
-                                                    : calculation.isCPDiambil
-                                                        ? 'bg-purple-600 text-white'
-                                                        : 'bg-slate-700 text-white'
-                                    }`}>
-                                    <Zap className="h-4 w-4" />
-                                </div>
-                                <div>
-                                    <div className="text-[10px] uppercase font-black tracking-wider text-slate-500">Status Terkalkulasi</div>
-                                    <div className="text-sm font-black">{calculation.keteranganStatus}</div>
-                                </div>
-                            </div>
-                            {calculation.jamLembur > 0 && (
-                                <div className="text-right">
-                                    <div className="text-[10px] text-slate-500 font-bold">Jam Lembur</div>
-                                    <div className="text-base font-mono font-black text-emerald-700">{calculation.jamLembur.toFixed(1)} Jam</div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* 1. Pemilihan Shift (Touch Pills Grid) */}
-                    <div className="rounded-2xl bg-white p-2.5 sm:p-3.5 border border-slate-200 shadow-xs space-y-1.5 sm:space-y-2">
-                        <label className="text-xs font-black text-slate-800 flex items-center justify-between">
-                            <span>Pilihan Shift Kerja</span>
-                            <span className="text-[10px] text-slate-400 font-semibold">Tap untuk memilih</span>
-                        </label>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-1.5">
-                            {SHIFT_OPTIONS.map((opt) => {
-                                const STATIC_SHIFTS: Record<string, { bg: string; text: string; hexBg: string; hexText: string }> = {
-                                    Graha: { bg: 'bg-[#EDF6F9]', text: 'text-[#011627]', hexBg: '#EDF6F9', hexText: '#011627' },
-                                    NPCT: { bg: 'bg-[#FFDDD2]', text: 'text-[#011627]', hexBg: '#FFDDD2', hexText: '#011627' },
-                                    TPSL: { bg: 'bg-[#E29578]', text: 'text-white', hexBg: '#E29578', hexText: '#FFFFFF' },
-                                    OFF: { bg: 'bg-[#BE1A1A]', text: 'text-white', hexBg: '#BE1A1A', hexText: '#FFFFFF' },
-                                    SM: { bg: 'bg-[#83C5BE]', text: 'text-[#0B0909]', hexBg: '#83C5BE', hexText: '#0B0909' },
-                                    S2: { bg: 'bg-[#83C5BE]', text: 'text-[#0B0909]', hexBg: '#83C5BE', hexText: '#0B0909' },
-                                    PM: { bg: 'bg-[#006D77]', text: 'text-white', hexBg: '#006D77', hexText: '#FFFFFF' },
-                                    Malam: { bg: 'bg-[#2C4251]', text: 'text-white', hexBg: '#2C4251', hexText: '#FFFFFF' },
-                                    M: { bg: 'bg-[#2C4251]', text: 'text-white', hexBg: '#2C4251', hexText: '#FFFFFF' },
-                                    CUTI: { bg: 'bg-[#0B0909]', text: 'text-white', hexBg: '#0B0909', hexText: '#FFFFFF' },
-                                };
-                                const optSpec = STATIC_SHIFTS[opt];
-                                const isSelected = normalizedCurrentShift === opt;
-
-                                // Theme gradient overlay & thin white frame for selected shift
-                                let shiftFrameClass = 'border border-white/70 ring-1 ring-white/30 shadow-2xs';
-                                let shiftGradientClass = 'bg-gradient-to-b from-white/20 to-transparent';
-
-                                if (theme === 'dark') {
-                                    shiftFrameClass = 'border border-white/50 ring-1 ring-white/20 shadow-xs';
-                                    shiftGradientClass = 'bg-gradient-to-b from-white/15 via-transparent to-transparent';
-                                } else if (theme === 'vista') {
-                                    shiftFrameClass = 'border border-white/80 shadow-[0_1px_4px_rgba(255,255,255,0.35)]';
-                                    shiftGradientClass = 'bg-gradient-to-b from-white/30 via-white/10 to-transparent backdrop-blur-xs';
-                                } else if (theme === 'winamp') {
-                                    shiftFrameClass = 'border border-white/70 rounded-none shadow-none';
-                                    shiftGradientClass = 'bg-gradient-to-b from-white/20 via-transparent to-transparent';
-                                }
-
-                                return (
-                                    <button
-                                        key={opt}
-                                        type="button"
-                                        disabled={data.isLocked}
-                                        onClick={() => onUpdate({ shift: opt })}
-                                        style={isSelected && optSpec ? { backgroundColor: optSpec.hexBg, color: optSpec.hexText } : undefined}
-                                        className={`relative overflow-hidden h-8 sm:h-10 px-1.5 py-1 ${theme === 'winamp' ? 'rounded-none font-mono' : 'rounded-lg sm:rounded-xl'} font-black text-[10.5px] sm:text-xs transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isSelected
-                                                ? `${optSpec?.bg || 'bg-indigo-600'} ${optSpec?.text || 'text-white'} ${shiftFrameClass} ring-2 ${theme === 'winamp' ? 'ring-[#00FF00]' : 'ring-indigo-500'} ring-offset-1 shadow-md scale-102`
-                                                : theme === 'dark'
-                                                    ? 'bg-[#252525] text-slate-300 hover:bg-[#303030] border border-[#444444]'
-                                                    : theme === 'vista'
-                                                        ? 'bg-white/50 text-[#0F172A] hover:bg-white/70 border border-white/60 backdrop-blur-xs font-bold'
-                                                        : theme === 'winamp'
-                                                            ? 'bg-black text-[#00FF00] hover:bg-zinc-900 border border-[#00FF00]/40 font-mono'
-                                                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/80'
-                                            }`}
-                                    >
-                                        {isSelected && (
-                                            <div className={`absolute inset-0 pointer-events-none ${shiftGradientClass}`} />
-                                        )}
-                                        <span className="relative z-10">{opt}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* 2. Switch Masuk Kerja & Hold Dokumen */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
-                        <div
-                            onClick={() => onUpdate({ isMasuk: !data.isMasuk })}
-                            className={`flex items-center justify-between rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 border transition-all cursor-pointer select-none ${data.isMasuk
-                                    ? 'bg-emerald-50/90 border-emerald-300 shadow-xs'
-                                    : 'bg-white border-slate-200 hover:bg-slate-50'
+                        <div className="flex items-center space-x-1 shrink-0 ml-1">
+                            {/* Tombol Navigasi Tanggal Berikutnya */}
+                            <button
+                                type="button"
+                                disabled={dayNumber >= daysInMonth}
+                                onClick={handleNext}
+                                className={`p-1.5 rounded-[6px] border transition-colors cursor-pointer ${
+                                    dayNumber >= daysInMonth
+                                        ? 'opacity-25 cursor-not-allowed border-transparent'
+                                        : isWinamp
+                                        ? 'border-zinc-700 bg-black text-[#00FF00] hover:border-[#00FF00]'
+                                        : isDark || isDarkFluid
+                                        ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white'
+                                        : isVista
+                                        ? 'border-sky-300/80 bg-white/80 hover:bg-white text-sky-900 shadow-xs'
+                                        : 'border-slate-300 bg-white/90 hover:bg-white text-slate-700 shadow-2xs'
                                 }`}
-                        >
-                            <div className="space-y-0.5">
-                                <div className="text-[11px] sm:text-xs font-black text-slate-900">Masuk Kerja</div>
-                                <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium">Hadir bekerja pada hari ini</div>
-                            </div>
-                            <div className={`relative inline-flex h-5 w-9 sm:h-6 sm:w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${data.isMasuk ? 'bg-emerald-600' : 'bg-slate-300'
-                                }`}>
-                                <span
-                                    className={`pointer-events-none inline-block h-4 w-4 sm:h-5 sm:w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${data.isMasuk ? 'translate-x-4 sm:translate-x-5' : 'translate-x-0'
-                                        }`}
-                                />
-                            </div>
-                        </div>
+                                title="Tanggal berikutnya (Geser kiri)"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
 
-                        <div
-                            onClick={() => onUpdate({ isHoldDokumen: !data.isHoldDokumen })}
-                            className={`flex items-center justify-between rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 border transition-all cursor-pointer select-none ${data.isHoldDokumen
-                                    ? 'bg-orange-50/90 border-orange-300 shadow-xs'
-                                    : 'bg-white border-slate-200 hover:bg-slate-50'
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className={`p-1.5 rounded-[6px] transition-colors cursor-pointer ${
+                                    isWinamp
+                                        ? 'hover:bg-zinc-800 text-[#00FF00]'
+                                        : isVista
+                                        ? 'hover:bg-rose-500/20 hover:text-rose-600 text-sky-800'
+                                        : 'hover:bg-black/10 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white'
                                 }`}
-                        >
-                            <div className="space-y-0.5">
-                                <div className="text-[11px] sm:text-xs font-black text-slate-900">Hold Dokumen</div>
-                                <div className="text-[10px] sm:text-[11px] text-slate-500 font-medium">Terdapat penahanan dokumen</div>
-                            </div>
-                            <div className={`relative inline-flex h-5 w-9 sm:h-6 sm:w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${data.isHoldDokumen ? 'bg-orange-600' : 'bg-slate-300'
-                                }`}>
-                                <span
-                                    className={`pointer-events-none inline-block h-4 w-4 sm:h-5 sm:w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${data.isHoldDokumen ? 'translate-x-4 sm:translate-x-5' : 'translate-x-0'
-                                        }`}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Opsi Mengambil OFF / CP di Hari Kerja Biasa saat Masuk tidak aktif */}
-                    {!isTanggalMerah && !data.isMasuk && data.shift !== 'OFF' && (
-                        <div className="space-y-2">
-                            {/* Gunakan OFF Button (Locked & greyed out if no quota) */}
-                            <div
-                                onClick={() => {
-                                    if (isOffDisabled) return;
-                                    if (!data.isGunakanOffGeser) {
-                                        onUpdate({ isGunakanOffGeser: true, isGunakanCP: false });
-                                    } else {
-                                        onUpdate({ isGunakanOffGeser: false });
-                                    }
-                                }}
-                                className={`flex items-center justify-between rounded-2xl p-3.5 border transition-all select-none ${isOffDisabled
-                                        ? 'bg-slate-100/70 border-slate-200 text-slate-400 opacity-40 cursor-not-allowed'
-                                        : data.isGunakanOffGeser
-                                            ? 'bg-amber-50/90 border-amber-300 shadow-xs cursor-pointer'
-                                            : 'bg-white border-slate-200 hover:bg-slate-50 cursor-pointer'
-                                    }`}
+                                title="Tutup kartu (Esc)"
                             >
-                                <div className="space-y-0.5">
-                                    <div className={`text-xs font-black flex items-center ${isOffDisabled ? 'text-slate-400' : 'text-amber-950'}`}>
-                                        <ShieldCheck className={`h-3.5 w-3.5 mr-1.5 ${isOffDisabled ? 'text-slate-400' : 'text-amber-600'}`} />
-                                        Gunakan OFF {sisaKuotaOff !== 0 ? `(Sisa Kuota: ${sisaKuotaOff > 0 ? '+' : ''}${sisaKuotaOff})` : '(Kuota Habis / 0)'}
-                                    </div>
-                                    <div className={`text-[11px] font-medium ${isOffDisabled ? 'text-slate-400' : 'text-amber-800'}`}>
-                                        {isOffDisabled ? 'Kuota tabungan OFF tidak tersedia / sudah habis' : 'Gunakan kuota tabungan OFF untuk libur pada jadwal ini'}
-                                    </div>
-                                </div>
-                                <div className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${isOffDisabled ? 'bg-slate-200 opacity-60' : data.isGunakanOffGeser ? 'bg-amber-600' : 'bg-slate-300'
-                                    }`}>
-                                    <span
-                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${data.isGunakanOffGeser ? 'translate-x-5' : 'translate-x-0'
-                                            }`}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Gunakan CP (Cuti Pengganti) Button (Locked & greyed out if no quota) */}
-                            <div
-                                onClick={() => {
-                                    if (isCPDisabled) return;
-                                    if (!data.isGunakanCP) {
-                                        onUpdate({ isGunakanCP: true, isGunakanOffGeser: false });
-                                    } else {
-                                        onUpdate({ isGunakanCP: false });
-                                    }
-                                }}
-                                className={`flex items-center justify-between rounded-2xl p-3.5 border transition-all select-none ${isCPDisabled
-                                        ? 'bg-slate-100/70 border-slate-200 text-slate-400 opacity-40 cursor-not-allowed'
-                                        : data.isGunakanCP
-                                            ? 'bg-purple-50/90 border-purple-300 shadow-xs cursor-pointer'
-                                            : 'bg-white border-slate-200 hover:bg-slate-50 cursor-pointer'
-                                    }`}
-                            >
-                                <div className="space-y-0.5">
-                                    <div className={`text-xs font-black flex items-center ${isCPDisabled ? 'text-slate-400' : 'text-purple-950'}`}>
-                                        <Palmtree className={`h-3.5 w-3.5 mr-1.5 ${isCPDisabled ? 'text-slate-400' : 'text-purple-600'}`} />
-                                        Gunakan CP {sisaKuotaCP !== 0 ? `(Sisa Kuota: ${sisaKuotaCP > 0 ? '+' : ''}${sisaKuotaCP})` : '(Kuota Habis / 0)'}
-                                    </div>
-                                    <div className={`text-[11px] font-medium ${isCPDisabled ? 'text-slate-400' : 'text-purple-800'}`}>
-                                        {isCPDisabled ? 'Kuota Cuti Pengganti tidak tersedia / sudah habis' : 'Gunakan kuota Cuti Pengganti Surat Tugas untuk libur'}
-                                    </div>
-                                </div>
-                                <div className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${isCPDisabled ? 'bg-slate-200 opacity-60' : data.isGunakanCP ? 'bg-purple-600' : 'bg-slate-300'
-                                    }`}>
-                                    <span
-                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${data.isGunakanCP ? 'translate-x-5' : 'translate-x-0'
-                                            }`}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Banner Menabung OFF Geser di Hari Kerja saat Jadwal OFF & Masuk */}
-                    {!isTanggalMerah && data.isMasuk && data.shift === 'OFF' && (
-                        <div className="rounded-2xl p-3.5 border border-emerald-300 bg-emerald-50/90 shadow-xs flex items-center justify-between">
-                            <div className="space-y-0.5">
-                                <div className="text-xs font-black text-emerald-950">OFF Ditabung (+1)</div>
-                                <div className="text-[11px] text-emerald-800 font-medium">
-                                    Menabung 1 kuota OFF geser karena hadir bekerja pada hari kerja jadwal OFF.
-                                </div>
-                            </div>
-                            <span className="rounded-xl bg-emerald-600 px-2.5 py-1 text-xs font-black text-white shadow-2xs">
-                                +1 Kuota
-                            </span>
-                        </div>
-                    )}
-
-                    {/* 3. Pilihan Masuk Tanggal Merah / Libur (Piket vs Lembur) */}
-                    {isTanggalMerah && data.isMasuk && data.shift !== 'OFF' && (
-                        <div className="rounded-2xl bg-amber-50/90 p-3.5 border border-amber-200 space-y-2">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-black text-amber-950">Jenis Kehadiran Hari Libur:</span>
-                                <span className="text-[10px] text-amber-800 font-bold">Pilih salah satu</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => onUpdate({ tipeMasukLibur: 'piket' })}
-                                    className={`flex items-center justify-center space-x-2 rounded-xl py-2.5 px-3 text-xs font-black transition-all cursor-pointer ${(!data.tipeMasukLibur || data.tipeMasukLibur === 'piket')
-                                            ? 'bg-blue-600 text-white shadow-xs'
-                                            : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                                        }`}
-                                >
-                                    <ShieldCheck className="h-4 w-4" />
-                                    <span>Piket</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => onUpdate({ tipeMasukLibur: 'lembur' })}
-                                    className={`flex items-center justify-center space-x-2 rounded-xl py-2.5 px-3 text-xs font-black transition-all cursor-pointer ${data.tipeMasukLibur === 'lembur'
-                                            ? 'bg-emerald-600 text-white shadow-xs'
-                                            : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                                        }`}
-                                >
-                                    <Zap className="h-4 w-4" />
-                                    <span>Lembur Hari Libur</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 4. Jam Absen Masuk, Pulang & CEISA (Dial Clock Triggers) */}
-                    <div className="rounded-2xl bg-white p-3.5 border border-slate-200 shadow-xs space-y-3">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-black text-slate-900 flex items-center">
-                                <Clock className="h-3.5 w-3.5 mr-1.5 text-indigo-600" />
-                                Jam Kerja & Absensi
-                            </span>
-                            {calculation.durasiKerja > 0 && (
-                                <span className="text-xs font-mono font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100">
-                                    Total: {calculation.durasiKerja.toFixed(1)} Jam
-                                </span>
-                            )}
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            <div>
-                                <label className="text-[10px] font-bold text-slate-500 mb-1 block">Jam Masuk</label>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        onRequestTimePick('jamMasuk', `Jam Masuk - Tgl ${dayNumber}`, data.jamMasuk)
-                                    }
-                                    className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/80 px-2 text-center font-mono text-sm font-black text-slate-900 hover:border-indigo-500 hover:bg-indigo-50/50 transition-colors flex items-center justify-center cursor-pointer"
-                                >
-                                    {data.jamMasuk || '--:--'}
-                                </button>
-                            </div>
-
-                            <div>
-                                <label className="text-[10px] font-bold text-slate-500 mb-1 block">Jam Pulang</label>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        onRequestTimePick('jamPulang', `Jam Pulang - Tgl ${dayNumber}`, data.jamPulang)
-                                    }
-                                    className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/80 px-2 text-center font-mono text-sm font-black text-slate-900 hover:border-indigo-500 hover:bg-indigo-50/50 transition-colors flex items-center justify-center cursor-pointer"
-                                >
-                                    {data.jamPulang || '--:--'}
-                                </button>
-                            </div>
-
-                            <div className="col-span-2 sm:col-span-1">
-                                <label className="text-[10px] font-bold text-blue-700 mb-1 block">Absen CEISA</label>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        onRequestTimePick('absenCeisa', `Absen CEISA - Tgl ${dayNumber}`, data.absenCeisa)
-                                    }
-                                    className="w-full h-11 rounded-xl border border-blue-200 bg-blue-50/60 px-2 text-center font-mono text-sm font-black text-blue-950 hover:bg-blue-100 transition-colors flex items-center justify-center cursor-pointer"
-                                >
-                                    {data.absenCeisa || '--:--'}
-                                </button>
-                            </div>
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
                     </div>
 
-                    {/* 5. Surat Tugas / Cuti Pengganti (ST CP) */}
-                    <div
-                        onClick={() => {
-                            if (canHaveST) {
-                                onUpdate({ isSuratTugasTambahan: !data.isSuratTugasTambahan });
-                            }
-                        }}
-                        className={`flex items-center justify-between rounded-2xl p-3.5 border transition-all select-none ${!canHaveST
-                                ? 'bg-slate-100/60 border-slate-200 opacity-50 cursor-not-allowed pointer-events-none'
-                                : data.isSuratTugasTambahan
-                                    ? 'bg-purple-50/90 border-purple-300 shadow-xs cursor-pointer'
-                                    : 'bg-white border-slate-200 hover:bg-slate-50 cursor-pointer'
-                            }`}
-                    >
-                        <div className="space-y-0.5">
-                            <div className="text-xs font-black text-slate-900 flex items-center">
-                                <Palmtree className="h-3.5 w-3.5 mr-1.5 text-purple-600" />
-                                ST CP (Surat Tugas / Cuti Pengganti)
-                            </div>
-                            <div className="text-[11px] text-slate-500 font-medium">
-                                {canHaveST
-                                    ? 'Menghasilkan hak cuti pengganti (+1 CP) untuk dinas di hari libur'
-                                    : 'Hanya aktif pada hari libur (Weekend / Tanggal Merah)'}
-                            </div>
-                        </div>
-                        <div className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${data.isSuratTugasTambahan && canHaveST ? 'bg-purple-600' : 'bg-slate-300'
-                            }`}>
-                            <span
-                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${data.isSuratTugasTambahan && canHaveST ? 'translate-x-5' : 'translate-x-0'
-                                    }`}
-                            />
-                        </div>
+                    {/* Swipe Hint Pill */}
+                    <div className="flex items-center justify-center relative z-10">
+                        <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full ${
+                            isWinamp
+                                ? 'text-[#00FF00]/70 bg-black border border-zinc-800'
+                            : isDark || isDarkFluid
+                                ? 'text-slate-300 bg-white/5 border border-white/10'
+                            : isVista
+                                ? 'text-sky-900 bg-sky-500/15 border border-sky-300/40'
+                                : 'text-slate-600 bg-black/5 border border-slate-200'
+                        }`}>
+                            ◄ Geser kartu untuk ganti tanggal ►
+                        </span>
                     </div>
 
-                    {/* 6. Catatan / Keterangan (batas ditingkatkan) */}
-                    <div className="rounded-2xl bg-white p-3.5 border border-slate-200 shadow-xs space-y-1.5">
-                        <label className="text-xs font-black text-slate-800 block">
-                            Catatan / Keterangan Harian
+                    {/* Dropdown Menu Pemilihan Shift */}
+                    <div className="space-y-1 relative z-30">
+                        <label className={`text-[9.5px] font-bold uppercase tracking-wider block ${
+                            isWinamp
+                                ? 'text-[#00FF00]/70'
+                                : isDark || isDarkFluid
+                                ? 'text-slate-400'
+                                : isVista
+                                ? 'text-sky-900/80'
+                                : 'text-slate-500'
+                        }`}>
+                            Shift Kerja
                         </label>
-                        <input
-                            type="text"
-                            maxLength={33}
-                            placeholder="Contoh: Piket Bandara, Tukar Shift, Dinas Luar..."
-                            value={data.note}
-                            onChange={(e) => onUpdate({ note: e.target.value })}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-indigo-500 focus:outline-none transition-colors"
+                        <ShiftDropdown
+                            value={normalizedShift}
+                            disabled={isLocked}
+                            theme={theme}
+                            onChange={(val) => onUpdate({ shift: val })}
+                            align="left"
                         />
                     </div>
 
-                    {/* 7. Kotak Khusus Referensi Tgl OFF (Jika Menabung atau Mengambil OFF) */}
-                    {!isTanggalMerah && (
-                        (data.shift === 'OFF' && data.isMasuk) ||
-                        (data.shift !== 'OFF' && !data.isMasuk && data.isGunakanOffGeser)
-                    ) && (
-                            <div className="rounded-2xl bg-indigo-50/80 p-3.5 border border-indigo-200 shadow-xs space-y-1.5">
-                                <label className="text-xs font-black text-indigo-950 block">
-                                    Referensi Tgl OFF
-                                </label>
+                    {/* Separator Line */}
+                    <div
+                        className={`border-t my-0.5 relative z-10 ${
+                            isWinamp
+                                ? 'border-zinc-800'
+                                : isDark || isDarkFluid
+                                ? 'border-white/10'
+                                : isVista
+                                ? 'border-sky-200/80'
+                                : 'border-slate-200'
+                        }`}
+                    />
+
+                    {/* Jam Masuk & Jam Pulang */}
+                    <div className="grid grid-cols-2 gap-2 relative z-10">
+                        <div className="space-y-1">
+                            <span className={`text-[9.5px] font-bold uppercase tracking-wider block ${
+                                isWinamp
+                                    ? 'text-[#00FF00]/70'
+                                    : isDark || isDarkFluid
+                                    ? 'text-slate-400'
+                                    : isVista
+                                    ? 'text-sky-900/80'
+                                    : 'text-slate-500'
+                            }`}>
+                                Masuk
+                            </span>
+                            {onRequestTimePick ? (
+                                <button
+                                    type="button"
+                                    onClick={() => onRequestTimePick('jamMasuk', `Jam Masuk - Tgl ${dayNumber}`, data?.jamMasuk || '')}
+                                    className={`w-full py-1.5 px-1.5 text-center font-mono text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
+                                        isWinamp
+                                            ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
+                                            : isDark || isDarkFluid
+                                            ? 'bg-[#2B2930] text-[#E6E0E9] border-white/10 hover:border-indigo-400/50'
+                                            : isVista
+                                            ? 'bg-white/90 text-sky-950 border-sky-300/80 hover:border-sky-400 shadow-xs'
+                                            : 'bg-white/90 text-slate-800 border-slate-300 hover:border-indigo-400 shadow-2xs'
+                                    }`}
+                                >
+                                    {data?.jamMasuk || '--:--'}
+                                </button>
+                            ) : (
                                 <input
                                     type="text"
-                                    maxLength={33}
-                                    placeholder="Contoh: Ganti tgl 12 / Potong kuota tgl..."
-                                    value={data.referensiTglOff || ''}
-                                    onChange={(e) => onUpdate({ referensiTglOff: e.target.value })}
-                                    className="w-full rounded-xl border border-indigo-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-indigo-950 placeholder:text-indigo-300 focus:border-indigo-600 focus:outline-none transition-colors"
+                                    placeholder="07:30"
+                                    value={data?.jamMasuk || ''}
+                                    onChange={(e) => onUpdate({ jamMasuk: e.target.value })}
+                                    className={`w-full py-1.5 px-1.5 text-center font-mono text-xs rounded-[6px] border ${
+                                        isWinamp
+                                            ? 'bg-black border-zinc-700 text-[#00FF00]'
+                                            : isDark || isDarkFluid
+                                            ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
+                                            : isVista
+                                            ? 'border-sky-300/80 bg-white/90 text-sky-950 shadow-xs'
+                                            : 'border-slate-300 bg-white/90 text-slate-800'
+                                    }`}
                                 />
-                            </div>
-                        )}
+                            )}
+                        </div>
 
-                    {/* 8. Kotak Khusus Referensi Tgl CP */}
-                    {!isTanggalMerah && !data.isMasuk && data.shift !== 'OFF' && data.isGunakanCP && (
-                        <div className="rounded-2xl bg-purple-50/80 p-3.5 border border-purple-200 shadow-xs space-y-1.5">
-                            <label className="text-xs font-black text-purple-950 block">
-                                Referensi Tanggal ST / Cuti Pengganti
-                            </label>
+                        <div className="space-y-1">
+                            <span className={`text-[9.5px] font-bold uppercase tracking-wider block ${
+                                isWinamp
+                                    ? 'text-[#00FF00]/70'
+                                    : isDark || isDarkFluid
+                                    ? 'text-slate-400'
+                                    : isVista
+                                    ? 'text-sky-900/80'
+                                    : 'text-slate-500'
+                            }`}>
+                                Pulang
+                            </span>
+                            {onRequestTimePick ? (
+                                <button
+                                    type="button"
+                                    onClick={() => onRequestTimePick('jamPulang', `Jam Pulang - Tgl ${dayNumber}`, data?.jamPulang || '')}
+                                    className={`w-full py-1.5 px-1.5 text-center font-mono text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
+                                        isWinamp
+                                            ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
+                                            : isDark || isDarkFluid
+                                            ? 'bg-[#2B2930] text-[#E6E0E9] border-white/10 hover:border-indigo-400/50'
+                                            : isVista
+                                            ? 'bg-white/90 text-sky-950 border-sky-300/80 hover:border-sky-400 shadow-xs'
+                                            : 'bg-white/90 text-slate-800 border-slate-300 hover:border-indigo-400 shadow-2xs'
+                                    }`}
+                                >
+                                    {data?.jamPulang || '--:--'}
+                                </button>
+                            ) : (
+                                <input
+                                    type="text"
+                                    placeholder="17:00"
+                                    value={data?.jamPulang || ''}
+                                    onChange={(e) => onUpdate({ jamPulang: e.target.value })}
+                                    className={`w-full py-1.5 px-1.5 text-center font-mono text-xs rounded-[6px] border ${
+                                        isWinamp
+                                            ? 'bg-black border-zinc-700 text-[#00FF00]'
+                                            : isDark || isDarkFluid
+                                            ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
+                                            : isVista
+                                            ? 'border-sky-300/80 bg-white/90 text-sky-950 shadow-xs'
+                                            : 'border-slate-300 bg-white/90 text-slate-800'
+                                    }`}
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Absen CEISA (Time Picker) */}
+                    <div className="space-y-1 relative z-10">
+                        <div className="flex items-center justify-between">
+                            <span className={`text-[9.5px] font-bold uppercase tracking-wider ${
+                                isWinamp
+                                    ? 'text-[#00FF00]/70'
+                                    : isDark || isDarkFluid
+                                    ? 'text-slate-400'
+                                    : isVista
+                                    ? 'text-sky-900/80'
+                                    : 'text-slate-500'
+                            }`}>
+                                Absen CEISA
+                            </span>
+                            {data?.absenCeisa && (
+                                <span className={`text-[9px] font-black ${
+                                    isWinamp
+                                        ? 'text-[#00FF00]'
+                                        : isDark || isDarkFluid
+                                        ? 'text-indigo-300'
+                                        : isVista
+                                        ? 'text-blue-700'
+                                        : 'text-sky-600'
+                                }`}>
+                                    Tercatat ({data.absenCeisa})
+                                </span>
+                            )}
+                        </div>
+                        {onRequestTimePick ? (
+                            <button
+                                type="button"
+                                onClick={() => onRequestTimePick('absenCeisa', `Absen CEISA - Tgl ${dayNumber}`, data?.absenCeisa || '')}
+                                className={`w-full py-1.5 px-2.5 text-center font-mono text-xs rounded-[6px] border transition-colors flex items-center justify-center space-x-1.5 cursor-pointer ${
+                                    data?.absenCeisa
+                                        ? isWinamp
+                                            ? 'bg-black border-[#00FF00] text-[#00FF00] font-bold'
+                                            : isDark || isDarkFluid
+                                            ? 'bg-indigo-600/30 border-indigo-500/40 text-indigo-200 font-bold'
+                                            : isVista
+                                            ? 'bg-sky-400/25 border-sky-400/80 text-sky-950 font-bold shadow-xs'
+                                            : 'bg-sky-500/20 border-sky-400/50 text-sky-800 font-bold shadow-2xs'
+                                        : isWinamp
+                                        ? 'bg-black text-zinc-500 border-zinc-700 hover:border-[#00FF00]'
+                                        : isDark || isDarkFluid
+                                        ? 'bg-[#2B2930] text-slate-300 border-white/10 hover:border-indigo-400/50'
+                                        : isVista
+                                        ? 'bg-white/90 text-sky-800 border-sky-300/80 hover:border-sky-400 shadow-xs'
+                                        : 'bg-white/90 text-slate-600 border-slate-300 hover:border-sky-400 shadow-2xs'
+                                }`}
+                            >
+                                <Clock className="w-3 h-3 opacity-70 shrink-0" />
+                                <span>{data?.absenCeisa || 'Absen CEISA (--:--)'}</span>
+                            </button>
+                        ) : (
                             <input
                                 type="text"
-                                maxLength={33}
-                                placeholder="Contoh: Dari ST Tgl 15 / Cuti libur..."
-                                value={data.referensiTglCP || ''}
-                                onChange={(e) => onUpdate({ referensiTglCP: e.target.value })}
-                                className="w-full rounded-xl border border-purple-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-purple-950 placeholder:text-purple-300 focus:border-purple-600 focus:outline-none transition-colors"
+                                placeholder="07:30"
+                                value={data?.absenCeisa || ''}
+                                onChange={(e) => onUpdate({ absenCeisa: e.target.value })}
+                                className={`w-full py-1.5 px-2.5 text-center font-mono text-xs rounded-[6px] border ${
+                                    isWinamp
+                                        ? 'bg-black border-zinc-700 text-[#00FF00]'
+                                        : isDark || isDarkFluid
+                                        ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
+                                        : isVista
+                                        ? 'border-sky-300/80 bg-white/90 text-sky-950 shadow-xs'
+                                        : 'border-slate-300 bg-white/90 text-slate-800'
+                                }`}
                             />
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
 
-                {/* Modal Footer */}
-                <div className="border-t border-slate-200 bg-white p-3.5 sm:p-4 flex items-center justify-end space-x-2">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="w-full sm:w-auto rounded-xl bg-indigo-600 px-6 py-2.5 text-xs sm:text-sm font-black text-white hover:bg-indigo-700 shadow-xs transition-colors cursor-pointer"
-                    >
-                        Selesai & Simpan
-                    </button>
-                </div>
+                    {/* Catatan (Note) Input */}
+                    <div className="space-y-1 relative z-10">
+                        <span className={`text-[9.5px] font-bold uppercase tracking-wider block ${
+                            isWinamp
+                                ? 'text-[#00FF00]/70'
+                                : isDark || isDarkFluid
+                                ? 'text-slate-400'
+                                : isVista
+                                ? 'text-sky-900/80'
+                                : 'text-slate-500'
+                        }`}>
+                            Catatan
+                        </span>
+                        <AutoResizingTextarea
+                            value={data?.note || ''}
+                            placeholder="Catatan..."
+                            onChange={(val) => onUpdate({ note: val })}
+                            onEnterSubmit={onClose}
+                            className={
+                                isWinamp
+                                    ? 'bg-black border-zinc-700 text-[#00FF00] placeholder-zinc-600 focus:border-[#00FF00] font-mono'
+                                    : isDark || isDarkFluid
+                                    ? 'bg-[#2B2930] border-white/10 text-slate-100 placeholder-slate-500 focus:border-indigo-400'
+                                    : isVista
+                                    ? 'bg-white/90 border-sky-300/80 text-sky-950 placeholder-sky-700/50 focus:border-sky-500 shadow-2xs'
+                                    : 'bg-white/90 border-slate-300 text-slate-800 placeholder-slate-400 focus:border-indigo-500 shadow-2xs'
+                            }
+                        />
+                    </div>
+
+                    {/* Jumlah Lembur di Bawah Catatan */}
+                    {(() => {
+                        const lemburInfo = calculateDayLembur(data, nextDayData, isWeekendOrHoliday);
+                        if (!lemburInfo) return null;
+
+                        const mm = String(lemburInfo.minutes).padStart(2, '0');
+                        const lemburFormatted = `Lembur ${lemburInfo.hours} Jam ${mm} Menit`;
+
+                        return (
+                            <div className="relative z-10">
+                                <div
+                                    className={`w-full py-2 px-3 rounded-[6px] border flex items-center justify-center font-bold text-xs transition-all ${
+                                        isWinamp
+                                            ? 'bg-black border-[#00FF00] text-[#00FF00] font-mono'
+                                            : isDark || isDarkFluid
+                                            ? 'bg-amber-500/15 border-amber-500/30 text-amber-200'
+                                            : isVista
+                                            ? 'bg-sky-100/90 border-sky-300 text-sky-950 shadow-xs'
+                                            : 'bg-amber-50 border-amber-300 text-amber-900 shadow-2xs'
+                                    }`}
+                                >
+                                    <div className="flex items-center space-x-1.5">
+                                        <Clock className="w-3.5 h-3.5 shrink-0" />
+                                        <span className="font-black tracking-wide">{lemburFormatted}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })()}
+
+                    {/* Footer Tombol Selesai */}
+                    <div className="pt-1 relative z-10">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className={`w-full py-2 rounded-[6px] text-xs font-black transition-all shadow-md cursor-pointer ${
+                                isWinamp
+                                    ? 'bg-[#00FF00] text-black hover:bg-emerald-400 font-mono'
+                                    : isDarkFluid
+                                    ? 'bg-[#D0BCFF] text-[#381E72] hover:bg-[#E8DEF8]'
+                                    : isDark
+                                    ? 'bg-indigo-600 text-white hover:bg-indigo-500'
+                                    : isVista
+                                    ? 'bg-gradient-to-b from-[#4facfe] via-[#00a2ff] to-[#0072ff] text-white shadow-[0_4px_12px_rgba(0,114,255,0.35),inset_0_1px_1px_rgba(255,255,255,0.8)] hover:brightness-110 active:brightness-95 border border-sky-300/60'
+                                    : 'bg-[#2EC4B6] text-white hover:bg-[#25a89c]'
+                            }`}
+                        >
+                            Selesai
+                        </button>
+                    </div>
+                </motion.div>
             </div>
-        </div>
+        </AnimatePresence>
     );
 };

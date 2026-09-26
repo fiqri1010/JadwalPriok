@@ -234,7 +234,40 @@ export async function saveFileWithDialog(options: SaveFileOptions): Promise<Save
         };
     }
 
-    // A. File System Access API (Menampilkan dialog Windows Explorer / macOS Finder)
+    // A-1. Mobile Web Browser (Android / iOS): Tampilkan menu pemilihan folder & penyimpanan sistem asli
+    const isMobileDevice =
+        typeof navigator !== 'undefined' &&
+        /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent || '');
+
+    if (isMobileDevice && typeof navigator !== 'undefined' && 'canShare' in navigator) {
+        try {
+            const file = new File([finalBlob], filename, { type: mimeType });
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: filename,
+                    text: `Simpan atau bagikan ${filename}`,
+                });
+                return {
+                    success: true,
+                    method: 'picker',
+                    message: `Menu penyimpanan sistem dibuka untuk "${filename}".`,
+                };
+            }
+        } catch (shareErr: any) {
+            if (shareErr.name === 'AbortError') {
+                return {
+                    success: false,
+                    method: 'picker',
+                    cancelled: true,
+                    message: 'Penyimpanan file dibatalkan.',
+                };
+            }
+            console.warn('Mobile Web Share fallback failed:', shareErr);
+        }
+    }
+
+    // A-2. File System Access API (Menampilkan dialog Windows Explorer / macOS Finder)
     // Catatan: Jika di dalam iframe, showSaveFilePicker akan ditolak oleh izin browser, langsung gunakan unduh browser standar.
     const isInsideIframe = typeof window !== 'undefined' && window.self !== window.top;
     if (!isInsideIframe && typeof window !== 'undefined' && 'showSaveFilePicker' in window) {

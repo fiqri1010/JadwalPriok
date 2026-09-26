@@ -3,10 +3,21 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
+// Suppress benign ResizeObserver loop errors during CSS transitions
+window.addEventListener('error', (e) => {
+  if (
+    e.message === 'ResizeObserver loop completed with undelivered notifications.' ||
+    e.message === 'ResizeObserver loop limit exceeded'
+  ) {
+    e.stopImmediatePropagation();
+  }
+});
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
   </StrictMode>,
 );
+
 
 

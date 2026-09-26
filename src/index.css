@@ -1,6 +1,50 @@
 @import "tailwindcss";
+@import "./timePicker.css";
+@import "@fontsource/dseg7-modern/400.css";
+@import "@fontsource/dseg7-modern/700.css";
+@import "@fontsource/dseg7-classic/400.css";
+@import "@fontsource/dseg7-classic/700.css";
 
-:root {
+/* Digital-7 Bold Font Utility for Attendance Time Badges & Pickers */
+.font-digital-7,
+.font-digital-regular,
+.font-digital-mono7,
+.font-digital-clock {
+    font-family: 'Digital-7', 'Digital-7 Mono', 'DSEG7 Modern', 'DSEG7 Classic', monospace !important;
+    font-weight: 700 !important;
+    font-style: normal !important;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1;
+    letter-spacing: 0.07em;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@keyframes marquee {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+.animate-marquee {
+    display: inline-flex;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    animation: marquee 8s linear infinite;
+}
+
+.animate-marquee:hover {
+    animation-play-state: paused;
+}
+
+:root,
+[data-theme="default"] {
     --bg-app: #E6E6E6;
     --bg-card: #FFFFFF;
     --bg-card-subtle: #F8FAFC;
@@ -16,6 +60,20 @@
    ========================================================= */
 html, body {
     cursor: default;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* GPU hardware acceleration for smooth 60fps animations & tooltips */
+.tooltip,
+.animate-in,
+.transition-all,
+.transition-transform,
+.transition-opacity {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 input[type="text"],
@@ -172,10 +230,33 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
         }
 
     [data-theme="vista"] input[type="text"],
+    [data-theme="vista"] input[type="date"],
+    [data-theme="vista"] input[type="number"],
+    [data-theme="vista"] input[type="time"],
+    [data-theme="vista"] textarea,
     [data-theme="vista"] select:not(.shift-select) {
-        background: rgba(255, 255, 255, 0.9) !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        color: #0f172a !important;
         border: 1px solid #7eb4ea !important;
         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 5px rgba(100, 180, 255, 0.2) !important;
+    }
+
+    [data-theme="vista"] label,
+    [data-theme="vista"] .modal-label,
+    [data-theme="vista"] .form-label,
+    [data-theme="vista"] form label,
+    [data-theme="vista"] label[for="check-hari-libur"] {
+        color: #0f172a !important;
+    }
+
+    [data-theme="vista"] form p,
+    [data-theme="vista"] .text-slate-700,
+    [data-theme="vista"] .text-slate-600 {
+        color: #334155 !important;
+    }
+
+    [data-theme="vista"] input[type="checkbox"] {
+        accent-color: #2563eb !important;
     }
 
 /* =========================================================
@@ -262,6 +343,20 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
     }
 
     /* =========================================================
+   THEME 4: DARK FLUID (Material Design 3 / AMOLED Fluid)
+   ========================================================= */
+[data-theme="darkFluid"] {
+    --bg-app: #141218;
+    --bg-card: #1D1B20;
+    --bg-card-subtle: #141218;
+    --text-main: #E6E0E9;
+    --text-muted: #CAC4D0;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --header-bg: #1D1B20;
+    color-scheme: dark;
+}
+
+/* =========================================================
    SHIFT PILL & SELECT STATIC OVERRIDES (IMMUNE TO THEMES)
    Shift background and text colors must be strictly static
    and cannot be overridden by theme dark/vista/winamp classes.
@@ -311,8 +406,36 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 }
 
 /* =========================================================
-   RUNNING TEXT / MARQUEE ANIMATION FOR DESKTOP NOTES
+   ROPE PHYSICS & CUT THE ROPE ANIMATIONS (PERUBAHAN JADWAL)
    ========================================================= */
+@keyframes rope-snap-glow {
+    0%, 100% {
+        filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.6));
+    }
+    50% {
+        filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.95)) drop-shadow(0 0 20px rgba(52, 211, 153, 0.7));
+    }
+}
+
+.animate-rope-sway {
+    animation: none;
+}
+
+.animate-rope-dangle {
+    animation: none;
+}
+
+.animate-rope-snap {
+    animation: rope-snap-glow 1.5s ease-in-out infinite;
+}
+
+.rope-touch-handle {
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
+}
+
 @keyframes note-marquee {
     0% {
         transform: translateX(0%);
@@ -339,6 +462,49 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 
 .note-marquee-container:hover .note-marquee-content {
     animation-play-state: paused;
+}
+
+@keyframes holiday-marquee {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.holiday-marquee-container {
+    overflow: hidden;
+    white-space: nowrap;
+    mask-image: linear-gradient(to right, transparent 0%, black 4px, black calc(100% - 4px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4px, black calc(100% - 4px), transparent 100%);
+}
+
+.holiday-marquee-content {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: holiday-marquee 8s linear infinite;
+    will-change: transform;
+}
+
+.holiday-marquee-container:hover .holiday-marquee-content {
+    animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .holiday-marquee-content {
+        animation: none;
+    }
+}
+
+/* Utility to hide scrollbars while allowing smooth scrolling */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
 /* =========================================================
@@ -407,3 +573,1267 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
         background: #00AA50;
         border-color: #00FF00;
     }
+
+/* =========================================================
+   CYBER GLITCH HOVER EFFECT (For Supabase & Local Delete Buttons)
+   Inspired by Uiverse.io - Glitch Slice & Chromatic Aberration
+   ========================================================= */
+@keyframes cyber-glitch-slice {
+  0% {
+    clip-path: inset(80% -6px 0 0);
+    transform: translate(-3px, -1.5px);
+  }
+  10% {
+    clip-path: inset(10% -6px 85% 0);
+    transform: translate(3px, 1.5px);
+  }
+  20% {
+    clip-path: inset(80% -6px 0 0);
+    transform: translate(-2px, 2px);
+  }
+  30% {
+    clip-path: inset(10% -6px 85% 0);
+    transform: translate(0px, 1px);
+  }
+  40% {
+    clip-path: inset(50% -6px 30% 0);
+    transform: translate(-2px, 0px);
+  }
+  50% {
+    clip-path: inset(10% -6px 85% 0);
+    transform: translate(2px, 0px);
+  }
+  60% {
+    clip-path: inset(40% -6px 43% 0);
+    transform: translate(2px, 2px);
+  }
+  70% {
+    clip-path: inset(50% -6px 30% 0);
+    transform: translate(-3px, 1.5px);
+  }
+  80% {
+    clip-path: inset(80% -6px 5% 0);
+    transform: translate(3px, -1.5px);
+  }
+  90% {
+    clip-path: inset(80% -6px 0 0);
+    transform: translate(-2px, 0px);
+  }
+  100% {
+    clip-path: inset(80% -6px 0 0);
+    transform: translate(0);
+  }
+}
+
+.cyber-glitch-rose {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cyber-glitch-rose::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: linear-gradient(45deg, transparent 3%, #00ffb1 3%, #00ffb1 5%, #ff0055 5%, #ff0055 7%, transparent 7%);
+  box-shadow: inset 0 0 10px rgba(255, 0, 85, 0.4), 4px 0px 0px #00ffb1;
+  clip-path: inset(50% 50% 50% 50%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.15s ease;
+}
+
+.cyber-glitch-rose:hover::after {
+  opacity: 1;
+  animation: cyber-glitch-slice 0.8s steps(2, end) infinite;
+}
+
+.cyber-glitch-rose:hover {
+  box-shadow: 0 0 16px rgba(244, 63, 94, 0.5), 4px 0px 0px #00ffb1;
+  text-shadow: -1.5px -1.5px 0px #ff0055, 1.5px 1.5px 0px #00e6f6;
+}
+
+.cyber-glitch-amber {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cyber-glitch-amber::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: linear-gradient(45deg, transparent 3%, #f59e0b 3%, #f59e0b 5%, #06b6d4 5%, #06b6d4 7%, transparent 7%);
+  box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.4), 4px 0px 0px #06b6d4;
+  clip-path: inset(50% 50% 50% 50%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.15s ease;
+}
+
+.cyber-glitch-amber:hover::after {
+  opacity: 1;
+  animation: cyber-glitch-slice 0.8s steps(2, end) infinite;
+}
+
+.cyber-glitch-amber:hover {
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.5), 3px 0px 0px #06b6d4;
+  text-shadow: -1px -1px 0px #f59e0b, 1px 1px 0px #06b6d4;
+}
+
+/* =========================================================
+   CIRCUIT & FLUID PIPE FLOW ANIMATION (Piket -> OFF Flow)
+   Inspired by Uiverse.io trace-flow & fluid circuit traces
+   ========================================================= */
+@keyframes pipe-trace-flow-anim {
+  0% {
+    stroke-dashoffset: 160;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pipe-dangling-pulse {
+  0%, 100% {
+    opacity: 0.45;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    opacity: 0.85;
+    stroke-dashoffset: 12;
+  }
+}
+
+.pipe-trace-bg {
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.3s ease, stroke-width 0.2s ease;
+}
+
+.pipe-trace-flow {
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 32 128;
+  animation: pipe-trace-flow-anim 2.4s linear infinite;
+  pointer-events: none;
+  transition: stroke-width 0.2s ease, filter 0.2s ease;
+}
+
+.pipe-trace-flow-hovered {
+  stroke-width: 2.4 !important;
+  animation-duration: 1.4s !important;
+}
+
+.pipe-trace-dangling {
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 6 6;
+  animation: pipe-dangling-pulse 2s ease-in-out infinite;
+}
+
+/* Theme color glow variants for pipe flow */
+.pipe-flow-copper {
+  stroke: #f59e0b;
+  color: #f59e0b;
+  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.85));
+}
+
+.pipe-flow-cyan {
+  stroke: #06b6d4;
+  color: #06b6d4;
+  filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.85));
+}
+
+.pipe-flow-violet {
+  stroke: #c084fc;
+  color: #c084fc;
+  filter: drop-shadow(0 0 5px rgba(192, 132, 252, 0.9));
+}
+
+.pipe-flow-winamp {
+  stroke: #00ff00;
+  color: #00ff00;
+  filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.95));
+}
+
+.pipe-flow-vista {
+  stroke: #0284c7;
+  color: #0284c7;
+  filter: drop-shadow(0 0 4px rgba(2, 132, 199, 0.85));
+}
+
+.pipe-flow-emerald {
+  stroke: #10b981;
+  color: #10b981;
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.85));
+}
+
+.pipe-flow-red-neon {
+  stroke: #ff1e42;
+  color: #ff1e42;
+  filter: drop-shadow(0 0 5px #ff0033) drop-shadow(0 0 10px rgba(255, 0, 51, 0.85));
+}
+
+[data-theme="winamp"] .pipe-flow-red-neon {
+  stroke: #ff003c;
+  color: #ff003c;
+  filter: drop-shadow(0 0 6px #ff003c) drop-shadow(0 0 12px rgba(255, 0, 60, 0.95));
+}
+
+[data-theme="dark-fluid"] .pipe-flow-red-neon {
+  stroke: #ff2d55;
+  color: #ff2d55;
+  filter: drop-shadow(0 0 6px #ff2d55) drop-shadow(0 0 12px rgba(255, 45, 85, 0.9));
+}
+
+[data-theme="vista"] .pipe-flow-red-neon {
+  stroke: #e11d48;
+  color: #e11d48;
+  filter: drop-shadow(0 0 5px #e11d48) drop-shadow(0 0 8px rgba(225, 29, 72, 0.8));
+}
+
+/* =========================================================
+   INTERACTIVE LOCK SWITCH (Inspired by Uiverse transition)
+   ========================================================= */
+.lock-switch-track {
+  --switch-transition: 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+  height: 30px;
+  width: 58px;
+  padding: 3px;
+  border-radius: 9999px;
+  transition: all var(--switch-transition);
+}
+
+@media (min-width: 640px) {
+  .lock-switch-track {
+    height: 32px;
+    width: 64px;
+    padding: 3.5px;
+  }
+}
+
+.lock-switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--switch-transition), background-color var(--switch-transition), border-color var(--switch-transition), box-shadow var(--switch-transition);
+  z-index: 2;
+}
+
+@media (min-width: 640px) {
+  .lock-switch-knob {
+    top: 3.5px;
+    left: 3.5px;
+    width: 23px;
+    height: 23px;
+  }
+}
+
+.lock-switch-track:hover .lock-switch-knob {
+  transform: translateX(1.5px);
+}
+
+.lock-switch-track.is-locked .lock-switch-knob {
+  transform: translateX(28px);
+}
+
+@media (min-width: 640px) {
+  .lock-switch-track.is-locked .lock-switch-knob {
+    transform: translateX(32px);
+  }
+}
+
+.lock-switch-track.is-locked:hover .lock-switch-knob {
+  transform: translateX(26.5px);
+}
+
+@media (min-width: 640px) {
+  .lock-switch-track.is-locked:hover .lock-switch-knob {
+    transform: translateX(30.5px);
+  }
+}
+
+/* Icons inside switch track */
+.lock-switch-track .icon-unlock {
+  transition: opacity var(--switch-transition), transform var(--switch-transition);
+}
+.lock-switch-track .icon-lock {
+  transition: opacity var(--switch-transition), transform var(--switch-transition);
+}
+
+.lock-switch-track.is-locked .icon-unlock {
+  opacity: 0.2;
+  transform: scale(0.75);
+}
+.lock-switch-track.is-locked .icon-lock {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.lock-switch-track:not(.is-locked) .icon-unlock {
+  opacity: 1;
+  transform: scale(1);
+}
+.lock-switch-track:not(.is-locked) .icon-lock {
+  opacity: 0.2;
+  transform: scale(0.75);
+}
+
+/* =========================================================
+   EXPANDING CARD DROPDOWN UI FOR DATE CARD (DESKTOP)
+   Adaptive collapsible dropdown card with smooth transition
+   ========================================================= */
+.date-card-expandable {
+  border: 1px solid #c1c2c5;
+  border-radius: 12px;
+  transition: all 300ms ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 58px;
+  background-color: #ffffff;
+  overflow: hidden;
+  position: relative;
+  inset-inline: auto;
+  max-width: 440px;
+  min-width: 320px;
+  width: 100%;
+}
+
+[data-theme="dark"] .date-card-expandable,
+[data-theme="darkFluid"] .date-card-expandable {
+  border-color: rgba(255, 255, 255, 0.12);
+  background-color: #1e1e24;
+  color: #f1f5f9;
+}
+
+[data-theme="vista"] .date-card-expandable {
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(224, 242, 254, 0.85) 40%, rgba(186, 230, 253, 0.7) 100%);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  box-shadow: 0 25px 60px -10px rgba(14, 116, 224, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="winamp"] .date-card-expandable {
+  border: 3px double #00ff00;
+  border-radius: 0px;
+  background-color: #0a0a0a;
+  color: #00ff00;
+  font-family: 'Courier New', Courier, monospace;
+  box-shadow: 6px 6px 0px #000000;
+}
+
+/* Checkbox toggle controls list visibility */
+.date-card-expandable input:where(:checked) ~ .date-card-expandable-list {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 12px;
+  padding-top: 4px;
+  height: auto;
+  max-height: 75vh;
+  pointer-events: auto;
+}
+
+.date-card-expandable input:where(:not(:checked)) ~ .date-card-expandable-list {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  margin-top: -100%;
+  user-select: none;
+  height: 0px;
+  max-height: 0px;
+  min-height: 0px;
+  pointer-events: none;
+  transition: all 400ms ease-out;
+}
+
+.date-card-trigger {
+  cursor: pointer;
+  list-style: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  font-weight: 600;
+  color: inherit;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-flow: row;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1.125rem;
+  height: max-content;
+  position: relative;
+  z-index: 20;
+  border-radius: inherit;
+  background-color: inherit;
+  transition: background-color 200ms ease;
+}
+
+.date-card-trigger:hover {
+  filter: brightness(0.98);
+}
+
+[data-theme="winamp"] .date-card-trigger:hover {
+  background-color: #141414;
+}
+
+/* Arrow indicator before trigger */
+.date-card-indicator {
+  content: "›";
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.date-card-expandable input:where(:checked) + .date-card-trigger .date-card-indicator {
+  transform: rotate(90deg);
+}
+
+.date-card-expandable input:where(:not(:checked)) + .date-card-trigger .date-card-indicator {
+  transform: rotate(0deg);
+}
+
+.date-card-expandable-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 0 1.125rem 1.125rem 1.125rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  --w-scrollbar: 6px;
+}
+
+.date-card-article {
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  width: 100%;
+  border: 1px solid #c1c2c5;
+  background-color: inherit;
+}
+
+[data-theme="dark"] .date-card-article,
+[data-theme="darkFluid"] .date-card-article {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="vista"] .date-card-article {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.55);
+}
+
+[data-theme="winamp"] .date-card-article {
+  border: 1px solid #333;
+  background-color: #0f0f0f;
+}
+
+/* =========================================================
+   Custom Header Hamburger Menu Button (Uiverse Cevorob)
+   ========================================================= */
+.burger {
+  position: relative;
+  width: 22px;
+  height: 16px;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+  user-select: none;
+}
+
+.burger input {
+  display: none;
+}
+
+.burger span {
+  display: block;
+  position: absolute;
+  height: 3.2px;
+  width: 100%;
+  background: #0f172a;
+  border-radius: 9999px;
+  opacity: 1;
+  left: 0;
+  transform: rotate(0deg);
+  transition: 0.25s ease-in-out;
+}
+
+.burger.burger-dark span,
+[data-theme="dark"] .burger span,
+[data-theme="darkFluid"] .burger span {
+  background: #f8fafc;
+}
+
+.burger.burger-vista span,
+[data-theme="vista"] .burger span {
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.burger span:nth-of-type(1) {
+  top: 0px;
+  transform-origin: left center;
+}
+
+.burger span:nth-of-type(2) {
+  top: 50%;
+  transform: translateY(-50%);
+  transform-origin: left center;
+}
+
+.burger span:nth-of-type(3) {
+  top: 100%;
+  transform-origin: left center;
+  transform: translateY(-100%);
+}
+
+.burger input:checked ~ span:nth-of-type(1) {
+  transform: rotate(45deg);
+  top: 0.5px;
+  left: 3px;
+}
+
+.burger input:checked ~ span:nth-of-type(2) {
+  width: 0%;
+  opacity: 0;
+}
+
+.burger input:checked ~ span:nth-of-type(3) {
+  transform: rotate(-45deg);
+  top: 15.5px;
+  left: 3px;
+}
+
+/* =========================================================
+   Winamp Custom UI Switch Button
+   ========================================================= */
+.custom-ui-switch {
+  font-size: 13px;
+  position: relative;
+  display: inline-block;
+  width: 3.4em;
+  height: 1.8em;
+  user-select: none;
+}
+
+.custom-ui-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.custom-ui-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #211f21;
+  border: 1px solid #413f41;
+  border-radius: 6px;
+  box-shadow: inset 0 0 5px #000;
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.custom-ui-slider:before {
+  position: absolute;
+  content: "";
+  height: 1.3em;
+  width: 1.3em;
+  left: 0.2em;
+  bottom: 0.2em;
+  background-color: #000;
+  border-radius: 4px;
+  border: 1px solid #565656;
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.custom-ui-lights {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0.45em;
+  right: 0.45em;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.custom-ui-light-off,
+.custom-ui-light-on {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.custom-ui-light-off {
+  background-color: #ff3b30;
+  box-shadow: 0 0 5px #ff3b30, 0 0 8px #ff3b30;
+}
+
+.custom-ui-light-on {
+  background-color: #2c2c2e;
+  box-shadow: none;
+}
+
+.custom-ui-switch input:checked + .custom-ui-slider {
+  background-color: #1c2e1c;
+  border-color: #274d27;
+}
+
+.custom-ui-switch input:checked + .custom-ui-slider:before {
+  transform: translateX(1.5em);
+  background-color: #121212;
+  border-color: #00FF00;
+  box-shadow: inset 0 0 4px #00FF00, 0 0 6px rgba(0, 255, 0, 0.4);
+}
+
+.custom-ui-switch input:checked + .custom-ui-slider .custom-ui-light-off {
+  background-color: #2c2c2e;
+  box-shadow: none;
+}
+
+.custom-ui-switch input:checked + .custom-ui-slider .custom-ui-light-on {
+  background-color: #00FF00;
+  box-shadow: 0 0 5px #00FF00, 0 0 8px #00FF00;
+}
+
+/* =========================================================
+   Custom Day Card Styles (.card with hover shadows)
+   ========================================================= */
+.card-day-cell {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: rgb(255, 255, 255);
+  border-radius: 1rem;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  transition: all ease-in-out 0.3s;
+}
+
+.card-day-cell:hover {
+  background-color: #fdfdfd;
+  box-shadow: rgba(0, 0, 0, 0.09) 0px 2px 1px, rgba(0, 0, 0, 0.09) 0px 4px 2px,
+    rgba(0, 0, 0, 0.09) 0px 8px 4px, rgba(0, 0, 0, 0.09) 0px 16px 8px,
+    rgba(0, 0, 0, 0.09) 0px 32px 16px;
+}
+
+[data-theme="dark"] .card-day-cell,
+[data-theme="darkFluid"] .card-day-cell {
+  background: #1E1E24;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .card-day-cell:hover,
+[data-theme="darkFluid"] .card-day-cell:hover {
+  background: #25252E;
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow: 0 8px 25px -4px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="winamp"] .card-day-cell {
+  background: #191919;
+  border-radius: 0px;
+  border: 1.5px solid #333333;
+  box-shadow: inset 3px 3px 0 #000000, inset -2px -2px 0 #2a2a2a;
+}
+
+[data-theme="winamp"] .card-day-cell:hover {
+  background: #202020;
+  border-color: #00FF00;
+}
+
+[data-theme="vista"] .card-day-cell {
+  background: rgba(235, 246, 255, 0.85);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 6px 18px -3px rgba(14, 116, 224, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px) saturate(190%);
+}
+
+[data-theme="vista"] .card-day-cell:hover {
+  background: rgba(245, 250, 255, 0.95);
+  box-shadow: 0 10px 24px -2px rgba(14, 116, 224, 0.35);
+}
+
+/* =========================================================
+   CUSTOM DESKTOP TOOLTIP STYLES (UI/UX)
+   ========================================================= */
+.tooltip-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tooltip-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tooltip-container:hover,
+.tooltip-container:focus-visible,
+.tooltip-container:focus-within,
+.tooltip-container:active {
+  z-index: 60;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  color: #1f2937;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0.15s ease-out;
+  will-change: opacity, transform;
+  border: 1px solid rgba(229, 231, 235, 1);
+  z-index: 90;
+  pointer-events: none !important;
+}
+
+/* Tooltip arrow */
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 7px;
+  border-style: solid;
+  border-color: #ffffff transparent transparent transparent;
+}
+
+@keyframes tooltipAutoHide2Sec {
+  0% {
+    opacity: 1;
+    visibility: visible;
+  }
+  80% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.tooltip-container:hover .tooltip,
+.tooltip-container:focus-visible .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  animation: tooltipAutoHide2Sec 2s forwards ease-out !important;
+}
+
+/* Tooltip positioning for top elements (popping downwards) */
+.tooltip.tooltip-bottom {
+  bottom: auto;
+  top: calc(100% + 10px);
+  transform: translateX(-50%) translateY(-10px);
+}
+
+.tooltip-container:hover .tooltip.tooltip-bottom,
+.tooltip-container:focus-visible .tooltip.tooltip-bottom {
+  transform: translateX(-50%) translateY(0);
+  animation: tooltipAutoHide2Sec 2s forwards ease-out !important;
+}
+
+.tooltip.tooltip-bottom::after {
+  top: auto;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 7px;
+  border-style: solid;
+  border-color: transparent transparent #ffffff transparent;
+}
+
+/* Tooltip positioning for sidebar elements (popping to the right) */
+.tooltip.tooltip-right {
+  bottom: auto;
+  top: 50%;
+  left: calc(100% + 10px);
+  right: auto;
+  transform: translateY(-50%) translateX(-6px);
+  white-space: nowrap;
+}
+
+.tooltip-container:hover .tooltip.tooltip-right,
+.tooltip-container:focus-visible .tooltip.tooltip-right {
+  transform: translateY(-50%) translateX(0);
+  animation: tooltipAutoHide2Sec 2s forwards ease-out !important;
+}
+
+.tooltip.tooltip-right::after {
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  right: 100%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent #ffffff transparent transparent;
+}
+
+[data-theme="dark"] .tooltip.tooltip-right::after,
+[data-theme="darkFluid"] .tooltip.tooltip-right::after {
+  border-color: transparent #0f172a transparent transparent !important;
+}
+
+[data-theme="winamp"] .tooltip.tooltip-right::after {
+  border-color: transparent #00FF00 transparent transparent !important;
+}
+
+[data-theme="vista"] .tooltip.tooltip-right::after {
+  border-color: transparent rgba(230, 245, 255, 0.95) transparent transparent !important;
+}
+
+/* Tooltip positioning for left elements (popping to the left) */
+.tooltip.tooltip-left {
+  bottom: auto;
+  top: 50%;
+  right: calc(100% + 10px);
+  left: auto;
+  transform: translateY(-50%) translateX(6px);
+  white-space: nowrap;
+}
+
+.tooltip-container:hover .tooltip.tooltip-left,
+.tooltip-container:focus-visible .tooltip.tooltip-left {
+  transform: translateY(-50%) translateX(0);
+  animation: tooltipAutoHide2Sec 2s forwards ease-out !important;
+}
+
+.tooltip.tooltip-left::after {
+  top: 50%;
+  bottom: auto;
+  left: 100%;
+  right: auto;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent transparent #ffffff;
+}
+
+[data-theme="dark"] .tooltip.tooltip-left::after,
+[data-theme="darkFluid"] .tooltip.tooltip-left::after {
+  border-color: transparent transparent transparent #0f172a !important;
+}
+
+[data-theme="winamp"] .tooltip.tooltip-left::after {
+  border-color: transparent transparent transparent #00FF00 !important;
+}
+
+[data-theme="vista"] .tooltip.tooltip-left::after {
+  border-color: transparent transparent transparent rgba(230, 245, 255, 0.95) !important;
+}
+
+/* Sidebar Tooltip Unclipping & Stacking Elevation */
+#desktop-side-menu,
+#desktop-side-menu > div,
+#desktop-side-menu nav,
+#desktop-side-menu .tooltip-container {
+  overflow: visible !important;
+}
+
+#desktop-side-menu {
+  position: relative;
+  z-index: 40 !important;
+}
+
+#desktop-side-menu .tooltip-container {
+  position: relative;
+  z-index: 50;
+}
+
+#desktop-side-menu .tooltip-container:hover,
+#desktop-side-menu .tooltip-container:focus-within,
+#desktop-side-menu .tooltip-container:focus-visible {
+  z-index: 60;
+}
+
+#desktop-side-menu .tooltip {
+  z-index: 90;
+  white-space: nowrap;
+}
+
+/* Tooltip positioning for right-edge calendar cells */
+.tooltip.tooltip-right-edge {
+  left: auto;
+  right: -8px;
+  transform: translateY(10px);
+}
+
+.tooltip-container:hover .tooltip.tooltip-right-edge,
+.tooltip-container:focus-visible .tooltip.tooltip-right-edge {
+  transform: translateY(0);
+  animation: tooltipAutoHide2Sec 2s forwards ease-out !important;
+}
+
+.tooltip-container[data-tooltip-expired="true"] .tooltip {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  animation: none !important;
+  pointer-events: none !important;
+}
+
+.tooltip.tooltip-right-edge::after {
+  left: auto;
+  right: 12px;
+  transform: none;
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.7);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  }
+}
+
+.tooltip strong {
+  animation: glow 2s infinite;
+  font-weight: 600;
+}
+
+.tooltip i {
+  margin-right: 6px;
+  color: #6366f1;
+}
+
+/* Theme compatibility for tooltips */
+[data-theme="dark"] .tooltip,
+[data-theme="darkFluid"] .tooltip {
+  background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .tooltip::after,
+[data-theme="darkFluid"] .tooltip::after {
+  border-color: #0f172a transparent transparent transparent !important;
+}
+
+[data-theme="dark"] .tooltip.tooltip-bottom::after,
+[data-theme="darkFluid"] .tooltip.tooltip-bottom::after {
+  border-color: transparent transparent #0f172a transparent !important;
+}
+
+/* Winamp Theme Custom Hint / Retro Tooltip Styles */
+[data-theme="winamp"] .tooltip-container {
+  position: relative;
+}
+
+[data-theme="winamp"] .tooltip {
+  background: #050505 !important;
+  color: #00FF00 !important;
+  border: 1px solid #00FF00 !important;
+  font-family: 'Courier New', Courier, monospace !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border-radius: 0px !important;
+  padding: 8px 14px !important;
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.45), inset 0 0 8px rgba(0, 255, 0, 0.15) !important;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.8) !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Winamp hint scanline effect (::before) */
+[data-theme="winamp"] .tooltip::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0px;
+  height: 2px;
+  background-color: #00FF00;
+  box-shadow: 0 0 8px #00FF00;
+  transition: width 0.4s ease;
+}
+
+[data-theme="winamp"] .tooltip-container:hover .tooltip::before,
+[data-theme="winamp"] .tooltip-container:focus-visible .tooltip::before {
+  width: 100%;
+  transition: width 0.4s ease;
+}
+
+[data-theme="winamp"] .tooltip::after {
+  border-color: #00FF00 transparent transparent transparent !important;
+  filter: drop-shadow(0 0 4px #00FF00);
+}
+
+[data-theme="winamp"] .tooltip.tooltip-bottom::after {
+  border-color: transparent transparent #00FF00 transparent !important;
+}
+
+[data-theme="winamp"] .tooltip strong {
+  color: #55FF55 !important;
+  text-shadow: 0 0 8px #00FF00, 0 0 14px #00FF00 !important;
+  font-weight: 900 !important;
+}
+
+[data-theme="vista"] .tooltip {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(230, 245, 255, 0.95)) !important;
+  backdrop-filter: blur(12px) !important;
+  border-color: rgba(100, 180, 245, 0.5) !important;
+  color: #0f2942 !important;
+  box-shadow: 0 8px 25px rgba(14, 116, 224, 0.25) !important;
+}
+
+[data-theme="vista"] .tooltip::after {
+  border-color: rgba(230, 245, 255, 0.95) transparent transparent transparent !important;
+}
+
+[data-theme="vista"] .tooltip.tooltip-bottom::after {
+  border-color: transparent transparent rgba(230, 245, 255, 0.95) transparent !important;
+}
+
+@media (max-width: 768px) {
+  /* Tooltip on mobile always opens upwards */
+  .tooltip,
+  .tooltip.tooltip-bottom,
+  .tooltip.tooltip-right {
+    bottom: calc(100% + 8px) !important;
+    top: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) translateY(6px) !important;
+    font-size: 11.5px !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  .tooltip-container:hover .tooltip,
+  .tooltip-container:focus-visible .tooltip,
+  .tooltip-container:active .tooltip,
+  .tooltip-container:hover .tooltip.tooltip-bottom,
+  .tooltip-container:focus-visible .tooltip.tooltip-bottom,
+  .tooltip-container:active .tooltip.tooltip-bottom,
+  .tooltip-container:hover .tooltip.tooltip-right,
+  .tooltip-container:focus-visible .tooltip.tooltip-right,
+  .tooltip-container:active .tooltip.tooltip-right {
+    transform: translateX(-50%) translateY(0) !important;
+  }
+
+  /* Tooltip arrow points downward to the trigger element */
+  .tooltip::after,
+  .tooltip.tooltip-bottom::after,
+  .tooltip.tooltip-right::after {
+    top: 100% !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    border-width: 6px !important;
+    border-style: solid !important;
+    border-color: #ffffff transparent transparent transparent !important;
+  }
+
+  [data-theme="dark"] .tooltip::after,
+  [data-theme="dark"] .tooltip.tooltip-bottom::after,
+  [data-theme="dark"] .tooltip.tooltip-right::after,
+  [data-theme="darkFluid"] .tooltip::after,
+  [data-theme="darkFluid"] .tooltip.tooltip-bottom::after,
+  [data-theme="darkFluid"] .tooltip.tooltip-right::after {
+    border-color: #0f172a transparent transparent transparent !important;
+  }
+
+  [data-theme="winamp"] .tooltip::after,
+  [data-theme="winamp"] .tooltip.tooltip-bottom::after,
+  [data-theme="winamp"] .tooltip.tooltip-right::after {
+    border-color: #00FF00 transparent transparent transparent !important;
+  }
+
+  [data-theme="vista"] .tooltip::after,
+  [data-theme="vista"] .tooltip.tooltip-bottom::after,
+  [data-theme="vista"] .tooltip.tooltip-right::after {
+    border-color: rgba(230, 245, 255, 0.95) transparent transparent transparent !important;
+  }
+
+  /* Right-edge tooltip adjustment on mobile */
+  .tooltip.tooltip-right-edge {
+    left: auto !important;
+    right: -4px !important;
+    transform: translateY(6px) !important;
+  }
+
+  .tooltip-container:hover .tooltip.tooltip-right-edge,
+  .tooltip-container:focus-visible .tooltip.tooltip-right-edge,
+  .tooltip-container:active .tooltip.tooltip-right-edge {
+    transform: translateY(0) !important;
+  }
+
+  .tooltip.tooltip-right-edge::after {
+    left: auto !important;
+    right: 12px !important;
+    transform: none !important;
+  }
+}
+
+/* =========================================================
+   GLITCH HOVER EFFECT FOR DELETE BUTTON IN SETTINGS
+   ========================================================= */
+.btn-glitch-delete {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.btn-glitch-delete::after {
+  --move1: inset(50% 50% 50% 50%);
+  --move2: inset(31% 0 40% 0);
+  --move3: inset(39% 0 15% 0);
+  --move4: inset(45% 0 40% 0);
+  --move5: inset(45% 0 6% 0);
+  --move6: inset(14% 0 61% 0);
+  clip-path: var(--move1);
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  pointer-events: none;
+  font-weight: 800;
+  font-size: inherit;
+  color: #ffffff;
+}
+
+.btn-glitch-delete:hover::after {
+  animation: glitch_4011 1s steps(2, end);
+  text-shadow: -3px -3px 0px #1df2f0, 3px 3px 0px #E94BE8;
+  background-color: transparent;
+  border: 2px solid rgb(0, 255, 213);
+}
+
+.btn-glitch-delete:hover {
+  text-shadow: -1px -1px 0px #1df2f0, 1px 1px 0px #E94BE8;
+  background-color: transparent !important;
+  border: 1px solid rgb(0, 255, 213) !important;
+  box-shadow: 0px 10px 15px -5px rgba(0, 255, 213, 0.6) !important;
+  color: #ffffff !important;
+}
+
+@keyframes glitch_4011 {
+  0% {
+    clip-path: var(--move1);
+    transform: translate(0px, -10px);
+  }
+  10% {
+    clip-path: var(--move2);
+    transform: translate(-10px, 10px);
+  }
+  20% {
+    clip-path: var(--move3);
+    transform: translate(10px, 0px);
+  }
+  30% {
+    clip-path: var(--move4);
+    transform: translate(-10px, 10px);
+  }
+  40% {
+    clip-path: var(--move5);
+    transform: translate(10px, -10px);
+  }
+  50% {
+    clip-path: var(--move6);
+    transform: translate(-10px, 10px);
+  }
+  60% {
+    clip-path: var(--move1);
+    transform: translate(10px, -10px);
+  }
+  70% {
+    clip-path: var(--move3);
+    transform: translate(-10px, 10px);
+  }
+  80% {
+    clip-path: var(--move2);
+    transform: translate(10px, -10px);
+  }
+  90% {
+    clip-path: var(--move4);
+    transform: translate(-10px, 10px);
+  }
+  100% {
+    clip-path: var(--move1);
+    transform: translate(0);
+  }
+}
+
+

@@ -1,6 +1,81 @@
 export const SHIFT_OPTIONS = ['Graha', 'NPCT', 'TPSL', 'OFF', 'SM', 'PM', 'Malam', 'CUTI'] as const;
 export type ShiftType = typeof SHIFT_OPTIONS[number] | '';
-export type AppTheme = 'default' | 'dark' | 'vista' | 'winamp';
+export type AppTheme = 'default' | 'dark' | 'vista' | 'winamp' | 'darkFluid';
+
+// --- Visual Studio & Shift Configuration Models ---
+export type VisualColorMode = 'solid' | 'linear' | 'radial' | 'customCss';
+export type PresetPatternType = 'none' | 'stripes' | 'dots' | 'honeycomb' | 'grid' | 'waves' | 'carbon';
+
+export interface GradientColorStop {
+    color: string;
+    position: number; // 0 - 100%
+}
+
+export interface ShiftVisualStyle {
+    colorMode: VisualColorMode;
+    solidColor: string;
+    textColor: string;
+    borderColor: string;
+    gradientType: 'linear' | 'radial';
+    gradientAngle: number; // 0 - 360 deg
+    colorStops: GradientColorStop[]; // 2 to 4 stops
+    patternType: PresetPatternType;
+    patternOpacity: number; // 10 - 100%
+    customPatternUrl?: string;
+    iconType: 'svg' | 'customImage' | 'emoji' | 'none';
+    iconName?: string;
+    customIconUrl?: string;
+    emoji?: string;
+    customCss?: string;
+}
+
+export interface ShiftWorkTimeConfig {
+    jamMasukDasar: string; // HH:mm
+    jamPulangDasar: string; // HH:mm
+    earliestFlexiIn: string; // HH:mm
+    latestFlexiIn: string; // HH:mm
+    earliestFlexiOut: string; // HH:mm
+    latestFlexiOut: string; // HH:mm
+    minLemburMinutes: number; // e.g. 120
+    maxLemburMinutes: number; // e.g. 180
+    isOvernight?: boolean;
+    isSplitShift?: boolean;
+    splitSession1?: { masuk: string; pulang: string };
+    splitSession2?: { masuk: string; pulang: string };
+}
+
+export interface ShiftNamingConfig {
+    fullName: string; // e.g. "Terminal Peti Kemas Surabaya Lapangan"
+    displayBadge: string; // 2 - 5 characters, e.g. "TPSL"
+    copyCode: string; // 1 - 3 characters, e.g. "L"
+    dropdownSublabel: string; // e.g. "FCL/LCL 07.30 - 17.00"
+}
+
+export interface ShiftItemConfig {
+    id: string; // Permanent Unique ID e.g. "SHIFT_GRAHA_001"
+    key: ShiftType | string;
+    naming: ShiftNamingConfig;
+    workTime: ShiftWorkTimeConfig;
+    visual: ShiftVisualStyle;
+    isPiket: boolean;
+    isVisibleInDropdown: boolean;
+    isSystemDefault?: boolean;
+}
+
+export interface ActiveDateRange {
+    id: string;
+    startDate: string; // YYYY-MM-DD
+    endDate?: string | null; // YYYY-MM-DD or null/empty for infinity (batas tak hingga)
+}
+
+export interface ShiftGroupProfile {
+    id: string;
+    name: string; // e.g. "Aturan Standar 2026"
+    effectiveStartDate: string; // YYYY-MM-DD
+    dateRanges?: ActiveDateRange[]; // One or more active date ranges
+    isActive: boolean;
+    shifts: ShiftItemConfig[];
+}
 
 export const SHIFT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
     Graha: { bg: 'bg-[#EDF6F9]', text: 'text-[#011627]', border: 'border-[#83C5BE]' },
@@ -14,7 +89,7 @@ export const SHIFT_COLORS: Record<string, { bg: string; text: string; border: st
     M: { bg: 'bg-[#2C4251]', text: 'text-white', border: 'border-[#1B2A35]' },
     CUTI: { bg: 'bg-[#0B0909]', text: 'text-white', border: 'border-[#0B0909]' },
     '': { bg: 'bg-slate-100', text: 'text-slate-500', border: 'border-slate-300' },
-    // Backward compatibility alias for legacy data
+    // Aliases
     G: { bg: 'bg-[#EDF6F9]', text: 'text-[#011627]', border: 'border-[#83C5BE]' },
     L: { bg: 'bg-[#E29578]', text: 'text-white', border: 'border-[#C8775B]' },
     N: { bg: 'bg-[#FFDDD2]', text: 'text-[#011627]', border: 'border-[#E29578]' },
@@ -23,9 +98,6 @@ export const SHIFT_COLORS: Record<string, { bg: string; text: string; border: st
     CT: { bg: 'bg-[#0B0909]', text: 'text-white', border: 'border-[#0B0909]' },
 };
 
-/**
- * Pemetaan kode singkatan Excel (G, L, N, OFF, SM, PM, M, CUTI/C) ke nama lengkap Shift
- */
 export const EXCEL_SHIFT_MAPPING: Record<string, ShiftType> = {
     G: 'Graha',
     GRAHA: 'Graha',
@@ -37,7 +109,7 @@ export const EXCEL_SHIFT_MAPPING: Record<string, ShiftType> = {
     O: 'OFF',
     OFF: 'OFF',
     SM: 'SM',
-    S2: 'SM', // Map legacy S2 to SM
+    S2: 'SM',
     PM: 'PM',
     M: 'Malam',
     MALAM: 'Malam',
@@ -48,10 +120,6 @@ export const EXCEL_SHIFT_MAPPING: Record<string, ShiftType> = {
     '': '',
 };
 
-/**
- * Singkatan Shift untuk tampilan di perangkat Mobile (Otomatis)
- * SM = SM, TPSL = L, Graha = G, OFF = O, NPCS/NPCT = N, PM = PM, Malam = M, CUTI = C
- */
 export const MOBILE_SHIFT_LABELS: Record<string, string> = {
     Graha: 'G',
     G: 'G',
@@ -88,12 +156,66 @@ export function normalizeShift(val: string | undefined | null): ShiftType {
     }
     const found = SHIFT_OPTIONS.find((s) => s.toUpperCase() === clean);
     if (found) return found;
-    return 'Graha';
+    return '';
 }
+
+/**
+ * Deteksi Piket:
+ * 1. Shift pada hari libur/tanggal merah/sabtu/minggu bukan OFF & CUTI
+ * 2. Shift pada hari kerja adalah M (Malam), PM, SM
+ */
+export function isPiketShift(
+    shift: string | undefined | null,
+    isWeekendOrHoliday: boolean
+): boolean {
+    const normalized = normalizeShift(shift);
+    if (!normalized || normalized === 'OFF' || normalized === 'CUTI') {
+        return false;
+    }
+    if (isWeekendOrHoliday) {
+        return true;
+    }
+    return normalized === 'SM' || normalized === 'PM' || normalized === 'Malam';
+}
+
+export type HolidayCategory = 'libur_nasional' | 'cuti_bersama' | 'lainnya';
 
 export interface LiburNasional {
     tanggal: string; // YYYY-MM-DD
     keterangan: string;
+    kategori?: HolidayCategory | string;
+    isCutiBersama?: boolean;
+    isDisabled?: boolean;
+}
+
+export function resolveHolidayCategory(item: { keterangan?: string; kategori?: string; isCutiBersama?: boolean }): {
+    category: HolidayCategory;
+    label: string;
+    shortLabel: string;
+    isCustom: boolean;
+} {
+    const rawKategori = (item.kategori || '').trim();
+    const lowerKat = rawKategori.toLowerCase();
+    const lowerKet = (item.keterangan || '').toLowerCase();
+
+    if (lowerKat === 'cuti_bersama' || lowerKat === 'cuti bersama' || lowerKat === 'cuti') {
+        return { category: 'cuti_bersama', label: 'Cuti Bersama', shortLabel: 'CB', isCustom: false };
+    }
+    if (lowerKat === 'libur_nasional' || lowerKat === 'libur nasional' || lowerKat === 'nasional') {
+        return { category: 'libur_nasional', label: 'Libur Nasional', shortLabel: 'LN', isCustom: false };
+    }
+    if (rawKategori && rawKategori !== 'lainnya') {
+        return { category: 'lainnya', label: rawKategori, shortLabel: 'L', isCustom: true };
+    }
+    if (lowerKat === 'lainnya') {
+        return { category: 'lainnya', label: 'Lainnya', shortLabel: 'L', isCustom: true };
+    }
+
+    // Fallback if kategori is not explicitly set
+    if (item.isCutiBersama || lowerKet.includes('cuti')) {
+        return { category: 'cuti_bersama', label: 'Cuti Bersama', shortLabel: 'CB', isCustom: false };
+    }
+    return { category: 'libur_nasional', label: 'Libur Nasional', shortLabel: 'LN', isCustom: false };
 }
 
 export interface DayData {
@@ -101,92 +223,22 @@ export interface DayData {
     isLocked: boolean;
     note: string;
     isMasuk: boolean;
-    tipeMasukLibur?: 'piket' | 'lembur'; // Opsi eksplisit saat masuk di hari libur: Piket atau Lembur
-    isHoldDokumen: boolean;
     jamMasuk: string; // HH:mm
     jamPulang: string; // HH:mm
-    absenCeisa: string; // HH:mm
-    isSuratTugasTambahan: boolean; // ST di Tanggal Merah -> Cuti Pengganti
-    isManualHoliday: boolean; // Tanggal merah di hari kerja
-    isGunakanOffGeser?: boolean; // Mengambil OFF di hari kerja biasa saat isMasuk === false
-    referensiTglOff?: string; // Kotak referensi tanggal ganti OFF (e.g. "Ganti tgl 12")
-    isGunakanCP?: boolean; // Mengambil Cuti Pengganti di hari kerja saat isMasuk === false
-    referensiTglCP?: string; // Kotak referensi tanggal Cuti Pengganti (e.g. "ST Tgl 15")
+    absenCeisa: string; // HH:mm or 'YA' / time
+    isManualHoliday?: boolean;
+    updated_at?: string;
 }
 
-export interface DayCalculationResult {
-    isLembur: boolean;
-    jamLembur: number;
-    durasiKerja: number;
-    isPiket: boolean;
-    isDapatGeserOff: boolean;
-    isOffDiambil: boolean;
-    isCutiPengganti: boolean;
-    isCPDiambil: boolean;
-    keteranganStatus: string;
+export function isDayDataFilled(data: DayData | null | undefined): boolean {
+    if (!data) return false;
+    if (typeof data.shift === 'string' && data.shift.trim() !== '' && data.shift.trim() !== '-') return true;
+    if (data.isMasuk === true) return true;
+    if (typeof data.jamMasuk === 'string' && data.jamMasuk.trim() !== '') return true;
+    if (typeof data.jamPulang === 'string' && data.jamPulang.trim() !== '') return true;
+    if (typeof data.absenCeisa === 'string' && data.absenCeisa.trim() !== '') return true;
+    if (typeof data.note === 'string' && data.note.trim() !== '') return true;
+    if (data.isManualHoliday === true) return true;
+    return false;
 }
-
-export interface CeisaScoreResult {
-    score: number; // 1, 2, 3, 4, or 0 (unrated)
-    grade: 'Sangat Patuh' | 'Patuh' | 'Kurang Patuh' | 'Tidak Patuh' | 'N/A';
-    ruleDescription: string;
-    isEligible: boolean; // whether this entry counts towards score/scale calculations
-    colorClass: 'emerald' | 'blue' | 'amber' | 'rose' | 'slate';
-}
-
-export interface PeriodPerformanceSummary {
-    periodLabel: string;
-    periodType: 'month' | 'quarter' | 'semester' | 'year';
-    totalDaysEvaluated: number;
-    totalScore: number;
-    averageScore: number;
-    countScore4: number; // Sangat Patuh (4)
-    countScore3: number; // Patuh (3)
-    countScore2: number; // Kurang Patuh (2)
-    countScore1: number; // Tidak Patuh (1)
-    predikat: string;
-}
-
-export interface CustomShiftType {
-    id: string;
-    name: string;
-    shortCode: string;
-    bgColor: string;
-    textColor: string;
-    orderIndex: number;
-    isActive: boolean;
-}
-
-export type CalculationMode = 'AVERAGE' | 'SUM';
-export type ValueType = 'SKALA' | 'PERSENTASE';
-
-export interface CeisaThreshold {
-    max_time: string;
-    score: number;
-    name: string;
-}
-
-export interface CeisaShiftRule {
-    multiplier: number;
-    thresholds: CeisaThreshold[];
-    is_exempt?: boolean;
-    is_auto_max?: boolean;
-}
-
-export interface CeisaRuleDetail {
-    shifts: Record<string, CeisaShiftRule>;
-}
-
-export interface CeisaRule {
-    id: string;
-    nama_rule: string;
-    tanggal_berlaku_efektif: string;
-    metode_kalkulasi: CalculationMode;
-    tipe_nilai: ValueType;
-    rule_detail: CeisaRuleDetail;
-}
-
-export const APP_VERSION = '1.2.4';
-export const APP_VERSION_DISPLAY = 'v1.2.4';
-
 

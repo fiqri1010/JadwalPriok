@@ -4,22 +4,19 @@ import { FULL_APP_TITLE } from '../version';
 import {
     Minus,
     Square,
-    X,
     Copy,
-    Sparkles,
+    X,
     Zap,
     Maximize2,
     Minimize2
 } from 'lucide-react';
-import {
-    startWindowDragging,
-    minimizeAppWindow,
-    toggleMaximizeAppWindow,
-    closeAppWindow
-} from '../lib/tauriBridge';
+import { AppTheme } from '../types';
+import { isTauriEnvironment } from '../lib/fileDownload';
 
 interface WindowTitleBarProps {
-    theme: 'default' | 'dark' | 'vista' | 'winamp';
+    theme: AppTheme;
+    appTitle?: string;
+    appVersion?: string;
     onClose?: () => void;
     title?: string;
     subtitle?: string;
@@ -27,9 +24,9 @@ interface WindowTitleBarProps {
 
 export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
     theme,
-    onClose,
     title = FULL_APP_TITLE,
-    subtitle = 'Jadwal Pemeriksa Fisik dan Performance View'
+    subtitle = 'Kalender Jadwal Kerja',
+    onClose
 }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -41,98 +38,155 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
     }, []);
 
-    const handleToggleMaximize = async () => {
-        const isMax = await toggleMaximizeAppWindow();
-        setIsFullscreen(isMax);
+    // Get Tauri AppWindow safely
+    const getTauriAppWindow = async () => {
+        if (!isTauriEnvironment()) return null;
+        try {
+            const { getCurrentWindow } = await import('@tauri-apps/api/window');
+            return getCurrentWindow();
+        } catch (e) {
+            console.warn('Gagal memuat instance jendela Tauri:', e);
+            return null;
+        }
+    };
+
+    // Native Window Dragging for PC / Tauri
+    const handleStartDragging = async (e: React.MouseEvent) => {
+        // Only drag with left mouse button and not when clicking controls
+        if (e.button === 0 && !(e.target as HTMLElement).closest('button, a, input, select')) {
+            const appWindow = await getTauriAppWindow();
+            if (appWindow) {
+                try {
+                    await appWindow.startDragging();
+                } catch (err) {
+                    console.warn('Tauri startDragging error:', err);
+                }
+            }
+        }
     };
 
     const handleMinimize = async () => {
-        await minimizeAppWindow();
+        const appWindow = await getTauriAppWindow();
+        if (appWindow) {
+            try {
+                await appWindow.minimize();
+                return;
+            } catch (err) {
+                console.warn('Tauri minimize error:', err);
+            }
+        }
+
+        // Web Fallback
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+            setIsFullscreen(false);
+        }
+    };
+
+    const handleToggleMaximize = async () => {
+        const appWindow = await getTauriAppWindow();
+        if (appWindow) {
+            try {
+                await appWindow.toggleMaximize();
+                const isMax = await appWindow.isMaximized();
+                setIsFullscreen(isMax);
+                return;
+            } catch (err) {
+                console.warn('Tauri toggleMaximize error:', err);
+            }
+        }
+
+        // Web Fallback (Fullscreen API)
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+            setIsFullscreen(true);
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            }
+            setIsFullscreen(false);
+        }
     };
 
     const handleClose = async () => {
+        const appWindow = await getTauriAppWindow();
+        if (appWindow) {
+            try {
+                await appWindow.close();
+                return;
+            } catch (err) {
+                console.warn('Tauri close error:', err);
+            }
+        }
+
         if (onClose) {
             onClose();
-        } else {
-            await closeAppWindow();
+            return;
+        }
+
+        // Standard browser fallback
+        try {
+            window.close();
+        } catch {
+            // Ignored if browser prevents window.close on user-opened tabs
         }
     };
 
-    const handleMouseDownOnBar = (e: React.MouseEvent) => {
-        // Jangan trigger drag jika yang diklik adalah button window control
-        if ((e.target as HTMLElement).closest('button')) return;
-        // Hanya tombol kiri mouse
-        if (e.button === 0) {
-            startWindowDragging();
-        }
-    };
-
-    // 1. WINDOWS VISTA (ALPHA) THEMED TITLE BAR
+    // Windows Vista Aero Glass Title Bar
     if (theme === 'vista') {
         return (
             <div
-                data-tauri-drag-region
-                onMouseDown={handleMouseDownOnBar}
-                onDoubleClick={handleToggleMaximize}
-                className="w-full shrink-0 select-none font-sans text-xs shadow-md border-b border-sky-300/30 cursor-default"
+                data-tauri-drag-region="true"
+                onMouseDown={handleStartDragging}
+                className="hidden sm:block w-full shrink-0 select-none font-sans text-xs shadow-md border-b border-white/35 cursor-default"
             >
                 <div
-                    data-tauri-drag-region
-                    className="h-8 px-3 flex items-center justify-between text-white relative overflow-hidden"
+                    data-tauri-drag-region="true"
+                    className="h-8 px-3 flex items-center justify-between text-white relative overflow-hidden backdrop-blur-xl"
                     style={{
-                        background: 'linear-gradient(180deg, rgba(160, 205, 240, 0.85) 0%, rgba(65, 125, 175, 0.9) 45%, rgba(15, 55, 90, 0.95) 50%, rgba(30, 85, 130, 0.95) 100%)',
-                        boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(0, 20, 40, 0.4)'
+                        background:
+                            'linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(186, 230, 253, 0.35) 45%, rgba(56, 189, 248, 0.25) 50%, rgba(14, 116, 224, 0.38) 100%)',
+                        boxShadow:
+                            'inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(255, 255, 255, 0.3), 0 2px 10px rgba(0, 50, 120, 0.15)',
+                        backdropFilter: 'blur(20px) saturate(190%)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(190%)',
                     }}
                 >
-                    {/* Glass reflection top highlight */}
-                    <div className="absolute top-0 left-0 right-0 h-3.5 bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
-
-                    {/* Left: Vista Orb Icon + AppLogo + Glowing Title */}
-                    <div data-tauri-drag-region className="flex items-center space-x-2 z-10 min-w-0 pr-2">
-                        <AppLogo className="h-5 w-5 rounded-md shadow-xs drop-shadow-xs shrink-0" />
-                        <span
-                            data-tauri-drag-region
-                            className="font-bold tracking-wide text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)] truncate"
-                            style={{ fontFamily: "'Segoe UI', Tahoma, sans-serif" }}
-                        >
-                            {title} <span className="text-[10px] font-normal text-sky-200 hidden md:inline">({subtitle})</span>
+                    {/* Aero Specular Sheen Overlay */}
+                    <div className="absolute top-0 left-0 right-0 h-3.5 bg-gradient-to-b from-white/60 to-transparent pointer-events-none" />
+                    
+                    <div data-tauri-drag-region="true" className="flex items-center space-x-2 z-10 min-w-0 pr-2">
+                        <AppLogo className="h-5 w-5 rounded-md shadow-xs drop-shadow-xs shrink-0 border border-white/40 pointer-events-none" />
+                        <span data-tauri-drag-region="true" className="font-extrabold tracking-wide text-sky-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)] truncate pointer-events-none">
+                            {title} <span className="text-[10px] font-semibold text-sky-900/80 hidden md:inline">({subtitle})</span>
                         </span>
                     </div>
 
-                    {/* Right: Authentic Windows Vista 3 Window Buttons */}
-                    <div className="flex items-center space-x-1 z-10 shrink-0 -mr-1">
-                        {/* Minimize */}
+                    {/* Window Controls: Minimize, Maximize, Close */}
+                    <div className="flex items-center space-x-1.5 z-10 shrink-0 -mr-1">
                         <button
                             type="button"
                             onClick={handleMinimize}
-                            title="Minimize Window"
-                            className="h-5 w-7 rounded-sm flex items-center justify-center bg-white/10 hover:bg-white/30 border border-white/30 text-white shadow-2xs transition-all cursor-pointer active:scale-95"
+                            title="Minimize"
+                            className="h-5 w-7 rounded-xs flex items-center justify-center bg-white/40 hover:bg-white/70 border border-white/70 text-sky-950 shadow-2xs transition-all cursor-pointer active:scale-95"
                         >
-                            <Minus className="h-3 w-3 drop-shadow-xs" />
+                            <Minus className="h-3 w-3" />
                         </button>
-
-                        {/* Maximize / Restore */}
                         <button
                             type="button"
                             onClick={handleToggleMaximize}
                             title={isFullscreen ? 'Restore' : 'Maximize'}
-                            className="h-5 w-7 rounded-sm flex items-center justify-center bg-white/10 hover:bg-white/30 border border-white/30 text-white shadow-2xs transition-all cursor-pointer active:scale-95"
+                            className="h-5 w-7 rounded-xs flex items-center justify-center bg-white/40 hover:bg-white/70 border border-white/70 text-sky-950 shadow-2xs transition-all cursor-pointer active:scale-95"
                         >
-                            {isFullscreen ? (
-                                <Copy className="h-2.5 w-2.5 drop-shadow-xs rotate-90" />
-                            ) : (
-                                <Square className="h-2.5 w-2.5 drop-shadow-xs" />
-                            )}
+                            {isFullscreen ? <Copy className="h-2.5 w-2.5 rotate-90" /> : <Square className="h-2.5 w-2.5" />}
                         </button>
-
-                        {/* Vista Glossy Red Close Button */}
                         <button
                             type="button"
                             onClick={handleClose}
-                            title="Close Window (Exit)"
-                            className="h-5 w-11 rounded-sm flex items-center justify-center bg-gradient-to-b from-rose-400 via-rose-600 to-rose-800 hover:from-rose-300 hover:via-rose-500 hover:to-rose-700 border border-rose-300/80 text-white shadow-sm transition-all cursor-pointer active:scale-95 hover:shadow-[0_0_8px_rgba(244,63,94,0.9)]"
+                            title="Tutup Jendela"
+                            className="h-5 w-7 rounded-xs flex items-center justify-center bg-white/40 hover:bg-rose-500/90 hover:text-white border border-white/70 hover:border-rose-400 text-sky-950 shadow-2xs transition-all cursor-pointer active:scale-95"
                         >
-                            <X className="h-3.5 w-3.5 stroke-[2.5] drop-shadow-xs" />
+                            <X className="h-3 w-3" />
                         </button>
                     </div>
                 </div>
@@ -140,67 +194,56 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
         );
     }
 
-    // 2. WINAMP CLASSIC (ALPHA) THEMED TITLE BAR
+    // Winamp Classic Retro Title Bar
     if (theme === 'winamp') {
         return (
             <div
-                data-tauri-drag-region
-                onMouseDown={handleMouseDownOnBar}
-                onDoubleClick={handleToggleMaximize}
-                className="w-full shrink-0 select-none font-mono text-[11px] bg-[#1a1e22] border-b-2 border-[#0a0d0f] cursor-default"
+                data-tauri-drag-region="true"
+                onMouseDown={handleStartDragging}
+                className="hidden sm:block w-full shrink-0 select-none font-mono text-[11px] bg-[#1a1e22] border-b-2 border-[#0a0d0f] cursor-default"
             >
                 <div
-                    data-tauri-drag-region
+                    data-tauri-drag-region="true"
                     className="h-7 px-2 flex items-center justify-between text-emerald-400 relative"
                     style={{
                         background: 'linear-gradient(180deg, #444f59 0%, #2c343b 50%, #1a1e22 100%)',
                         borderTop: '1px solid #7d90a0',
                         borderLeft: '1px solid #7d90a0',
                         borderRight: '1px solid #080a0c',
-                        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)'
                     }}
                 >
-                    {/* Left: Winamp Lightning Bolt Icon + Retro LCD Text */}
-                    <div data-tauri-drag-region className="flex items-center space-x-2 min-w-0 pr-2">
+                    <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
                         <div className="h-4 w-4 bg-[#0a0d0f] border border-[#00ff66]/50 flex items-center justify-center text-amber-400 shrink-0">
                             <Zap className="h-3 w-3 fill-amber-400" />
                         </div>
-                        <span
-                            data-tauri-drag-region
-                            className="font-mono font-bold tracking-widest text-[#00ff66] drop-shadow-[0_0_4px_rgba(0,255,100,0.6)] uppercase truncate"
-                        >
+                        <span data-tauri-drag-region="true" className="font-mono font-bold tracking-widest text-[#00ff66] uppercase truncate">
                             *** WINAMP - {title} ***
                         </span>
                     </div>
 
-                    {/* Right: Retro Winamp 3D Buttons */}
+                    {/* Winamp Controls: Minimize, Maximize, Close */}
                     <div className="flex items-center space-x-1 shrink-0">
-                        {/* Minimize */}
                         <button
                             type="button"
                             onClick={handleMinimize}
-                            title="Minimize Winamp"
-                            className="h-4 w-4 bg-[#323b42] hover:bg-[#485560] border-t border-l border-[#6a7d8d] border-b border-r border-[#0a0d0f] text-slate-200 flex items-center justify-center text-[9px] active:translate-y-px cursor-pointer"
+                            title="Minimize"
+                            className="h-4 w-4 bg-[#323b42] hover:bg-[#485560] border-t border-l border-[#6a7d8d] border-b border-r border-[#0a0d0f] text-slate-200 flex items-center justify-center text-[9px] cursor-pointer"
                         >
                             _
                         </button>
-
-                        {/* Windowshade / Maximize */}
                         <button
                             type="button"
                             onClick={handleToggleMaximize}
-                            title={isFullscreen ? 'Restore Screen' : 'Fullscreen / Shade'}
-                            className="h-4 w-4 bg-[#323b42] hover:bg-[#485560] border-t border-l border-[#6a7d8d] border-b border-r border-[#0a0d0f] text-slate-200 flex items-center justify-center text-[9px] active:translate-y-px cursor-pointer"
+                            title={isFullscreen ? 'Restore' : 'Maximize'}
+                            className="h-4 w-4 bg-[#323b42] hover:bg-[#485560] border-t border-l border-[#6a7d8d] border-b border-r border-[#0a0d0f] text-slate-200 flex items-center justify-center text-[9px] cursor-pointer"
                         >
                             {isFullscreen ? '▼' : '▲'}
                         </button>
-
-                        {/* Close */}
                         <button
                             type="button"
                             onClick={handleClose}
-                            title="Close Winamp (Exit)"
-                            className="h-4 w-4 bg-[#323b42] hover:bg-rose-700 border-t border-l border-[#6a7d8d] border-b border-r border-[#0a0d0f] text-rose-300 hover:text-white flex items-center justify-center text-[9px] font-bold active:translate-y-px cursor-pointer"
+                            title="Tutup Jendela"
+                            className="h-4 w-4 bg-[#323b42] hover:bg-rose-700 hover:text-white border-t border-l border-[#6a7d8d] border-b border-r border-[#0a0d0f] text-slate-200 flex items-center justify-center text-[9px] cursor-pointer"
                         >
                             ✕
                         </button>
@@ -210,31 +253,27 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
         );
     }
 
-    // 3. DARK MODE (ALPHA) THEMED TITLE BAR
-    if (theme === 'dark') {
+    // Dark Fluid Material Title Bar
+    if (theme === 'darkFluid') {
         return (
             <div
-                data-tauri-drag-region
-                onMouseDown={handleMouseDownOnBar}
-                onDoubleClick={handleToggleMaximize}
-                className="w-full shrink-0 select-none font-sans text-xs bg-[#0b0f19] border-b border-slate-800 cursor-default"
+                data-tauri-drag-region="true"
+                onMouseDown={handleStartDragging}
+                className="hidden sm:block w-full shrink-0 select-none font-sans text-xs bg-[#141218] border-b border-white/5 cursor-default"
             >
-                <div
-                    data-tauri-drag-region
-                    className="h-7 px-3 flex items-center justify-between text-slate-300 bg-[#111827]/90"
-                >
-                    <div data-tauri-drag-region className="flex items-center space-x-2 min-w-0 pr-2">
+                <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#E6E0E9] bg-[#1D1B20]">
+                    <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
                         <AppLogo className="h-4 w-4 rounded-xs shrink-0" />
-                        <span data-tauri-drag-region className="font-semibold text-slate-200 text-[11px] truncate">
+                        <span data-tauri-drag-region="true" className="font-semibold text-[#E6E0E9] text-[11px] truncate">
                             {title}
                         </span>
                     </div>
 
-                    <div className="flex items-center space-x-1 shrink-0">
+                    <div className="flex items-center space-x-0.5 shrink-0">
                         <button
                             type="button"
                             onClick={handleMinimize}
-                            className="h-5 w-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                             title="Minimize"
                         >
                             <Minus className="h-3 w-3" />
@@ -242,7 +281,54 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                         <button
                             type="button"
                             onClick={handleToggleMaximize}
-                            className="h-5 w-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                            title={isFullscreen ? 'Restore' : 'Maximize'}
+                        >
+                            {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-[#B3261E] transition-colors cursor-pointer"
+                            title="Tutup Jendela"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Dark Mode Title Bar
+    if (theme === 'dark') {
+        return (
+            <div
+                data-tauri-drag-region="true"
+                onMouseDown={handleStartDragging}
+                className="hidden sm:block w-full shrink-0 select-none font-sans text-xs bg-[#121212] border-b border-[#333333] cursor-default"
+            >
+                <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#E0E0E0] bg-[#1A1A1A]">
+                    <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
+                        <AppLogo className="h-4 w-4 rounded-xs shrink-0" />
+                        <span data-tauri-drag-region="true" className="font-semibold text-[#E0E0E0] text-[11px] truncate">
+                            {title}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center space-x-0.5 shrink-0">
+                        <button
+                            type="button"
+                            onClick={handleMinimize}
+                            className="h-5 w-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                            title="Minimize"
+                        >
+                            <Minus className="h-3 w-3" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleToggleMaximize}
+                            className="h-5 w-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                             title={isFullscreen ? 'Restore' : 'Maximize'}
                         >
                             {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
@@ -251,9 +337,9 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                             type="button"
                             onClick={handleClose}
                             className="h-5 w-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-rose-600 transition-colors cursor-pointer"
-                            title="Close (Exit)"
+                            title="Tutup Jendela"
                         >
-                            <X className="h-3.5 w-3.5" />
+                            <X className="h-3 w-3" />
                         </button>
                     </div>
                 </div>
@@ -261,30 +347,26 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
         );
     }
 
-    // 4. STANDAR (BRAND BARU) THEMED TITLE BAR: #011627 with #2EC4B6 accent
+    // Default Light Clean Title Bar (Matching #F6F7F8 / #FFFFFF & Ink Black #011627)
     return (
         <div
-            data-tauri-drag-region
-            onMouseDown={handleMouseDownOnBar}
-            onDoubleClick={handleToggleMaximize}
-            className="w-full shrink-0 select-none font-sans text-xs bg-[#011627] border-b border-[#0d2a45] cursor-default"
+            data-tauri-drag-region="true"
+            onMouseDown={handleStartDragging}
+            className="hidden sm:block w-full shrink-0 select-none font-sans text-xs bg-[#F6F7F8] border-b border-[#E2E8F0] cursor-default"
         >
-            <div
-                data-tauri-drag-region
-                className="h-7 px-3 flex items-center justify-between text-[#F6F7F8] bg-[#021f37]"
-            >
-                <div data-tauri-drag-region className="flex items-center space-x-2 min-w-0 pr-2">
+            <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#011627] bg-[#FFFFFF]">
+                <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
                     <AppLogo className="h-4 w-4 rounded-xs shrink-0" />
-                    <span data-tauri-drag-region className="font-semibold text-[#F6F7F8] text-[11px] truncate">
+                    <span data-tauri-drag-region="true" className="font-bold text-[#011627] text-[11px] truncate">
                         {title}
                     </span>
                 </div>
 
-                <div className="flex items-center space-x-1 shrink-0">
+                <div className="flex items-center space-x-0.5 shrink-0">
                     <button
                         type="button"
                         onClick={handleMinimize}
-                        className="h-5 w-6 rounded flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                        className="h-5 w-6 rounded flex items-center justify-center text-slate-500 hover:text-[#011627] hover:bg-slate-100 transition-colors cursor-pointer"
                         title="Minimize"
                     >
                         <Minus className="h-3 w-3" />
@@ -292,7 +374,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                     <button
                         type="button"
                         onClick={handleToggleMaximize}
-                        className="h-5 w-6 rounded flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                        className="h-5 w-6 rounded flex items-center justify-center text-slate-500 hover:text-[#011627] hover:bg-slate-100 transition-colors cursor-pointer"
                         title={isFullscreen ? 'Restore' : 'Maximize'}
                     >
                         {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
@@ -300,10 +382,10 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="h-5 w-6 rounded flex items-center justify-center text-slate-300 hover:text-white hover:bg-[#FF3366] transition-colors cursor-pointer"
-                        title="Close (Exit)"
+                        className="h-5 w-6 rounded flex items-center justify-center text-slate-500 hover:text-white hover:bg-rose-500 transition-colors cursor-pointer"
+                        title="Tutup Jendela"
                     >
-                        <X className="h-3.5 w-3.5" />
+                        <X className="h-3 w-3" />
                     </button>
                 </div>
             </div>

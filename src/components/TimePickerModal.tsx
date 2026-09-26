@@ -1,116 +1,163 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Clock, 
   Check, 
   X, 
   Trash2, 
   Sparkles, 
-  ChevronUp, 
-  ChevronDown, 
-  RotateCcw,
   AlertTriangle,
-  Info
+  Info,
+  Keyboard
 } from 'lucide-react';
+import { AppTheme } from '../types';
+
+interface UnifiedTimeValues {
+  jamMasuk?: string;
+  jamPulang?: string;
+  absenCeisa?: string;
+}
 
 interface TimePickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  value: string; // HH:mm or ""
-  onSelect: (timeStr: string) => void;
-  field?: 'jamMasuk' | 'jamPulang' | 'absenCeisa';
+  value?: string; // HH:mm or ""
+  onSelect?: (timeStr: string) => void;
+  onApplyUnified?: (values: UnifiedTimeValues) => void;
+  field?: 'jamMasuk' | 'jamPulang' | 'absenCeisa' | 'unified';
   existingJamMasuk?: string;
   existingJamPulang?: string;
+  existingAbsenCeisa?: string;
+  theme?: AppTheme;
 }
 
-const PRESET_TIMES = ['07:30', '08:00', '08:30', '16:00', '16:30', '17:00', '19:30', '05:00'];
-
-const parseTimeToMinutes = (timeStr?: string): number | null => {
-  if (!timeStr || !timeStr.trim() || !timeStr.includes(':')) return null;
-  const [h, m] = timeStr.trim().split(':').map(Number);
-  if (isNaN(h) || isNaN(m)) return null;
-  return h * 60 + m;
-};
+const PRESET_TIMES = ['07:30', '08:00', '08:30', '12:30', '16:00', '17:00', '20:00', '22:00'];
 
 export const TimePickerModal: React.FC<TimePickerModalProps> = ({
   isOpen,
   onClose,
   title,
-  value,
+  value = '',
   onSelect,
-  field,
-  existingJamMasuk,
-  existingJamPulang,
+  onApplyUnified,
+  field = 'unified',
+  existingJamMasuk = '',
+  existingJamPulang = '',
+  existingAbsenCeisa = '',
+  theme,
 }) => {
+  const isWinamp = theme === 'winamp';
+  const isVista = theme === 'vista';
+  const isDark = theme === 'dark';
+  const isDarkFluid = theme === 'darkFluid';
+
+  // Active target field being edited on clock face: 'jamMasuk' | 'jamPulang' | 'absenCeisa'
+  const [activeTab, setActiveTab] = useState<'jamMasuk' | 'jamPulang' | 'absenCeisa'>(() => {
+    if (field === 'jamPulang') return 'jamPulang';
+    if (field === 'absenCeisa') return 'absenCeisa';
+    return 'jamMasuk';
+  });
+
+  // State for all 3 time values in unified mode
+  const [jamMasukVal, setJamMasukVal] = useState<string>(existingJamMasuk || (field === 'jamMasuk' ? value : ''));
+  const [jamPulangVal, setJamPulangVal] = useState<string>(existingJamPulang || (field === 'jamPulang' ? value : ''));
+  const [absenCeisaVal, setAbsenCeisaVal] = useState<string>(existingAbsenCeisa || (field === 'absenCeisa' ? value : ''));
+
   const [hour, setHour] = useState<number>(8);
   const [minute, setMinute] = useState<number>(0);
+  const [hourInput, setHourInput] = useState<string>('08');
+  const [minuteInput, setMinuteInput] = useState<string>('00');
   const [mode, setMode] = useState<'hour' | 'minute'>('hour');
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [showWarningFeedback, setShowWarningFeedback] = useState<boolean>(false);
-  const clockRef = useRef<HTMLDivElement>(null);
 
+  const clockRef = useRef<HTMLDivElement>(null);
+  const hourInputRef = useRef<HTMLInputElement>(null);
+  const minuteInputRef = useRef<HTMLInputElement>(null);
+  const handleApplyRef = useRef<() => void>(() => {});
+
+  // Sync internal hour/minute with activeTab value
+  const syncClockWithActiveValue = useCallback((activeTarget: 'jamMasuk' | 'jamPulang' | 'absenCeisa', valStr: string) => {
+    let initH = 8;
+    let initM = 0;
+    if (valStr && valStr.includes(':')) {
+      const [h, m] = valStr.split(':').map(Number);
+      initH = isNaN(h) ? 8 : Math.max(0, Math.min(23, h));
+      initM = isNaN(m) ? 0 : Math.max(0, Math.min(59, m));
+    } else {
+      if (activeTarget === 'jamPulang') {
+        initH = 17;
+        initM = 0;
+      } else if (activeTarget === 'absenCeisa') {
+        initH = 7;
+        initM = 30;
+      } else {
+        initH = 7;
+        initM = 30;
+      }
+    }
+    setHour(initH);
+    setMinute(initM);
+    setHourInput(String(initH).padStart(2, '0'));
+    setMinuteInput(String(initM).padStart(2, '0'));
+  }, []);
+
+  // Initialize values when modal opens or props change
   useEffect(() => {
     if (isOpen) {
-      if (value && value.includes(':')) {
-        const [h, m] = value.split(':');
-        const parsedH = parseInt(h, 10);
-        const parsedM = parseInt(m, 10);
-        setHour(isNaN(parsedH) ? 8 : Math.max(0, Math.min(23, parsedH)));
-        setMinute(isNaN(parsedM) ? 0 : Math.max(0, Math.min(59, parsedM)));
-      } else {
-        // If field is jamPulang and existingJamMasuk exists, default to something reasonable after jamMasuk
-        if (field === 'jamPulang' && existingJamMasuk && existingJamMasuk.includes(':')) {
-          const [h, m] = existingJamMasuk.split(':').map(Number);
-          if (!isNaN(h)) {
-            setHour(Math.min(23, (h + 8) % 24));
-            setMinute(isNaN(m) ? 0 : m);
-          } else {
-            setHour(16);
-            setMinute(30);
-          }
-        } else if (field === 'jamPulang') {
-          setHour(16);
-          setMinute(30);
-        } else {
-          setHour(8);
-          setMinute(0);
-        }
-      }
+      const initialMasuk = existingJamMasuk || (field === 'jamMasuk' ? value : '');
+      const initialPulang = existingJamPulang || (field === 'jamPulang' ? value : '');
+      const initialCeisa = existingAbsenCeisa || (field === 'absenCeisa' ? value : '');
+
+      setJamMasukVal(initialMasuk);
+      setJamPulangVal(initialPulang);
+      setAbsenCeisaVal(initialCeisa);
+
+      const targetTab = field === 'jamPulang' ? 'jamPulang' : field === 'absenCeisa' ? 'absenCeisa' : 'jamMasuk';
+      setActiveTab(targetTab);
+
+      const activeVal = targetTab === 'jamPulang' ? initialPulang : targetTab === 'absenCeisa' ? initialCeisa : initialMasuk;
+      syncClockWithActiveValue(targetTab, activeVal);
       setMode('hour');
       setShowWarningFeedback(false);
-    }
-  }, [isOpen, value, field, existingJamMasuk]);
 
-  if (!isOpen) return null;
+      const timer = setTimeout(() => {
+        if (hourInputRef.current) {
+          hourInputRef.current.focus();
+          hourInputRef.current.select();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, field, value, existingJamMasuk, existingJamPulang, existingAbsenCeisa, syncClockWithActiveValue]);
+
+  // Update active tab value whenever hour/minute changes
+  const updateActiveTabValue = (newH: number, newM: number) => {
+    const formatted = `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
+    if (activeTab === 'jamMasuk') {
+      setJamMasukVal(formatted);
+    } else if (activeTab === 'jamPulang') {
+      setJamPulangVal(formatted);
+    } else if (activeTab === 'absenCeisa') {
+      setAbsenCeisaVal(formatted);
+    }
+  };
+
+  const handleSwitchTab = (target: 'jamMasuk' | 'jamPulang' | 'absenCeisa') => {
+    setActiveTab(target);
+    const targetVal = target === 'jamMasuk' ? jamMasukVal : target === 'jamPulang' ? jamPulangVal : absenCeisaVal;
+    syncClockWithActiveValue(target, targetVal);
+  };
 
   const formatHour = String(hour).padStart(2, '0');
   const formatMinute = String(minute).padStart(2, '0');
   const currentTimeStr = `${formatHour}:${formatMinute}`;
-  const currentMinutes = hour * 60 + minute;
 
-  // Validasi: jamMasuk < jamPulang
+  // Validation: Check if jamMasuk < jamPulang (except for overnight shifts like 17:00 - 04:30)
   let validationError: string | null = null;
   let validationRuleSubtext: string | null = null;
 
-  if (field === 'jamPulang' && existingJamMasuk) {
-    const masukMinutes = parseTimeToMinutes(existingJamMasuk);
-    if (masukMinutes !== null) {
-      if (currentMinutes <= masukMinutes) {
-        validationError = `Jam pulang (${currentTimeStr}) tidak boleh lebih awal atau sama dengan jam masuk (${existingJamMasuk})!`;
-        validationRuleSubtext = `Aturan kehadiran: Jam Masuk (${existingJamMasuk}) harus lebih awal dari Jam Pulang (${currentTimeStr}).`;
-      }
-    }
-  } else if (field === 'jamMasuk' && existingJamPulang) {
-    const pulangMinutes = parseTimeToMinutes(existingJamPulang);
-    if (pulangMinutes !== null) {
-      if (currentMinutes >= pulangMinutes) {
-        validationError = `Jam masuk (${currentTimeStr}) tidak boleh lebih lambat atau sama dengan jam pulang (${existingJamPulang})!`;
-        validationRuleSubtext = `Aturan kehadiran: Jam Masuk (${currentTimeStr}) harus lebih awal dari Jam Pulang (${existingJamPulang}).`;
-      }
-    }
-  }
-
-  const isInvalid = validationError !== null;
+  const isInvalid = false; // Allow all shift timings including overnight
 
   // Kalkulasi sudut jarum jam & jarum menit
   // Jam: 12 jam putaran (30 deg per jam) + pergeseran menit
@@ -151,11 +198,15 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
         finalH = rawHour === 12 ? 12 : rawHour;
       }
       setHour(finalH);
+      setHourInput(String(finalH).padStart(2, '0'));
+      updateActiveTabValue(finalH, minute);
     } else {
       // Minute Logic: Bebas 0 sampai 59 (tiap 6 derajat = 1 menit)
       let rawMin = Math.round(angleDeg / 6) % 60;
       if (rawMin < 0) rawMin += 60;
       setMinute(rawMin);
+      setMinuteInput(String(rawMin).padStart(2, '0'));
+      updateActiveTabValue(hour, rawMin);
     }
   };
 
@@ -212,16 +263,27 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
     }
     setMinute(newM);
     setHour(newH);
+    setMinuteInput(String(newM).padStart(2, '0'));
+    setHourInput(String(newH).padStart(2, '0'));
+    updateActiveTabValue(newH, newM);
   };
 
   const adjustHour = (delta: number) => {
-    setHour((prev) => (prev + delta + 24) % 24);
+    const newH = (hour + delta + 24) % 24;
+    setHour(newH);
+    setHourInput(String(newH).padStart(2, '0'));
+    updateActiveTabValue(newH, minute);
   };
 
   const handleSetNow = () => {
     const now = new Date();
-    setHour(now.getHours());
-    setMinute(now.getMinutes());
+    const newH = now.getHours();
+    const newM = now.getMinutes();
+    setHour(newH);
+    setMinute(newM);
+    setHourInput(String(newH).padStart(2, '0'));
+    setMinuteInput(String(newM).padStart(2, '0'));
+    updateActiveTabValue(newH, newM);
   };
 
   const handleApply = () => {
@@ -229,12 +291,55 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
       setShowWarningFeedback(true);
       return;
     }
-    onSelect(`${formatHour}:${formatMinute}`);
+    if (onApplyUnified) {
+      onApplyUnified({
+        jamMasuk: jamMasukVal,
+        jamPulang: jamPulangVal,
+        absenCeisa: absenCeisaVal,
+      });
+    } else if (onSelect) {
+      onSelect(`${formatHour}:${formatMinute}`);
+    }
     onClose();
   };
 
   const handleClear = () => {
-    onSelect('');
+    let newMasuk = jamMasukVal;
+    let newPulang = jamPulangVal;
+    let newCeisa = absenCeisaVal;
+
+    if (activeTab === 'jamMasuk') {
+      newMasuk = '';
+      setJamMasukVal('');
+    } else if (activeTab === 'jamPulang') {
+      newPulang = '';
+      setJamPulangVal('');
+    } else if (activeTab === 'absenCeisa') {
+      newCeisa = '';
+      setAbsenCeisaVal('');
+    }
+
+    if (onApplyUnified) {
+      onApplyUnified({
+        jamMasuk: newMasuk,
+        jamPulang: newPulang,
+        absenCeisa: newCeisa,
+      });
+    } else if (onSelect) {
+      onSelect('');
+    }
+    onClose();
+  };
+
+  const handleClearAll = () => {
+    setJamMasukVal('');
+    setJamPulangVal('');
+    setAbsenCeisaVal('');
+    if (onApplyUnified) {
+      onApplyUnified({ jamMasuk: '', jamPulang: '', absenCeisa: '' });
+    } else if (onSelect) {
+      onSelect('');
+    }
     onClose();
   };
 
@@ -244,94 +349,215 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
     const parsedM = parseInt(m, 10);
     setHour(parsedH);
     setMinute(parsedM);
+    setHourInput(String(parsedH).padStart(2, '0'));
+    setMinuteInput(String(parsedM).padStart(2, '0'));
+    updateActiveTabValue(parsedH, parsedM);
+  };
 
-    // Cek apakah preset ini valid terhadap aturan jamMasuk < jamPulang
-    const presetMinutes = parsedH * 60 + parsedM;
-    let presetInvalid = false;
+  // Keyboard Typing Handlers for Hour Input
+  const handleHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, '');
+    if (raw === '') {
+      setHourInput('');
+      return;
+    }
+    const val = parseInt(raw, 10);
+    if (isNaN(val)) return;
 
-    if (field === 'jamPulang' && existingJamMasuk) {
-      const masukMinutes = parseTimeToMinutes(existingJamMasuk);
-      if (masukMinutes !== null && presetMinutes <= masukMinutes) {
-        presetInvalid = true;
-      }
-    } else if (field === 'jamMasuk' && existingJamPulang) {
-      const pulangMinutes = parseTimeToMinutes(existingJamPulang);
-      if (pulangMinutes !== null && presetMinutes >= pulangMinutes) {
-        presetInvalid = true;
-      }
+    let finalVal = val;
+    if (finalVal > 23) {
+      finalVal = Math.min(23, val % 100);
+      if (finalVal > 23) finalVal = 23;
     }
 
-    if (presetInvalid) {
-      setShowWarningFeedback(true);
-    } else {
-      onSelect(time);
+    setHour(finalVal);
+    setHourInput(raw.length === 1 ? raw : String(finalVal).padStart(2, '0'));
+
+    // Auto-advance ke input menit jika sudah 2 digit atau jika angka awal >= 3
+    if (raw.length >= 2 || val >= 3) {
+      setMode('minute');
+      setTimeout(() => {
+        if (minuteInputRef.current) {
+          minuteInputRef.current.focus();
+          minuteInputRef.current.select();
+        }
+      }, 10);
+    }
+  };
+
+  const handleHourKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      adjustHour(1);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      adjustHour(-1);
+    } else if (e.key === ':' || e.key === 'ArrowRight' || e.key === 'Tab') {
+      if (e.key !== 'Tab') e.preventDefault();
+      setMode('minute');
+      minuteInputRef.current?.focus();
+      minuteInputRef.current?.select();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      handleApply();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
       onClose();
     }
   };
 
+  // Keyboard Typing Handlers for Minute Input
+  const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, '');
+    if (raw === '') {
+      setMinuteInput('');
+      return;
+    }
+    const val = parseInt(raw, 10);
+    if (isNaN(val)) return;
+
+    let finalVal = val;
+    if (finalVal > 59) {
+      finalVal = 59;
+    }
+
+    setMinute(finalVal);
+    setMinuteInput(raw.length === 1 ? raw : String(finalVal).padStart(2, '0'));
+  };
+
+  const handleMinuteKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      adjustMinute(1);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      adjustMinute(-1);
+    } else if (
+      e.key === 'ArrowLeft' ||
+      (e.key === 'Backspace' && (minuteInput === '' || e.currentTarget.selectionStart === 0))
+    ) {
+      e.preventDefault();
+      setMode('hour');
+      hourInputRef.current?.focus();
+      hourInputRef.current?.select();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      handleApply();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      onClose();
+    }
+  };
+
+  handleApplyRef.current = handleApply;
+
+  // Global keydown di level modal untuk tombol Escape dan Enter
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      } else if (e.key === 'Enter') {
+        const activeTag = (document.activeElement?.tagName || '').toLowerCase();
+        if (activeTag !== 'button') {
+          e.preventDefault();
+          handleApplyRef.current();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/70 p-3 backdrop-blur-xs animate-in fade-in duration-150 select-none"
+      className="fixed inset-0 z-[100000] flex items-center justify-center bg-slate-950/75 p-3 backdrop-blur-sm animate-in fade-in duration-150 select-none"
       onMouseUp={handleMouseUp}
     >
-      <div className="w-full max-w-sm rounded-3xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+      <div 
+        className={`w-full max-w-sm overflow-hidden tp-modal-card shadow-2xl ${
+          isWinamp ? 'font-mono shadow-[4px_4px_0_#000]' : isVista ? 'backdrop-blur-2xl shadow-[0_25px_60px_rgba(14,116,224,0.3)] ring-1 ring-sky-300/30' : ''
+        }`}
+        data-theme={theme}
+      >
         {/* Header Bar */}
-        <div className="flex items-center justify-between bg-slate-900 px-5 py-3 text-white">
+        <div className="flex items-center justify-between px-5 py-3.5 tp-header">
           <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-indigo-400" />
+            <Clock className="h-4 w-4 tp-header-icon" />
             <span className="text-xs font-bold tracking-wide uppercase">{title}</span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 transition-colors cursor-pointer tp-header-close-btn"
+            aria-label="Tutup"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="p-4 space-y-3.5">
-          {/* Reference Info Pill (Jika ada pasangan jam masuk / pulang) */}
-          {(field === 'jamPulang' && existingJamMasuk) && (
-            <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-indigo-50/80 border border-indigo-100 text-indigo-900 text-xs">
-              <div className="flex items-center space-x-1.5 font-medium">
-                <Info className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
-                <span>Jam Masuk: <strong className="font-mono">{existingJamMasuk}</strong></span>
-              </div>
-              <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight bg-indigo-100/70 px-1.5 py-0.5 rounded">
-                Target: &gt; {existingJamMasuk}
-              </span>
-            </div>
-          )}
+          {/* Multi-Field Tab Selector (Masuk / Pulang / Absen CEISA) */}
+          <div className="grid grid-cols-3 gap-1 p-1 tp-tabs-container">
+            <button
+              type="button"
+              onClick={() => handleSwitchTab('jamMasuk')}
+              className={`py-1.5 px-2 text-xs font-bold transition-all text-center cursor-pointer tp-tab-btn ${
+                activeTab === 'jamMasuk' ? 'tp-tab-active shadow-xs' : ''
+              }`}
+            >
+              <div className="text-[9.5px] opacity-75 uppercase tracking-wider font-semibold">Masuk</div>
+              <div className="font-mono text-xs font-black">{jamMasukVal || '--:--'}</div>
+            </button>
 
-          {(field === 'jamMasuk' && existingJamPulang) && (
-            <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-indigo-50/80 border border-indigo-100 text-indigo-900 text-xs">
-              <div className="flex items-center space-x-1.5 font-medium">
-                <Info className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
-                <span>Jam Pulang: <strong className="font-mono">{existingJamPulang}</strong></span>
-              </div>
-              <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight bg-indigo-100/70 px-1.5 py-0.5 rounded">
-                Target: &lt; {existingJamPulang}
-              </span>
-            </div>
-          )}
+            <button
+              type="button"
+              onClick={() => handleSwitchTab('jamPulang')}
+              className={`py-1.5 px-2 text-xs font-bold transition-all text-center cursor-pointer tp-tab-btn ${
+                activeTab === 'jamPulang' ? 'tp-tab-active shadow-xs' : ''
+              }`}
+            >
+              <div className="text-[9.5px] opacity-75 uppercase tracking-wider font-semibold">Pulang</div>
+              <div className="font-mono text-xs font-black">{jamPulangVal || '--:--'}</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSwitchTab('absenCeisa')}
+              className={`py-1.5 px-2 text-xs font-bold transition-all text-center cursor-pointer tp-tab-btn ${
+                activeTab === 'absenCeisa' ? 'tp-tab-active shadow-xs' : ''
+              }`}
+            >
+              <div className="text-[9.5px] opacity-75 uppercase tracking-wider font-semibold">CEISA</div>
+              <div className="font-mono text-xs font-black">{absenCeisaVal || '--:--'}</div>
+            </button>
+          </div>
 
           {/* Warning Banner Jika Tidak Valid */}
           {isInvalid && (
-            <div className="flex items-start space-x-2.5 rounded-2xl bg-rose-50 border-2 border-rose-300 p-3 text-rose-900 animate-in fade-in zoom-in-95 duration-150">
+            <div className={`flex items-start space-x-2.5 p-3 duration-150 ${
+              isWinamp 
+                ? 'rounded-none bg-black border-2 border-rose-500 text-rose-400 font-mono' 
+                : 'rounded-lg bg-rose-50 border border-rose-300 text-rose-900 animate-in fade-in zoom-in-95'
+            }`}>
               <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5 animate-bounce" />
               <div className="text-xs space-y-1">
-                <div className="font-black text-rose-900 flex items-center space-x-1">
+                <div className="font-black text-rose-600 flex items-center space-x-1">
                   <span>Waktu Tidak Valid!</span>
-                  <span className="text-[10px] font-mono bg-rose-200/80 text-rose-950 px-1.5 py-0.2 rounded font-bold">
+                  <span className={`text-[10px] font-mono px-1.5 py-0.2 font-bold ${
+                    isWinamp ? 'rounded-none bg-rose-950 text-rose-300 border border-rose-700' : 'rounded bg-rose-200/80 text-rose-950'
+                  }`}>
                     jamMasuk &lt; jamPulang
                   </span>
                 </div>
-                <p className="text-[11.5px] text-rose-800 leading-snug font-medium">
+                <p className="text-[11.5px] leading-snug font-medium">
                   {validationError}
                 </p>
                 {validationRuleSubtext && (
-                  <p className="text-[10px] text-rose-700 font-semibold">
+                  <p className="text-[10px] font-semibold">
                     💡 {validationRuleSubtext}
                   </p>
                 )}
@@ -340,47 +566,87 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
           )}
 
           {/* Digital Time Display & Mode Switcher */}
-          <div className={`flex items-center justify-between rounded-2xl p-3 shadow-inner transition-colors ${
-            isInvalid ? 'bg-rose-950 ring-2 ring-rose-500' : 'bg-slate-950'
-          }`}>
+          <div className="flex items-center justify-between p-3 transition-colors tp-digital-container">
             <div className="flex items-center space-x-1.5">
-              {/* Hour Box */}
-              <button
-                type="button"
-                onClick={() => setMode('hour')}
-                className={`relative px-3 py-1.5 rounded-xl font-mono text-2xl font-black transition-all cursor-pointer ${
+              {/* Hour Input Box */}
+              <div
+                className={`relative flex flex-col items-center justify-center px-2.5 py-1 transition-all cursor-text tp-digital-box ${
                   mode === 'hour'
-                    ? isInvalid 
-                      ? 'bg-rose-600 text-white shadow-md ring-2 ring-rose-400/60'
-                      : 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400/50'
-                    : 'bg-slate-900 text-slate-400 hover:text-slate-200'
+                    ? (isInvalid ? '!bg-rose-600 !text-white !border-rose-500 shadow-md ring-2 ring-rose-400/60' : 'tp-digital-active shadow-md')
+                    : ''
                 }`}
+                onClick={() => {
+                  setMode('hour');
+                  hourInputRef.current?.focus();
+                  hourInputRef.current?.select();
+                }}
               >
-                {formatHour}
-                <span className="block text-[8px] tracking-wider text-slate-400 font-sans uppercase font-bold text-center">
+                <input
+                  ref={hourInputRef}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={2}
+                  value={hourInput}
+                  onFocus={(e) => {
+                    setMode('hour');
+                    e.target.select();
+                  }}
+                  onBlur={() => {
+                    setHourInput(String(hour).padStart(2, '0'));
+                  }}
+                  onChange={handleHourChange}
+                  onKeyDown={handleHourKeyDown}
+                  className="w-11 text-center font-mono text-2xl font-black bg-transparent border-none outline-none p-0 selection:bg-white/30 cursor-text text-inherit"
+                  aria-label="Ketik Jam (00-23)"
+                  title="Klik untuk ketik jam lewat keyboard (00-23)"
+                />
+                <span className="block text-[8px] tracking-wider font-sans uppercase font-bold text-center select-none tp-digital-subtext">
                   Jam
                 </span>
-              </button>
+              </div>
 
-              <span className={`text-2xl font-mono font-bold animate-pulse ${isInvalid ? 'text-rose-400' : 'text-indigo-400'}`}>:</span>
+              <span className={`text-2xl font-mono font-bold select-none animate-pulse ${
+                isInvalid ? 'text-rose-500' : 'tp-colon'
+              }`}>:</span>
 
-              {/* Minute Box */}
-              <button
-                type="button"
-                onClick={() => setMode('minute')}
-                className={`relative px-3 py-1.5 rounded-xl font-mono text-2xl font-black transition-all cursor-pointer ${
+              {/* Minute Input Box */}
+              <div
+                className={`relative flex flex-col items-center justify-center px-2.5 py-1 transition-all cursor-text tp-digital-box ${
                   mode === 'minute'
-                    ? isInvalid
-                      ? 'bg-rose-600 text-white shadow-md ring-2 ring-rose-400/60'
-                      : 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-400/50'
-                    : 'bg-slate-900 text-slate-400 hover:text-slate-200'
+                    ? (isInvalid ? '!bg-rose-600 !text-white !border-rose-500 shadow-md ring-2 ring-rose-400/60' : 'tp-digital-active shadow-md')
+                    : ''
                 }`}
+                onClick={() => {
+                  setMode('minute');
+                  minuteInputRef.current?.focus();
+                  minuteInputRef.current?.select();
+                }}
               >
-                {formatMinute}
-                <span className="block text-[8px] tracking-wider text-slate-400 font-sans uppercase font-bold text-center">
+                <input
+                  ref={minuteInputRef}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={2}
+                  value={minuteInput}
+                  onFocus={(e) => {
+                    setMode('minute');
+                    e.target.select();
+                  }}
+                  onBlur={() => {
+                    setMinuteInput(String(minute).padStart(2, '0'));
+                  }}
+                  onChange={handleMinuteChange}
+                  onKeyDown={handleMinuteKeyDown}
+                  className="w-11 text-center font-mono text-2xl font-black bg-transparent border-none outline-none p-0 selection:bg-white/30 cursor-text text-inherit"
+                  aria-label="Ketik Menit (00-59)"
+                  title="Klik untuk ketik menit lewat keyboard (00-59)"
+                />
+                <span className="block text-[8px] tracking-wider font-sans uppercase font-bold text-center select-none tp-digital-subtext">
                   Menit
                 </span>
-              </button>
+              </div>
             </div>
 
             {/* Stepper Buttons */}
@@ -388,7 +654,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               <button
                 type="button"
                 onClick={() => adjustMinute(-1)}
-                className="rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 px-2 py-1.5 text-xs font-bold font-mono transition-colors cursor-pointer"
+                className="px-2 py-1.5 text-xs font-bold font-mono transition-colors cursor-pointer tp-stepper-btn"
                 title="Kurangi 1 Menit"
               >
                 -1m
@@ -396,7 +662,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               <button
                 type="button"
                 onClick={() => adjustMinute(1)}
-                className="rounded-lg bg-slate-900 hover:bg-slate-800 text-indigo-400 px-2 py-1.5 text-xs font-bold font-mono transition-colors cursor-pointer"
+                className="px-2 py-1.5 text-xs font-bold font-mono transition-colors cursor-pointer tp-stepper-btn tp-stepper-btn-accent"
                 title="Tambah 1 Menit"
               >
                 +1m
@@ -404,7 +670,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               <button
                 type="button"
                 onClick={handleSetNow}
-                className="flex items-center space-x-1 rounded-lg bg-indigo-950 hover:bg-indigo-900 text-indigo-300 px-2 py-1.5 text-xs font-semibold transition-colors border border-indigo-800/40 cursor-pointer"
+                className="flex items-center space-x-1 px-2 py-1.5 text-xs font-semibold transition-colors cursor-pointer tp-stepper-btn tp-stepper-btn-accent"
                 title="Set Waktu Saat Ini"
               >
                 <Sparkles className="h-3 w-3" />
@@ -422,10 +688,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              className="relative w-52 h-52 sm:w-56 sm:h-56 rounded-full bg-linear-to-b from-slate-900 via-slate-950 to-slate-900 border-4 border-slate-800 shadow-xl cursor-pointer select-none touch-none"
-              style={{
-                boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.4), inset 0 0 15px rgba(0,0,0,0.8)',
-              }}
+              className="relative w-52 h-52 sm:w-56 sm:h-56 rounded-full cursor-pointer select-none touch-none tp-dial-surface shadow-xl"
             >
               {/* Watch Bezel Ticks (60 Menit / Detik) */}
               {Array.from({ length: 60 }).map((_, i) => {
@@ -442,7 +705,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                   >
                     <div
                       className={`w-[1.5px] rounded-full mx-auto ${
-                        isMajor ? 'h-2 bg-indigo-400' : 'h-1 bg-slate-700'
+                        isMajor ? 'h-2 tp-dial-tick-major' : 'h-1 tp-dial-tick-minor'
                       }`}
                     />
                   </div>
@@ -461,10 +724,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                     return (
                       <div
                         key={h}
-                        className={`absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center rounded-full text-xs font-bold transition-transform ${
-                          isSelected
-                            ? 'bg-indigo-600 text-white shadow-lg scale-110'
-                            : 'text-slate-300 hover:text-white'
+                        className={`absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center text-xs font-bold transition-transform rounded-full tp-dial-num ${
+                          isSelected ? 'tp-dial-num-active shadow-md scale-110' : ''
                         }`}
                         style={{
                           left: `calc(50% + ${Math.cos(rad) * r}px)`,
@@ -485,10 +746,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                     return (
                       <div
                         key={h}
-                        className={`absolute w-5 h-5 -ml-2.5 -mt-2.5 flex items-center justify-center rounded-full text-[10px] font-semibold transition-transform ${
-                          isSelected
-                            ? 'bg-amber-500 text-slate-950 font-black shadow-md scale-110'
-                            : 'text-slate-500 hover:text-slate-300'
+                        className={`absolute w-5 h-5 -ml-2.5 -mt-2.5 flex items-center justify-center text-[10px] font-semibold transition-transform rounded-full tp-dial-sub-num ${
+                          isSelected ? 'tp-dial-sub-active font-black shadow-md scale-110' : ''
                         }`}
                         style={{
                           left: `calc(50% + ${Math.cos(rad) * r}px)`,
@@ -513,10 +772,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                     return (
                       <div
                         key={m}
-                        className={`absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center rounded-full text-xs font-bold transition-transform ${
-                          isSelected
-                            ? 'bg-indigo-600 text-white shadow-lg scale-110'
-                            : 'text-slate-300 hover:text-white'
+                        className={`absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center text-xs font-bold transition-transform rounded-full tp-dial-num ${
+                          isSelected ? 'tp-dial-num-active shadow-md scale-110' : ''
                         }`}
                         style={{
                           left: `calc(50% + ${Math.cos(rad) * r}px)`,
@@ -532,77 +789,66 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
 
               {/* JARUM JAM (Hour Hand) */}
               <div
-                className="absolute top-1/2 left-1/2 origin-bottom transition-all duration-75 pointer-events-none"
+                className="absolute top-1/2 left-1/2 origin-bottom transition-all duration-75 pointer-events-none tp-hand-hour-elem"
                 style={{
                   width: '4px',
                   height: '42px',
-                  backgroundColor: '#818cf8', // indigo-400
-                  borderRadius: '3px',
+                  borderRadius: isWinamp ? '0' : '3px',
                   transform: `translate(-50%, -100%) rotate(${hourAngle}deg)`,
-                  boxShadow: '0 0 8px rgba(129, 140, 248, 0.6)',
+                  boxShadow: 'var(--tp-hand-shadow, 0 0 6px rgba(0, 0, 0, 0.25))',
                 }}
               />
 
               {/* JARUM MENIT (Minute Hand) */}
               <div
-                className="absolute top-1/2 left-1/2 origin-bottom transition-all duration-75 pointer-events-none"
+                className="absolute top-1/2 left-1/2 origin-bottom transition-all duration-75 pointer-events-none tp-hand-minute-elem"
                 style={{
                   width: '2.5px',
                   height: '68px',
-                  backgroundColor: mode === 'minute' ? '#a855f7' : '#e2e8f0', // purple / slate
-                  borderRadius: '2px',
+                  borderRadius: isWinamp ? '0' : '2px',
                   transform: `translate(-50%, -100%) rotate(${minuteAngle}deg)`,
-                  boxShadow: mode === 'minute' ? '0 0 10px rgba(168, 85, 247, 0.8)' : 'none',
+                  boxShadow: 'var(--tp-hand-shadow, 0 0 8px rgba(0, 0, 0, 0.25))',
                 }}
               />
 
               {/* Center Pivot Pin */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-amber-400 border-2 border-slate-900 shadow-md pointer-events-none" />
+              <div 
+                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none tp-pivot-elem ${
+                  isWinamp ? 'rounded-none' : 'rounded-full shadow-md'
+                }`} 
+              />
             </div>
 
             {/* Hint Navigation Label */}
-            <p className="mt-2 text-[11px] text-slate-500 font-medium text-center">
-              Sentuh & putar dial jam di atas untuk mengatur waktu secara bebas (0–59 menit)
-            </p>
+            <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] font-medium text-center tp-hint-text">
+              <Keyboard className="h-3.5 w-3.5 shrink-0 tp-colon" />
+              <span>
+                Ketik langsung via keyboard <kbd className="px-1 py-0.2 text-[10px] font-mono tp-hint-kbd">00-23</kbd> / <kbd className="px-1 py-0.2 text-[10px] font-mono tp-hint-kbd">00-59</kbd> atau putar dial jam
+              </span>
+            </div>
           </div>
 
-          {/* Quick Preset Buttons */}
+          {/* Quick Preset Buttons (8px border-radius) */}
           <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-              Preset Shift Populer
+            <span className="text-[10px] font-bold uppercase tracking-wider block mb-1.5 tp-preset-label">
+              {activeTab === 'absenCeisa' ? 'Preset Waktu CEISA' : `Preset Waktu ${activeTab === 'jamMasuk' ? 'Masuk' : 'Pulang'}`}
             </span>
             <div className="grid grid-cols-4 gap-1.5">
-              {PRESET_TIMES.map((preset) => {
+              {(activeTab === 'absenCeisa'
+                ? ['07:15', '07:30', '07:45', '08:00', '16:00', '16:30', '17:00', '19:30']
+                : PRESET_TIMES
+              ).map((preset) => {
                 const isSelected = `${formatHour}:${formatMinute}` === preset;
-                const pMinutes = parseTimeToMinutes(preset);
-                let pInvalid = false;
-                if (field === 'jamPulang' && existingJamMasuk) {
-                  const mMin = parseTimeToMinutes(existingJamMasuk);
-                  if (mMin !== null && pMinutes !== null && pMinutes <= mMin) {
-                    pInvalid = true;
-                  }
-                } else if (field === 'jamMasuk' && existingJamPulang) {
-                  const pMin = parseTimeToMinutes(existingJamPulang);
-                  if (pMin !== null && pMinutes !== null && pMinutes >= pMin) {
-                    pInvalid = true;
-                  }
-                }
 
                 return (
                   <button
                     key={preset}
                     type="button"
                     onClick={() => handlePreset(preset)}
-                    className={`relative rounded-lg py-1.5 text-xs font-mono font-semibold border transition-all cursor-pointer ${
-                      isSelected
-                        ? isInvalid
-                          ? 'bg-rose-50 border-rose-500 text-rose-700 font-bold'
-                          : 'bg-indigo-50 border-indigo-600 text-indigo-700 font-bold'
-                        : pInvalid
-                          ? 'bg-slate-50 border-slate-200 text-slate-400 line-through opacity-70 hover:opacity-100 hover:bg-rose-50'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-indigo-50/50'
+                    className={`relative py-1.5 text-xs font-mono font-semibold transition-all cursor-pointer tp-preset-btn ${
+                      isSelected ? 'tp-preset-active font-bold shadow-xs' : ''
                     }`}
-                    title={pInvalid ? `Preset ${preset} melanggar aturan jamMasuk < jamPulang` : `Pilih ${preset}`}
+                    title={`Pilih ${preset}`}
                   >
                     {preset}
                   </button>
@@ -613,11 +859,11 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50 p-3">
+        <div className="flex items-center justify-between p-3.5 tp-footer">
           <button
             type="button"
             onClick={handleClear}
-            className="flex items-center space-x-1 rounded-xl px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+            className="flex items-center space-x-1 px-3 py-2 text-xs font-semibold transition-colors cursor-pointer tp-btn-clear"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span>Kosongkan</span>
@@ -627,7 +873,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 bg-white hover:bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+              className="px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer tp-btn-secondary"
             >
               Batal
             </button>
@@ -635,17 +881,11 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               type="button"
               onClick={handleApply}
               disabled={isInvalid}
-              className={`flex items-center space-x-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white shadow-sm transition-all ${
-                isInvalid
-                  ? 'bg-slate-400 cursor-not-allowed opacity-60'
-                  : 'bg-indigo-600 hover:bg-indigo-500 cursor-pointer active:scale-95'
-              }`}
-              title={isInvalid ? validationError || 'Jam masuk harus lebih awal dari jam pulang' : `Terapkan ${formatHour}:${formatMinute}`}
+              className="flex items-center space-x-1.5 px-4 py-2 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 tp-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Simpan waktu untuk semua field"
             >
               <Check className="h-4 w-4" />
-              <span>
-                {isInvalid ? 'Waktu Tidak Valid' : `Terapkan (${formatHour}:${formatMinute})`}
-              </span>
+              <span>Simpan Waktu</span>
             </button>
           </div>
         </div>

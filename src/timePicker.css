@@ -1,0 +1,672 @@
+/* =========================================================
+   TIME PICKER THEME SYSTEM (PURE CSS CUSTOM PROPERTIES)
+   Supports: Default (Clean Light & Teal), Dark, Vista, Winamp, DarkFluid
+   All colors, borders, and radiuses driven strictly by --tp-* variables
+   ========================================================= */
+
+/* --- 1. DEFAULT LIGHT THEME (Clean Light & Teal Accent) --- */
+:root,
+[data-theme="default"] {
+  --tp-modal-bg: #FFFFFF;
+  --tp-modal-border: #E2E8F0;
+  --tp-header-bg: #F8FAFC;
+  --tp-header-text: #0F172A;
+  --tp-header-subtext: #0D9488;
+  --tp-header-border: #E2E8F0;
+  --tp-header-close-hover: #F1F5F9;
+
+  --tp-tab-container-bg: #F1F5F9;
+  --tp-tab-container-border: #E2E8F0;
+  --tp-tab-active-bg: #0D9488;
+  --tp-tab-active-text: #FFFFFF;
+  --tp-tab-inactive-text: #64748B;
+  --tp-tab-inactive-hover: #E2E8F0;
+
+  --tp-digital-bg: #F8FAFC;
+  --tp-digital-border: #E2E8F0;
+  --tp-digital-box-bg: #FFFFFF;
+  --tp-digital-box-border: #CBD5E1;
+  --tp-digital-box-text: #0F172A;
+  --tp-digital-box-subtext: #64748B;
+  --tp-digital-box-active-bg: #0D9488;
+  --tp-digital-box-active-text: #FFFFFF;
+  --tp-colon-text: #0D9488;
+
+  --tp-stepper-bg: #FFFFFF;
+  --tp-stepper-text: #334155;
+  --tp-stepper-border: #CBD5E1;
+  --tp-stepper-hover-bg: #F1F5F9;
+  --tp-stepper-hover-text: #0F172A;
+  --tp-stepper-accent-text: #0D9488;
+
+  --tp-dial-bg: #F8FAFC;
+  --tp-dial-border: #E2E8F0;
+  --tp-dial-tick-major: #0D9488;
+  --tp-dial-tick-minor: #CBD5E1;
+  --tp-dial-text: #0F172A;
+  --tp-dial-text-hover: #000000;
+  --tp-dial-text-active-bg: #0D9488;
+  --tp-dial-text-active-text: #FFFFFF;
+  --tp-dial-sub-text: #64748B;
+  --tp-dial-sub-active-bg: #14B8A6;
+  --tp-dial-sub-active-text: #FFFFFF;
+
+  --tp-hand-hour: #0D9488;
+  --tp-hand-minute: #14B8A6;
+  --tp-hand-shadow: 0 0 4px rgba(13, 148, 136, 0.25);
+  --tp-pivot-pin: #0D9488;
+  --tp-pivot-border: #FFFFFF;
+
+  --tp-hint-text: #64748B;
+  --tp-hint-kbd-bg: #F1F5F9;
+  --tp-hint-kbd-border: #CBD5E1;
+  --tp-hint-kbd-text: #334155;
+
+  --tp-preset-label: #64748B;
+  --tp-preset-active-bg: #CCFBF1;
+  --tp-preset-active-border: #0D9488;
+  --tp-preset-active-text: #0F766E;
+  --tp-preset-inactive-bg: #FFFFFF;
+  --tp-preset-inactive-border: #E2E8F0;
+  --tp-preset-inactive-text: #334155;
+  --tp-preset-inactive-hover: #F1F5F9;
+
+  --tp-footer-bg: #F8FAFC;
+  --tp-footer-border: #E2E8F0;
+  --tp-btn-primary-bg: #0D9488;
+  --tp-btn-primary-hover: #0F766E;
+  --tp-btn-primary-text: #FFFFFF;
+  --tp-btn-primary-border: transparent;
+  --tp-accent-color: #0D9488;
+  --tp-accent-hover: #0F766E;
+  --tp-accent-text: #FFFFFF;
+  --tp-btn-secondary-bg: #FFFFFF;
+  --tp-btn-secondary-border: #CBD5E1;
+  --tp-btn-secondary-text: #334155;
+  --tp-btn-secondary-hover-bg: #F8FAFC;
+  --tp-btn-clear-text: #E11D48;
+  --tp-btn-clear-hover-bg: #FFE4E6;
+
+  --tp-radius-box: 8px;
+  --tp-radius-button: 8px;
+  --tp-radius-preset: 8px;
+}
+
+/* --- 2. DARK THEME --- */
+[data-theme="dark"] {
+  --tp-modal-bg: #1E1E1E;
+  --tp-modal-border: #334155;
+  --tp-header-bg: #141414;
+  --tp-header-text: #F1F5F9;
+  --tp-header-subtext: #818CF8;
+  --tp-header-border: #334155;
+  --tp-header-close-hover: rgba(255, 255, 255, 0.1);
+
+  --tp-tab-container-bg: #121212;
+  --tp-tab-container-border: #334155;
+  --tp-tab-active-bg: #4F46E5;
+  --tp-tab-active-text: #FFFFFF;
+  --tp-tab-inactive-text: #94A3B8;
+  --tp-tab-inactive-hover: #1E293B;
+
+  --tp-digital-bg: #121212;
+  --tp-digital-border: #334155;
+  --tp-digital-box-bg: #1E293B;
+  --tp-digital-box-border: #334155;
+  --tp-digital-box-text: #F8FAFC;
+  --tp-digital-box-subtext: #94A3B8;
+  --tp-digital-box-active-bg: #4F46E5;
+  --tp-digital-box-active-text: #FFFFFF;
+  --tp-colon-text: #818CF8;
+
+  --tp-stepper-bg: #1E293B;
+  --tp-stepper-text: #E2E8F0;
+  --tp-stepper-border: #334155;
+  --tp-stepper-hover-bg: #334155;
+  --tp-stepper-hover-text: #FFFFFF;
+  --tp-stepper-accent-text: #818CF8;
+
+  --tp-dial-bg: #121212;
+  --tp-dial-border: #334155;
+  --tp-dial-tick-major: #818CF8;
+  --tp-dial-tick-minor: #475569;
+  --tp-dial-text: #E2E8F0;
+  --tp-dial-text-hover: #FFFFFF;
+  --tp-dial-text-active-bg: #4F46E5;
+  --tp-dial-text-active-text: #FFFFFF;
+  --tp-dial-sub-text: #64748B;
+  --tp-dial-sub-active-bg: #F59E0B;
+  --tp-dial-sub-active-text: #0F172A;
+
+  --tp-hand-hour: #818CF8;
+  --tp-hand-minute: #A78BFA;
+  --tp-hand-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+  --tp-pivot-pin: #F59E0B;
+  --tp-pivot-border: rgba(0, 0, 0, 0.3);
+
+  --tp-hint-text: #94A3B8;
+  --tp-hint-kbd-bg: #1E293B;
+  --tp-hint-kbd-border: #334155;
+  --tp-hint-kbd-text: #CBD5E1;
+
+  --tp-preset-label: #94A3B8;
+  --tp-preset-active-bg: rgba(79, 70, 229, 0.25);
+  --tp-preset-active-border: #6366F1;
+  --tp-preset-active-text: #A5B4FC;
+  --tp-preset-inactive-bg: #1E293B;
+  --tp-preset-inactive-border: #334155;
+  --tp-preset-inactive-text: #CBD5E1;
+  --tp-preset-inactive-hover: #334155;
+
+  --tp-footer-bg: #141414;
+  --tp-footer-border: #334155;
+  --tp-btn-primary-bg: #4F46E5;
+  --tp-btn-primary-hover: #4338CA;
+  --tp-btn-primary-text: #FFFFFF;
+  --tp-btn-primary-border: transparent;
+  --tp-accent-color: #64FFDA;
+  --tp-accent-hover: #52E5C3;
+  --tp-accent-text: #000000;
+  --tp-btn-secondary-bg: #1E293B;
+  --tp-btn-secondary-border: #334155;
+  --tp-btn-secondary-text: #E2E8F0;
+  --tp-btn-secondary-hover-bg: #334155;
+  --tp-btn-clear-text: #FB7185;
+  --tp-btn-clear-hover-bg: rgba(244, 63, 94, 0.15);
+
+  --tp-radius-box: 8px;
+  --tp-radius-button: 8px;
+  --tp-radius-preset: 8px;
+}
+
+/* --- 3. WINDOWS VISTA THEME (Aero Glass Aesthetic) --- */
+[data-theme="vista"] {
+  --tp-modal-bg: rgba(255, 255, 255, 0.88);
+  --tp-modal-border: rgba(255, 255, 255, 0.8);
+  --tp-header-bg: linear-gradient(180deg, rgba(82, 144, 185, 0.95) 0%, rgba(35, 78, 108, 0.95) 50%, rgba(13, 38, 58, 0.98) 100%);
+  --tp-header-text: #FFFFFF;
+  --tp-header-subtext: #7DD3FC;
+  --tp-header-border: rgba(255, 255, 255, 0.3);
+  --tp-header-close-hover: rgba(255, 255, 255, 0.2);
+
+  --tp-tab-container-bg: rgba(220, 235, 248, 0.7);
+  --tp-tab-container-border: rgba(170, 205, 235, 0.6);
+  --tp-tab-active-bg: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%);
+  --tp-tab-active-text: #FFFFFF;
+  --tp-tab-inactive-text: #0C4A6E;
+  --tp-tab-inactive-hover: rgba(255, 255, 255, 0.6);
+
+  --tp-digital-bg: rgba(15, 35, 55, 0.92);
+  --tp-digital-border: rgba(56, 189, 248, 0.4);
+  --tp-digital-box-bg: rgba(255, 255, 255, 0.1);
+  --tp-digital-box-border: rgba(255, 255, 255, 0.2);
+  --tp-digital-box-text: #FFFFFF;
+  --tp-digital-box-subtext: #7DD3FC;
+  --tp-digital-box-active-bg: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%);
+  --tp-digital-box-active-text: #FFFFFF;
+  --tp-colon-text: #38BDF8;
+
+  --tp-stepper-bg: rgba(255, 255, 255, 0.15);
+  --tp-stepper-text: #FFFFFF;
+  --tp-stepper-border: rgba(255, 255, 255, 0.3);
+  --tp-stepper-hover-bg: rgba(255, 255, 255, 0.3);
+  --tp-stepper-hover-text: #FFFFFF;
+  --tp-stepper-accent-text: #38BDF8;
+
+  --tp-dial-bg: radial-gradient(circle at 50% 50%, rgba(20, 50, 75, 0.95) 0%, rgba(10, 25, 40, 0.98) 100%);
+  --tp-dial-border: rgba(56, 189, 248, 0.4);
+  --tp-dial-tick-major: #38BDF8;
+  --tp-dial-tick-minor: rgba(255, 255, 255, 0.3);
+  --tp-dial-text: #F0F9FF;
+  --tp-dial-text-hover: #FFFFFF;
+  --tp-dial-text-active-bg: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%);
+  --tp-dial-text-active-text: #FFFFFF;
+  --tp-dial-sub-text: #7DD3FC;
+  --tp-dial-sub-active-bg: linear-gradient(180deg, #FBBF24 0%, #D97706 100%);
+  --tp-dial-sub-active-text: #0F172A;
+
+  --tp-hand-hour: #38BDF8;
+  --tp-hand-minute: #60A5FA;
+  --tp-hand-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+  --tp-pivot-pin: #F59E0B;
+  --tp-pivot-border: rgba(0, 0, 0, 0.3);
+
+  --tp-hint-text: #0C4A6E;
+  --tp-hint-kbd-bg: rgba(255, 255, 255, 0.9);
+  --tp-hint-kbd-border: rgba(170, 205, 235, 0.8);
+  --tp-hint-kbd-text: #0C4A6E;
+
+  --tp-preset-label: #0C4A6E;
+  --tp-preset-active-bg: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%);
+  --tp-preset-active-border: #0284C7;
+  --tp-preset-active-text: #FFFFFF;
+  --tp-preset-inactive-bg: rgba(255, 255, 255, 0.8);
+  --tp-preset-inactive-border: rgba(170, 205, 235, 0.6);
+  --tp-preset-inactive-text: #0C4A6E;
+  --tp-preset-inactive-hover: #FFFFFF;
+
+  --tp-footer-bg: rgba(220, 235, 248, 0.7);
+  --tp-footer-border: rgba(170, 205, 235, 0.5);
+  --tp-btn-primary-bg: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%);
+  --tp-btn-primary-hover: linear-gradient(180deg, #60A5FA 0%, #0369A1 100%);
+  --tp-btn-primary-text: #FFFFFF;
+  --tp-btn-primary-border: transparent;
+  --tp-accent-color: #0284C7;
+  --tp-accent-hover: #0369A1;
+  --tp-accent-text: #FFFFFF;
+  --tp-btn-secondary-bg: rgba(255, 255, 255, 0.85);
+  --tp-btn-secondary-border: rgba(255, 255, 255, 0.7);
+  --tp-btn-secondary-text: #0C4A6E;
+  --tp-btn-secondary-hover-bg: #FFFFFF;
+  --tp-btn-clear-text: #E11D48;
+  --tp-btn-clear-hover-bg: rgba(225, 29, 72, 0.15);
+
+  --tp-radius-box: 8px;
+  --tp-radius-button: 8px;
+  --tp-radius-preset: 8px;
+}
+
+/* --- 4. WINAMP RETRO THEME (Classic Green on Black & Sharp Angles) --- */
+[data-theme="winamp"] {
+  --tp-modal-bg: #000000;
+  --tp-modal-border: #48545E;
+  --tp-header-bg: linear-gradient(180deg, #38424B 0%, #20262B 50%, #15191C 100%);
+  --tp-header-text: #00FF00;
+  --tp-header-subtext: #00FF00;
+  --tp-header-border: #48545E;
+  --tp-header-close-hover: #333D45;
+
+  --tp-tab-container-bg: #0D1012;
+  --tp-tab-container-border: #48545E;
+  --tp-tab-active-bg: #00FF00;
+  --tp-tab-active-text: #000000;
+  --tp-tab-inactive-text: rgba(0, 255, 0, 0.7);
+  --tp-tab-inactive-hover: #14181C;
+
+  --tp-digital-bg: #000000;
+  --tp-digital-border: #48545E;
+  --tp-digital-box-bg: #0D1012;
+  --tp-digital-box-border: #333D45;
+  --tp-digital-box-text: #00FF00;
+  --tp-digital-box-subtext: rgba(0, 255, 0, 0.7);
+  --tp-digital-box-active-bg: #00FF00;
+  --tp-digital-box-active-text: #000000;
+  --tp-colon-text: #00FF00;
+
+  --tp-stepper-bg: #14181C;
+  --tp-stepper-text: #00FF00;
+  --tp-stepper-border: #48545E;
+  --tp-stepper-hover-bg: #20262B;
+  --tp-stepper-hover-text: #00FF66;
+  --tp-stepper-accent-text: #00FF00;
+
+  --tp-dial-bg: #000000;
+  --tp-dial-border: #48545E;
+  --tp-dial-tick-major: #00FF00;
+  --tp-dial-tick-minor: #333D45;
+  --tp-dial-text: rgba(0, 255, 0, 0.85);
+  --tp-dial-text-hover: #00FF00;
+  --tp-dial-text-active-bg: #00FF00;
+  --tp-dial-text-active-text: #000000;
+  --tp-dial-sub-text: rgba(0, 255, 0, 0.5);
+  --tp-dial-sub-active-bg: #FBBF24;
+  --tp-dial-sub-active-text: #000000;
+
+  --tp-hand-hour: #00FF00;
+  --tp-hand-minute: #34D399;
+  --tp-hand-shadow: 0 0 6px rgba(0, 255, 0, 0.6);
+  --tp-pivot-pin: #00FF00;
+  --tp-pivot-border: #000000;
+
+  --tp-hint-text: #88A0B0;
+  --tp-hint-kbd-bg: #0D1012;
+  --tp-hint-kbd-border: #48545E;
+  --tp-hint-kbd-text: #00FF00;
+
+  --tp-preset-label: #88A0B0;
+  --tp-preset-active-bg: #00FF00;
+  --tp-preset-active-border: #00FF00;
+  --tp-preset-active-text: #000000;
+  --tp-preset-inactive-bg: #000000;
+  --tp-preset-inactive-border: #48545E;
+  --tp-preset-inactive-text: #00FF00;
+  --tp-preset-inactive-hover: #14181C;
+
+  --tp-footer-bg: #000000;
+  --tp-footer-border: #48545E;
+  --tp-btn-primary-bg: #000000;
+  --tp-btn-primary-hover: #00FF00;
+  --tp-btn-primary-text: #00FF00;
+  --tp-btn-primary-border: #00FF00;
+  --tp-accent-color: #00FF00;
+  --tp-accent-hover: #00CC00;
+  --tp-accent-text: #000000;
+  --tp-btn-secondary-bg: #14181C;
+  --tp-btn-secondary-border: #48545E;
+  --tp-btn-secondary-text: #CBD5E1;
+  --tp-btn-secondary-hover-bg: #20262B;
+  --tp-btn-clear-text: #FF3366;
+  --tp-btn-clear-hover-bg: #330011;
+
+  --tp-radius-box: 0px;
+  --tp-radius-button: 0px;
+  --tp-radius-preset: 0px;
+}
+
+/* --- 5. DARK FLUID THEME (AMOLED Material 3) --- */
+[data-theme="darkFluid"] {
+  --tp-modal-bg: #1D1B20;
+  --tp-modal-border: rgba(255, 255, 255, 0.12);
+  --tp-header-bg: #141218;
+  --tp-header-text: #E6E0E9;
+  --tp-header-subtext: #D0BCFF;
+  --tp-header-border: rgba(255, 255, 255, 0.08);
+  --tp-header-close-hover: rgba(255, 255, 255, 0.08);
+
+  --tp-tab-container-bg: #141218;
+  --tp-tab-container-border: rgba(255, 255, 255, 0.08);
+  --tp-tab-active-bg: #D0BCFF;
+  --tp-tab-active-text: #381E72;
+  --tp-tab-inactive-text: #CAC4D0;
+  --tp-tab-inactive-hover: rgba(255, 255, 255, 0.06);
+
+  --tp-digital-bg: #141218;
+  --tp-digital-border: rgba(255, 255, 255, 0.08);
+  --tp-digital-box-bg: #2B2930;
+  --tp-digital-box-border: rgba(255, 255, 255, 0.1);
+  --tp-digital-box-text: #E6E0E9;
+  --tp-digital-box-subtext: #CAC4D0;
+  --tp-digital-box-active-bg: #D0BCFF;
+  --tp-digital-box-active-text: #381E72;
+  --tp-colon-text: #D0BCFF;
+
+  --tp-stepper-bg: #2B2930;
+  --tp-stepper-text: #E6E0E9;
+  --tp-stepper-border: rgba(255, 255, 255, 0.1);
+  --tp-stepper-hover-bg: #36343B;
+  --tp-stepper-hover-text: #FFFFFF;
+  --tp-stepper-accent-text: #D0BCFF;
+
+  --tp-dial-bg: #141218;
+  --tp-dial-border: rgba(255, 255, 255, 0.08);
+  --tp-dial-tick-major: #D0BCFF;
+  --tp-dial-tick-minor: rgba(255, 255, 255, 0.2);
+  --tp-dial-text: #E6E0E9;
+  --tp-dial-text-hover: #FFFFFF;
+  --tp-dial-text-active-bg: #D0BCFF;
+  --tp-dial-text-active-text: #381E72;
+  --tp-dial-sub-text: #CAC4D0;
+  --tp-dial-sub-active-bg: #FFB951;
+  --tp-dial-sub-active-text: #452B00;
+
+  --tp-hand-hour: #D0BCFF;
+  --tp-hand-minute: #AEC6FF;
+  --tp-hand-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+  --tp-pivot-pin: #FFB951;
+  --tp-pivot-border: rgba(0, 0, 0, 0.3);
+
+  --tp-hint-text: #CAC4D0;
+  --tp-hint-kbd-bg: #2B2930;
+  --tp-hint-kbd-border: rgba(255, 255, 255, 0.1);
+  --tp-hint-kbd-text: #E6E0E9;
+
+  --tp-preset-label: #CAC4D0;
+  --tp-preset-active-bg: rgba(208, 188, 255, 0.2);
+  --tp-preset-active-border: #D0BCFF;
+  --tp-preset-active-text: #D0BCFF;
+  --tp-preset-inactive-bg: #2B2930;
+  --tp-preset-inactive-border: rgba(255, 255, 255, 0.08);
+  --tp-preset-inactive-text: #CAC4D0;
+  --tp-preset-inactive-hover: #36343B;
+
+  --tp-footer-bg: #141218;
+  --tp-footer-border: rgba(255, 255, 255, 0.08);
+  --tp-btn-primary-bg: #D0BCFF;
+  --tp-btn-primary-hover: #E8DEF8;
+  --tp-btn-primary-text: #381E72;
+  --tp-btn-primary-border: transparent;
+  --tp-accent-color: #D0BCFF;
+  --tp-accent-hover: #B69DF8;
+  --tp-accent-text: #381E72;
+  --tp-btn-secondary-bg: #2B2930;
+  --tp-btn-secondary-border: rgba(255, 255, 255, 0.1);
+  --tp-btn-secondary-text: #E6E0E9;
+  --tp-btn-secondary-hover-bg: #36343B;
+  --tp-btn-clear-text: #F2B8B5;
+  --tp-btn-clear-hover-bg: rgba(242, 184, 181, 0.15);
+
+  --tp-radius-box: 8px;
+  --tp-radius-button: 8px;
+  --tp-radius-preset: 8px;
+}
+
+/* =========================================================
+   TIME PICKER COMPONENT CLASS RULES
+   Every visual property is bound directly to --tp-* variables
+   ========================================================= */
+
+.tp-modal-card {
+  background-color: var(--tp-modal-bg);
+  border: 1px solid var(--tp-modal-border);
+  border-radius: var(--tp-radius-box, 8px);
+}
+
+.tp-header {
+  background: var(--tp-header-bg);
+  color: var(--tp-header-text);
+  border-bottom: 1px solid var(--tp-header-border);
+}
+
+.tp-header-icon {
+  color: var(--tp-header-subtext);
+}
+
+.tp-header-close-btn {
+  color: var(--tp-header-text);
+  opacity: 0.75;
+  background: transparent;
+  border-radius: var(--tp-radius-button, 8px);
+  transition: all 0.15s ease;
+}
+
+.tp-header-close-btn:hover {
+  opacity: 1;
+  background-color: var(--tp-header-close-hover);
+}
+
+.tp-tabs-container {
+  background: var(--tp-tab-container-bg);
+  border: 1px solid var(--tp-tab-container-border);
+  border-radius: var(--tp-radius-box, 8px);
+}
+
+.tp-tab-btn {
+  border-radius: var(--tp-radius-button, 8px);
+  color: var(--tp-tab-inactive-text);
+  background: transparent;
+  transition: all 0.15s ease;
+}
+
+.tp-tab-btn:hover {
+  background: var(--tp-tab-inactive-hover);
+}
+
+.tp-tab-btn.tp-tab-active {
+  background: var(--tp-tab-active-bg);
+  color: var(--tp-tab-active-text);
+}
+
+.tp-digital-container {
+  background: var(--tp-digital-bg);
+  border: 1px solid var(--tp-digital-border);
+  border-radius: var(--tp-radius-box, 8px);
+}
+
+.tp-digital-box {
+  background: var(--tp-digital-box-bg);
+  border: 1px solid var(--tp-digital-box-border);
+  color: var(--tp-digital-box-text);
+  border-radius: var(--tp-radius-button, 8px);
+  transition: all 0.15s ease;
+}
+
+.tp-digital-box.tp-digital-active {
+  background: var(--tp-digital-box-active-bg);
+  color: var(--tp-digital-box-active-text);
+  border-color: var(--tp-digital-box-active-bg);
+}
+
+.tp-digital-subtext {
+  color: var(--tp-digital-box-subtext);
+}
+
+.tp-digital-active .tp-digital-subtext {
+  color: var(--tp-digital-box-active-text);
+  opacity: 0.85;
+}
+
+.tp-colon {
+  color: var(--tp-colon-text);
+}
+
+.tp-stepper-btn {
+  background: var(--tp-stepper-bg);
+  color: var(--tp-stepper-text);
+  border: 1px solid var(--tp-stepper-border);
+  border-radius: var(--tp-radius-button, 8px);
+  transition: all 0.15s ease;
+}
+
+.tp-stepper-btn:hover {
+  background: var(--tp-stepper-hover-bg, var(--tp-stepper-bg));
+  color: var(--tp-stepper-hover-text, var(--tp-stepper-text));
+}
+
+.tp-stepper-btn-accent {
+  color: var(--tp-stepper-accent-text);
+}
+
+.tp-dial-surface {
+  background: var(--tp-dial-bg);
+  border: 3px solid var(--tp-dial-border);
+}
+
+.tp-dial-tick-major {
+  background-color: var(--tp-dial-tick-major);
+}
+
+.tp-dial-tick-minor {
+  background-color: var(--tp-dial-tick-minor);
+}
+
+.tp-dial-num {
+  color: var(--tp-dial-text);
+  transition: all 0.12s ease;
+}
+
+.tp-dial-num:hover {
+  color: var(--tp-dial-text-hover);
+}
+
+.tp-dial-num.tp-dial-num-active {
+  background: var(--tp-dial-text-active-bg);
+  color: var(--tp-dial-text-active-text);
+}
+
+.tp-dial-sub-num {
+  color: var(--tp-dial-sub-text);
+  transition: all 0.12s ease;
+}
+
+.tp-dial-sub-num.tp-dial-sub-active {
+  background: var(--tp-dial-sub-active-bg);
+  color: var(--tp-dial-sub-active-text);
+}
+
+.tp-hand-hour-elem {
+  background-color: var(--tp-hand-hour);
+}
+
+.tp-hand-minute-elem {
+  background-color: var(--tp-hand-minute);
+}
+
+.tp-pivot-elem {
+  background-color: var(--tp-pivot-pin);
+  border: 2px solid var(--tp-pivot-border, rgba(0, 0, 0, 0.15));
+}
+
+.tp-hint-text {
+  color: var(--tp-hint-text);
+}
+
+.tp-hint-kbd {
+  background-color: var(--tp-hint-kbd-bg);
+  color: var(--tp-hint-kbd-text);
+  border: 1px solid var(--tp-hint-kbd-border);
+  border-radius: var(--tp-radius-button, 4px);
+}
+
+.tp-preset-label {
+  color: var(--tp-preset-label);
+}
+
+.tp-preset-btn {
+  border-radius: var(--tp-radius-preset, 8px);
+  background: var(--tp-preset-inactive-bg);
+  border: 1px solid var(--tp-preset-inactive-border);
+  color: var(--tp-preset-inactive-text);
+  transition: all 0.15s ease;
+}
+
+.tp-preset-btn:hover {
+  background: var(--tp-preset-inactive-hover);
+}
+
+.tp-preset-btn.tp-preset-active {
+  background: var(--tp-preset-active-bg);
+  border-color: var(--tp-preset-active-border);
+  color: var(--tp-preset-active-text);
+}
+
+.tp-footer {
+  background: var(--tp-footer-bg);
+  border-top: 1px solid var(--tp-footer-border);
+}
+
+.tp-btn-clear {
+  color: var(--tp-btn-clear-text);
+  background: transparent;
+  border-radius: var(--tp-radius-button, 8px);
+  transition: all 0.15s ease;
+}
+
+.tp-btn-clear:hover {
+  background: var(--tp-btn-clear-hover-bg);
+}
+
+.tp-btn-primary {
+  background: var(--tp-btn-primary-bg);
+  color: var(--tp-btn-primary-text);
+  border: 1px solid var(--tp-btn-primary-border, transparent);
+  border-radius: var(--tp-radius-button, 8px);
+  transition: all 0.15s ease;
+}
+
+.tp-btn-primary:hover:not(:disabled) {
+  background: var(--tp-btn-primary-hover);
+  color: var(--tp-btn-primary-text);
+}
+
+.tp-btn-secondary {
+  background: var(--tp-btn-secondary-bg);
+  border: 1px solid var(--tp-btn-secondary-border);
+  color: var(--tp-btn-secondary-text);
+  border-radius: var(--tp-radius-button, 8px);
+  transition: all 0.15s ease;
+}
+
+.tp-btn-secondary:hover {
+  background: var(--tp-btn-secondary-hover-bg);
+  color: var(--tp-btn-secondary-hover-text, var(--tp-btn-secondary-text));
+}

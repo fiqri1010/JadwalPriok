@@ -1,0 +1,424 @@
+import React, { useState } from 'react';
+import { ShiftGroupProfile, ShiftItemConfig, AppTheme, DayData, ActiveDateRange } from '../../types';
+import { loadShiftGroups, saveShiftGroups } from '../../utils/shiftTimeline';
+import { DEFAULT_SHIFT_GROUP } from '../../data/defaultShifts';
+import { ShiftGroupProfilesSection } from './ShiftGroupProfilesSection';
+import { ShiftListView } from './ShiftListView';
+import { ShiftEditModal } from './ShiftEditModal';
+import { ShiftDeleteConfirmModal } from './ShiftDeleteConfirmModal';
+import { HelpCircle, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+
+interface ShiftSettingsTabProps {
+    daysState: Record<string, DayData>;
+    onShowToast: (msg: string) => void;
+    theme?: AppTheme;
+}
+
+export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
+    daysState,
+    onShowToast,
+    theme = 'default',
+}) => {
+    const [groups, setGroups] = useState<ShiftGroupProfile[]>(() => loadShiftGroups());
+    const [activeGroupId, setActiveGroupId] = useState<string>(() => groups[0]?.id || DEFAULT_SHIFT_GROUP.id);
+
+    // Level Navigasi: 'profiles' (Level 1: Profil Aturan Shift) | 'edit-profile' (Level 2: Edit List Shift Profil)
+    const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+
+    // Modals untuk shift individual
+    const [editingShift, setEditingShift] = useState<ShiftItemConfig | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [shiftToDelete, setShiftToDelete] = useState<ShiftItemConfig | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isPetunjukExpanded, setIsPetunjukExpanded] = useState(false);
+
+    // Profil yang sedang diedit (atau aktif jika belum dipilih)
+    const currentGroupToEdit = groups.find((g) => g.id === (editingGroupId || activeGroupId)) || groups[0] || DEFAULT_SHIFT_GROUP;
+
+    const handleUpdateGroupShifts = (groupId: string, newShifts: ShiftItemConfig[]) => {
+        const updatedGroups = groups.map((g) => {
+            if (g.id === groupId) {
+                return { ...g, shifts: newShifts };
+            }
+            return g;
+        });
+        setGroups(updatedGroups);
+        saveShiftGroups(updatedGroups);
+    };
+
+    const handleUpdateGroupDateRanges = (groupId: string, newRanges: ActiveDateRange[]) => {
+        const updatedGroups = groups.map((g) => {
+            if (g.id === groupId) {
+                const earliestStart = newRanges.length > 0 ? newRanges[0].startDate : g.effectiveStartDate;
+                return {
+                    ...g,
+                    dateRanges: newRanges,
+                    effectiveStartDate: earliestStart || g.effectiveStartDate,
+                };
+            }
+            return g;
+        });
+        setGroups(updatedGroups);
+        saveShiftGroups(updatedGroups);
+        onShowToast('Rentang tanggal aktivasi profil shift berhasil diperbarui.');
+    };
+
+    // Simpan hasil edit shift
+    const handleSaveShift = (updatedShift: ShiftItemConfig) => {
+        if (!currentGroupToEdit) return;
+        const exists = currentGroupToEdit.shifts.some((s) => s.id === updatedShift.id);
+        let newShifts: ShiftItemConfig[];
+        if (exists) {
+            newShifts = currentGroupToEdit.shifts.map((s) => (s.id === updatedShift.id ? updatedShift : s));
+            onShowToast(`Shift "${updatedShift.naming.displayBadge}" berhasil diperbarui.`);
+        } else {
+            newShifts = [...currentGroupToEdit.shifts, updatedShift];
+            onShowToast(`Shift baru "${updatedShift.naming.displayBadge}" berhasil ditambahkan.`);
+        }
+        handleUpdateGroupShifts(currentGroupToEdit.id, newShifts);
+    };
+
+    // Hapus shift
+    const handleConfirmDelete = (shiftId: string, action: 'delete_all' | 'migrate', targetShiftId?: string) => {
+        if (!currentGroupToEdit) return;
+        const newShifts = currentGroupToEdit.shifts.filter((s) => s.id !== shiftId);
+        handleUpdateGroupShifts(currentGroupToEdit.id, newShifts);
+        onShowToast('Shift berhasil dihapus.');
+    };
+
+    // Toggle visibilitas shift
+    const handleToggleVisibility = (shiftId: string) => {
+        if (!currentGroupToEdit) return;
+        const newShifts = currentGroupToEdit.shifts.map((s) => {
+            if (s.id === shiftId) {
+                return { ...s, isVisibleInDropdown: !s.isVisibleInDropdown };
+            }
+            return s;
+        });
+        handleUpdateGroupShifts(currentGroupToEdit.id, newShifts);
+    };
+
+    // Tambah shift baru
+    const handleAddNewShift = () => {
+        const newId = `SHIFT_CUSTOM_${Date.now()}`;
+        const newShift: ShiftItemConfig = {
+            id: newId,
+            key: `CUSTOM_${Date.now()}`,
+            naming: {
+                fullName: 'Shift Kustom Baru',
+                displayBadge: 'NEW',
+                copyCode: 'NW',
+                dropdownSublabel: '08.00 - 17.00',
+            },
+            workTime: {
+                jamMasukDasar: '08:00',
+                jamPulangDasar: '17:30',
+                earliestFlexiIn: '07:30',
+                latestFlexiIn: '08:30',
+                earliestFlexiOut: '17:00',
+                latestFlexiOut: '18:00',
+                minLemburMinutes: 120,
+                maxLemburMinutes: 180,
+            },
+            visual: {
+                colorMode: 'solid',
+                solidColor: '#0E7C7B',
+                textColor: '#FFFFFF',
+                borderColor: '#2EC4B6',
+                gradientType: 'linear',
+                gradientAngle: 135,
+                colorStops: [
+                    { color: '#2EC4B6', position: 0 },
+                    { color: '#0E7C7B', position: 100 },
+                ],
+                patternType: 'none',
+                patternOpacity: 20,
+                iconType: 'svg',
+                iconName: 'Sparkles',
+            },
+            isPiket: false,
+            isVisibleInDropdown: true,
+        };
+        setEditingShift(newShift);
+        setIsEditModalOpen(true);
+    };
+
+    // Kembalikan ke default di dalam menu edit
+    const handleResetGroupToDefault = () => {
+        if (!currentGroupToEdit) return;
+        handleUpdateGroupShifts(currentGroupToEdit.id, JSON.parse(JSON.stringify(DEFAULT_SHIFT_GROUP.shifts)));
+        onShowToast(`Daftar shift pada "${currentGroupToEdit.name}" dikembalikan ke standar bawaan.`);
+    };
+
+    // Duplikasi kelompok profil
+    const handleCopyGroup = (sourceGroup: ShiftGroupProfile, newName: string, startDate: string) => {
+        const newGroup: ShiftGroupProfile = {
+            id: `GROUP_${Date.now()}`,
+            name: newName,
+            effectiveStartDate: startDate,
+            isActive: true,
+            shifts: JSON.parse(JSON.stringify(sourceGroup.shifts)),
+        };
+        const updated = [...groups, newGroup];
+        setGroups(updated);
+        setActiveGroupId(newGroup.id);
+        saveShiftGroups(updated);
+        onShowToast(`Profil baru "${newName}" berhasil dibuat.`);
+    };
+
+    // Buat profil kelompok baru dari kosong/standar
+    const handleCreateNewGroup = (name: string, startDate: string) => {
+        const newGroup: ShiftGroupProfile = {
+            id: `GROUP_${Date.now()}`,
+            name,
+            effectiveStartDate: startDate,
+            isActive: true,
+            shifts: JSON.parse(JSON.stringify(DEFAULT_SHIFT_GROUP.shifts)),
+        };
+        const updated = [...groups, newGroup];
+        setGroups(updated);
+        setActiveGroupId(newGroup.id);
+        saveShiftGroups(updated);
+        onShowToast(`Profil "${name}" berhasil dibuat.`);
+    };
+
+    // Hapus profil kelompok
+    const handleDeleteGroup = (groupToDelete: ShiftGroupProfile) => {
+        if (groups.length <= 1) {
+            onShowToast('Tidak dapat menghapus satu-satunya profil yang tersisa.');
+            return;
+        }
+        const filtered = groups.filter((g) => g.id !== groupToDelete.id);
+        setGroups(filtered);
+        if (activeGroupId === groupToDelete.id) {
+            setActiveGroupId(filtered[0]?.id || DEFAULT_SHIFT_GROUP.id);
+        }
+        if (editingGroupId === groupToDelete.id) {
+            setEditingGroupId(null);
+        }
+        saveShiftGroups(filtered);
+        onShowToast(`Profil "${groupToDelete.name}" berhasil dihapus.`);
+    };
+
+    // Ekspor JSON
+    const handleExportJson = () => {
+        const jsonStr = JSON.stringify(groups, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Konfigurasi_Shift_Priok_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        onShowToast('Konfigurasi shift berhasil diekspor.');
+    };
+
+    // Impor JSON
+    const handleImportJson = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const parsed = JSON.parse(evt.target?.result as string);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        setGroups(parsed);
+                        setActiveGroupId(parsed[0].id);
+                        saveShiftGroups(parsed);
+                        onShowToast('Konfigurasi shift berhasil diimpor.');
+                    }
+                } catch (err) {
+                    onShowToast('Gagal membaca file JSON konfigurasi shift.');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    };
+
+    return (
+        <div className="space-y-4">
+            {/* Tampilan Level 1: Profil Aturan Shift ATAU Level 2: Edit List Shift */}
+            {editingGroupId ? (
+                <ShiftListView
+                    groupName={currentGroupToEdit.name}
+                    effectiveStartDate={currentGroupToEdit.effectiveStartDate}
+                    shifts={currentGroupToEdit.shifts}
+                    onBack={() => setEditingGroupId(null)}
+                    onEditShift={(s) => {
+                        setEditingShift(s);
+                        setIsEditModalOpen(true);
+                    }}
+                    onDeleteShift={(s) => {
+                        setShiftToDelete(s);
+                        setIsDeleteModalOpen(true);
+                    }}
+                    onToggleVisibility={handleToggleVisibility}
+                    onAddNewShift={handleAddNewShift}
+                    onResetToDefault={handleResetGroupToDefault}
+                    onExportJson={handleExportJson}
+                    onImportJson={handleImportJson}
+                />
+            ) : (
+                <ShiftGroupProfilesSection
+                    groups={groups}
+                    activeGroupId={activeGroupId}
+                    theme={theme}
+                    onSelectGroup={(id) => {
+                        setActiveGroupId(id);
+                        onShowToast('Profil aturan shift aktif berhasil diperbarui.');
+                    }}
+                    onEditGroup={(grp) => {
+                        setEditingGroupId(grp.id);
+                    }}
+                    onDeleteGroup={handleDeleteGroup}
+                    onCopyGroup={handleCopyGroup}
+                    onCreateNewGroup={handleCreateNewGroup}
+                    onUpdateGroupDateRanges={handleUpdateGroupDateRanges}
+                />
+            )}
+
+            {/* Petunjuk Absensi Collapsible / Folded Section */}
+            <div className="rounded-xl border border-teal-200/70 dark:border-zinc-700/60 overflow-hidden bg-teal-50/40 dark:bg-zinc-800/40 transition-all">
+                <div
+                    onClick={() => setIsPetunjukExpanded((prev) => !prev)}
+                    className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-teal-50/80 dark:hover:bg-zinc-800/80 transition-colors select-none"
+                >
+                    <div className="flex items-center space-x-2.5">
+                        <div className="p-2 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                            <HelpCircle className="w-4 h-4" />
+                        </div>
+                        <div className="text-xs">
+                            <span className="font-bold block text-slate-900 dark:text-slate-100">Petunjuk Absensi Kantor</span>
+                            <span className="block text-[10.5px] opacity-65">Panduan bagaimana sistem membaca jam masuk & pulang serta dinas malam</span>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsPetunjukExpanded((prev) => !prev);
+                        }}
+                        className="flex items-center space-x-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white cursor-pointer shadow-xs transition-all active:scale-95"
+                    >
+                        <span>{isPetunjukExpanded ? 'Tutup Petunjuk' : 'Buka Petunjuk'}</span>
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isPetunjukExpanded ? 'rotate-180' : ''}`} />
+                    </button>
+                </div>
+
+                {/* Folded Body: Tampil Langsung di Bawah Section */}
+                <AnimatePresence>
+                    {isPetunjukExpanded && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden border-t border-teal-200/60 dark:border-zinc-700/60"
+                        >
+                            <div className="p-3.5 sm:p-4 space-y-3 bg-white/70 dark:bg-zinc-900/60">
+                                {/* Skenario 1 */}
+                                <div className="p-3 rounded-lg bg-teal-50/50 dark:bg-zinc-800/50 border border-teal-200/60 dark:border-zinc-700/60 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-xs font-bold text-teal-700 dark:text-teal-400">
+                                            Skenario 1: Hari OFF Setelah Shift Malam
+                                        </h4>
+                                        <span className="px-2 py-0.5 rounded-md bg-teal-500/15 text-teal-700 dark:text-teal-400 text-[10px] font-bold">
+                                            Jam Pulang Kemarin
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                                        <div className="p-2 rounded-lg bg-white/80 dark:bg-zinc-800 border border-slate-200/70 dark:border-zinc-700">
+                                            <span className="opacity-60 block text-[9px]">Data Mentah Kantor:</span>
+                                            <div className="font-mono mt-0.5 font-bold">04:30</div>
+                                        </div>
+                                        <div className="p-2 rounded-lg bg-teal-500/10 border border-teal-500/30 text-teal-700 dark:text-teal-400">
+                                            <span className="opacity-80 block text-[9px]">Hasil Terjemahan:</span>
+                                            <div className="font-bold mt-0.5">Penutup Shift Kemarin & Tetap OFF</div>
+                                        </div>
+                                    </div>
+                                    <p className="text-[10.5px] opacity-75 leading-relaxed">
+                                        Sistem mengenali jam 04:30 sebagai jam pulang dinas shift malam kemarin, sehingga jadwal hari ini tetap murni OFF tanpa dianggap masuk kerja.
+                                    </p>
+                                </div>
+
+                                {/* Skenario 2 */}
+                                <div className="p-3 rounded-lg bg-amber-50/50 dark:bg-zinc-800/50 border border-amber-200/60 dark:border-zinc-700/60 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                            Skenario 2: Masuk Ekstra di Hari OFF / Libur
+                                        </h4>
+                                        <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-400 text-[10px] font-bold">
+                                            Dinas di Hari Libur
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                                        <div className="p-2 rounded-lg bg-white/80 dark:bg-zinc-800 border border-slate-200/70 dark:border-zinc-700">
+                                            <span className="opacity-60 block text-[9px]">Data Mentah Kantor:</span>
+                                            <div className="font-mono mt-0.5 font-bold">Masuk: 08:00 | Pulang: 17:30</div>
+                                        </div>
+                                        <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400">
+                                            <span className="opacity-80 block text-[9px]">Hasil Terjemahan:</span>
+                                            <div className="font-bold mt-0.5">Lembur Hari Libur Diaktifkan</div>
+                                        </div>
+                                    </div>
+                                    <p className="text-[10.5px] opacity-75 leading-relaxed">
+                                        Ketika terdapat pencatatan jam masuk dan pulang dinas pada hari libur, sistem mengenali Anda masuk dinas dan otomatis mengaktifkan perhitungan lembur hari libur.
+                                    </p>
+                                </div>
+
+                                {/* Skenario 3 */}
+                                <div className="p-3 rounded-lg bg-teal-50/50 dark:bg-zinc-800/50 border border-teal-200/60 dark:border-zinc-700/60 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-xs font-bold text-teal-700 dark:text-teal-400">
+                                            Skenario 3: Shift Beruntun (Malam lanjut Pagi)
+                                        </h4>
+                                        <span className="px-2 py-0.5 rounded-md bg-teal-500/15 text-teal-700 dark:text-teal-400 text-[10px] font-bold">
+                                            Transisi Flexi
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                                        <div className="p-2 rounded-lg bg-white/80 dark:bg-zinc-800 border border-slate-200/70 dark:border-zinc-700">
+                                            <span className="opacity-60 block text-[9px]">Data Mentah Kantor:</span>
+                                            <div className="font-mono mt-0.5 font-bold">Masuk: 04:30 | Pulang: 17:30</div>
+                                        </div>
+                                        <div className="p-2 rounded-lg bg-teal-500/10 border border-teal-500/30 text-teal-700 dark:text-teal-400">
+                                            <span className="opacity-80 block text-[9px]">Hasil Terjemahan:</span>
+                                            <div className="font-bold mt-0.5">04:30 Kemarin, 07:30-17:30 Hari Ini</div>
+                                        </div>
+                                    </div>
+                                    <p className="text-[10.5px] opacity-75 leading-relaxed">
+                                        Jam 04:30 dialokasikan menutup shift malam kemarin, sedangkan jam masuk hari ini dipatok ke batas awal flexi (07:30/08:00) sehingga total jam kerja 9.5 jam tercapai sempurna.
+                                    </p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {/* Modals */}
+            <ShiftEditModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                shift={editingShift}
+                existingShifts={currentGroupToEdit.shifts}
+                onSaveShift={handleSaveShift}
+            />
+
+            <ShiftDeleteConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                shiftToDelete={shiftToDelete}
+                availableShifts={currentGroupToEdit.shifts}
+                onConfirmDelete={handleConfirmDelete}
+            />
+        </div>
+    );
+};
+

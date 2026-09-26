@@ -1,0 +1,236 @@
+import React from 'react';
+import { AppTheme } from '../types';
+import { PiketCalculationResult } from '../utils/piket';
+import { Calendar, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { OffRelaxIcon } from './OffRelaxIcon';
+import { BriefcaseIcon } from './BriefcaseIcon';
+
+interface MonthlyPiketSummarySegmentProps {
+    selectedMonth: number; // 1-12
+    selectedYear: number;
+    piketCalculation: PiketCalculationResult;
+    theme: AppTheme;
+    onSelectDate?: (dayNumber: number) => void;
+    className?: string;
+}
+
+const INDONESIAN_MONTH_NAMES = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
+export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentProps>(({
+    selectedMonth,
+    selectedYear,
+    piketCalculation,
+    theme,
+    onSelectDate,
+    className = '',
+}) => {
+    const isWinamp = theme === 'winamp';
+    const isVista = theme === 'vista';
+    const isDark = theme === 'dark';
+    const isDarkFluid = theme === 'darkFluid';
+
+    // Filter Piket matches for the current selected month
+    const monthPikets = React.useMemo(() => {
+        return piketCalculation.piketMatches.filter(
+            (p) => p.piketYear === selectedYear && p.piketMonth === selectedMonth
+        );
+    }, [piketCalculation, selectedMonth, selectedYear]);
+
+    const totalPiket = monthPikets.length;
+    const matchedPiketCount = monthPikets.filter((p) => p.status === 'matched').length;
+    const pendingPiketCount = monthPikets.filter((p) => p.status === 'pending').length;
+
+    const piketWithOffCount = React.useMemo(() => {
+        return monthPikets.filter((p) => p.earnsOff).length;
+    }, [monthPikets]);
+
+    const piketWithoutOffCount = React.useMemo(() => {
+        return monthPikets.filter((p) => !p.earnsOff).length;
+    }, [monthPikets]);
+
+    // Theme Container Styles
+    const getContainerStyles = () => {
+        if (isWinamp) {
+            return 'bg-[#191919] border border-[#00FF00] font-mono text-[#00FF00] rounded-none shadow-[2px_2px_0_#000]';
+        }
+        if (isVista) {
+            return 'bg-white/70 backdrop-blur-xl border border-white/80 text-slate-900 rounded-xl shadow-[0_8px_20px_rgba(14,116,224,0.12)] ring-1 ring-sky-300/20';
+        }
+        if (isDark) {
+            return 'bg-[#1E1E1E] border border-slate-800 text-slate-100 rounded-xl shadow-xs';
+        }
+        if (isDarkFluid) {
+            return 'bg-[#1D1B20] border border-white/10 text-[#E6E0E9] rounded-xl shadow-xs';
+        }
+        return 'bg-white text-slate-900 rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-black/[0.04]';
+    };
+
+    const getJumlahPiketBoxStyles = () => {
+        if (isWinamp) {
+            return 'bg-black border border-[#00FF00]/50 text-[#00FF00] font-mono p-2 rounded-none';
+        }
+        if (isVista) {
+            return 'bg-gradient-to-r from-sky-50 to-blue-50/80 border border-sky-200/90 text-slate-900 p-2.5 rounded-xl shadow-2xs';
+        }
+        if (isDark) {
+            return 'bg-slate-800/60 border border-slate-700/80 text-slate-100 p-2.5 rounded-xl shadow-2xs';
+        }
+        if (isDarkFluid) {
+            return 'bg-white/5 border border-white/10 text-[#E6E0E9] p-2.5 rounded-xl shadow-2xs';
+        }
+        return 'bg-slate-50 border border-slate-200/60 text-slate-900 p-2.5 rounded-lg shadow-2xs';
+    };
+
+    const getHeaderStyles = () => {
+        if (isWinamp) {
+            return 'border-b border-[#00FF00]/40 bg-black/40 text-[#00FF00]';
+        }
+        if (isVista) {
+            return 'border-b border-white/60 bg-gradient-to-r from-amber-50/80 to-amber-100/60 text-slate-900';
+        }
+        if (isDark || isDarkFluid) {
+            return 'border-b border-white/10 bg-white/5 text-slate-200';
+        }
+        return 'border-b border-slate-100 bg-amber-50/60 text-slate-800';
+    };
+
+    const getItemStyles = () => {
+        if (isWinamp) {
+            return 'bg-black hover:bg-zinc-900 border border-[#00FF00]/40 shadow-[1px_1px_0_#00FF00] text-[#00FF00] rounded-none';
+        }
+        if (isVista) {
+            return 'bg-white/65 hover:bg-white/90 border border-white/90 shadow-[0_2px_6px_rgba(14,116,224,0.1)] text-slate-800 backdrop-blur-xs';
+        }
+        if (isDark) {
+            return 'bg-[#242424] hover:bg-[#2d2d2d] border border-slate-800 shadow-[0_1.5px_4px_rgba(0,0,0,0.45)] text-slate-200';
+        }
+        if (isDarkFluid) {
+            return 'bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 shadow-[0_1.5px_4px_rgba(0,0,0,0.35)] text-[#E6E0E9]';
+        }
+        return 'bg-white hover:bg-slate-50/90 border border-slate-200/85 shadow-2xs text-slate-800';
+    };
+
+    return (
+        <div className={`w-full overflow-hidden select-none ${getContainerStyles()} ${className}`}>
+            {/* Header Segmen */}
+            <div className={`px-3 py-2 flex items-center justify-between ${getHeaderStyles()}`}>
+                <div className="flex items-center space-x-2">
+                    <BriefcaseIcon theme={theme} className="w-4 h-4 shrink-0" />
+                    <span className="text-xs font-bold uppercase tracking-wide">
+                        JADWAL PIKET {INDONESIAN_MONTH_NAMES[selectedMonth - 1].toUpperCase()}
+                    </span>
+                </div>
+                <span className="text-[11.5px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                    {totalPiket} Piket
+                </span>
+            </div>
+
+            {/* Content: Stat Badges + List */}
+            <div className="p-2.5 space-y-2">
+                {/* Kotak Ringkasan Piket (Paling Atas) */}
+                <div className={getJumlahPiketBoxStyles()}>
+                    <div className="space-y-1.5">
+                        {/* Data 1: PIKET DENGAN OFF */}
+                        <div className="flex items-center justify-between gap-1 text-[11px] font-extrabold">
+                            <span className="opacity-80 truncate uppercase">PIKET DENGAN OFF</span>
+                            <span className="font-black font-mono text-emerald-600 dark:text-emerald-400 shrink-0">
+                                {piketWithOffCount} Hari
+                            </span>
+                        </div>
+
+                        {/* Garis Batas Horizontal */}
+                        <div className="border-t border-current/15" />
+
+                        {/* Data 2: PIKET SM (TANPA OFF) */}
+                        <div className="flex items-center justify-between gap-1 text-[11px] font-extrabold">
+                            <span className="opacity-80 truncate uppercase">PIKET SM (TANPA OFF)</span>
+                            <span className="font-black font-mono opacity-90 shrink-0">
+                                {piketWithoutOffCount} Hari
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Kotak 2 & 3: OFF TERJADWAL & OFF BELUM TERJADWAL */}
+                <div className="grid grid-cols-2 gap-1.5 text-center">
+                    <div className="p-1 rounded-md border bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex flex-col items-center justify-between min-h-[46px]">
+                        <div className="text-[9px] font-extrabold uppercase tracking-tight leading-tight opacity-90">
+                            <div>OFF</div>
+                            <div>TERJADWAL</div>
+                        </div>
+                        <div className="text-[12px] font-black flex items-center justify-center gap-1 mt-0.5">
+                            <CheckCircle2 className="w-2.5 h-2.5 shrink-0 text-emerald-500" />
+                            <span>{matchedPiketCount} Hari</span>
+                        </div>
+                    </div>
+                    <div className="p-1 rounded-md border bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400 flex flex-col items-center justify-between min-h-[46px]">
+                        <div className="text-[9px] font-extrabold uppercase tracking-tight leading-tight opacity-90">
+                            <div>OFF BELUM</div>
+                            <div>TERJADWAL</div>
+                        </div>
+                        <div className="text-[12px] font-black flex items-center justify-center gap-1 mt-0.5">
+                            <Clock className="w-2.5 h-2.5 shrink-0 text-amber-500" />
+                            <span>{pendingPiketCount} Hari</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* List of Pikets in Month */}
+                {totalPiket === 0 ? (
+                    <div className="py-3 text-center text-xs opacity-60 italic">
+                        Tidak ada jadwal piket pada bulan ini.
+                    </div>
+                ) : (
+                    <div className="space-y-1.5 max-h-[305px] sm:max-h-[315px] overflow-y-auto no-scrollbar p-0.5">
+                        {monthPikets.map((item) => (
+                            <div
+                                key={item.piketDateKey}
+                                onClick={() => onSelectDate?.(item.piketDay)}
+                                className={`w-full flex items-center justify-between py-1.5 px-2.5 rounded-lg transition-colors cursor-pointer text-xs ${getItemStyles()}`}
+                            >
+                                <div className="flex items-center space-x-2.5 min-w-0">
+                                    <div className="w-6 shrink-0 text-center font-mono font-black text-amber-600 dark:text-amber-400 text-[13px] tabular-nums">
+                                        {item.piketDay}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="font-bold truncate text-[12px] leading-snug">
+                                            {item.piketDateLabel} ({item.piketShift})
+                                        </div>
+                                        <div className="text-[11px] opacity-80 truncate mt-0.5">
+                                            {item.status === 'no_off_entitlement' ? (
+                                                <span className="text-slate-500 dark:text-slate-400 font-semibold">
+                                                    ⚪ Tanpa OFF (Piket SM Hari Kerja)
+                                                </span>
+                                            ) : item.status === 'matched' ? (
+                                                <span className="text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1">
+                                                    <OffRelaxIcon theme={theme} className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                                    <span>OFF: {item.offDateLabel}</span>
+                                                </span>
+                                            ) : (
+                                                <span className="text-amber-600 dark:text-amber-400 font-semibold">
+                                                    ⏳ Dijatahkan ke bulan berikutnya
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="shrink-0 ml-1">
+                                    {item.status === 'no_off_entitlement' ? (
+                                        <span className="text-[11.5px] font-mono font-bold text-slate-400">—</span>
+                                    ) : item.status === 'matched' ? (
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                    ) : (
+                                        <AlertCircle className="w-4 h-4 text-amber-500" />
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+});
