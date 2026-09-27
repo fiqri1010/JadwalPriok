@@ -1,34 +1,23 @@
 import React, { useState, useRef } from 'react';
 import {
     Upload,
-    FileSpreadsheet,
-    FileCode,
-    FileText,
-    Image as ImageIcon,
     Trash2,
     Sliders,
     X,
     AlertTriangle,
-    Clock,
-    Layers,
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import { DayData, normalizeShift, LiburNasional, AppTheme } from '../types';
-import { saveFileWithDialog } from '../lib/fileDownload';
-import { getCalendarPngBlob } from '../lib/calendarImageGenerator';
-import { generateSchedulePdf } from '../lib/pdfExport';
 import { ShiftSettingsTab } from './shift-studio/ShiftSettingsTab';
-import { APP_VERSION } from '../version';
 
-export type SettingsTab = 'export' | 'import' | 'shift' | 'reset';
+export type SettingsTab = 'import' | 'shift' | 'reset';
 
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
     daysState: Record<string, DayData>;
-    selectedMonth: number;
-    selectedYear: number;
-    monthName: string;
+    selectedMonth?: number;
+    selectedYear?: number;
+    monthName?: string;
     onImportDays: (importedData: Record<string, DayData>, mode: 'merge' | 'replace') => void;
     onClearAllData?: () => void;
     onShowToast: (msg: string) => void;
@@ -41,23 +30,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     isOpen,
     onClose,
     daysState,
-    selectedMonth,
-    selectedYear,
-    monthName,
     onImportDays,
     onClearAllData,
     onShowToast,
     theme = 'default',
-    daftarLibur = [],
     isPageView = false,
 }) => {
     const isDarkFluid = theme === 'darkFluid';
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
     const isWinamp = theme === 'winamp';
-    const isDefault = theme === 'default';
 
-    const [activeTab, setActiveTab] = useState<SettingsTab>('export');
+    const [activeTab, setActiveTab] = useState<SettingsTab>('import');
     const [pastedJson, setPastedJson] = useState('');
     const [importMode, setImportMode] = useState<'merge' | 'replace'>('merge');
     const [importError, setImportError] = useState<string | null>(null);
@@ -65,152 +49,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     if (!isOpen && !isPageView) return null;
-
-    // Export Handlers
-    const handleExportJSON = async () => {
-        try {
-            const jsonStr = JSON.stringify(
-                {
-                    version: APP_VERSION,
-                    exportedAt: new Date().toISOString(),
-                    days: daysState,
-                },
-                null,
-                2
-            );
-
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const res = await saveFileWithDialog({
-                blob,
-                filename: `Backup_Jadwal_Shift_${selectedYear}.json`,
-                description: 'JSON Backup Data',
-                mimeType: 'application/json',
-                extension: 'json',
-            });
-
-            if (res.success) {
-                onShowToast('File JSON backup berhasil diekspor.');
-            }
-        } catch (e) {
-            console.error('Export JSON failed:', e);
-            onShowToast('Gagal mengekspor file JSON.');
-        }
-    };
-
-    const handleExportExcel = async () => {
-        try {
-            const rows = Object.entries(daysState).map(([dateKey, data]) => {
-                const parts = dateKey.split('-');
-                const y = parts[0];
-                const m = parts[1];
-                const d = parts[2];
-                return {
-                    Tanggal: `${d?.padStart(2, '0')}/${m?.padStart(2, '0')}/${y}`,
-                    Shift: normalizeShift(data.shift) || '-',
-                    'Jam Masuk': data.jamMasuk || '-',
-                    'Jam Pulang': data.jamPulang || '-',
-                    'Absen CEISA': data.absenCeisa || '-',
-                    Catatan: data.note || '',
-                };
-            });
-
-            const ws = XLSX.utils.json_to_sheet(rows);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, `Jadwal_${selectedYear}`);
-
-            const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-            const blob = new Blob([excelBuffer], {
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            });
-
-            const res = await saveFileWithDialog({
-                blob,
-                filename: `Jadwal_Shift_${selectedYear}.xlsx`,
-                description: 'Excel Spreadsheet',
-                mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                extension: 'xlsx',
-            });
-
-            if (res.success) {
-                onShowToast('File Excel jadwal berhasil diekspor.');
-            }
-        } catch (e) {
-            console.error('Export Excel failed:', e);
-            onShowToast('Gagal mengekspor file Excel.');
-        }
-    };
-
-    const handleExportPDF = async () => {
-        try {
-            const entries = Object.entries(daysState).map(([dateKey, data]) => {
-                const parts = dateKey.split('-');
-                const y = Number(parts[0]);
-                const m = Number(parts[1]);
-                const d = Number(parts[2]);
-                const dateObj = new Date(y, m - 1, d);
-                const dayName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][dateObj.getDay()] || '';
-                return {
-                    day: d,
-                    month: m,
-                    year: y,
-                    dateKey,
-                    dayName,
-                    data,
-                };
-            }).sort((a, b) => a.year - b.year || a.month - b.month || a.day - b.day);
-
-            const blob = await generateSchedulePdf({
-                daysState,
-                filteredEntries: entries,
-                rangeLabel: `Tahun ${selectedYear}`,
-                filenameSuffix: `Tahun_${selectedYear}`,
-                daftarLibur,
-                monthsToInclude: [{ year: selectedYear, month: selectedMonth }],
-            });
-
-            const res = await saveFileWithDialog({
-                blob,
-                filename: `Jadwal_Kerja_${selectedYear}.pdf`,
-                description: 'Dokumen PDF Laporan Jadwal',
-                mimeType: 'application/pdf',
-                extension: 'pdf',
-            });
-
-            if (res.success) {
-                onShowToast('Dokumen PDF jadwal berhasil diekspor.');
-            }
-        } catch (e) {
-            console.error('Export PDF failed:', e);
-            onShowToast('Gagal mengekspor PDF.');
-        }
-    };
-
-    const handleExportPNG = async () => {
-        try {
-            const blob = await getCalendarPngBlob({
-                daysState,
-                year: selectedYear,
-                month: selectedMonth,
-                monthName,
-                daftarLibur,
-            });
-
-            const res = await saveFileWithDialog({
-                blob,
-                filename: `Tampilan_Kalender_${monthName}_${selectedYear}.png`,
-                description: 'Gambar PNG Kalender',
-                mimeType: 'image/png',
-                extension: 'png',
-            });
-
-            if (res.success) {
-                onShowToast('Gambar kalender PNG berhasil diekspor.');
-            }
-        } catch (e) {
-            console.error('Export PNG failed:', e);
-            onShowToast('Gagal mengekspor gambar PNG.');
-        }
-    };
 
     // Import Handlers
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -349,199 +187,114 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     )}
                 </div>
 
-                {/* Modern iOS/macOS Style Segmented Tab Container with Animated Sliding Indicator */}
-                <div
-                    className={`relative my-4 p-[2px] rounded-[9px] flex items-center select-none ${
-                        isWinamp
-                            ? 'bg-black border border-zinc-700 rounded-none'
-                            : isDarkFluid
-                            ? 'bg-[#141218] border border-white/10'
-                            : isDark
-                            ? 'bg-[#161616] border border-slate-800'
-                            : isVista
-                            ? 'bg-sky-100/70 border border-sky-200/80 backdrop-blur-xs'
-                            : 'bg-[#dadadb]'
-                    }`}
-                >
-                    {/* Animated Sliding Indicator Pill */}
+                {/* Modern Segmented Tab Container with Grid 3-Columns for Perfect Tab Alignment */}
+                <div className="flex justify-center my-3 sm:my-4">
                     <div
-                        className={`absolute top-[2px] bottom-[2px] rounded-[7px] transition-transform duration-200 ease-out pointer-events-none z-0 ${
+                        className={`relative p-[3px] rounded-[10px] grid grid-cols-3 items-center select-none w-full max-w-[360px] sm:max-w-[450px] ${
                             isWinamp
-                                ? 'bg-[#00FF00] rounded-none'
+                                ? 'bg-black border border-zinc-700 rounded-none'
                                 : isDarkFluid
-                                ? 'bg-[#D0BCFF] shadow-[0px_3px_8px_rgba(0,0,0,0.35)]'
+                                ? 'bg-[#141218] border border-white/10'
                                 : isDark
-                                ? 'bg-[#2a2f3b] border border-white/10 shadow-[0px_3px_8px_rgba(0,0,0,0.35)]'
+                                ? 'bg-[#161616] border border-slate-800'
                                 : isVista
-                                ? 'bg-white/95 border border-white/80 shadow-[0px_3px_8px_rgba(14,116,224,0.18)]'
-                                : 'bg-white border-[0.5px] border-black/5 shadow-[0px_3px_8px_rgba(0,0,0,0.12),0px_3px_1px_rgba(0,0,0,0.04)]'
-                        }`}
-                        style={{
-                            width: 'calc(25% - 1px)',
-                            transform: `translateX(${
-                                activeTab === 'export'
-                                    ? '0%'
-                                    : activeTab === 'import'
-                                    ? '100%'
-                                    : activeTab === 'shift'
-                                    ? '200%'
-                                    : '300%'
-                            })`,
-                        }}
-                    />
-
-                    {/* Tab 1: Ekspor Data */}
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('export')}
-                        className={`relative z-10 w-1/4 py-1.5 sm:py-2 text-[10px] min-[360px]:text-[11px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer truncate px-0.5 sm:px-1 ${
-                            activeTab === 'export'
-                                ? isWinamp
-                                    ? 'text-black font-mono'
-                                    : isDarkFluid
-                                    ? 'text-[#381E72]'
-                                    : isDark
-                                    ? 'text-white'
-                                    : isVista
-                                    ? 'text-sky-950'
-                                    : 'text-slate-900'
-                                : 'opacity-60 hover:opacity-90'
+                                ? 'bg-sky-100/70 border border-sky-200/80 backdrop-blur-xs'
+                                : 'bg-[#dadadb]'
                         }`}
                     >
-                        Ekspor Data
-                    </button>
-
-                    {/* Tab 2: Impor Data */}
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('import')}
-                        className={`relative z-10 w-1/4 py-1.5 sm:py-2 text-[10px] min-[360px]:text-[11px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer truncate px-0.5 sm:px-1 ${
-                            activeTab === 'import'
-                                ? isWinamp
-                                    ? 'text-black font-mono'
+                        {/* Animated Sliding Indicator Pill */}
+                        <div
+                            className={`absolute top-[3px] bottom-[3px] rounded-[8px] transition-transform duration-200 ease-out pointer-events-none z-0 ${
+                                isWinamp
+                                    ? 'bg-[#00FF00] rounded-none'
                                     : isDarkFluid
-                                    ? 'text-[#381E72]'
+                                    ? 'bg-[#D0BCFF] shadow-[0px_3px_8px_rgba(0,0,0,0.35)]'
                                     : isDark
-                                    ? 'text-white'
+                                    ? 'bg-[#2a2f3b] border border-white/10 shadow-[0px_3px_8px_rgba(0,0,0,0.35)]'
                                     : isVista
-                                    ? 'text-sky-950'
-                                    : 'text-slate-900'
-                                : 'opacity-60 hover:opacity-90'
-                        }`}
-                    >
-                        Impor Data
-                    </button>
+                                    ? 'bg-white/95 border border-white/80 shadow-[0px_3px_8px_rgba(14,116,224,0.18)]'
+                                    : 'bg-white border-[0.5px] border-black/5 shadow-[0px_3px_8px_rgba(0,0,0,0.12),0px_3px_1px_rgba(0,0,0,0.04)]'
+                            }`}
+                            style={{
+                                left: '3px',
+                                width: 'calc((100% - 6px) / 3)',
+                                transform: `translateX(${
+                                    activeTab === 'import'
+                                        ? '0%'
+                                        : activeTab === 'shift'
+                                        ? '100%'
+                                        : '200%'
+                                })`,
+                            }}
+                        />
 
-                    {/* Tab 3: Shift */}
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('shift')}
-                        className={`relative z-10 w-1/4 py-1.5 sm:py-2 text-[10px] min-[360px]:text-[11px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer truncate px-0.5 sm:px-1 ${
-                            activeTab === 'shift'
-                                ? isWinamp
-                                    ? 'text-black font-mono'
-                                    : isDarkFluid
-                                    ? 'text-[#381E72]'
-                                    : isDark
-                                    ? 'text-white'
-                                    : isVista
-                                    ? 'text-sky-950'
-                                    : 'text-slate-900'
-                                : 'opacity-60 hover:opacity-90'
-                        }`}
-                    >
-                        Shift
-                    </button>
+                        {/* Tab 1: Impor Data */}
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('import')}
+                            className={`relative z-10 w-full py-2 text-[11px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer whitespace-nowrap px-1 ${
+                                activeTab === 'import'
+                                    ? isWinamp
+                                        ? 'text-black font-mono'
+                                        : isDarkFluid
+                                        ? 'text-[#381E72]'
+                                        : isDark
+                                        ? 'text-white'
+                                        : isVista
+                                        ? 'text-sky-950'
+                                        : 'text-slate-900'
+                                    : 'opacity-60 hover:opacity-90'
+                            }`}
+                        >
+                            Impor Data
+                        </button>
 
-                    {/* Tab 4: Reset & Hapus */}
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('reset')}
-                        className={`relative z-10 w-1/4 py-1.5 sm:py-2 text-[10px] min-[360px]:text-[11px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer truncate px-0.5 sm:px-1 ${
-                            activeTab === 'reset'
-                                ? isWinamp
-                                    ? 'text-black font-mono'
-                                    : isDarkFluid
-                                    ? 'text-[#381E72]'
-                                    : isDark
-                                    ? 'text-white'
-                                    : isVista
-                                    ? 'text-sky-950'
-                                    : 'text-slate-900'
-                                : 'opacity-60 hover:opacity-90'
-                        }`}
-                    >
-                        Reset & Hapus
-                    </button>
+                        {/* Tab 2: Shift */}
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('shift')}
+                            className={`relative z-10 w-full py-2 text-[11px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer whitespace-nowrap px-1 ${
+                                activeTab === 'shift'
+                                    ? isWinamp
+                                        ? 'text-black font-mono'
+                                        : isDarkFluid
+                                        ? 'text-[#381E72]'
+                                        : isDark
+                                        ? 'text-white'
+                                        : isVista
+                                        ? 'text-sky-950'
+                                        : 'text-slate-900'
+                                    : 'opacity-60 hover:opacity-90'
+                            }`}
+                        >
+                            Shift
+                        </button>
+
+                        {/* Tab 3: Reset & Hapus */}
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('reset')}
+                            className={`relative z-10 w-full py-2 text-[11px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer whitespace-nowrap px-1 ${
+                                activeTab === 'reset'
+                                    ? isWinamp
+                                        ? 'text-black font-mono'
+                                        : isDarkFluid
+                                        ? 'text-[#381E72]'
+                                        : isDark
+                                        ? 'text-white'
+                                        : isVista
+                                        ? 'text-sky-950'
+                                        : 'text-slate-900'
+                                    : 'opacity-60 hover:opacity-90'
+                            }`}
+                        >
+                            Reset & Hapus
+                        </button>
+                    </div>
                 </div>
 
                 {/* Body Content */}
                 <div className="space-y-4">
-                    {activeTab === 'export' && (
-                        <div className="space-y-3.5">
-                            <p className="text-xs opacity-75">
-                                Unduh salinan data jadwal Anda dalam dokumen PDF siap cetak, gambar kalender HD (PNG), tabel Excel (.xlsx), atau cadangan lengkap JSON.
-                            </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <button
-                                    type="button"
-                                    onClick={handleExportPDF}
-                                    className={`flex items-center space-x-3 p-4 rounded-lg border transition-all text-left cursor-pointer ${s.insetBox} hover:border-teal-500`}
-                                >
-                                    <div className="p-2.5 rounded-lg bg-rose-500/10 text-rose-500">
-                                        <FileText className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xs font-bold">Dokumen PDF (.pdf)</h4>
-                                        <p className="text-[11px] opacity-60">Laporan visual siap cetak</p>
-                                    </div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={handleExportPNG}
-                                    className={`flex items-center space-x-3 p-4 rounded-lg border transition-all text-left cursor-pointer ${s.insetBox} hover:border-teal-500`}
-                                >
-                                    <div className="p-2.5 rounded-lg bg-sky-500/10 text-sky-500">
-                                        <ImageIcon className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xs font-bold">Gambar Kalender (.png)</h4>
-                                        <p className="text-[11px] opacity-60">Tangkapan HD kalender</p>
-                                    </div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={handleExportExcel}
-                                    className={`flex items-center space-x-3 p-4 rounded-lg border transition-all text-left cursor-pointer ${s.insetBox} hover:border-teal-500`}
-                                >
-                                    <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-500">
-                                        <FileSpreadsheet className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xs font-bold">File Excel (.xlsx)</h4>
-                                        <p className="text-[11px] opacity-60">Tabel spreadsheet jadwal</p>
-                                    </div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={handleExportJSON}
-                                    className={`flex items-center space-x-3 p-4 rounded-lg border transition-all text-left cursor-pointer ${s.insetBox} hover:border-teal-500`}
-                                >
-                                    <div className="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-500">
-                                        <FileCode className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xs font-bold">Cadangan JSON</h4>
-                                        <p className="text-[11px] opacity-60">Format lengkap cadangan</p>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
                     {activeTab === 'import' && (
                         <div className="space-y-3.5">
                             <p className="text-xs opacity-75">
@@ -683,8 +436,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
 
     return (
-        <div className="fixed inset-0 z-150 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-            <div className="fixed inset-0" onClick={onClose} />
+        <div className="fixed inset-0 sm:top-7 z-150 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+            <div className="fixed inset-0 sm:top-7" onClick={onClose} />
             <div className="relative z-10 w-full max-w-3xl">{modalContent}</div>
         </div>
     );

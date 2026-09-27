@@ -716,11 +716,13 @@ export const App: React.FC = () => {
             className={`min-h-screen flex flex-col ${themeConfig.wrapperClass} font-sans selection:bg-teal-500 selection:text-white`}
         >
             {/* Window Title Bar */}
-            <WindowTitleBar
-                theme={currentTheme}
-                title={FULL_APP_TITLE}
-                subtitle="Kalender Kerja"
-            />
+            <div className="sticky top-0 z-[999999] shrink-0 w-full">
+                <WindowTitleBar
+                    theme={currentTheme}
+                    title={FULL_APP_TITLE}
+                    subtitle="Kalender Kerja"
+                />
+            </div>
 
             {/* Top Navbar */}
             <TopNavbar
@@ -760,13 +762,13 @@ export const App: React.FC = () => {
                 <main className="flex-1 flex flex-col overflow-y-auto min-w-0 pb-14 md:pb-2">
                     {pageTab === 'calendar' && (
                         <div
-                            className="p-2 sm:p-3 lg:p-3 max-w-[1490px] w-full mx-auto touch-pan-y"
+                            className="p-2 sm:p-2.5 lg:p-2.5 max-w-[1490px] w-full mx-auto touch-pan-y"
                             onTouchStart={handleTouchStart}
                             onTouchEnd={handleTouchEnd}
                         >
-                            <div className="flex flex-col lg:flex-row gap-3 xl:gap-4 items-start">
+                            <div className="flex flex-col lg:flex-row gap-2.5 xl:gap-3 items-start">
                                 {/* Left/Main Column: Calendar & Controls */}
-                                <div className="flex-1 min-w-0 w-full space-y-2">
+                                <div className="flex-1 min-w-0 w-full space-y-1.5 sm:space-y-2">
                                     {/* Calendar Header Toolbar */}
                                     <SubToolbarHeader
                                         title="Jadwal Kerja"
@@ -781,7 +783,7 @@ export const App: React.FC = () => {
                                         onOpenMonthPicker={() => setIsMonthYearPickerOpen(true)}
                                     />
 
-                                    {/* Mobile/Compact View: Kontrol Kalender diletakkan di atas kalender dalam mode ramping */}
+                                     {/* Mobile/Compact View: Kontrol Kalender diletakkan di atas kalender dalam mode ramping */}
                                     <div className="block lg:hidden mb-1 sm:mb-1.5">
                                         <CalendarActionToolbar
                                             selectedMonth={selectedMonth}
@@ -789,6 +791,7 @@ export const App: React.FC = () => {
                                             currentTheme={currentTheme}
                                             areAllLocked={isMonthFullyLocked}
                                             lastResetBackupState={undoBackup ? { year: undoBackup.year, month: undoBackup.month } : null}
+                                            
                                             onTempelJadwal={() => setIsPasteModalOpen(true)}
                                             onUndoReset={handleUndoReset}
                                             onResetCalendar={() => setIsResetConfirmOpen(true)}
@@ -813,78 +816,98 @@ export const App: React.FC = () => {
                                     </div>
 
                                     {/* Calendar Days Grid */}
-                                    <div className="grid grid-cols-7 gap-1 sm:gap-1.5 relative">
-                                        {/* Empty prefix cells to align Day 1 with its correct day of the week */}
-                                        {Array.from({ length: firstDayOffset }).map((_, emptyIdx) => (
-                                             <div
-                                                 key={`empty-prefix-${emptyIdx}`}
-                                                 className="aspect-square opacity-0 pointer-events-none"
-                                                 aria-hidden="true"
-                                             />
-                                         ))}
+                                    {(() => {
+                                        const totalCells = firstDayOffset + daysInCurrentMonth;
+                                        const totalRows = Math.ceil(totalCells / 7);
 
-                                        {(() => {
-                                            const totalCells = firstDayOffset + daysInCurrentMonth;
-                                            const totalRows = Math.ceil(totalCells / 7);
+                                        // Calculated aspect ratio based on total rows (4, 5, or 6) so full calendar month fits viewport height
+                                        const getGridAspectStyle = (rows: number): React.CSSProperties => {
+                                            if (rows >= 6) {
+                                                return { aspectRatio: '1.95 / 1' };
+                                            }
+                                            if (rows === 5) {
+                                                return { aspectRatio: '1.65 / 1' };
+                                            }
+                                            return { aspectRatio: '1.35 / 1' };
+                                        };
 
-                                            return Array.from({ length: daysInCurrentMonth }).map((_, idx) => {
-                                                const dayNumber = idx + 1;
-                                                const cellIndex = firstDayOffset + idx;
-                                                const colIndex = cellIndex % 7;
-                                                const rowIndex = Math.floor(cellIndex / 7);
-                                                const isRightEdge = colIndex >= 6;
-                                                const isBottomEdge = rowIndex >= totalRows - 1;
+                                        const cellAspectStyle = getGridAspectStyle(totalRows);
 
-                                                const dateKey = `${selectedYear}-${selectedMonth}-${dayNumber}`;
-                                                const dayData = daysState[dateKey] || {
-                                                    shift: '',
-                                                    isLocked: true,
-                                                    note: '',
-                                                    isMasuk: false,
-                                                    jamMasuk: '',
-                                                    jamPulang: '',
-                                                    absenCeisa: '',
-                                                    isManualHoliday: false,
-                                                };
-
-                                                const paddedD = String(dayNumber).padStart(2, '0');
-                                                const paddedM = String(selectedMonth).padStart(2, '0');
-                                                const isoDate = `${selectedYear}-${paddedM}-${paddedD}`;
-                                                const holiday = holidayMap.get(isoDate) || holidayMap.get(dateKey);
-
-                                                const nextDayPaddedD = String(dayNumber + 1).padStart(2, '0');
-                                                const nextDateKey = `${selectedYear}-${paddedM}-${nextDayPaddedD}`;
-                                                const nextDayData = daysState[nextDateKey];
-
-                                                return (
-                                                    <DayCell
-                                                        key={dateKey}
-                                                        dateKey={dateKey}
-                                                        year={selectedYear}
-                                                        month={selectedMonth}
-                                                        dayNumber={dayNumber}
-                                                        data={dayData}
-                                                        nextDayData={nextDayData}
-                                                        isLocked={dayData.isLocked ?? true}
-                                                        holiday={holiday}
-                                                        theme={currentTheme}
-                                                        isExpandedDesktop={!isMobile && expandedDesktopDay === dayNumber}
-                                                        isRightEdge={isRightEdge}
-                                                        isBottomEdge={isBottomEdge}
-                                                        onToggleExpandDesktop={handleToggleExpandDesktop}
-                                                        onCloseExpandDesktop={handleCloseExpandDesktop}
-                                                        onUpdate={(partial) => handleUpdateDay(dateKey, partial)}
-                                                        onRequestTimePick={(field, title, currentVal) =>
-                                                            handleOpenTimePicker(field, title, currentVal, dateKey)
-                                                        }
-                                                        onOpenDetail={handleOpenDetail}
-                                                        piketMatchInfo={piketCalculation.piketByDateKey[dateKey]}
-                                                        offMatchInfo={piketCalculation.offMatches[dateKey]}
+                                        return (
+                                            <div className="grid grid-cols-7 gap-1 sm:gap-1.5 relative">
+                                                {/* Empty prefix cells to align Day 1 with its correct day of the week */}
+                                                {Array.from({ length: firstDayOffset }).map((_, emptyIdx) => (
+                                                    <div
+                                                        key={`empty-prefix-${emptyIdx}`}
+                                                        style={cellAspectStyle} className="opacity-0 pointer-events-none w-full"
+                                                        aria-hidden="true"
                                                     />
-                                                );
-                                            });
-                                        })()}
-                                    </div>
+                                                ))}
+
+                                                {Array.from({ length: daysInCurrentMonth }).map((_, idx) => {
+                                                    const dayNumber = idx + 1;
+                                                    const cellIndex = firstDayOffset + idx;
+                                                    const colIndex = cellIndex % 7;
+                                                    const rowIndex = Math.floor(cellIndex / 7);
+                                                    const isRightEdge = colIndex >= 6;
+                                                    const isBottomEdge = rowIndex >= totalRows - 1;
+
+                                                    const dateKey = `${selectedYear}-${selectedMonth}-${dayNumber}`;
+                                                    const dayData = daysState[dateKey] || {
+                                                        shift: '',
+                                                        isLocked: true,
+                                                        note: '',
+                                                        isMasuk: false,
+                                                        jamMasuk: '',
+                                                        jamPulang: '',
+                                                        absenCeisa: '',
+                                                        isManualHoliday: false,
+                                                    };
+
+                                                    const paddedD = String(dayNumber).padStart(2, '0');
+                                                    const paddedM = String(selectedMonth).padStart(2, '0');
+                                                    const isoDate = `${selectedYear}-${paddedM}-${paddedD}`;
+                                                    const holiday = holidayMap.get(isoDate) || holidayMap.get(dateKey);
+
+                                                    const nextDayPaddedD = String(dayNumber + 1).padStart(2, '0');
+                                                    const nextDateKey = `${selectedYear}-${paddedM}-${nextDayPaddedD}`;
+                                                    const nextDayData = daysState[nextDateKey];
+
+                                                    return (
+                                                        <div
+                                                            key={dateKey}
+                                                            style={cellAspectStyle} className="relative w-full"
+                                                        >
+                                                            <DayCell
+                                                                dateKey={dateKey}
+                                                                year={selectedYear}
+                                                                month={selectedMonth}
+                                                                dayNumber={dayNumber}
+                                                                data={dayData}
+                                                                nextDayData={nextDayData}
+                                                                isLocked={dayData.isLocked ?? true}
+                                                                holiday={holiday}
+                                                                theme={currentTheme}
+                                                                
+                                                                isExpandedDesktop={!isMobile && expandedDesktopDay === dayNumber}
+                                                                isRightEdge={isRightEdge}
+                                                                isBottomEdge={isBottomEdge}
+                                                                onToggleExpandDesktop={handleToggleExpandDesktop}
+                                                                onCloseExpandDesktop={handleCloseExpandDesktop}
+                                                                onUpdate={(partial) => handleUpdateDay(dateKey, partial)}
+                                                                onRequestTimePick={(field, title, currentVal) =>
+                                                                    handleOpenTimePicker(field, title, currentVal, dateKey)
+                                                                }
+                                                                onOpenDetail={handleOpenDetail}
+                                                                piketMatchInfo={piketCalculation.piketByDateKey[dateKey]}
+                                                                offMatchInfo={piketCalculation.offMatches[dateKey]}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        );
+                                    })()}
 
                                      {/* Mobile View: Libur Nasional di Atas & Ringkasan Piket di Bawah Kalender */}
                                     <div className="block lg:hidden pt-2 space-y-3">
@@ -926,6 +949,7 @@ export const App: React.FC = () => {
                                         currentTheme={currentTheme}
                                         areAllLocked={isMonthFullyLocked}
                                         lastResetBackupState={undoBackup ? { year: undoBackup.year, month: undoBackup.month } : null}
+                                        
                                         onTempelJadwal={() => setIsPasteModalOpen(true)}
                                         onUndoReset={handleUndoReset}
                                         onResetCalendar={() => setIsResetConfirmOpen(true)}

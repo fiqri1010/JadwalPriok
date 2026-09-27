@@ -32,8 +32,8 @@ export const ShiftDeleteConfirmModal: React.FC<ShiftDeleteConfirmModalProps> = (
     };
 
     return createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-            <div className="fixed inset-0" onClick={onClose} />
+        <div className="fixed inset-0 sm:top-7 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+            <div className="fixed inset-0 sm:top-7" onClick={onClose} />
             <div className="relative z-10 w-full max-w-md rounded-lg bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200/90 dark:border-slate-700 overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-current/10">

@@ -300,7 +300,7 @@ export const ShiftDropdown: React.FC<ShiftDropdownProps> = ({
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 512 512"
                     className={`${compact ? 'w-2 h-2 ml-0.5' : 'w-3 h-3 ml-1'} shrink-0 transition-transform duration-300 ease-in-out ${
-                        isOpen ? 'rotate-0' : '-rotate-90'
+                        isOpen ? 'rotate-180' : 'rotate-0'
                     } opacity-80`}
                     fill="currentColor"
                 >

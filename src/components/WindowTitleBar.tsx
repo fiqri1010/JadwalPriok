@@ -138,7 +138,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             <div
                 data-tauri-drag-region="true"
                 onMouseDown={handleStartDragging}
-                className="hidden sm:block w-full shrink-0 select-none font-sans text-xs shadow-md border-b border-white/35 cursor-default"
+                className="hidden sm:block w-full shrink-0 select-none font-sans text-xs shadow-md border-b border-white/35 cursor-default relative z-[999999]"
             >
                 <div
                     data-tauri-drag-region="true"
@@ -200,7 +200,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             <div
                 data-tauri-drag-region="true"
                 onMouseDown={handleStartDragging}
-                className="hidden sm:block w-full shrink-0 select-none font-mono text-[11px] bg-[#1a1e22] border-b-2 border-[#0a0d0f] cursor-default"
+                className="hidden sm:block w-full shrink-0 select-none font-mono text-[11px] bg-[#1a1e22] border-b-2 border-[#0a0d0f] cursor-default relative z-[999999]"
             >
                 <div
                     data-tauri-drag-region="true"
@@ -259,7 +259,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             <div
                 data-tauri-drag-region="true"
                 onMouseDown={handleStartDragging}
-                className="hidden sm:block w-full shrink-0 select-none font-sans text-xs bg-[#141218] border-b border-white/5 cursor-default"
+                className="hidden sm:block w-full shrink-0 select-none font-sans text-xs bg-[#141218] border-b border-white/5 cursor-default relative z-[999999]"
             >
                 <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#E6E0E9] bg-[#1D1B20]">
                     <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
@@ -306,7 +306,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
             <div
                 data-tauri-drag-region="true"
                 onMouseDown={handleStartDragging}
-                className="hidden sm:block w-full shrink-0 select-none font-sans text-xs bg-[#121212] border-b border-[#333333] cursor-default"
+                className="hidden sm:block w-full shrink-0 select-none font-sans text-xs bg-[#121212] border-b border-[#333333] cursor-default relative z-[999999]"
             >
                 <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#E0E0E0] bg-[#1A1A1A]">
                     <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
@@ -352,7 +352,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
         <div
             data-tauri-drag-region="true"
             onMouseDown={handleStartDragging}
-            className="hidden sm:block w-full shrink-0 select-none font-sans text-xs bg-[#F6F7F8] border-b border-[#E2E8F0] cursor-default"
+            className="hidden sm:block w-full shrink-0 select-none font-sans text-xs bg-[#F6F7F8] border-b border-[#E2E8F0] cursor-default relative z-[999999]"
         >
             <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#011627] bg-[#FFFFFF]">
                 <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">

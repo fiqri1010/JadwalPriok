@@ -26,6 +26,16 @@ export type PresetPatternType =
     | 'triangles'
     | 'chevron'
     | 'concentric'
+    | 'isometric'
+    | 'scales'
+    | 'waves_ocean'
+    | 'bricks'
+    | 'houndstooth'
+    | 'lines_vertical'
+    | 'polka_dense'
+    | 'sunburst'
+    | 'cross_dots'
+    | 'zigzag_dense'
     | string;
 
 export interface GradientColorStop {
@@ -45,6 +55,7 @@ export interface ShiftVisualStyle {
     patternType: PresetPatternType;
     patternOpacity: number; // 10 - 100% or 0.05 - 1.0
     patternScale?: number; // 0.5 - 3.0 (scale/density factor)
+    patternStrokeWidth?: number; // 0.5 - 4.0 (Ketebalan motif stroke)
     customPatternUrl?: string;
     iconType: 'svg' | 'customImage' | 'emoji' | 'none';
     iconName?: string;
@@ -82,6 +93,9 @@ export interface ShiftItemConfig {
     workTime: ShiftWorkTimeConfig;
     visual: ShiftVisualStyle;
     isPiket: boolean;
+    piketHariKerja?: boolean;           // Piket pada hari kerja biasa (Senin - Jumat)
+    piketHariLibur?: boolean;           // Piket pada hari libur / tanggal merah / akhir pekan
+    piketHariKerjaDenganOff?: boolean;  // Piket hari kerja yang berhak mendapatkan jatah OFF pengganti
     isVisibleInDropdown: boolean;
     isSystemDefault?: boolean;
 }
@@ -185,16 +199,31 @@ export function normalizeShift(val: string | undefined | null): ShiftType {
 
 /**
  * Deteksi Piket:
- * 1. Shift pada hari libur/tanggal merah/sabtu/minggu bukan OFF & CUTI
- * 2. Shift pada hari kerja adalah M (Malam), PM, SM
+ * 1. Shift pada hari libur/tanggal merah/sabtu/minggu bukan OFF & CUTI (atau sesuai piketHariLibur)
+ * 2. Shift pada hari kerja adalah M (Malam), PM, SM (atau sesuai piketHariKerja)
  */
 export function isPiketShift(
     shift: string | undefined | null,
-    isWeekendOrHoliday: boolean
+    isWeekendOrHoliday: boolean,
+    shiftConfigs?: ShiftItemConfig[]
 ): boolean {
     const normalized = normalizeShift(shift);
     if (!normalized || normalized === 'OFF' || normalized === 'CUTI') {
         return false;
+    }
+    if (shiftConfigs && shiftConfigs.length > 0) {
+        const found = shiftConfigs.find(
+            (s) =>
+                s.key.toUpperCase() === normalized.toUpperCase() ||
+                s.naming.displayBadge.toUpperCase() === normalized.toUpperCase() ||
+                s.naming.copyCode.toUpperCase() === normalized.toUpperCase()
+        );
+        if (found) {
+            if (isWeekendOrHoliday) {
+                return found.piketHariLibur ?? true;
+            }
+            return found.piketHariKerja ?? (normalized === 'SM' || normalized === 'PM' || normalized === 'Malam');
+        }
     }
     if (isWeekendOrHoliday) {
         return true;

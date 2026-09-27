@@ -1137,7 +1137,7 @@ ${activeYear}-08-17,Kemerdekaan RI,Libur Nasional`}
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 sm:top-7 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
             <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 {content}
             </div>

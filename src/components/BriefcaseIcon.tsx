@@ -16,162 +16,72 @@ export const BriefcaseIcon: React.FC<BriefcaseIconProps> = ({
 }) => {
     const isWinamp = theme === 'winamp';
     const isDark = theme === 'dark' || theme === 'darkFluid';
-    const isVista = theme === 'vista';
 
-    // Theme color palette definitions
-    let bodyColor = '#5C3E38'; // Default brown leather
-    let handleColor = '#462D28';
-    let strapColor = '#ECB237'; // Default golden yellow
-    let buckleColor = '#F7D059';
-    let buckleHighlight = '#FFF282';
-    let outlineColor = '#38221D';
-
-    if (isWinamp) {
-        bodyColor = '#002200';
-        handleColor = '#00FF00';
-        strapColor = '#00FF00';
-        buckleColor = '#00FF00';
-        buckleHighlight = '#00FF00';
-        outlineColor = '#00FF00';
-    } else if (isDark) {
-        bodyColor = '#523B33';
-        handleColor = '#36241E';
-        strapColor = '#F59E0B'; // Bright golden amber
-        buckleColor = '#FBBF24';
-        buckleHighlight = '#FEF08A';
-        outlineColor = '#1F1916';
-    } else if (isVista) {
-        bodyColor = '#1E3A8A'; // Vista Aero Dark Blue
-        handleColor = '#0F172A';
-        strapColor = '#38BDF8'; // Aero Sky Blue
-        buckleColor = '#7DD3FC';
-        buckleHighlight = '#E0F2FE';
-        outlineColor = '#0284C7';
-    }
+    // Black and White Line Art Palette
+    // Light mode: Crisp black lines with solid white backing
+    // Dark mode: Crisp white lines with deep black backing
+    const strokeColor = isWinamp ? '#00FF00' : isDark ? '#FFFFFF' : '#18181B';
+    const fillColor = isWinamp ? '#000000' : isDark ? '#121212' : '#FFFFFF';
 
     return (
         <svg
-            viewBox="0 0 100 100"
+            viewBox="0 0 24 24"
+            fill="none"
             className={`inline-block shrink-0 ${className}`}
             style={style}
             xmlns="http://www.w3.org/2000/svg"
         >
             {title && <title>{title}</title>}
+
             {/* Top Handle */}
             <path
-                d="M 35 25 C 35 12, 65 12, 65 25"
-                fill="none"
-                stroke={isWinamp ? '#00FF00' : handleColor}
-                strokeWidth="7"
+                d="M8 6.5V4.5C8 3.67157 8.67157 3 9.5 3H14.5C15.3284 3 16 3.67157 16 4.5V6.5"
+                stroke={strokeColor}
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+
+            {/* Main Briefcase Body with B&W Fill & Crisp Line */}
+            <rect
+                x="2.5"
+                y="6.5"
+                width="19"
+                height="14"
+                rx="2.5"
+                fill={fillColor}
+                stroke={strokeColor}
+                strokeWidth="1.8"
+                strokeLinejoin="round"
+            />
+
+            {/* Horizontal Flap Separation Line */}
+            <path
+                d="M2.5 12H21.5"
+                stroke={strokeColor}
+                strokeWidth="1.5"
                 strokeLinecap="round"
             />
 
-            {/* Main Briefcase Body */}
-            <rect
-                x="6"
-                y="24"
-                width="88"
-                height="68"
-                rx="10"
-                fill={bodyColor}
-                stroke={isWinamp ? '#00FF00' : outlineColor}
-                strokeWidth={isWinamp ? '3' : '2'}
-            />
-
-            {/* Top Flap Division Line */}
+            {/* Vertical Accent Straps */}
             <path
-                d="M 6 48 L 94 48"
-                stroke={isWinamp ? '#00FF00' : outlineColor}
-                strokeWidth="2"
-                opacity="0.4"
+                d="M7 6.5V20.5M17 6.5V20.5"
+                stroke={strokeColor}
+                strokeWidth="1.2"
+                strokeDasharray="2 1.5"
+                opacity="0.8"
             />
 
-            {/* Left Vertical Strap */}
+            {/* Center Lock Clasp */}
             <rect
-                x="20"
-                y="24"
-                width="14"
-                height="68"
-                fill={strapColor}
-            />
-
-            {/* Right Vertical Strap */}
-            <rect
-                x="66"
-                y="24"
-                width="14"
-                height="68"
-                fill={strapColor}
-            />
-
-            {/* Center Lock / Latch */}
-            <rect
-                x="41"
-                y="52"
-                width="18"
-                height="8"
-                rx="3"
-                fill={buckleColor}
-                stroke={outlineColor}
-                strokeWidth="1.5"
-            />
-
-            {/* Left Buckle */}
-            <rect
-                x="17"
-                y="57"
-                width="20"
-                height="18"
-                rx="4"
-                fill={buckleColor}
-                stroke={outlineColor}
-                strokeWidth="1.5"
-            />
-            <rect
-                x="22"
-                y="61"
-                width="10"
-                height="10"
-                rx="2"
-                fill={bodyColor}
-            />
-            {/* Left Buckle Prong */}
-            <rect
-                x="25"
-                y="58"
-                width="4"
-                height="16"
-                rx="1"
-                fill={buckleHighlight}
-            />
-
-            {/* Right Buckle */}
-            <rect
-                x="63"
-                y="57"
-                width="20"
-                height="18"
-                rx="4"
-                fill={buckleColor}
-                stroke={outlineColor}
-                strokeWidth="1.5"
-            />
-            <rect
-                x="68"
-                y="61"
-                width="10"
-                height="10"
-                rx="2"
-                fill={bodyColor}
-            />
-            {/* Right Buckle Prong */}
-            <rect
-                x="71"
-                y="58"
-                width="4"
-                height="16"
-                rx="1"
-                fill={buckleHighlight}
+                x="10.5"
+                y="10.5"
+                width="3"
+                height="3"
+                rx="0.6"
+                fill={strokeColor}
+                stroke={fillColor}
+                strokeWidth="0.5"
             />
         </svg>
     );

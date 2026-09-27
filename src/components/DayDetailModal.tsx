@@ -172,7 +172,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     return (
         <AnimatePresence>
             <div
-                className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm select-none"
+                className="fixed inset-0 sm:top-7 z-[99999] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm select-none"
                 onClick={onClose}
             >
                 {/* Hardware-accelerated Swipeable Card */}
@@ -385,7 +385,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => onRequestTimePick('jamMasuk', `Jam Masuk - Tgl ${dayNumber}`, data?.jamMasuk || '')}
-                                    className={`w-full py-1.5 px-1.5 text-center font-mono text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
+                                    className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
                                         isWinamp
                                             ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
                                             : isDark || isDarkFluid
@@ -403,7 +403,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                     placeholder="07:30"
                                     value={data?.jamMasuk || ''}
                                     onChange={(e) => onUpdate({ jamMasuk: e.target.value })}
-                                    className={`w-full py-1.5 px-1.5 text-center font-mono text-xs rounded-[6px] border ${
+                                    className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs rounded-[6px] border ${
                                         isWinamp
                                             ? 'bg-black border-zinc-700 text-[#00FF00]'
                                             : isDark || isDarkFluid
@@ -432,7 +432,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => onRequestTimePick('jamPulang', `Jam Pulang - Tgl ${dayNumber}`, data?.jamPulang || '')}
-                                    className={`w-full py-1.5 px-1.5 text-center font-mono text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
+                                    className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
                                         isWinamp
                                             ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
                                             : isDark || isDarkFluid
@@ -450,7 +450,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                     placeholder="17:00"
                                     value={data?.jamPulang || ''}
                                     onChange={(e) => onUpdate({ jamPulang: e.target.value })}
-                                    className={`w-full py-1.5 px-1.5 text-center font-mono text-xs rounded-[6px] border ${
+                                    className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs rounded-[6px] border ${
                                         isWinamp
                                             ? 'bg-black border-zinc-700 text-[#00FF00]'
                                             : isDark || isDarkFluid

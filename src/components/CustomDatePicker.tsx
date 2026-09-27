@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X, Check, Clock } from 'lucide-react';
 import { AppTheme } from '../types';
 
@@ -65,6 +66,36 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   const [isMonthSelectOpen, setIsMonthSelectOpen] = useState(false);
   const [isYearSelectOpen, setIsYearSelectOpen] = useState(false);
 
+  // Coordinate tracking for fixed portal positioning
+  const [coords, setCoords] = useState<{ top: number; left: number; openUpward: boolean }>({
+    top: 0,
+    left: 0,
+    openUpward: false,
+  });
+
+  const updateCoords = useCallback(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const popoverWidth = window.innerWidth < 640 ? 288 : 320;
+    const popoverHeight = 350;
+    const padding = 10;
+
+    const spaceBelow = window.innerHeight - rect.bottom - padding;
+    const spaceAbove = rect.top - padding;
+    const openUpward = spaceBelow < popoverHeight && spaceAbove > spaceBelow;
+
+    let top = openUpward ? rect.top - popoverHeight - 4 : rect.bottom + 6;
+    if (top < padding) top = padding;
+
+    let left = align === 'right' ? rect.right - popoverWidth : rect.left;
+    if (left + popoverWidth > window.innerWidth - padding) {
+      left = window.innerWidth - popoverWidth - padding;
+    }
+    if (left < padding) left = padding;
+
+    setCoords({ top, left, openUpward });
+  }, [align]);
+
   // Sync view when value changes or when opened
   useEffect(() => {
     if (parsedDate) {
@@ -73,12 +104,21 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     }
   }, [parsedDate]);
 
-  // Close on outside click or escape
+  // Close on outside click or escape & update coords on scroll/resize
   useEffect(() => {
     if (!isOpen) return;
+    updateCoords();
+
+    const handleScrollOrResize = () => updateCoords();
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
 
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        containerRef.current && !containerRef.current.contains(target) &&
+        popoverRef.current && !popoverRef.current.contains(target)
+      ) {
         setIsOpen(false);
         setIsMonthSelectOpen(false);
         setIsYearSelectOpen(false);
@@ -96,10 +136,12 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
     return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, updateCoords]);
 
   const isWinamp = theme === 'winamp';
   const isDarkFluid = theme === 'darkFluid';
@@ -285,13 +327,17 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         </div>
       </div>
 
-      {/* Custom Calendar Popover */}
-      {isOpen && (
+      {/* Custom Calendar Popover rendered via Portal to avoid overflow clipping */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
         <div
           ref={popoverRef}
-          className={`absolute z-[99999] mt-1.5 w-72 sm:w-80 rounded-2xl p-3.5 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 ${
-            align === 'right' ? 'right-0' : 'left-0'
-          } ${s.dropdown} animate-in fade-in slide-in-from-top-2 duration-150`}
+          style={{
+            position: 'fixed',
+            top: coords.top,
+            left: coords.left,
+            zIndex: 100000,
+          }}
+          className={`w-72 sm:w-80 rounded-2xl p-3.5 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 ${s.dropdown} animate-in fade-in slide-in-from-top-2 duration-150`}
         >
           {/* Header (Bulan, Tahun, Navigasi) */}
           <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-current/10">
@@ -515,7 +561,8 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
               </button>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

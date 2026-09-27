@@ -474,7 +474,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-slate-950/75 p-3 backdrop-blur-sm animate-in fade-in duration-150 select-none"
+      className="fixed inset-0 sm:top-7 z-[100000] flex items-center justify-center bg-slate-950/75 p-3 backdrop-blur-sm animate-in fade-in duration-150 select-none"
       onMouseUp={handleMouseUp}
     >
       <div 

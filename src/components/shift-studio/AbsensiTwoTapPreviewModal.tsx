@@ -14,8 +14,8 @@ export const AbsensiTwoTapPreviewModal: React.FC<AbsensiTwoTapPreviewModalProps>
     if (!isOpen || typeof document === 'undefined') return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-            <div className="fixed inset-0" onClick={onClose} />
+        <div className="fixed inset-0 sm:top-7 z-[200] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+            <div className="fixed inset-0 sm:top-7" onClick={onClose} />
             <div
                 className="relative z-10 w-full max-w-xl rounded-xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200/90 dark:border-slate-700 overflow-hidden flex flex-col max-h-[85vh]"
                 onClick={(e) => e.stopPropagation()}

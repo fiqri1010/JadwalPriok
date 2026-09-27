@@ -152,11 +152,12 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
     };
 
     // Duplikasi kelompok profil
-    const handleCopyGroup = (sourceGroup: ShiftGroupProfile, newName: string, startDate: string) => {
+    const handleCopyGroup = (sourceGroup: ShiftGroupProfile, newName: string, startDate?: string) => {
+        const effectiveStart = startDate?.trim() || new Date().toISOString().split('T')[0];
         const newGroup: ShiftGroupProfile = {
             id: `GROUP_${Date.now()}`,
             name: newName,
-            effectiveStartDate: startDate,
+            effectiveStartDate: effectiveStart,
             isActive: true,
             shifts: JSON.parse(JSON.stringify(sourceGroup.shifts)),
         };
@@ -168,11 +169,12 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
     };
 
     // Buat profil kelompok baru dari kosong/standar
-    const handleCreateNewGroup = (name: string, startDate: string) => {
+    const handleCreateNewGroup = (name: string, startDate?: string) => {
+        const effectiveStart = startDate?.trim() || new Date().toISOString().split('T')[0];
         const newGroup: ShiftGroupProfile = {
             id: `GROUP_${Date.now()}`,
             name,
-            effectiveStartDate: startDate,
+            effectiveStartDate: effectiveStart,
             isActive: true,
             shifts: JSON.parse(JSON.stringify(DEFAULT_SHIFT_GROUP.shifts)),
         };
@@ -199,6 +201,24 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
         }
         saveShiftGroups(filtered);
         onShowToast(`Profil "${groupToDelete.name}" berhasil dihapus.`);
+    };
+
+    // Ubah nama profil kelompok
+    const handleRenameGroup = (groupId: string, newName: string) => {
+        const trimmed = newName.trim();
+        if (!trimmed) {
+            onShowToast('Nama profil shift tidak boleh kosong.');
+            return;
+        }
+        const updated = groups.map((g) => {
+            if (g.id === groupId) {
+                return { ...g, name: trimmed };
+            }
+            return g;
+        });
+        setGroups(updated);
+        saveShiftGroups(updated);
+        onShowToast(`Nama profil berhasil diubah menjadi "${trimmed}".`);
     };
 
     // Ekspor JSON
@@ -263,6 +283,7 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                     onResetToDefault={handleResetGroupToDefault}
                     onExportJson={handleExportJson}
                     onImportJson={handleImportJson}
+                    onRenameProfile={(newName) => handleRenameGroup(currentGroupToEdit.id, newName)}
                 />
             ) : (
                 <ShiftGroupProfilesSection
@@ -280,6 +301,7 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                     onCopyGroup={handleCopyGroup}
                     onCreateNewGroup={handleCreateNewGroup}
                     onUpdateGroupDateRanges={handleUpdateGroupDateRanges}
+                    onRenameGroup={handleRenameGroup}
                 />
             )}
 

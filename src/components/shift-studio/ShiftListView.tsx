@@ -1,6 +1,8 @@
-import React from 'react';
-import { ShiftItemConfig } from '../../types';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { ShiftItemConfig, ShiftVisualStyle } from '../../types';
 import { ICON_CATALOG } from './ShiftIconPickerModal';
+import { BADGE_PATTERNS, isCustomPatternImage, parseCssPatternToStyle } from './patterns';
 import {
     Edit3,
     Trash2,
@@ -14,6 +16,9 @@ import {
     ArrowLeft,
     Layers,
     Calendar,
+    Pencil,
+    X,
+    Check,
 } from 'lucide-react';
 
 interface ShiftListViewProps {
@@ -28,6 +33,7 @@ interface ShiftListViewProps {
     onResetToDefault: () => void;
     onExportJson: () => void;
     onImportJson: () => void;
+    onRenameProfile?: (newName: string) => void;
 }
 
 export const ShiftListView: React.FC<ShiftListViewProps> = ({
@@ -42,7 +48,45 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
     onResetToDefault,
     onExportJson,
     onImportJson,
+    onRenameProfile,
 }) => {
+    const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
+    const [nameInput, setNameInput] = useState(groupName);
+    const [nameError, setNameError] = useState('');
+
+    useEffect(() => {
+        setNameInput(groupName);
+    }, [groupName]);
+
+    const handleOpenEditName = () => {
+        setNameInput(groupName);
+        setNameError('');
+        setIsEditNameModalOpen(true);
+    };
+
+    const handleSaveName = () => {
+        const trimmed = nameInput.trim();
+        if (!trimmed) {
+            setNameError('Nama profil aturan shift tidak boleh kosong.');
+            return;
+        }
+        if (onRenameProfile) {
+            onRenameProfile(trimmed);
+        }
+        setIsEditNameModalOpen(false);
+        setNameError('');
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSaveName();
+        } else if (e.key === 'Escape') {
+            setIsEditNameModalOpen(false);
+            setNameError('');
+        }
+    };
+
     const getBadgeStyle = (visual: ShiftItemConfig['visual']): React.CSSProperties => {
         if (visual.colorMode === 'customCss' && visual.customCss) {
             return { background: visual.customCss.replace(/background(-color)?:\s*|;/g, '').trim() };
@@ -56,6 +100,73 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
             return { background: `linear-gradient(${visual.gradientAngle || 135}deg, ${stopsStr})` };
         }
         return { backgroundColor: visual.solidColor || '#EDF6F9' };
+    };
+
+    const renderPatternOverlay = (vis: ShiftVisualStyle) => {
+        if (vis.customPatternUrl) {
+            let opacity = vis.patternOpacity !== undefined ? vis.patternOpacity : 1.0;
+            if (opacity > 1) opacity = opacity / 100;
+
+            if (isCustomPatternImage(vis.customPatternUrl)) {
+                const imgScale = vis.patternScale || 1.0;
+                const sizePx = Math.max(8, Math.round(16 * imgScale));
+                return (
+                    <div
+                        className="absolute inset-0 pointer-events-none z-0"
+                        style={{
+                            backgroundImage: `url(${vis.customPatternUrl})`,
+                            backgroundRepeat: 'repeat',
+                            backgroundPosition: 'center',
+                            backgroundSize: `${sizePx}px ${sizePx}px`,
+                            opacity,
+                        }}
+                    />
+                );
+            }
+
+            const cssStyle = parseCssPatternToStyle(vis.customPatternUrl, vis.patternScale || 1.0);
+            return (
+                <div
+                    className="absolute inset-0 pointer-events-none z-0"
+                    style={{
+                        ...cssStyle,
+                        opacity,
+                    }}
+                />
+            );
+        }
+
+        const patternObj = BADGE_PATTERNS.find((p) => p.id === vis.patternType);
+        if (!patternObj || patternObj.id === 'none') return null;
+
+        const patColor = vis.patternColor || '#FFFFFF';
+        const strokeWidth = vis.patternStrokeWidth !== undefined ? vis.patternStrokeWidth : 1.2;
+        const svgContentStr = patternObj.svgContent(patColor, strokeWidth);
+        const scale = vis.patternScale || 1.0;
+        const patWidth = Math.max(2, Math.round(patternObj.defaultWidth * scale));
+        const patHeight = Math.max(2, Math.round(patternObj.defaultHeight * scale));
+        let opacity = vis.patternOpacity !== undefined ? vis.patternOpacity : 1.0;
+        if (opacity > 1) opacity = opacity / 100;
+
+        const patId = `list-pat-${vis.patternType || 'pat'}`;
+        return (
+            <svg
+                className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0"
+                style={{ opacity }}
+            >
+                <defs>
+                    <pattern
+                        id={patId}
+                        width={patWidth}
+                        height={patHeight}
+                        patternUnits="userSpaceOnUse"
+                    >
+                        <g dangerouslySetInnerHTML={{ __html: svgContentStr }} />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill={`url(#${patId})`} />
+            </svg>
+        );
     };
 
     const renderIcon = (visual: ShiftItemConfig['visual']) => {
@@ -94,9 +205,18 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                                 Profil Aturan Shift
                             </span>
                             <span className="text-xs text-slate-400">/</span>
-                            <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate">
-                                {groupName}
-                            </h3>
+                            <div
+                                onClick={onRenameProfile ? handleOpenEditName : undefined}
+                                className={`flex items-center space-x-1.5 group ${onRenameProfile ? 'cursor-pointer' : ''}`}
+                                title={onRenameProfile ? 'Klik untuk mengubah nama profil shift' : undefined}
+                            >
+                                <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                                    {groupName}
+                                </h3>
+                                {onRenameProfile && (
+                                    <Pencil className="w-3 h-3 text-slate-400 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors opacity-60 group-hover:opacity-100" />
+                                )}
+                            </div>
                         </div>
                         <p className="text-[10.5px] text-slate-500 dark:text-zinc-400 flex items-center space-x-1.5 mt-0.5">
                             <Calendar className="w-3 h-3 opacity-60" />
@@ -173,15 +293,18 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                                 {/* Fixed Width Container untuk Badge agar perataan kiri teks nama shift seragam */}
                                 <div className="w-18 sm:w-20 shrink-0 flex items-center justify-center">
                                     <div
-                                        className="w-full text-center py-1 px-1 rounded-md font-black text-xs shadow-2xs border flex items-center justify-center space-x-1"
+                                        className="relative overflow-hidden w-full text-center py-1 px-1 rounded-md font-black text-xs shadow-2xs border flex items-center justify-center space-x-1"
                                         style={{
                                             ...getBadgeStyle(s.visual),
                                             color: s.visual.textColor || '#FFFFFF',
                                             borderColor: s.visual.borderColor || '#83C5BE',
                                         }}
                                     >
-                                        {renderIcon(s.visual)}
-                                        <span className="truncate">{s.naming.displayBadge}</span>
+                                        {renderPatternOverlay(s.visual)}
+                                        <div className="relative z-10 flex items-center justify-center space-x-1 min-w-0">
+                                            {renderIcon(s.visual)}
+                                            <span className="truncate">{s.naming.displayBadge}</span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -268,6 +391,108 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                     );
                 })}
             </div>
+
+            {/* Modal Dialog Edit Nama Profil Aturan Shift */}
+            {isEditNameModalOpen && createPortal(
+                <div
+                    className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="modal-edit-profile-title"
+                >
+                    <div
+                        className="fixed inset-0"
+                        onClick={() => {
+                            setIsEditNameModalOpen(false);
+                            setNameError('');
+                        }}
+                    />
+                    <div className="relative z-10 w-full max-w-md rounded-xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200/90 dark:border-zinc-800 p-5 space-y-4">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-zinc-800">
+                            <div className="flex items-center space-x-2.5">
+                                <div className="p-2 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                                    <Pencil className="w-4 h-4" />
+                                </div>
+                                <div>
+                                    <h3 id="modal-edit-profile-title" className="text-sm font-bold text-slate-900 dark:text-white">
+                                        Edit Nama Profil Shift
+                                    </h3>
+                                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                                        Perbarui nama profil aturan shift kerja ini
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsEditNameModalOpen(false);
+                                    setNameError('');
+                                }}
+                                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Modal Form */}
+                        <div className="space-y-3">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold block text-slate-700 dark:text-zinc-300">
+                                    Nama Profil Aturan Shift
+                                </label>
+                                <input
+                                    type="text"
+                                    value={nameInput}
+                                    onChange={(e) => {
+                                        setNameInput(e.target.value);
+                                        if (nameError) setNameError('');
+                                    }}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Contoh: Aturan Shift Operasional 2026"
+                                    autoFocus
+                                    className={`w-full p-2.5 text-xs rounded-lg border bg-slate-50 dark:bg-zinc-800/60 outline-none font-medium transition-all ${
+                                        nameError
+                                            ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
+                                            : 'border-slate-200 dark:border-zinc-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20'
+                                    }`}
+                                />
+                                {nameError && (
+                                    <p className="text-[11px] text-rose-500 font-medium">
+                                        {nameError}
+                                    </p>
+                                )}
+                                <p className="text-[10px] text-slate-500 dark:text-zinc-400">
+                                    Tekan <kbd className="px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 font-mono text-[9px]">Enter</kbd> untuk menyimpan perubahan atau <kbd className="px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 font-mono text-[9px]">Esc</kbd> untuk membatalkan.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="flex justify-end items-center space-x-2 pt-3 border-t border-slate-200/80 dark:border-zinc-800">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsEditNameModalOpen(false);
+                                    setNameError('');
+                                }}
+                                className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 cursor-pointer transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleSaveName}
+                                className="px-4 py-1.5 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white cursor-pointer shadow-xs transition-all active:scale-95 flex items-center space-x-1.5"
+                            >
+                                <Check className="w-3.5 h-3.5" />
+                                <span>Simpan Nama</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 };

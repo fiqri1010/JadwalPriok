@@ -4,6 +4,7 @@ import { PiketCalculationResult } from '../utils/piket';
 import { Calendar, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { OffRelaxIcon } from './OffRelaxIcon';
 import { BriefcaseIcon } from './BriefcaseIcon';
+import { Tooltip } from './Tooltip';
 
 interface MonthlyPiketSummarySegmentProps {
     selectedMonth: number; // 1-12
@@ -41,7 +42,7 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
 
     const totalPiket = monthPikets.length;
     const matchedPiketCount = monthPikets.filter((p) => p.status === 'matched').length;
-    const pendingPiketCount = monthPikets.filter((p) => p.status === 'pending').length;
+    const pendingPiketCount = monthPikets.filter((p) => p.status === 'pending' || p.status === 'accumulated_off').length;
 
     const piketWithOffCount = React.useMemo(() => {
         return monthPikets.filter((p) => p.earnsOff).length;
@@ -130,52 +131,67 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
 
             {/* Content: Stat Badges + List */}
             <div className="p-2.5 space-y-2">
-                {/* Kotak Ringkasan Piket (Paling Atas) */}
-                <div className={getJumlahPiketBoxStyles()}>
-                    <div className="space-y-1.5">
-                        {/* Data 1: PIKET DENGAN OFF */}
-                        <div className="flex items-center justify-between gap-1 text-[11px] font-extrabold">
-                            <span className="opacity-80 truncate uppercase">PIKET DENGAN OFF</span>
-                            <span className="font-black font-mono text-emerald-600 dark:text-emerald-400 shrink-0">
+                {/* Unified Adaptive Grid: 4x1 on mobile and narrow sidebars, 2x2 on wide viewports */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-1.5 text-center">
+                    {/* Box 1: Piket-Off */}
+                    <Tooltip content="Piket dengan libur pengganti." containerClassName="w-full">
+                        <div
+                            className="py-1 sm:py-1.5 px-2 rounded-lg border bg-indigo-500/10 border-indigo-500/15 text-indigo-700 dark:text-indigo-400 flex flex-col items-center justify-between min-h-[38px] sm:min-h-[42px] min-w-0 hover:bg-indigo-500/15 cursor-help transition-all shadow-3xs w-full"
+                        >
+                            <div className="text-[8px] sm:text-[9.5px] font-black uppercase tracking-tight opacity-95 truncate w-full flex items-center justify-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0 animate-pulse" />
+                                <span>Piket-Off</span>
+                            </div>
+                            <div className="text-[10px] sm:text-[11px] font-extrabold text-indigo-600 dark:text-indigo-300 w-full truncate mt-0.5">
                                 {piketWithOffCount} Hari
-                            </span>
+                            </div>
                         </div>
+                    </Tooltip>
 
-                        {/* Garis Batas Horizontal */}
-                        <div className="border-t border-current/15" />
-
-                        {/* Data 2: PIKET SM (TANPA OFF) */}
-                        <div className="flex items-center justify-between gap-1 text-[11px] font-extrabold">
-                            <span className="opacity-80 truncate uppercase">PIKET SM (TANPA OFF)</span>
-                            <span className="font-black font-mono opacity-90 shrink-0">
+                    {/* Box 2: Piket-no OFF */}
+                    <Tooltip content="Piket tanpa libur pengganti." containerClassName="w-full">
+                        <div
+                            className="py-1 sm:py-1.5 px-2 rounded-lg border bg-slate-500/10 border-slate-500/15 text-slate-700 dark:text-slate-400 flex flex-col items-center justify-between min-h-[38px] sm:min-h-[42px] min-w-0 hover:bg-slate-500/15 cursor-help transition-all shadow-3xs w-full"
+                        >
+                            <div className="text-[8px] sm:text-[9.5px] font-black uppercase tracking-tight opacity-95 truncate w-full flex items-center justify-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                                <span>Piket-no OFF</span>
+                            </div>
+                            <div className="text-[10px] sm:text-[11px] font-extrabold text-slate-600 dark:text-slate-300 w-full truncate mt-0.5">
                                 {piketWithoutOffCount} Hari
-                            </span>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </Tooltip>
 
-                {/* Kotak 2 & 3: OFF TERJADWAL & OFF BELUM TERJADWAL */}
-                <div className="grid grid-cols-2 gap-1.5 text-center">
-                    <div className="p-1 rounded-md border bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex flex-col items-center justify-between min-h-[46px]">
-                        <div className="text-[9px] font-extrabold uppercase tracking-tight leading-tight opacity-90">
-                            <div>OFF</div>
-                            <div>TERJADWAL</div>
+                    {/* Box 3: Off Ready */}
+                    <Tooltip content="Jatah libur pengganti yang sudah terjadwal di kalender." containerClassName="w-full">
+                        <div
+                            className="py-1 sm:py-1.5 px-2 rounded-lg border bg-emerald-500/10 border-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex flex-col items-center justify-between min-h-[38px] sm:min-h-[42px] min-w-0 hover:bg-emerald-500/15 cursor-help transition-all shadow-3xs w-full"
+                        >
+                            <div className="text-[8px] sm:text-[9.5px] font-black uppercase tracking-tight opacity-95 truncate w-full flex items-center justify-center gap-1">
+                                <CheckCircle2 className="w-2.5 h-2.5 shrink-0 text-emerald-500" />
+                                <span>Off Ready</span>
+                            </div>
+                            <div className="text-[10px] sm:text-[11px] font-extrabold text-emerald-600 dark:text-emerald-300 w-full truncate mt-0.5">
+                                {matchedPiketCount} Hari
+                            </div>
                         </div>
-                        <div className="text-[12px] font-black flex items-center justify-center gap-1 mt-0.5">
-                            <CheckCircle2 className="w-2.5 h-2.5 shrink-0 text-emerald-500" />
-                            <span>{matchedPiketCount} Hari</span>
+                    </Tooltip>
+
+                    {/* Box 4: Off Delay */}
+                    <Tooltip content="Jatah libur pengganti yang belum dijadwalkan." containerClassName="w-full">
+                        <div
+                            className="py-1 sm:py-1.5 px-2 rounded-lg border bg-amber-500/10 border-amber-500/15 text-amber-700 dark:text-amber-400 flex flex-col items-center justify-between min-h-[38px] sm:min-h-[42px] min-w-0 hover:bg-amber-500/15 cursor-help transition-all shadow-3xs w-full"
+                        >
+                            <div className="text-[8px] sm:text-[9.5px] font-black uppercase tracking-tight opacity-95 truncate w-full flex items-center justify-center gap-1">
+                                <Clock className="w-2.5 h-2.5 shrink-0 text-amber-500" />
+                                <span>Off Delay</span>
+                            </div>
+                            <div className="text-[10px] sm:text-[11px] font-extrabold text-amber-600 dark:text-amber-300 w-full truncate mt-0.5">
+                                {pendingPiketCount} Hari
+                            </div>
                         </div>
-                    </div>
-                    <div className="p-1 rounded-md border bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400 flex flex-col items-center justify-between min-h-[46px]">
-                        <div className="text-[9px] font-extrabold uppercase tracking-tight leading-tight opacity-90">
-                            <div>OFF BELUM</div>
-                            <div>TERJADWAL</div>
-                        </div>
-                        <div className="text-[12px] font-black flex items-center justify-center gap-1 mt-0.5">
-                            <Clock className="w-2.5 h-2.5 shrink-0 text-amber-500" />
-                            <span>{pendingPiketCount} Hari</span>
-                        </div>
-                    </div>
+                    </Tooltip>
                 </div>
 
                 {/* List of Pikets in Month */}
@@ -209,6 +225,12 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                                                     <OffRelaxIcon theme={theme} className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                                                     <span>OFF: {item.offDateLabel}</span>
                                                 </span>
+                                            ) : item.status === 'accumulated_off' ? (
+                                                <Tooltip content="Jatah libur pengganti tetap didapatkan (akumulasi/saldo), tetapi belum ada jadwal OFF pasti di bulan depan">
+                                                    <span className="text-indigo-600 dark:text-indigo-400 font-semibold cursor-help">
+                                                        ⏳ OFF Tetap Didapat (Belum Terjadwal)
+                                                    </span>
+                                                </Tooltip>
                                             ) : (
                                                 <span className="text-amber-600 dark:text-amber-400 font-semibold">
                                                     ⏳ Dijatahkan ke bulan berikutnya
@@ -222,6 +244,10 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                                         <span className="text-[11.5px] font-mono font-bold text-slate-400">—</span>
                                     ) : item.status === 'matched' ? (
                                         <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                    ) : item.status === 'accumulated_off' ? (
+                                        <Tooltip content="Jatah libur pengganti tetap didapatkan (akumulasi/saldo), tetapi belum ada jadwal OFF pasti di bulan depan">
+                                            <AlertCircle className="w-4 h-4 text-indigo-500 cursor-help" />
+                                        </Tooltip>
                                     ) : (
                                         <AlertCircle className="w-4 h-4 text-amber-500" />
                                     )}

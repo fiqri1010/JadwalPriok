@@ -282,7 +282,7 @@ export const DayCell = React.memo<DayCellProps>(({
 
     const formattedDayLabel = `${INDONESIAN_DAY_NAMES[dayOfWeek]}, ${dayNumber} ${INDONESIAN_MONTH_SHORT[month - 1]}`;
 
-    // Helper to render attendance times (jamMasuk / jamPulang / absenCeisa) in Digital-7 Regular font right under shift
+    // Helper to render attendance times (jamMasuk / jamPulang / absenCeisa) in Bell Centennial Address font right under shift
     const renderAttendanceTimeBadge = () => {
         const hasMasuk = Boolean(data?.jamMasuk);
         const hasPulang = Boolean(data?.jamPulang);
@@ -292,19 +292,19 @@ export const DayCell = React.memo<DayCellProps>(({
 
         let timeText = '';
         if (hasMasuk && hasPulang) {
-            timeText = `${data.jamMasuk} - ${data.jamPulang}`;
+            timeText = `${data.jamMasuk}-${data.jamPulang}`;
         } else if (hasMasuk) {
-            timeText = `M: ${data.jamMasuk}`;
+            timeText = `M:${data.jamMasuk}`;
         } else if (hasPulang) {
-            timeText = `P: ${data.jamPulang}`;
+            timeText = `P:${data.jamPulang}`;
         } else if (hasCeisa) {
-            timeText = `C: ${data.absenCeisa}`;
+            timeText = `C:${data.absenCeisa}`;
         }
 
         return (
             <div className="w-full mt-0.5 flex flex-col items-center justify-center pointer-events-none shrink-0">
                 <span
-                    className={`inline-flex items-center justify-center font-digital-7 font-bold text-[10.3px] sm:text-[10.8px] lg:text-[11.3px] leading-tight px-1.5 py-[1px] rounded-[3px] border tracking-wider truncate max-w-full ${
+                    className={`inline-flex items-center justify-center font-bell-address font-bold text-[7.2px] sm:text-[7.6px] lg:text-[8px] leading-tight px-1 py-[0.5px] rounded-[3px] border tracking-tight truncate max-w-full ${
                         isWinamp
                             ? 'bg-black text-[#00FF00] border-zinc-800 shadow-[0_0_5px_rgba(0,255,0,0.3)]'
                             : isDark || isDarkFluid
@@ -444,7 +444,7 @@ export const DayCell = React.memo<DayCellProps>(({
                         onOpenDetail?.(dayNumber);
                     }
                 }}
-                className={`md:hidden flex flex-col justify-between p-1.5 sm:p-2 transition-transform duration-150 ease-out select-none aspect-square w-full h-full cursor-pointer hover:scale-[1.02] active:scale-[0.98] transform-gpu outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 overflow-hidden ${
+                className={`md:hidden flex flex-col justify-between p-1 sm:p-1.5 transition-transform duration-150 ease-out select-none w-full h-full cursor-pointer hover:scale-[1.02] active:scale-[0.98] transform-gpu outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 overflow-hidden ${
                     isWinamp
                         ? 'text-[#00FF00] font-mono'
                         : isDark || isDarkFluid
@@ -679,7 +679,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                     placement="top"
                                 >
                                     <span
-                                        className={`font-mono text-[9px] lg:text-[10px] font-black tracking-tighter px-1 py-0.5 rounded-[4px] border tabular-nums shrink-0 leading-none cursor-help ${
+                                        className={`font-sans text-[9px] lg:text-[10px] font-bold tracking-tight px-1 py-0.5 rounded-[4px] border tabular-nums shrink-0 leading-none cursor-help ${
                                             isWinamp
                                                 ? 'bg-black text-[#00FF00] border-[#00FF00]/80'
                                                 : isDark || isDarkFluid
@@ -841,7 +841,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                         <button
                                             type="button"
                                             onClick={() => handleRequestTimePick('jamMasuk', `Jam Masuk - Tgl ${dayNumber}`, data?.jamMasuk || '')}
-                                            className={`w-full py-1.5 px-1.5 text-center font-digital-clock text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
+                                            className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
                                                 isWinamp
                                                     ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
                                                     : isDark || isDarkFluid
@@ -859,7 +859,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                             placeholder="07:30"
                                             value={data?.jamMasuk || ''}
                                             onChange={(e) => handleUpdate({ jamMasuk: e.target.value })}
-                                            className={`w-full py-1.5 px-1.5 text-center font-digital-clock text-xs rounded-[6px] border ${
+                                            className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs rounded-[6px] border ${
                                                 isWinamp
                                                     ? 'bg-black border-zinc-700 text-[#00FF00]'
                                                     : isDark || isDarkFluid
@@ -888,7 +888,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                         <button
                                             type="button"
                                             onClick={() => handleRequestTimePick('jamPulang', `Jam Pulang - Tgl ${dayNumber}`, data?.jamPulang || '')}
-                                            className={`w-full py-1.5 px-1.5 text-center font-digital-clock text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
+                                            className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
                                                 isWinamp
                                                     ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
                                                     : isDark || isDarkFluid
@@ -906,7 +906,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                             placeholder="17:00"
                                             value={data?.jamPulang || ''}
                                             onChange={(e) => handleUpdate({ jamPulang: e.target.value })}
-                                            className={`w-full py-1.5 px-1.5 text-center font-digital-clock text-xs rounded-[6px] border ${
+                                            className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs rounded-[6px] border ${
                                                 isWinamp
                                                     ? 'bg-black border-zinc-700 text-[#00FF00]'
                                                     : isDark || isDarkFluid

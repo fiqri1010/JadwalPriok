@@ -1,4 +1,5 @@
-import { DayData, LiburNasional, isPiketShift, normalizeShift } from '../types';
+import { DayData, LiburNasional, isPiketShift, normalizeShift, ShiftGroupProfile } from '../types';
+import { loadShiftGroups, getEffectiveShiftGroup, findShiftConfig } from './shiftTimeline';
 
 export interface PiketMatchInfo {
     piketDateKey: string;      // e.g. "2026-9-5"
@@ -9,7 +10,7 @@ export interface PiketMatchInfo {
     piketDateLabel: string;    // e.g. "Sab, 5 Sep 2026"
     offDateKey?: string;       // e.g. "2026-9-8"
     offDateLabel?: string;     // e.g. "Sel, 8 Sep 2026"
-    status: 'matched' | 'pending' | 'no_off_entitlement';
+    status: 'matched' | 'pending' | 'no_off_entitlement' | 'accumulated_off';
     earnsOff: boolean;
 }
 
@@ -32,8 +33,11 @@ export function calculatePiketMatches(
     daysState: Record<string, DayData>,
     daftarLibur: LiburNasional[],
     focusYear?: number,
-    focusMonth?: number
+    focusMonth?: number,
+    shiftGroups?: ShiftGroupProfile[]
 ): PiketCalculationResult {
+    const groups = shiftGroups || loadShiftGroups();
+
     // 1. Build a map of holidays for O(1) lookup
     const holidayMap = new Map<string, LiburNasional>();
     for (const h of daftarLibur) {
@@ -98,7 +102,8 @@ export function calculatePiketMatches(
                 const rawShift = itemData?.shift || '';
                 const shift = normalizeShift(rawShift);
 
-                const isPiket = isPiketShift(rawShift, isWeekendOrHoliday);
+                const effectiveGroup = getEffectiveShiftGroup(isoDateStr, groups);
+                const isPiket = isPiketShift(rawShift, isWeekendOrHoliday, effectiveGroup?.shifts);
                 const isOffWorkday = isWorkday && shift === 'OFF';
 
                 const formattedLabel = `${INDONESIAN_DAY_SHORT[dayOfWeek]}, ${d} ${INDONESIAN_MONTH_SHORT[m - 1]} ${y}`;
@@ -137,25 +142,33 @@ export function calculatePiketMatches(
 
     // 4. Chronological Matching (FIFO for earlier Pikets)
     for (const piket of piketItems) {
-        // Khusus piket SM pada hari kerja (weekdays) tidak dapat OFF/Libur pengganti
-        const isWeekdaySM = piket.isWorkday && piket.shift === 'SM';
+        const effectiveGroup = getEffectiveShiftGroup(piket.isoDateStr, groups);
+        const shiftCfg = findShiftConfig(piket.shift, effectiveGroup);
 
-        if (isWeekdaySM) {
-            const matchInfo: PiketMatchInfo = {
-                piketDateKey: piket.dateKey,
-                piketYear: piket.year,
-                piketMonth: piket.month,
-                piketDay: piket.day,
-                piketShift: piket.shift,
-                piketDateLabel: piket.formattedLabel,
-                offDateLabel: 'Tanpa OFF (SM Hari Kerja)',
-                status: 'no_off_entitlement',
-                earnsOff: false,
-            };
+        // Jika piket jatuh pada hari kerja (weekdays):
+        // Cek apakah shift ini berhak mendapatkan OFF pengganti
+        if (piket.isWorkday) {
+            const earnsOffOnWorkday = shiftCfg !== undefined && shiftCfg.piketHariKerjaDenganOff !== undefined
+                ? Boolean(shiftCfg.piketHariKerjaDenganOff)
+                : (piket.shift !== 'SM');
 
-            piketMatches.push(matchInfo);
-            piketByDateKey[piket.dateKey] = matchInfo;
-            continue;
+            if (!earnsOffOnWorkday) {
+                const matchInfo: PiketMatchInfo = {
+                    piketDateKey: piket.dateKey,
+                    piketYear: piket.year,
+                    piketMonth: piket.month,
+                    piketDay: piket.day,
+                    piketShift: piket.shift,
+                    piketDateLabel: piket.formattedLabel,
+                    offDateLabel: 'Tanpa OFF (Piket Hari Kerja)',
+                    status: 'no_off_entitlement',
+                    earnsOff: false,
+                };
+
+                piketMatches.push(matchInfo);
+                piketByDateKey[piket.dateKey] = matchInfo;
+                continue;
+            }
         }
 
         // Find first available OFF on a workday strictly AFTER piket.timeVal
@@ -189,6 +202,16 @@ export function calculatePiketMatches(
             };
         } else {
             // Unmatched / Pending carry-over to next month
+            // Check if there are no available workday OFFs in the next month to cover this piket
+            const nextMonth = piket.month === 12 ? 1 : piket.month + 1;
+            const nextYear = piket.month === 12 ? piket.year + 1 : piket.year;
+            
+            const hasWorkdayOffNextMonth = availableOffs.some((off) => {
+                return off.year === nextYear && off.month === nextMonth && off.timeVal > piket.timeVal && !usedOffKeys.has(off.dateKey);
+            });
+
+            const calculatedStatus = !hasWorkdayOffNextMonth ? 'accumulated_off' : 'pending';
+
             const matchInfo: PiketMatchInfo = {
                 piketDateKey: piket.dateKey,
                 piketYear: piket.year,
@@ -196,7 +219,7 @@ export function calculatePiketMatches(
                 piketDay: piket.day,
                 piketShift: piket.shift,
                 piketDateLabel: piket.formattedLabel,
-                status: 'pending',
+                status: calculatedStatus,
                 earnsOff: true,
             };
 

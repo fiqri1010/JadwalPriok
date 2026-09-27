@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShiftWorkTimeConfig } from '../../types';
-import { Clock, Moon, CheckCircle2, AlertTriangle, Sparkles, Layers } from 'lucide-react';
+import { Clock, Moon, CheckCircle2, AlertTriangle, Layers, Timer } from 'lucide-react';
 
 interface ShiftWorkTimeConfigProps {
     workTime: ShiftWorkTimeConfig;
@@ -56,100 +56,108 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
     };
 
     return (
-        <div className="space-y-4">
-            {/* Work Time Section */}
-            <div className="p-3.5 rounded-2xl bg-current/5 border border-current/10 space-y-3">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-indigo-500" />
-                        <span className="text-xs font-bold">Jam Kerja Dasar & Fleksibilitas (Per-Shift):</span>
+        <div className="space-y-3 font-sans max-w-2xl mx-auto">
+            {/* Primary Work Time Card - Compact & Sleek */}
+            <div className="p-3 sm:p-3.5 rounded-xl bg-white/80 dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-zinc-800/80">
+                    <div className="flex items-center space-x-1.5">
+                        <Clock className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                        <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">
+                            Jam Kerja Dasar & Fleksibilitas
+                        </span>
                     </div>
                     {isOvernightActive && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-500 flex items-center space-x-1">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/15 text-indigo-500 flex items-center space-x-1">
                             <Moon className="w-3 h-3" />
                             <span>Shift Lintas Hari</span>
                         </span>
                     )}
                 </div>
 
-                {/* Primary In & Out (Kiri - Kanan berdampingan di mobile & desktop) */}
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-                    <div className="space-y-1">
-                        <label className="text-[11px] sm:text-xs font-bold block truncate">
+                {/* Primary In & Out (Kiri - Kanan berdampingan kompak) */}
+                <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+                    <div className="space-y-1 text-center sm:text-left">
+                        <label className="text-[11px] font-bold block text-slate-700 dark:text-zinc-300">
                             Jam Masuk Dasar:
                         </label>
                         <input
                             type="time"
                             value={workTime.jamMasukDasar === '-' ? '' : workTime.jamMasukDasar}
                             onChange={(e) => handleTimeChange('jamMasukDasar', e.target.value || '-')}
-                            className="w-full p-2 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500 font-mono text-center sm:text-left"
+                            className="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200/90 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-800/50 outline-none focus:border-teal-500 font-mono text-center transition-colors shadow-2xs"
                         />
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-[11px] sm:text-xs font-bold block truncate">
+                    <div className="space-y-1 text-center sm:text-left">
+                        <label className="text-[11px] font-bold block text-slate-700 dark:text-zinc-300">
                             Jam Pulang Dasar:
                         </label>
                         <input
                             type="time"
                             value={workTime.jamPulangDasar === '-' ? '' : workTime.jamPulangDasar}
                             onChange={(e) => handleTimeChange('jamPulangDasar', e.target.value || '-')}
-                            className="w-full p-2 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500 font-mono text-center sm:text-left"
+                            className="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200/90 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-800/50 outline-none focus:border-teal-500 font-mono text-center transition-colors shadow-2xs"
                         />
                     </div>
                 </div>
 
                 {/* Flexi In & Flexi Out Limits */}
                 {!isOffOrCuti && (
-                    <div className="space-y-2.5 pt-2 border-t border-current/10">
-                        <span className="text-[11px] font-semibold opacity-75 block">Batas Toleransi Waktu Fleksibel (Flexi In / Out):</span>
+                    <div className="pt-1.5 border-t border-slate-100 dark:border-zinc-800/80 space-y-1.5">
+                        <span className="text-[10.5px] font-semibold opacity-75 block">
+                            Batas Toleransi Waktu Fleksibel (Flexi In / Out):
+                        </span>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {/* Flexi In */}
-                            <div className="p-2.5 rounded-xl bg-current/5 border border-current/10 space-y-1.5">
-                                <span className="text-[10px] font-bold uppercase opacity-75 block">Batas Flexi Masuk (In):</span>
+                            <div className="p-2 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1">
+                                <span className="text-[10px] font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 block">
+                                    Batas Flexi Masuk (In):
+                                </span>
                                 <div className="grid grid-cols-2 gap-1.5">
                                     <div>
-                                        <span className="text-[9px] opacity-60">Terawal:</span>
+                                        <span className="text-[9px] opacity-60 block">Terawal:</span>
                                         <input
                                             type="time"
                                             value={workTime.earliestFlexiIn === '-' ? '' : workTime.earliestFlexiIn}
                                             onChange={(e) => handleTimeChange('earliestFlexiIn', e.target.value || '-')}
-                                            className="w-full p-1.5 text-xs font-mono rounded-lg border border-current/20 bg-current/5"
+                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                                         />
                                     </div>
                                     <div>
-                                        <span className="text-[9px] opacity-60">Terakhir:</span>
+                                        <span className="text-[9px] opacity-60 block">Terakhir:</span>
                                         <input
                                             type="time"
                                             value={workTime.latestFlexiIn === '-' ? '' : workTime.latestFlexiIn}
                                             onChange={(e) => handleTimeChange('latestFlexiIn', e.target.value || '-')}
-                                            className="w-full p-1.5 text-xs font-mono rounded-lg border border-current/20 bg-current/5"
+                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             {/* Flexi Out */}
-                            <div className="p-2.5 rounded-xl bg-current/5 border border-current/10 space-y-1.5">
-                                <span className="text-[10px] font-bold uppercase opacity-75 block">Batas Flexi Pulang (Out):</span>
+                            <div className="p-2 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1">
+                                <span className="text-[10px] font-bold uppercase tracking-wide text-cyan-600 dark:text-cyan-400 block">
+                                    Batas Flexi Pulang (Out):
+                                </span>
                                 <div className="grid grid-cols-2 gap-1.5">
                                     <div>
-                                        <span className="text-[9px] opacity-60">Terawal:</span>
+                                        <span className="text-[9px] opacity-60 block">Terawal:</span>
                                         <input
                                             type="time"
                                             value={workTime.earliestFlexiOut === '-' ? '' : workTime.earliestFlexiOut}
                                             onChange={(e) => handleTimeChange('earliestFlexiOut', e.target.value || '-')}
-                                            className="w-full p-1.5 text-xs font-mono rounded-lg border border-current/20 bg-current/5"
+                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                                         />
                                     </div>
                                     <div>
-                                        <span className="text-[9px] opacity-60">Terakhir:</span>
+                                        <span className="text-[9px] opacity-60 block">Terakhir:</span>
                                         <input
                                             type="time"
                                             value={workTime.latestFlexiOut === '-' ? '' : workTime.latestFlexiOut}
                                             onChange={(e) => handleTimeChange('latestFlexiOut', e.target.value || '-')}
-                                            className="w-full p-1.5 text-xs font-mono rounded-lg border border-current/20 bg-current/5"
+                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                                         />
                                     </div>
                                 </div>
@@ -159,11 +167,19 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                 )}
 
                 {/* Overtime Minimum & Maximum limits */}
-                <div className="space-y-2 pt-2 border-t border-current/10">
-                    <span className="text-[11px] font-semibold opacity-75 block">Batas Jumlah Jam Lembur:</span>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                            <label className="text-[10px] opacity-70 block">Minimal Lembur (Menit):</label>
+                <div className="pt-1.5 border-t border-slate-100 dark:border-zinc-800/80 space-y-1.5">
+                    <div className="flex items-center space-x-1.5 text-[10.5px] font-semibold opacity-75">
+                        <Timer className="w-3 h-3 text-amber-500 shrink-0" />
+                        <span>Batas Jumlah Jam Lembur:</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-0.5">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[10px] opacity-75">Minimal (Menit):</label>
+                                <span className="text-[9.5px] font-semibold font-mono text-amber-600 dark:text-amber-400">
+                                    {Math.floor(workTime.minLemburMinutes / 60)}j {workTime.minLemburMinutes % 60}m
+                                </span>
+                            </div>
                             <input
                                 type="number"
                                 min={0}
@@ -171,13 +187,17 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                 step={15}
                                 value={workTime.minLemburMinutes}
                                 onChange={(e) => onChange({ ...workTime, minLemburMinutes: Number(e.target.value) })}
-                                className="w-full p-2 text-xs font-mono rounded-xl border border-current/20 bg-current/5"
+                                className="w-full h-7 px-2 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-800/50"
                             />
-                            <p className="text-[9px] opacity-60">{Math.floor(workTime.minLemburMinutes / 60)} Jam {workTime.minLemburMinutes % 60} Menit</p>
                         </div>
 
-                        <div className="space-y-1">
-                            <label className="text-[10px] opacity-70 block">Maksimal Lembur (Menit):</label>
+                        <div className="space-y-0.5">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[10px] opacity-75">Maksimal (Menit):</label>
+                                <span className="text-[9.5px] font-semibold font-mono text-amber-600 dark:text-amber-400">
+                                    {Math.floor(workTime.maxLemburMinutes / 60)}j {workTime.maxLemburMinutes % 60}m
+                                </span>
+                            </div>
                             <input
                                 type="number"
                                 min={0}
@@ -185,9 +205,8 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                 step={15}
                                 value={workTime.maxLemburMinutes}
                                 onChange={(e) => onChange({ ...workTime, maxLemburMinutes: Number(e.target.value) })}
-                                className="w-full p-2 text-xs font-mono rounded-xl border border-current/20 bg-current/5"
+                                className="w-full h-7 px-2 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-800/50"
                             />
-                            <p className="text-[9px] opacity-60">{Math.floor(workTime.maxLemburMinutes / 60)} Jam {workTime.maxLemburMinutes % 60} Menit</p>
                         </div>
                     </div>
                 </div>
@@ -195,30 +214,32 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
 
             {/* Split Shift / PM Multi-Session Configuration */}
             {isSplitShiftAllowed && (
-                <div className="p-3.5 rounded-2xl bg-current/5 border border-current/10 space-y-3">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-white/80 dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 space-y-2 shadow-2xs">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                            <Layers className="w-4 h-4 text-cyan-500" />
-                            <span className="text-xs font-bold">Multi-Sesi / Shift PM (Pagi - Malam):</span>
+                        <div className="flex items-center space-x-1.5">
+                            <Layers className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                            <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">
+                                Multi-Sesi / Shift PM (Pagi - Malam):
+                            </span>
                         </div>
-                        <label className="flex items-center space-x-1.5 text-xs font-bold cursor-pointer">
+                        <label className="flex items-center space-x-1.5 text-[11px] font-bold cursor-pointer">
                             <input
                                 type="checkbox"
                                 checked={Boolean(workTime.isSplitShift)}
                                 onChange={(e) => onChange({ ...workTime, isSplitShift: e.target.checked })}
-                                className="rounded text-indigo-600 cursor-pointer"
+                                className="rounded text-teal-600 cursor-pointer w-3.5 h-3.5"
                             />
                             <span>Aktifkan Sesi Ganda</span>
                         </label>
                     </div>
 
                     {workTime.isSplitShift && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                            <div className="p-2.5 rounded-xl bg-current/5 border border-current/10 space-y-1.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-zinc-800/80">
+                            <div className="p-2 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1">
                                 <span className="text-[10px] font-bold text-amber-500 block">Sesi 1 (Pagi):</span>
                                 <div className="grid grid-cols-2 gap-1.5">
                                     <div>
-                                        <span className="text-[9px] opacity-60">Masuk:</span>
+                                        <span className="text-[9px] opacity-60 block">Masuk:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession1?.masuk || '07:30'}
@@ -231,11 +252,11 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full p-1.5 text-xs font-mono rounded-lg border border-current/20 bg-current/5"
+                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                                         />
                                     </div>
                                     <div>
-                                        <span className="text-[9px] opacity-60">Pulang:</span>
+                                        <span className="text-[9px] opacity-60 block">Pulang:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession1?.pulang || '17:00'}
@@ -248,17 +269,17 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full p-1.5 text-xs font-mono rounded-lg border border-current/20 bg-current/5"
+                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="p-2.5 rounded-xl bg-current/5 border border-current/10 space-y-1.5">
-                                <span className="text-[10px] font-bold text-indigo-400 block">Sesi 2 (Malam Lanjut Subuh):</span>
+                            <div className="p-2 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1">
+                                <span className="text-[10px] font-bold text-indigo-400 block">Sesi 2 (Malam - Subuh):</span>
                                 <div className="grid grid-cols-2 gap-1.5">
                                     <div>
-                                        <span className="text-[9px] opacity-60">Masuk:</span>
+                                        <span className="text-[9px] opacity-60 block">Masuk:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession2?.masuk || '20:00'}
@@ -271,11 +292,11 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full p-1.5 text-xs font-mono rounded-lg border border-current/20 bg-current/5"
+                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                                         />
                                     </div>
                                     <div>
-                                        <span className="text-[9px] opacity-60">Pulang:</span>
+                                        <span className="text-[9px] opacity-60 block">Pulang:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession2?.pulang || '04:30'}
@@ -288,7 +309,7 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full p-1.5 text-xs font-mono rounded-lg border border-current/20 bg-current/5"
+                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                                         />
                                     </div>
                                 </div>
@@ -298,33 +319,39 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                 </div>
             )}
 
-            {/* Live Validator Indicator Box */}
+            {/* Live Validator Indicator Box - Sleek & Compact */}
             {!isOffOrCuti && durationHours !== null && (
-                <div className={`p-3 rounded-2xl border flex items-start space-x-2.5 transition-all ${
-                    durationHours >= 9 && durationHours <= 10
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
-                        : durationHours < 9
-                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400'
-                        : 'bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-400'
-                }`}>
-                    {durationHours >= 9 && durationHours <= 10 ? (
-                        <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-500" />
-                    ) : (
-                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                    )}
-                    <div className="text-xs space-y-0.5">
-                        <div className="flex items-center space-x-2">
-                            <span className="font-bold">Total Durasi Bersih: {durationHours.toFixed(1)} Jam</span>
-                            {isOvernightActive && <span className="font-bold text-[10px] bg-blue-500/20 px-1.5 py-0.2 rounded-md">🌙 Lintas Hari (+1)</span>}
+                <div
+                    className={`p-2 sm:p-2.5 rounded-xl border flex items-center justify-between gap-2 transition-all ${
+                        durationHours >= 9 && durationHours <= 10
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
+                            : durationHours < 9
+                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400'
+                            : 'bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-400'
+                    }`}
+                >
+                    <div className="flex items-center space-x-2 min-w-0">
+                        {durationHours >= 9 && durationHours <= 10 ? (
+                            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
+                        ) : (
+                            <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500" />
+                        )}
+                        <div className="text-xs truncate">
+                            <span className="font-bold">Total: {durationHours.toFixed(1)} Jam</span>
+                            <span className="opacity-80 text-[11px] ml-1.5 hidden sm:inline">
+                                {durationHours >= 9 && durationHours <= 10
+                                    ? '(Sesuai standar operasional 9.5 Jam)'
+                                    : durationHours < 9
+                                    ? '(Lebih pendek dari standar 9.5 jam)'
+                                    : '(Shift panjang, kelebihan jam dihitung lembur)'}
+                            </span>
                         </div>
-                        <p className="text-[11px] opacity-90 leading-relaxed">
-                            {durationHours >= 9 && durationHours <= 10
-                                ? 'Durasi kerja sesuai standar jam operasional kantor (9.5 Jam).'
-                                : durationHours < 9
-                                ? `⚠️ Durasi kerja ${durationHours.toFixed(1)} jam lebih pendek dari standar 9.5 jam.`
-                                : `Shift panjang (${durationHours.toFixed(1)} jam). Kelebihan jam akan dihitung sebagai lembur.`}
-                        </p>
                     </div>
+                    {isOvernightActive && (
+                        <span className="font-bold text-[9.5px] bg-blue-500/20 px-1.5 py-0.5 rounded shrink-0">
+                            🌙 Lintas Hari
+                        </span>
+                    )}
                 </div>
             )}
         </div>

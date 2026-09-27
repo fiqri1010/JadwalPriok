@@ -140,25 +140,25 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
     };
 
     return (
-        <div className="p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 space-y-2 font-sans shadow-2xs w-full overflow-visible min-w-0">
+        <div className="p-1.5 sm:p-2 rounded-2xl bg-[#121212] border border-zinc-800 space-y-1.5 font-sans shadow-2xs w-full overflow-visible min-w-0 text-white">
             {/* Target Selector Tabs (Latar / Teks / Border / Motif) */}
-            <div className="space-y-1">
-                <span className="text-[10px] font-bold opacity-75 uppercase tracking-wider block">
+            <div className="space-y-0.5">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
                     Target Elemen Warna:
                 </span>
-                <div className="flex items-center gap-1 p-0.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-[10px] font-bold">
+                <div className="flex items-center gap-1 p-1 rounded-xl bg-[#1a1a1e] border border-zinc-800 text-xs sm:text-[12.5px] font-bold">
                     <button
                         type="button"
                         onClick={() => setTargetMode('bg')}
-                        className={`flex-1 py-1 px-1 rounded-lg flex items-center justify-center space-x-1 transition-all cursor-pointer ${
+                        className={`flex-1 py-1 px-1.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
                             targetMode === 'bg'
-                                ? 'bg-white dark:bg-zinc-700 text-teal-600 dark:text-teal-400 shadow-2xs'
-                                : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white'
+                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-extrabold border border-zinc-700'
+                                : 'text-zinc-400 hover:text-white'
                         }`}
                         title="Edit Warna Latar"
                     >
                         <div
-                            className="w-2.5 h-2.5 rounded-full border border-white/50 shadow-2xs shrink-0"
+                            className="w-3 h-3 rounded-full border border-white/50 shadow-2xs shrink-0"
                             style={{ background: getBgColorString() }}
                         />
                         <span>Latar</span>
@@ -167,15 +167,15 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                     <button
                         type="button"
                         onClick={() => setTargetMode('text')}
-                        className={`flex-1 py-1 px-1 rounded-lg flex items-center justify-center space-x-1 transition-all cursor-pointer ${
+                        className={`flex-1 py-1 px-1.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
                             targetMode === 'text'
-                                ? 'bg-white dark:bg-zinc-700 text-teal-600 dark:text-teal-400 shadow-2xs'
-                                : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white'
+                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-extrabold border border-zinc-700'
+                                : 'text-zinc-400 hover:text-white'
                         }`}
                         title="Edit Warna Teks"
                     >
                         <div
-                            className="w-2.5 h-2.5 rounded-full border border-white/50 shadow-2xs shrink-0"
+                            className="w-3 h-3 rounded-full border border-white/50 shadow-2xs shrink-0"
                             style={{ backgroundColor: visual.textColor || '#FFFFFF' }}
                         />
                         <span>Teks</span>
@@ -184,15 +184,15 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                     <button
                         type="button"
                         onClick={() => setTargetMode('border')}
-                        className={`flex-1 py-1 px-1 rounded-lg flex items-center justify-center space-x-1 transition-all cursor-pointer ${
+                        className={`flex-1 py-1 px-1.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
                             targetMode === 'border'
-                                ? 'bg-white dark:bg-zinc-700 text-teal-600 dark:text-teal-400 shadow-2xs'
-                                : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white'
+                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-extrabold border border-zinc-700'
+                                : 'text-zinc-400 hover:text-white'
                         }`}
                         title="Edit Warna Border"
                     >
                         <div
-                            className="w-2.5 h-2.5 rounded-full border border-white/50 shadow-2xs shrink-0"
+                            className="w-3 h-3 rounded-full border border-white/50 shadow-2xs shrink-0"
                             style={{ backgroundColor: visual.borderColor || '#83C5BE' }}
                         />
                         <span>Border</span>
@@ -201,15 +201,15 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                     <button
                         type="button"
                         onClick={() => setTargetMode('motif')}
-                        className={`flex-1 py-1 px-1 rounded-lg flex items-center justify-center space-x-1 transition-all cursor-pointer ${
+                        className={`flex-1 py-1 px-1.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
                             targetMode === 'motif'
-                                ? 'bg-white dark:bg-zinc-700 text-teal-600 dark:text-teal-400 shadow-2xs'
-                                : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-white'
+                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-extrabold border border-zinc-700'
+                                : 'text-zinc-400 hover:text-white'
                         }`}
                         title="Edit Warna Pattern Motif"
                     >
                         <div
-                            className="w-2.5 h-2.5 rounded-full border border-white/50 shadow-2xs shrink-0"
+                            className="w-3 h-3 rounded-full border border-white/50 shadow-2xs shrink-0"
                             style={{ backgroundColor: visual.patternColor || '#FFFFFF' }}
                         />
                         <span>Motif</span>
@@ -217,18 +217,18 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                 </div>
             </div>
 
-            {/* Pro-Tool Native Dark Panel Wrapper with Hover Wheel Scroll & Pause Parent Scroll Enabled */}
+            {/* Pro-Tool Native Panel Wrapper with Hover Wheel Scroll & Pause Parent Scroll Enabled */}
             <div className="w-full flex justify-center shrink-0 overflow-visible py-0.5">
                 <div
                     ref={colorPickerWrapperRef}
-                    className="rbgcp-wrapper bg-[#18181b] p-2.5 sm:p-3 rounded-xl shadow-md border border-zinc-800 text-white w-full overflow-visible flex justify-center shrink-0 min-w-0 select-none"
+                    className="rbgcp-wrapper bg-[#121212] p-1.5 sm:p-2 rounded-xl text-white w-full overflow-visible flex justify-center shrink-0 min-w-0 select-none border border-zinc-800/80"
                     title="Hover & Scroll mouse pada slider/angka untuk mengubah nilai"
                 >
                     <ColorPicker
                         value={getCurrentValue()}
                         onChange={handleColorChange}
-                        width={275}
-                        height={100}
+                        width={270}
+                        height={90}
                         hidePresets={false}
                         hideInputs={false}
                         hideControls={false}

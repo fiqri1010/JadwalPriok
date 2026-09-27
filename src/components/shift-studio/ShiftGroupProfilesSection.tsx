@@ -25,9 +25,11 @@ import {
     Sparkles,
     CheckCircle2,
     AlertTriangle,
+    Pencil,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { OffRelaxIcon } from '../OffRelaxIcon';
+import { CustomDatePicker } from '../CustomDatePicker';
 
 interface ShiftGroupProfilesSectionProps {
     groups: ShiftGroupProfile[];
@@ -39,6 +41,7 @@ interface ShiftGroupProfilesSectionProps {
     onCopyGroup: (sourceGroup: ShiftGroupProfile, newName: string, startDate: string) => void;
     onCreateNewGroup: (name: string, startDate: string) => void;
     onUpdateGroupDateRanges?: (groupId: string, ranges: ActiveDateRange[]) => void;
+    onRenameGroup?: (groupId: string, newName: string) => void;
 }
 
 // Icon mapper for shift icons
@@ -603,9 +606,10 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
     onCopyGroup,
     onCreateNewGroup,
     onUpdateGroupDateRanges,
+    onRenameGroup,
 }) => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [modalMode, setModalMode] = useState<'create' | 'copy'>('create');
+    const [modalMode, setModalMode] = useState<'create' | 'copy' | 'edit'>('create');
     const [targetGroup, setTargetGroup] = useState<ShiftGroupProfile | null>(null);
     const [groupNameInput, setGroupNameInput] = useState('');
     const [startDateInput, setStartDateInput] = useState('');
@@ -624,7 +628,7 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
         setModalMode('create');
         setTargetGroup(null);
         setGroupNameInput('Kelompok Shift Baru');
-        setStartDateInput(new Date().toISOString().split('T')[0]);
+        setStartDateInput('');
         setIsCreateModalOpen(true);
     };
 
@@ -632,16 +636,29 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
         setModalMode('copy');
         setTargetGroup(grp);
         setGroupNameInput(`${grp.name} (Salinan)`);
-        setStartDateInput(new Date().toISOString().split('T')[0]);
+        setStartDateInput('');
+        setIsCreateModalOpen(true);
+    };
+
+    const handleOpenEditName = (grp: ShiftGroupProfile) => {
+        setModalMode('edit');
+        setTargetGroup(grp);
+        setGroupNameInput(grp.name);
+        setStartDateInput('');
         setIsCreateModalOpen(true);
     };
 
     const handleConfirmSubmit = () => {
-        if (!groupNameInput.trim() || !startDateInput) return;
-        if (modalMode === 'copy' && targetGroup) {
-            onCopyGroup(targetGroup, groupNameInput.trim(), startDateInput);
+        if (!groupNameInput.trim()) return;
+        const finalStartDate = startDateInput.trim() || new Date().toISOString().split('T')[0];
+        if (modalMode === 'edit' && targetGroup) {
+            if (onRenameGroup) {
+                onRenameGroup(targetGroup.id, groupNameInput.trim());
+            }
+        } else if (modalMode === 'copy' && targetGroup) {
+            onCopyGroup(targetGroup, groupNameInput.trim(), finalStartDate);
         } else {
-            onCreateNewGroup(groupNameInput.trim(), startDateInput);
+            onCreateNewGroup(groupNameInput.trim(), finalStartDate);
         }
         setIsCreateModalOpen(false);
     };
@@ -700,6 +717,16 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
                                     <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                                         {grp.name}
                                     </h4>
+                                    {onRenameGroup && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleOpenEditName(grp)}
+                                            className="p-1 rounded text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                                            title={`Ubah nama profil "${grp.name}"`}
+                                        >
+                                            <Pencil className="w-3 h-3" />
+                                        </button>
+                                    )}
                                     {isActive ? (
                                         <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-teal-500/15 text-teal-700 dark:text-teal-400 border border-teal-500/30 flex items-center space-x-0.5 shrink-0">
                                             <Check className="w-2.5 h-2.5" />
@@ -902,11 +929,17 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
                             </div>
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                                    {modalMode === 'copy' ? 'Salin Profil Aturan Shift' : 'Tambah Profil Aturan Shift Baru'}
+                                    {modalMode === 'copy'
+                                        ? 'Salin Profil Aturan Shift'
+                                        : modalMode === 'edit'
+                                        ? 'Edit Nama Profil Shift'
+                                        : 'Tambah Profil Aturan Shift Baru'}
                                 </h3>
                                 <p className="text-[11px] text-slate-500 dark:text-zinc-400">
                                     {modalMode === 'copy'
                                         ? `Menduplikasi aturan dari "${targetGroup?.name}"`
+                                        : modalMode === 'edit'
+                                        ? `Ubah nama untuk profil "${targetGroup?.name}"`
                                         : 'Buat kelompok aturan shift dengan linimasa baru'}
                                 </p>
                             </div>
@@ -915,29 +948,20 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
                         <div className="space-y-3">
                             <div className="space-y-1">
                                 <label className="text-xs font-bold block text-slate-700 dark:text-zinc-300">
-                                    Nama Profil:
+                                    Nama Profil Aturan Shift:
                                 </label>
                                 <input
                                     type="text"
                                     value={groupNameInput}
                                     onChange={(e) => setGroupNameInput(e.target.value)}
                                     placeholder="Contoh: Aturan Jam Kerja Q3 2026"
-                                    className="w-full p-2.5 text-xs rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800/60 outline-none focus:border-teal-500"
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold block text-slate-700 dark:text-zinc-300">
-                                    Tanggal Mulai Berlaku:
-                                </label>
-                                <input
-                                    type="date"
-                                    value={startDateInput}
-                                    onChange={(e) => setStartDateInput(e.target.value)}
-                                    className="w-full p-2.5 text-xs rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800/60 outline-none focus:border-teal-500 font-mono"
+                                    autoFocus
+                                    className="w-full p-2.5 text-xs rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800/60 outline-none focus:border-teal-500 font-medium"
                                 />
                                 <p className="text-[10px] text-slate-500 dark:text-zinc-400">
-                                    Kalender mulai tanggal ini ke depan akan mengikuti aturan profil shift ini.
+                                    {modalMode === 'edit'
+                                        ? 'Perubahan nama akan langsung diperbarui pada profil shift dan kalender kerja.'
+                                        : 'Profil baru dapat langsung dibuat atau disalin tanpa perlu menginput tanggal berlaku.'}
                                 </p>
                             </div>
                         </div>
@@ -955,7 +979,7 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
                                 onClick={handleConfirmSubmit}
                                 className="px-4 py-1.5 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white cursor-pointer shadow-xs transition-all active:scale-95"
                             >
-                                Simpan Profil
+                                {modalMode === 'edit' ? 'Simpan Nama' : 'Simpan Profil'}
                             </button>
                         </div>
                     </div>

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
     X,
     Search,
-    Upload,
     Trash2,
     // --- 1. Santai, Istirahat, Kuliner, Hobi & Individu ---
     Coffee,
@@ -269,13 +268,18 @@ import {
     ThumbsUp,
     Gift,
     Tag,
+    Undo2,
+    Redo2,
+    Save,
 } from 'lucide-react';
-import { ShiftVisualStyle } from '../../types';
+import { ShiftVisualStyle, ShiftNamingConfig } from '../../types';
+import { BADGE_PATTERNS, isCustomPatternImage, parseCssPatternToStyle } from './patterns';
 
 interface ShiftIconPickerModalProps {
     isOpen: boolean;
     onClose: () => void;
     visual: ShiftVisualStyle;
+    naming?: ShiftNamingConfig;
     onChange: (visual: ShiftVisualStyle) => void;
 }
 
@@ -619,15 +623,73 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
     isOpen,
     onClose,
     visual,
+    naming,
     onChange,
 }) => {
+    const [draftVisual, setDraftVisual] = useState<ShiftVisualStyle>(visual);
+    const [history, setHistory] = useState<ShiftVisualStyle[]>([JSON.parse(JSON.stringify(visual))]);
+    const [historyIndex, setHistoryIndex] = useState<number>(0);
+    const [isApplied, setIsApplied] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeTab, setActiveTab] = useState<'svg' | 'upload' | 'emoji'>('svg');
+    const [activeTab, setActiveTab] = useState<'svg' | 'emoji'>('svg');
     const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
     const [selectedEmojiCategory, setSelectedEmojiCategory] = useState<string>('Semua');
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    // Sync draftVisual when modal opens
+    React.useEffect(() => {
+        if (isOpen) {
+            const cloned = JSON.parse(JSON.stringify(visual));
+            setDraftVisual(cloned);
+            setHistory([cloned]);
+            setHistoryIndex(0);
+            setIsApplied(false);        }
+    }, [isOpen, visual]);
 
     if (!isOpen) return null;
+
+    const updateDraft = (newVisual: ShiftVisualStyle) => {
+        const newHist = history.slice(0, historyIndex + 1);
+        newHist.push(JSON.parse(JSON.stringify(newVisual)));
+        setHistory(newHist);
+        setHistoryIndex(newHist.length - 1);
+        setDraftVisual(newVisual);
+    };
+
+    const handleUndo = () => {
+        if (historyIndex > 0) {
+            const prevIdx = historyIndex - 1;
+            setHistoryIndex(prevIdx);
+            setDraftVisual(JSON.parse(JSON.stringify(history[prevIdx])));
+        }
+    };
+
+    const handleRedo = () => {
+        if (historyIndex < history.length - 1) {
+            const nextIdx = historyIndex + 1;
+            setHistoryIndex(nextIdx);
+            setDraftVisual(JSON.parse(JSON.stringify(history[nextIdx])));
+        }
+    };
+
+    const handleHapus = () => {
+        updateDraft({
+            ...draftVisual,
+            iconType: 'none',
+            iconName: undefined,
+            customIconUrl: undefined,
+            emoji: undefined,
+        });
+    };
+
+    const handleApply = () => {
+        onChange(draftVisual);
+        setIsApplied(true);
+        setTimeout(() => setIsApplied(false), 1500);
+    };
+
+    const handleSave = () => {
+        onChange(draftVisual);
+        onClose();
+    };
 
     const categories = [
         'Semua',
@@ -651,137 +713,262 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
     });
 
     const handleSelectSvg = (name: string) => {
-        onChange({
-            ...visual,
+        updateDraft({
+            ...draftVisual,
             iconType: 'svg',
             iconName: name,
             customIconUrl: undefined,
             emoji: undefined,
         });
-        onClose();
     };
 
     const handleSelectEmoji = (em: string) => {
-        onChange({
-            ...visual,
+        updateDraft({
+            ...draftVisual,
             iconType: 'emoji',
             emoji: em,
             iconName: undefined,
             customIconUrl: undefined,
         });
-        onClose();
     };
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    // Helper to render background of desktop preview badge
+    const getBackgroundStyle = (vis: ShiftVisualStyle): React.CSSProperties => {
+        if (vis.customCss) {
+            return { background: vis.customCss.replace(/background(-color)?:\s*|;/g, '').trim() };
+        }
+        if (vis.colorMode === 'radial' && vis.colorStops && vis.colorStops.length > 0) {
+            const stopsStr = vis.colorStops.map((s) => `${s.color} ${s.position}%`).join(', ');
+            return { background: `radial-gradient(circle at center, ${stopsStr})` };
+        }
+        if (vis.colorMode === 'linear' && vis.colorStops && vis.colorStops.length > 0) {
+            const stopsStr = vis.colorStops.map((s) => `${s.color} ${s.position}%`).join(', ');
+            return { background: `linear-gradient(${vis.gradientAngle || 135}deg, ${stopsStr})` };
+        }
+        return { backgroundColor: vis.solidColor || '#006D77' };
+    };
 
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            const dataUrl = evt.target?.result as string;
-            onChange({
-                ...visual,
-                iconType: 'customImage',
-                customIconUrl: dataUrl,
-                iconName: undefined,
-                emoji: undefined,
-            });
-            onClose();
-        };
-        reader.readAsDataURL(file);
+    // Helper to render pattern overlay of desktop preview badge
+    const renderPatternOverlay = (vis: ShiftVisualStyle) => {
+        if (vis.customPatternUrl) {
+            let opacity = vis.patternOpacity !== undefined ? vis.patternOpacity : 1.0;
+            if (opacity > 1) opacity = opacity / 100;
+
+            if (isCustomPatternImage(vis.customPatternUrl)) {
+                const imgScale = vis.patternScale || 1.0;
+                const sizePx = Math.max(8, Math.round(16 * imgScale));
+                return (
+                    <div
+                        className="absolute inset-0 pointer-events-none z-0"
+                        style={{
+                            backgroundImage: `url(${vis.customPatternUrl})`,
+                            backgroundRepeat: 'repeat',
+                            backgroundPosition: 'center',
+                            backgroundSize: `${sizePx}px ${sizePx}px`,
+                            opacity,
+                        }}
+                    />
+                );
+            }
+
+            const patColor = vis.patternColor || '#FFFFFF';
+            const strokeWidth = vis.patternStrokeWidth !== undefined ? vis.patternStrokeWidth : 1.2;
+            const cssStyle = parseCssPatternToStyle(vis.customPatternUrl, vis.patternScale || 1.0, patColor, strokeWidth);
+            return (
+                <div
+                    className="absolute inset-0 pointer-events-none z-0"
+                    style={{
+                        ...cssStyle,
+                        opacity,
+                    }}
+                />
+            );
+        }
+        const patternObj = BADGE_PATTERNS.find((p) => p.id === vis.patternType);
+        if (!patternObj || patternObj.id === 'none') return null;
+
+        const patColor = vis.patternColor || '#FFFFFF';
+        const strokeWidth = vis.patternStrokeWidth !== undefined ? vis.patternStrokeWidth : 1.2;
+        const svgContentStr = patternObj.svgContent(patColor, strokeWidth);
+        const scale = vis.patternScale || 1.0;
+        const patWidth = Math.max(2, Math.round(patternObj.defaultWidth * scale));
+        const patHeight = Math.max(2, Math.round(patternObj.defaultHeight * scale));
+        let opacity = vis.patternOpacity !== undefined ? vis.patternOpacity : 1.0;
+        if (opacity > 1) opacity = opacity / 100;
+
+        return (
+            <div
+                className="absolute inset-0 pointer-events-none z-0"
+                style={{
+                    backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(
+                        `<svg xmlns='http://www.w3.org/2000/svg' width='${patWidth}' height='${patHeight}'>${svgContentStr}</svg>`
+                    )}")`,
+                    backgroundRepeat: 'repeat',
+                    backgroundPosition: 'center',
+                    opacity,
+                }}
+            />
+        );
+    };
+
+    // Helper to render selected icon in desktop preview badge
+    const renderSelectedIcon = (vis: ShiftVisualStyle, className: string = 'w-3 h-3') => {
+        if (vis.iconType === 'svg' && vis.iconName) {
+            const item = ICON_CATALOG.find((it) => it.name === vis.iconName);
+            if (item) {
+                const IconComp = item.component;
+                return <IconComp className={className} />;
+            }
+        }
+        if (vis.iconType === 'emoji' && vis.emoji) {
+            return <span className="text-[11px] leading-none">{vis.emoji}</span>;
+        }
+        if (vis.iconType === 'customImage' && vis.customIconUrl) {
+            return <img src={vis.customIconUrl} alt="custom" className={`${className} object-contain`} />;
+        }
+        return null;
     };
 
     return (
-        <div className="fixed inset-0 z-160 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-            <div className="fixed inset-0" onClick={onClose} />
-            <div className="relative z-10 w-full max-w-2xl max-h-[88vh] flex flex-col rounded-3xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-current/10 shrink-0">
-                    <div>
-                        <h3 className="text-sm sm:text-base font-bold">Pilih Ikon & Logo Shift</h3>
-                        <p className="text-[11px] opacity-60">260+ Ikon Vektor SVG Tematik, 300+ Emoji & Upload Gambar</p>
+        <div className="fixed inset-0 sm:top-7 z-160 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+            <div className="fixed inset-0 sm:top-7" onClick={onClose} />
+            <div className="relative z-10 w-full max-w-3xl max-h-[88vh] flex flex-col rounded-3xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                {/* Fixed Top Controls Header (Non-scrolling solid area) */}
+                <div className="shrink-0 bg-white dark:bg-[#1E1E1E] z-20 border-b border-current/10 p-3.5 sm:p-4 space-y-2.5">
+                    {/* Header with Title + Simple Desktop Badge Preview */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2.5 sm:space-x-4 min-w-0">
+                            <div>
+                                <h3 className="text-sm sm:text-base font-bold">Pilih Ikon & Logo Shift</h3>
+                                <p className="text-[11px] opacity-60 hidden sm:block">260+ Ikon Vektor SVG Tematik, 300+ Emoji & Upload Gambar</p>
+                            </div>
+
+                            {/* Simple Desktop Preview Badge */}
+                            <div className="flex items-center space-x-1.5 sm:space-x-2 pl-2 sm:pl-3 border-l border-current/10 shrink-0">
+                                <span className="text-[10px] sm:text-[11px] font-bold opacity-70">Badge:</span>
+                                <div
+                                    className="relative px-2 sm:px-2.5 py-0.5 rounded-[5px] font-black text-[10.5px] sm:text-[11px] shadow-xs border flex items-center space-x-1 select-none overflow-hidden"
+                                    style={{
+                                        ...getBackgroundStyle(draftVisual),
+                                        color: draftVisual.textColor || '#FFFFFF',
+                                        borderColor: draftVisual.borderColor || '#83C5BE',
+                                    }}
+                                >
+                                    {renderPatternOverlay(draftVisual)}
+                                    <div className="relative z-10 flex items-center space-x-1">
+                                        {renderSelectedIcon(draftVisual, 'w-3 h-3')}
+                                        <span className="tracking-tight">{naming?.displayBadge || 'SHIFT'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="p-1.5 rounded-full hover:bg-current/10 cursor-pointer text-current/70 hover:text-current transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="p-1.5 rounded-full hover:bg-current/10 cursor-pointer text-current/70 hover:text-current"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+
+                    {/* Main Tabs */}
+                    <div className="flex p-1 gap-1 rounded-xl bg-current/5 border border-current/10 text-xs">
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('svg')}
+                            className={`flex-1 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                                activeTab === 'svg' ? 'bg-indigo-600 text-white shadow-xs' : 'opacity-70 hover:opacity-100'
+                            }`}
+                        >
+                            260+ Ikon
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('emoji')}
+                            className={`flex-1 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                                activeTab === 'emoji' ? 'bg-indigo-600 text-white shadow-xs' : 'opacity-70 hover:opacity-100'
+                            }`}
+                        >
+                            300+ Koleksi Emoji
+                        </button>
+                    </div>
+
+                    {/* Sub Controls for Tab SVG: Search & Category Chips */}
+                    {activeTab === 'svg' && (
+                        <div className="space-y-2 pt-0.5">
+                            <div className="relative">
+                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 opacity-50" />
+                                <input
+                                    type="text"
+                                    placeholder="Cari ikon (misal: kopi, santai, sofa, tidur, gym, kapal, dokter, laptop, lembur, teh, renang)..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-indigo-500"
+                                />
+                            </div>
+
+                            <div className="flex flex-wrap gap-1.5 pt-0.5">
+                                {categories.map((cat) => (
+                                    <button
+                                        key={cat}
+                                        type="button"
+                                        onClick={() => setSelectedCategory(cat)}
+                                        className={`px-2.5 py-1.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
+                                            selectedCategory === cat
+                                                ? 'bg-indigo-600 text-white shadow-xs'
+                                                : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100 hover:bg-current/10'
+                                        }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Sub Controls for Tab Emoji: Category Chips */}
+                    {activeTab === 'emoji' && (
+                        <div className="flex flex-wrap gap-1.5 pt-0.5">
+                            <button
+                                type="button"
+                                onClick={() => setSelectedEmojiCategory('Semua')}
+                                className={`px-2.5 py-1.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
+                                    selectedEmojiCategory === 'Semua'
+                                        ? 'bg-indigo-600 text-white shadow-xs'
+                                        : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100 hover:bg-current/10'
+                                }`}
+                            >
+                                Semua Emoji
+                            </button>
+                            {Object.keys(CATEGORIZED_EMOJIS).map((catName) => (
+                                <button
+                                    key={catName}
+                                    type="button"
+                                    onClick={() => setSelectedEmojiCategory(catName)}
+                                    className={`px-2.5 py-1.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
+                                        selectedEmojiCategory === catName
+                                            ? 'bg-indigo-600 text-white shadow-xs'
+                                            : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100 hover:bg-current/10'
+                                    }`}
+                                >
+                                    {catName}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                {/* Main Tabs */}
-                <div className="flex p-1 gap-1 mx-4 mt-3 rounded-xl bg-current/5 border border-current/10 text-xs shrink-0">
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('svg')}
-                        className={`flex-1 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                            activeTab === 'svg' ? 'bg-indigo-600 text-white shadow-xs' : 'opacity-70 hover:opacity-100'
-                        }`}
-                    >
-                        260+ Ikon Vektor SVG
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('emoji')}
-                        className={`flex-1 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                            activeTab === 'emoji' ? 'bg-indigo-600 text-white shadow-xs' : 'opacity-70 hover:opacity-100'
-                        }`}
-                    >
-                        300+ Koleksi Emoji
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('upload')}
-                        className={`flex-1 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                            activeTab === 'upload' ? 'bg-indigo-600 text-white shadow-xs' : 'opacity-70 hover:opacity-100'
-                        }`}
-                    >
-                        Upload Gambar Sendiri
-                    </button>
-                </div>
-
-                {/* Body Content */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {/* Body Content - Pure Scrolling Content Only */}
+                <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 custom-scrollbar">
                     {/* Tab 1: SVG Icons */}
                     {activeTab === 'svg' && (
                         <>
-                            {/* Search & Category Filter */}
-                            <div className="space-y-2 sticky top-0 bg-white dark:bg-[#1E1E1E] z-10 pb-2">
-                                <div className="relative">
-                                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 opacity-50" />
-                                    <input
-                                        type="text"
-                                        placeholder="Cari ikon (misal: kopi, santai, sofa, tidur, gym, kapal, dokter, laptop, lembur, teh, renang)..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-indigo-500"
-                                    />
-                                </div>
-
-                                <div className="flex gap-1 overflow-x-auto pb-1 no-scrollbar">
-                                    {categories.map((cat) => (
-                                        <button
-                                            key={cat}
-                                            type="button"
-                                            onClick={() => setSelectedCategory(cat)}
-                                            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0 transition-all cursor-pointer ${
-                                                selectedCategory === cat
-                                                    ? 'bg-indigo-600 text-white shadow-xs'
-                                                    : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100'
-                                            }`}
-                                        >
-                                            {cat}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
                             {/* SVG Grid */}
-                            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 gap-2 pt-1">
+                            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 gap-2">
                                 {filteredIcons.map((item) => {
                                     const IconComp = item.component;
-                                    const isSelected = visual.iconType === 'svg' && visual.iconName === item.name;
+                                    const isSelected = draftVisual.iconType === 'svg' && draftVisual.iconName === item.name;
                                     return (
                                         <button
                                             key={item.name}
@@ -812,35 +999,6 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                     {/* Tab 2: Categorized Emojis */}
                     {activeTab === 'emoji' && (
                         <div className="space-y-4">
-                            {/* Emoji Category Tabs */}
-                            <div className="flex gap-1 overflow-x-auto pb-1 no-scrollbar">
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedEmojiCategory('Semua')}
-                                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0 transition-all cursor-pointer ${
-                                        selectedEmojiCategory === 'Semua'
-                                            ? 'bg-indigo-600 text-white shadow-xs'
-                                            : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100'
-                                    }`}
-                                >
-                                    Semua Emoji
-                                </button>
-                                {Object.keys(CATEGORIZED_EMOJIS).map((catName) => (
-                                    <button
-                                        key={catName}
-                                        type="button"
-                                        onClick={() => setSelectedEmojiCategory(catName)}
-                                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0 transition-all cursor-pointer ${
-                                            selectedEmojiCategory === catName
-                                                ? 'bg-indigo-600 text-white shadow-xs'
-                                                : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100'
-                                        }`}
-                                    >
-                                        {catName}
-                                    </button>
-                                ))}
-                            </div>
-
                             {/* Emoji Sections */}
                             <div className="space-y-4">
                                 {Object.entries(CATEGORIZED_EMOJIS).map(([catTitle, emojiList]) => {
@@ -850,7 +1008,7 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                             <h4 className="text-xs font-bold text-indigo-500">{catTitle}</h4>
                                             <div className="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-12 gap-2">
                                                 {emojiList.map((em, idx) => {
-                                                    const isSelected = visual.iconType === 'emoji' && visual.emoji === em;
+                                                    const isSelected = draftVisual.iconType === 'emoji' && draftVisual.emoji === em;
                                                     return (
                                                         <button
                                                             key={idx}
@@ -874,55 +1032,87 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                             </div>
                         </div>
                     )}
-
-                    {/* Tab 3: Upload Custom Image */}
-                    {activeTab === 'upload' && (
-                        <div className="space-y-4 p-4 rounded-2xl border border-dashed border-current/30 bg-current/5 text-center py-10">
-                            <Upload className="w-10 h-10 mx-auto opacity-50 text-indigo-500" />
-                            <div className="space-y-1">
-                                <h4 className="text-sm font-bold">Unggah Ikon / Logo Kustom</h4>
-                                <p className="text-xs opacity-60 max-w-sm mx-auto">
-                                    Unggah gambar logo tim, bendera, atau ikon khusus format PNG transparan, SVG, WebP, atau JPEG.
-                                </p>
-                            </div>
-                            <input
-                                type="file"
-                                accept="image/png,image/svg+xml,image/webp,image/jpeg"
-                                ref={fileInputRef}
-                                onChange={handleFileUpload}
-                                className="hidden"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="px-5 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white mx-auto cursor-pointer shadow-md active:scale-95 transition-all"
-                            >
-                                Pilih Berkas Gambar
-                            </button>
-                        </div>
-                    )}
                 </div>
 
-                {/* Footer Clear Icon Option */}
-                <div className="p-3 border-t border-current/10 flex justify-between items-center bg-current/5 shrink-0">
-                    <button
-                        type="button"
-                        onClick={() => {
-                            onChange({ ...visual, iconType: 'none', iconName: undefined, customIconUrl: undefined, emoji: undefined });
-                            onClose();
-                        }}
-                        className="text-xs font-bold text-rose-500 hover:underline flex items-center space-x-1 cursor-pointer"
-                    >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Hapus / Tanpa Ikon</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-1.5 text-xs font-bold rounded-xl bg-current/10 hover:bg-current/20 cursor-pointer"
-                    >
-                        Tutup
-                    </button>
+
+                {/* Footer Controls: Undo, Redo, Hapus on Left, Batal, Terapkan, Simpan on Right */}
+                <div className="p-2.5 sm:p-3 border-t border-current/10 flex flex-wrap justify-between items-center gap-2 bg-current/5 shrink-0">
+                    <div className="flex items-center space-x-1.5 sm:space-x-2">
+                        {/* Undo Button */}
+                        <button
+                            type="button"
+                            onClick={handleUndo}
+                            disabled={historyIndex <= 0}
+                            className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs font-bold flex items-center space-x-1 transition-all ${
+                                historyIndex > 0
+                                    ? 'bg-current/10 border-current/20 hover:bg-current/20 cursor-pointer active:scale-95'
+                                    : 'opacity-30 border-current/10 cursor-not-allowed'
+                            }`}
+                            title="Undo (Kembalikan pilihan ikon sebelumnya)"
+                        >
+                            <Undo2 className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Undo</span>
+                        </button>
+
+                        {/* Redo Button */}
+                        <button
+                            type="button"
+                            onClick={handleRedo}
+                            disabled={historyIndex >= history.length - 1}
+                            className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs font-bold flex items-center space-x-1 transition-all ${
+                                historyIndex < history.length - 1
+                                    ? 'bg-current/10 border-current/20 hover:bg-current/20 cursor-pointer active:scale-95'
+                                    : 'opacity-30 border-current/10 cursor-not-allowed'
+                            }`}
+                            title="Redo (Ulangi pilihan ikon)"
+                        >
+                            <Redo2 className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Redo</span>
+                        </button>
+
+                        {/* Hapus Button */}
+                        <button
+                            type="button"
+                            onClick={handleHapus}
+                            className="px-2.5 py-1 text-xs font-bold text-rose-500 hover:text-rose-600 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-lg flex items-center space-x-1 cursor-pointer transition-all active:scale-95"
+                            title="Hapus ikon / jadikan tanpa ikon"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Hapus</span>
+                        </button>
+                    </div>
+
+                    <div className="flex items-center space-x-1.5 sm:space-x-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-3 py-1.5 text-xs font-bold rounded-lg bg-current/10 hover:bg-current/20 cursor-pointer transition-colors"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleApply}
+                            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg border flex items-center space-x-1.5 cursor-pointer shadow-2xs transition-all active:scale-95 ${
+                                isApplied
+                                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
+                                    : 'bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border-indigo-500/30'
+                            }`}
+                            title="Terapkan ikon tanpa menutup jendela"
+                        >
+                            <Check className={`w-3.5 h-3.5 ${isApplied ? 'text-emerald-500' : ''}`} />
+                            <span>{isApplied ? 'Diterapkan!' : 'Terapkan'}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleSave}
+                            className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white flex items-center space-x-1.5 cursor-pointer shadow-xs transition-all active:scale-95"
+                            title="Simpan ikon dan tutup jendela"
+                        >
+                            <Save className="w-3.5 h-3.5" />
+                            <span>Simpan</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -26,10 +26,24 @@ export interface VersionItem {
 
 export const VERSION_HISTORY: VersionItem[] = [
     {
+        version: '0.3.62-beta',
+        releaseDate: '27 September 2026',
+        title: 'Harmonisasi Rasio UI, Font Sans-Serif Jam Lembur/Masuk-Pulang & Caching Model AI',
+        isLatest: true,
+        isMajor: true,
+        tag: 'UI/UX Harmonisasi & Cache Storage AI',
+        changes: [
+            'Harmonisasi Rasio & Proporsi Ukuran UI (UI Scale Balance): Menyelaraskan proporsi modal popup, color picker target elemen, kartu tanggal, font jam, dan komponen input agar tampil imbang, simetris, dan elegan di seluruh tema.',
+            'Font Sans-Serif Tabular Jam Absen & Lembur: Menggunakan font sans-serif tabular (ui-sans-serif, system-ui) dengan ukuran rapat dan presisi untuk jam masuk, jam pulang, dan jam lembur pada kartu tanggal.',
+            'Optimalisasi Permanent Cache Model AI Background Removal: Mengintegrasikan Cache Storage browser (caches.open) untuk menyimpan berkas ONNX & WASM secara permanen sehingga proses AI hapus latar belakang gambar instan tanpa unduhan berulang.',
+            'Kerapian Popover Color Picker & Studio Motif: Menyempurnakan pemilih warna dengan latar belakang hitam kontras, kontrol opasitas/kepadatan motif yang sinkron dengan Preset CSS, dan area preview sticky pada editor gambar shift.'
+        ]
+    },
+    {
         version: '0.3.33-beta',
         releaseDate: '26 September 2026',
         title: 'Integrasi Custom Popover Color Picker (Figma Style) & Sleek Property Panel',
-        isLatest: true,
+        isLatest: false,
         isMajor: false,
         tag: 'UI/UX Modern Color Picker & Property Panel',
         changes: [

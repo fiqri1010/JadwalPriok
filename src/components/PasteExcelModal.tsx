@@ -457,14 +457,14 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
     <AnimatePresence>
       {/* Backdrop (Latar Belakang Gelap / Buram) */}
       <div
-        className="fixed inset-0 z-[99998] bg-black/75 backdrop-blur-sm select-none"
+        className="fixed inset-0 sm:top-7 z-[99998] bg-black/75 backdrop-blur-sm select-none"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Modal Viewport Layer */}
       <div
-        className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 pointer-events-none select-none"
+        className="fixed inset-0 sm:top-7 z-[99999] flex items-center justify-center p-3 sm:p-5 pointer-events-none select-none"
         data-theme={theme}
       >
         {/* .form-card1 Outer Gradient Glowing Shell */}

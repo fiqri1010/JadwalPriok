@@ -229,7 +229,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
 
             // 5. Area Grid Kalender
             calendarContainerCardClass: 'rounded-xl sm:rounded-2xl bg-[#1E1E1E] p-1 sm:p-2 lg:p-2.5 shadow-lg border border-[#333333]',
-            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 lg:gap-1.5 mb-1 sm:mb-1.5 rounded-lg sm:rounded-xl bg-[#151515] py-1 sm:py-1.5 px-1 text-center text-xs sm:text-sm lg:text-base font-black border border-[#2B2B2B]',
+            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 lg:gap-1.5 mb-1 sm:mb-1.5 rounded-lg sm:rounded-xl bg-[#151515] py-1 sm:py-1.5 text-center text-xs sm:text-sm lg:text-base font-black border border-[#2B2B2B]',
             weekdayNameTextClass: 'text-[#B0B0B0]',
             weekendNameTextClass: 'text-[#FF6B6B]',
             emptyCellClass: 'rounded-lg sm:rounded-xl bg-[#141414] p-1',
@@ -313,7 +313,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
 
             // 5. Area Grid Kalender
             calendarContainerCardClass: 'rounded-xl sm:rounded-2xl bg-white/45 backdrop-blur-xl p-1 sm:p-2 lg:p-2.5 shadow-[0_8px_30px_rgba(14,116,224,0.12)] border border-white/70',
-            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 lg:gap-1.5 mb-1 sm:mb-1.5 rounded-lg sm:rounded-xl bg-white/85 backdrop-blur-md py-1 sm:py-1.5 px-1 text-center text-xs sm:text-sm lg:text-base font-black border border-white/60 shadow-2xs',
+            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 lg:gap-1.5 mb-1 sm:mb-1.5 rounded-lg sm:rounded-xl bg-white/85 backdrop-blur-md py-1 sm:py-1.5 text-center text-xs sm:text-sm lg:text-base font-black border border-white/60 shadow-2xs',
             weekdayNameTextClass: 'text-slate-800',
             weekendNameTextClass: 'text-[#BE1A1A]',
             emptyCellClass: 'rounded-lg sm:rounded-xl bg-white/25 backdrop-blur-xs p-1 border border-white/30',
@@ -397,7 +397,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
 
             // 5. Area Grid Kalender
             calendarContainerCardClass: 'rounded-none bg-[#1C1C1E] p-1 sm:p-2 lg:p-2.5 shadow-none border-2 border-[#555555] font-mono',
-            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 lg:gap-1.5 mb-1 sm:mb-1.5 rounded-none bg-[#000000] py-1 sm:py-1.5 px-1 text-center text-xs sm:text-sm lg:text-base font-black border border-[#555555] font-mono',
+            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 lg:gap-1.5 mb-1 sm:mb-1.5 rounded-none bg-[#000000] py-1 sm:py-1.5 text-center text-xs sm:text-sm lg:text-base font-black border border-[#555555] font-mono',
             weekdayNameTextClass: 'text-[#00FF00]',
             weekendNameTextClass: 'text-[#FF3333]',
             emptyCellClass: 'rounded-none bg-[#000000] p-1 border border-[#333333]',
@@ -483,7 +483,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
 
             // 5. Area Grid Kalender: rounded-3xl, Surface Container (#1D1B20)
             calendarContainerCardClass: 'rounded-3xl bg-[#1D1B20] p-1.5 sm:p-2.5 lg:p-3 shadow-lg border border-white/5 transition-all duration-300 ease-in-out',
-            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 lg:gap-1.5 mb-1.5 rounded-2xl bg-[#2B2930] py-1 sm:py-1.5 px-1 text-center text-xs sm:text-sm lg:text-base font-black border border-white/5',
+            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 lg:gap-1.5 mb-1.5 rounded-2xl bg-[#2B2930] py-1 sm:py-1.5 text-center text-xs sm:text-sm lg:text-base font-black border border-white/5',
             weekdayNameTextClass: 'text-[#CAC4D0]',
             weekendNameTextClass: 'text-[#FFB4AB]',
             emptyCellClass: 'rounded-2xl bg-[#141218]/60 p-1 border border-white/5',

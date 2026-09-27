@@ -10,11 +10,6 @@ import {
 import { AppTheme } from '../types';
 import { Tooltip } from './Tooltip';
 
-const MONTH_NAMES = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-];
-
 interface CalendarActionToolbarProps {
     selectedMonth: number;
     selectedYear: number;
@@ -96,7 +91,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                 </div>
             )}
 
-            {/* Grid 4 Tombol Aksi - Ramping & Seimbang */}
+            {/* Grid 4 Tombol Aksi */}
             <div className="grid grid-cols-4 gap-1 sm:gap-1.5">
                 {/* 1. Tempel / Salin */}
                 <Tooltip
