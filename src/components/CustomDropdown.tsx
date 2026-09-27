@@ -186,11 +186,11 @@ export function CustomDropdown<T extends string | number>({
                 {visibleOptions.length === 0 ? (
                     <div className="p-2 text-center text-xs opacity-60">Semua opsi telah dipilih</div>
                 ) : (
-                    visibleOptions.map((opt) => {
+                    visibleOptions.map((opt, idx) => {
                         const isSelected = opt.value === value;
                         return (
                             <div
-                                key={String(opt.value)}
+                                key={`${String(opt.value)}-${idx}`}
                                 role="button"
                                 tabIndex={0}
                                 onClick={(e) => {

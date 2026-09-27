@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShiftVisualStyle, ShiftNamingConfig } from '../../types';
 import { ICON_CATALOG } from './ShiftIconPickerModal';
+import { BADGE_PATTERNS } from './patterns';
 import { Smartphone, Monitor } from 'lucide-react';
 
 interface ShiftLiveBadgePreviewProps {
@@ -12,23 +13,21 @@ interface ShiftLiveBadgePreviewProps {
 export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
     visual,
     naming,
-    isPiket = false,
 }) => {
     const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
 
-    // Build background CSS style based on visual config
+    // Build background CSS style based on visual config from ColorPicker
     const getBackgroundStyle = (): React.CSSProperties => {
         if (visual.colorMode === 'customCss' && visual.customCss) {
-            // For custom CSS, parse simple background property or raw style
             return { background: visual.customCss.replace(/background(-color)?:\s*|;/g, '').trim() };
         }
 
-        if (visual.colorMode === 'radial') {
+        if (visual.colorMode === 'radial' && visual.colorStops && visual.colorStops.length > 0) {
             const stopsStr = visual.colorStops.map((s) => `${s.color} ${s.position}%`).join(', ');
             return { background: `radial-gradient(circle at center, ${stopsStr})` };
         }
 
-        if (visual.colorMode === 'linear') {
+        if (visual.colorMode === 'linear' && visual.colorStops && visual.colorStops.length > 0) {
             const stopsStr = visual.colorStops.map((s) => `${s.color} ${s.position}%`).join(', ');
             return { background: `linear-gradient(${visual.gradientAngle || 135}deg, ${stopsStr})` };
         }
@@ -37,99 +36,55 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
         return { backgroundColor: visual.solidColor || '#EDF6F9' };
     };
 
-    // Render Pattern Overlay
+    // Render Pattern SVG Overlay Layer with dynamic opacity & scale/density
     const renderPatternOverlay = () => {
         if (visual.customPatternUrl) {
+            let opacity = visual.patternOpacity !== undefined ? visual.patternOpacity : 0.3;
+            if (opacity > 1) opacity = opacity / 100;
             return (
                 <div
                     className="absolute inset-0 pointer-events-none rounded-inherit bg-repeat"
                     style={{
                         backgroundImage: `url(${visual.customPatternUrl})`,
-                        backgroundSize: '16px 16px',
-                        opacity: (visual.patternOpacity || 20) / 100,
+                        backgroundSize: `${Math.round(16 * (visual.patternScale || 1.0))}px ${Math.round(16 * (visual.patternScale || 1.0))}px`,
+                        opacity,
                     }}
                 />
             );
         }
 
-        if (visual.patternType === 'stripes') {
-            return (
-                <div
-                    className="absolute inset-0 pointer-events-none rounded-inherit"
-                    style={{
-                        backgroundImage: `repeating-linear-gradient(45deg, rgba(255,255,255,0.25) 0, rgba(255,255,255,0.25) 3px, transparent 0, transparent 6px)`,
-                        opacity: (visual.patternOpacity || 20) / 100,
-                    }}
-                />
-            );
-        }
+        const patternObj = BADGE_PATTERNS.find((p) => p.id === visual.patternType);
+        if (!patternObj || patternObj.id === 'none') return null;
 
-        if (visual.patternType === 'dots') {
-            return (
-                <div
-                    className="absolute inset-0 pointer-events-none rounded-inherit"
-                    style={{
-                        backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)`,
-                        backgroundSize: '6px 6px',
-                        opacity: (visual.patternOpacity || 20) / 100,
-                    }}
-                />
-            );
-        }
+        const patColor = visual.patternColor || '#FFFFFF';
+        const svgContentStr = patternObj.svgContent(patColor);
 
-        if (visual.patternType === 'grid') {
-            return (
-                <div
-                    className="absolute inset-0 pointer-events-none rounded-inherit"
-                    style={{
-                        backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.2) 1px, transparent 1px)`,
-                        backgroundSize: '8px 8px',
-                        opacity: (visual.patternOpacity || 20) / 100,
-                    }}
-                />
-            );
-        }
+        // Dynamic width & height scaled by patternScale
+        const scale = visual.patternScale || 1.0;
+        const patWidth = Math.max(2, Math.round(patternObj.defaultWidth * scale));
+        const patHeight = Math.max(2, Math.round(patternObj.defaultHeight * scale));
 
-        if (visual.patternType === 'honeycomb') {
-            return (
-                <div
-                    className="absolute inset-0 pointer-events-none rounded-inherit"
-                    style={{
-                        backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.3) 2px, transparent 3px)`,
-                        backgroundSize: '10px 10px',
-                        opacity: (visual.patternOpacity || 20) / 100,
-                    }}
-                />
-            );
-        }
+        let opacity = visual.patternOpacity !== undefined ? visual.patternOpacity : 0.3;
+        if (opacity > 1) opacity = opacity / 100;
 
-        if (visual.patternType === 'waves') {
-            return (
-                <div
-                    className="absolute inset-0 pointer-events-none rounded-inherit"
-                    style={{
-                        backgroundImage: `radial-gradient(ellipse at center, rgba(255,255,255,0.25) 0%, transparent 70%)`,
-                        backgroundSize: '12px 6px',
-                        opacity: (visual.patternOpacity || 20) / 100,
-                    }}
-                />
-            );
-        }
-
-        if (visual.patternType === 'carbon') {
-            return (
-                <div
-                    className="absolute inset-0 pointer-events-none rounded-inherit"
-                    style={{
-                        backgroundImage: `linear-gradient(45deg, rgba(0,0,0,0.3) 25%, transparent 25%), linear-gradient(-45deg, rgba(0,0,0,0.3) 25%, transparent 25%)`,
-                        backgroundSize: '6px 6px',
-                        opacity: (visual.patternOpacity || 20) / 100,
-                    }}
-                />
-            );
-        }
-
-        return null;
+        return (
+            <svg
+                className="absolute inset-0 w-full h-full pointer-events-none rounded-inherit overflow-hidden"
+                style={{ opacity }}
+            >
+                <defs>
+                    <pattern
+                        id={`badge-pattern-live-${patternObj.id}`}
+                        width={patWidth}
+                        height={patHeight}
+                        patternUnits="userSpaceOnUse"
+                    >
+                        <g dangerouslySetInnerHTML={{ __html: svgContentStr }} />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill={`url(#badge-pattern-live-${patternObj.id})`} />
+            </svg>
+        );
     };
 
     // Render Icon or Emoji
@@ -154,56 +109,21 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
     };
 
     return (
-        <div className="p-3.5 rounded-2xl bg-current/5 border border-current/10 space-y-2.5">
+        <div className="p-2 sm:p-2.5 rounded-lg bg-white/70 dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 space-y-1.5 shadow-2xs">
             <div className="flex items-center justify-between">
-                <span className="text-xs font-bold">Pratinjau Badge Shift (Live):</span>
-                <div className="flex p-0.5 rounded-lg bg-current/10 text-[10px]">
-                    <button
-                        type="button"
-                        onClick={() => setPreviewDevice('desktop')}
-                        className={`px-2 py-0.5 rounded font-bold flex items-center space-x-1 cursor-pointer ${
-                            previewDevice === 'desktop' ? 'bg-indigo-600 text-white shadow-xs' : 'opacity-70'
-                        }`}
-                    >
-                        <Monitor className="w-3 h-3" />
-                        <span>Desktop</span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setPreviewDevice('mobile')}
-                        className={`px-2 py-0.5 rounded font-bold flex items-center space-x-1 cursor-pointer ${
-                            previewDevice === 'mobile' ? 'bg-indigo-600 text-white shadow-xs' : 'opacity-70'
-                        }`}
-                    >
-                        <Smartphone className="w-3 h-3" />
-                        <span>Mobile</span>
-                    </button>
-                </div>
+                <span className="text-[11px] font-bold text-slate-600 dark:text-zinc-300">
+                    Pratinjau Badge Shift (Live):
+                </span>
             </div>
 
-            {/* Container Preview Area */}
-            <div className="flex items-center justify-center p-4 rounded-xl bg-slate-900/10 dark:bg-black/40 border border-current/10 min-h-[70px]">
-                {previewDevice === 'desktop' ? (
-                    /* Desktop Preview Card Badge */
-                    <div
-                        className="relative px-3 py-1.5 rounded-lg font-black text-xs shadow-md border flex items-center space-x-2 select-none overflow-hidden transition-all max-w-full"
-                        style={{
-                            ...getBackgroundStyle(),
-                            color: visual.textColor || '#FFFFFF',
-                            borderColor: visual.borderColor || '#83C5BE',
-                        }}
-                    >
-                        {renderPatternOverlay()}
-                        <div className="relative z-10 flex items-center space-x-1.5">
-                            {renderIcon('w-4 h-4')}
-                            <span className="tracking-wide">{naming.displayBadge || 'SHIFT'}</span>
-                        </div>
-                    </div>
-                ) : (
-                    /* Mobile Preview Card Badge */
-                    <div className="flex items-center space-x-2">
+            {/* Preview row with badge area on left & stacked device toggle on right */}
+            <div className="flex items-stretch gap-2">
+                {/* Container Preview Area - Dynamic Background + SVG Pattern Overlay Layering */}
+                <div className="flex-1 flex items-center justify-center p-2 rounded-md bg-slate-50/80 dark:bg-zinc-900/80 border border-slate-200/70 dark:border-zinc-800/80 min-h-[46px]">
+                    {previewDevice === 'desktop' ? (
+                        /* Desktop Preview Card Badge */
                         <div
-                            className="relative w-8 h-8 rounded-lg font-black text-xs shadow-sm border flex items-center justify-center select-none overflow-hidden"
+                            className="relative px-3 py-1 rounded-[6px] font-black text-[11px] sm:text-xs shadow-xs border flex items-center space-x-1.5 select-none overflow-hidden transition-all max-w-full"
                             style={{
                                 ...getBackgroundStyle(),
                                 color: visual.textColor || '#FFFFFF',
@@ -211,14 +131,62 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
                             }}
                         >
                             {renderPatternOverlay()}
-                            <span className="relative z-10">{naming.copyCode || (naming.displayBadge || 'S').slice(0, 1)}</span>
+                            <div className="relative z-10 flex items-center space-x-1.5">
+                                {renderIcon('w-3.5 h-3.5')}
+                                <span className="tracking-tight">{naming.displayBadge || 'SHIFT'}</span>
+                            </div>
                         </div>
-                        <div className="text-[11px] opacity-70">
-                            <span className="font-bold">{naming.fullName || 'Nama Shift'}</span>
-                            <span className="block text-[10px] opacity-60">Kode Salin: &apos;{naming.copyCode || 'S'}&apos;</span>
+                    ) : (
+                        /* Mobile Preview Card Badge */
+                        <div className="flex items-center space-x-2">
+                            <div
+                                className="relative w-6 h-6 rounded-[5px] font-black text-[10px] shadow-2xs border flex items-center justify-center select-none overflow-hidden"
+                                style={{
+                                    ...getBackgroundStyle(),
+                                    color: visual.textColor || '#FFFFFF',
+                                    borderColor: visual.borderColor || '#83C5BE',
+                                }}
+                            >
+                                {renderPatternOverlay()}
+                                <span className="relative z-10">{naming.copyCode || (naming.displayBadge || 'S').slice(0, 1)}</span>
+                            </div>
+                            <div className="text-[10.5px] leading-tight text-slate-600 dark:text-zinc-300">
+                                <span className="font-bold block truncate max-w-[180px] sm:max-w-[240px]">{naming.fullName || 'Nama Shift'}</span>
+                                <span className="block text-[9.5px] text-slate-400 dark:text-zinc-500">Kode Salin: &apos;{naming.copyCode || 'S'}&apos;</span>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
+
+                {/* Stacked Device Toggle Buttons */}
+                <div className="flex flex-col justify-center gap-1 p-1 rounded-md bg-slate-100 dark:bg-zinc-800 text-[9.5px] border border-slate-200/60 dark:border-zinc-700/50 shrink-0">
+                    <button
+                        type="button"
+                        onClick={() => setPreviewDevice('desktop')}
+                        className={`px-2 py-1 rounded font-bold flex items-center justify-center space-x-1 cursor-pointer transition-colors ${
+                            previewDevice === 'desktop'
+                                ? 'bg-teal-600 text-white shadow-2xs'
+                                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                        title="Pratinjau Tampilan Desktop"
+                    >
+                        <Monitor className="w-3 h-3" />
+                        <span className="text-[9.5px]">Desktop</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setPreviewDevice('mobile')}
+                        className={`px-2 py-1 rounded font-bold flex items-center justify-center space-x-1 cursor-pointer transition-colors ${
+                            previewDevice === 'mobile'
+                                ? 'bg-teal-600 text-white shadow-2xs'
+                                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                        title="Pratinjau Tampilan Mobile"
+                    >
+                        <Smartphone className="w-3 h-3" />
+                        <span className="text-[9.5px]">Mobile</span>
+                    </button>
+                </div>
             </div>
         </div>
     );

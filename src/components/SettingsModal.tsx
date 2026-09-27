@@ -328,10 +328,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className={s.cardOuter}>
             <div className={s.cardInner}>
                 {/* Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-slate-200/70">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-200/70 dark:border-slate-800">
                     <div className="flex items-center space-x-3">
-                        <div className="p-2 rounded-lg bg-teal-50 border border-teal-200/60 text-teal-600">
-                            <Sliders className="w-5 h-5 text-teal-600" />
+                        <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/50 text-indigo-600 dark:text-indigo-400 shrink-0">
+                            <Sliders className="w-5 h-5" />
                         </div>
                         <div>
                             <h2 className="text-base sm:text-lg font-black">Pengaturan Aplikasi</h2>

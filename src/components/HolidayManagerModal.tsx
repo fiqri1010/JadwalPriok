@@ -17,6 +17,7 @@ import {
     ArrowRight,
     Eye,
     EyeOff,
+    Flag,
 } from 'lucide-react';
 import { getIndonesianHoliday } from '../data/holidays';
 import { AppTheme, LiburNasional, HolidayCategory, resolveHolidayCategory } from '../types';
@@ -480,10 +481,13 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200/70 dark:border-slate-800">
                 <div className="space-y-1">
                     <div className="flex items-center gap-2.5">
-                        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
+                        <div className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/50 text-rose-500 shrink-0">
+                            <Flag className="h-5 w-5 fill-rose-500" />
+                        </div>
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                             Daftar Hari Libur
                         </h2>
-                        <span className="text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200/60 dark:border-slate-700">
+                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200/60 dark:border-slate-700">
                             {activeYear}
                         </span>
                     </div>
@@ -713,7 +717,7 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                         </div>
                     ) : (
                         <div className="divide-y divide-slate-100 dark:divide-slate-800/80 max-h-[60vh] overflow-y-auto pr-1">
-                            {yearItems.map((item) => {
+                            {yearItems.map((item, idx) => {
                                 const catInfo = resolveHolidayCategory({
                                     keterangan: item.keterangan,
                                     kategori: item.kategori,
@@ -722,7 +726,7 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
 
                                 return (
                                     <div
-                                        key={item.tanggalIso}
+                                        key={`${item.tanggalIso}-${item.keterangan || ''}-${idx}`}
                                         className={`flex items-center justify-between py-3 px-2 rounded-xl transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50 ${
                                             item.isDisabled ? 'opacity-50 bg-slate-50/40 dark:bg-slate-850/40' : ''
                                         }`}

@@ -14,7 +14,7 @@ function getFallbackBuildTime(): string {
 }
 
 export const APP_VERSION: string = 
-  typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.3.24-beta';
+  typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.3.33-beta';
 
 export const BUILD_TIMESTAMP: string = 
   typeof __BUILD_TIMESTAMP__ !== 'undefined' ? __BUILD_TIMESTAMP__ : getFallbackBuildTime();

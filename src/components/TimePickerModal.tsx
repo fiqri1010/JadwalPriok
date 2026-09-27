@@ -723,7 +723,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                     const isSelected = (hour % 12 === 0 ? 12 : hour % 12) === h && hour <= 12;
                     return (
                       <div
-                        key={h}
+                        key={`h-outer-${h}`}
                         className={`absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center text-xs font-bold transition-transform rounded-full tp-dial-num ${
                           isSelected ? 'tp-dial-num-active shadow-md scale-110' : ''
                         }`}
@@ -745,7 +745,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                     const isSelected = hour === h;
                     return (
                       <div
-                        key={h}
+                        key={`h-inner-${h}`}
                         className={`absolute w-5 h-5 -ml-2.5 -mt-2.5 flex items-center justify-center text-[10px] font-semibold transition-transform rounded-full tp-dial-sub-num ${
                           isSelected ? 'tp-dial-sub-active font-black shadow-md scale-110' : ''
                         }`}

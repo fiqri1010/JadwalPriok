@@ -72,25 +72,29 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                     )}
                 </div>
 
-                {/* Primary In & Out */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Primary In & Out (Kiri - Kanan berdampingan di mobile & desktop) */}
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                     <div className="space-y-1">
-                        <label className="text-xs font-bold block">Jam Masuk Dasar:</label>
+                        <label className="text-[11px] sm:text-xs font-bold block truncate">
+                            Jam Masuk Dasar:
+                        </label>
                         <input
                             type="time"
                             value={workTime.jamMasukDasar === '-' ? '' : workTime.jamMasukDasar}
                             onChange={(e) => handleTimeChange('jamMasukDasar', e.target.value || '-')}
-                            className="w-full p-2 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-indigo-500 font-mono"
+                            className="w-full p-2 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500 font-mono text-center sm:text-left"
                         />
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold block">Jam Pulang Dasar:</label>
+                        <label className="text-[11px] sm:text-xs font-bold block truncate">
+                            Jam Pulang Dasar:
+                        </label>
                         <input
                             type="time"
                             value={workTime.jamPulangDasar === '-' ? '' : workTime.jamPulangDasar}
                             onChange={(e) => handleTimeChange('jamPulangDasar', e.target.value || '-')}
-                            className="w-full p-2 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-indigo-500 font-mono"
+                            className="w-full p-2 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500 font-mono text-center sm:text-left"
                         />
                     </div>
                 </div>
@@ -103,7 +107,7 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {/* Flexi In */}
                             <div className="p-2.5 rounded-xl bg-current/5 border border-current/10 space-y-1.5">
-                                <span className="text-[10px] font-bold uppercase opacity-60 block">1. Batas Flexi Masuk (In):</span>
+                                <span className="text-[10px] font-bold uppercase opacity-75 block">Batas Flexi Masuk (In):</span>
                                 <div className="grid grid-cols-2 gap-1.5">
                                     <div>
                                         <span className="text-[9px] opacity-60">Terawal:</span>
@@ -128,7 +132,7 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
 
                             {/* Flexi Out */}
                             <div className="p-2.5 rounded-xl bg-current/5 border border-current/10 space-y-1.5">
-                                <span className="text-[10px] font-bold uppercase opacity-60 block">2. Batas Flexi Pulang (Out):</span>
+                                <span className="text-[10px] font-bold uppercase opacity-75 block">Batas Flexi Pulang (Out):</span>
                                 <div className="grid grid-cols-2 gap-1.5">
                                     <div>
                                         <span className="text-[9px] opacity-60">Terawal:</span>

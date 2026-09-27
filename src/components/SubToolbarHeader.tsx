@@ -107,6 +107,7 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
             {/* 1. Judul Statis di Kiri (De-duplication) */}
             <div className="flex items-center space-x-2 min-w-0">
                 <span className={styles.dot} aria-hidden="true" />
+                <CalendarCheck2 className="h-4 w-4 sm:h-4.5 sm:w-4.5 text-teal-600 dark:text-teal-400 shrink-0" />
                 <h2 className={styles.title}>
                     {staticTitle}
                 </h2>

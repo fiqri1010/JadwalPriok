@@ -39,19 +39,29 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
         const prefixPadded = `${selectedYear}-${paddedMonth}-`;
         const prefixRaw = `${selectedYear}-${selectedMonth}-`;
 
-        return daftarLibur
-            .filter((h) => {
-                if (h.tanggal.startsWith(prefixPadded) || h.tanggal.startsWith(prefixRaw)) {
-                    return true;
-                }
-                const parts = h.tanggal.split('-');
-                if (parts.length === 3) {
-                    const y = parseInt(parts[0], 10);
-                    const m = parseInt(parts[1], 10);
-                    return y === selectedYear && m === selectedMonth;
-                }
-                return false;
-            })
+        const filtered = (daftarLibur || []).filter((h) => {
+            if (h.tanggal.startsWith(prefixPadded) || h.tanggal.startsWith(prefixRaw)) {
+                return true;
+            }
+            const parts = h.tanggal.split('-');
+            if (parts.length === 3) {
+                const y = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10);
+                return y === selectedYear && m === selectedMonth;
+            }
+            return false;
+        });
+
+        // Deduplicate any exact duplicate records
+        const seen = new Set<string>();
+        const uniqueHolidays = filtered.filter((h) => {
+            const key = `${h.tanggal}_${h.keterangan || ''}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+
+        return uniqueHolidays
             .map((h) => {
                 const parts = h.tanggal.split('-');
                 const dayNum = parseInt(parts[2], 10) || 1;
@@ -185,7 +195,7 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
                     </div>
                 ) : (
                     <div className="space-y-1">
-                        {monthHolidays.map((holiday) => {
+                        {monthHolidays.map((holiday, idx) => {
                             const catInfo = resolveHolidayCategory({
                                 keterangan: holiday.keterangan,
                                 kategori: holiday.kategori,
@@ -194,7 +204,7 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
 
                             return (
                                 <div
-                                    key={holiday.tanggal}
+                                    key={`${holiday.tanggal}-${holiday.keterangan || ''}-${idx}`}
                                     onClick={() => onSelectDate && onSelectDate(holiday.dayNumber)}
                                     className={`tooltip-container w-full px-2 py-1.5 rounded-lg flex items-start gap-2.5 cursor-pointer transition-colors ${getItemStyles()}`}
                                 >

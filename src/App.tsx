@@ -264,7 +264,18 @@ export const App: React.FC = () => {
     const [daftarLibur, setDaftarLibur] = useState<LiburNasional[]>(() => {
         try {
             const saved = localStorage.getItem(LOCAL_STORAGE_HOLIDAYS_KEY);
-            if (saved) return JSON.parse(saved);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) {
+                    const seen = new Set<string>();
+                    return parsed.filter((item: LiburNasional) => {
+                        const key = `${item.tanggal}_${item.keterangan || ''}`;
+                        if (seen.has(key)) return false;
+                        seen.add(key);
+                        return true;
+                    });
+                }
+            }
         } catch (e) {
             console.error('Failed to load holidays:', e);
         }

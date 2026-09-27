@@ -489,7 +489,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               color: currentStyle.textColor,
               ...(isVista ? { backdropFilter: 'blur(24px) saturate(200%)', WebkitBackdropFilter: 'blur(24px) saturate(200%)' } : {})
             }}
-            className={`flex flex-col gap-3 p-4 sm:p-6 overflow-hidden max-h-[calc(92vh-4px)] transition-all duration-200 relative ${
+            className={`flex flex-col p-3.5 sm:p-5 overflow-hidden max-h-[calc(92vh-4px)] transition-all duration-200 relative ${
               isWinamp ? 'font-mono' : ''
             }`}
           >
@@ -497,8 +497,8 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-white/40 to-transparent pointer-events-none rounded-t-[20px]" />
             )}
 
-            {/* Header / Heading */}
-            <div className="flex items-center justify-between relative pb-1">
+            {/* Header / Heading (Pinned at top) */}
+            <div className="flex items-center justify-between relative pb-2 shrink-0 border-b border-current/10">
               <div className="flex items-center space-x-2.5 min-w-0">
                 <div
                   style={{
@@ -543,10 +543,14 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               <div className="flex items-center space-x-1.5 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setShowHelp(!showHelp)}
-                  title="Petunjuk salin"
-                  className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                    isLightMode
+                  onClick={() => setShowHelp((prev) => !prev)}
+                  title={showHelp ? 'Sembunyikan petunjuk' : 'Tampilkan petunjuk'}
+                  className={`p-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold ${
+                    showHelp
+                      ? isLightMode
+                        ? 'bg-teal-500/15 text-teal-700 dark:text-teal-300'
+                        : 'bg-white/15 text-white'
+                      : isLightMode
                       ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       : 'text-slate-300 hover:text-white hover:bg-white/10'
                   }`}
@@ -568,67 +572,66 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               </div>
             </div>
 
-            {/* SEGMENTED TAB SELECTOR (RADIO BUTTONS WITH INDIKATOR ANIMASI) */}
-            <div className="flex items-center justify-center pt-0.5 pb-1">
+            {/* SEGMENTED TAB SELECTOR (RADIO BUTTONS WITH INDIKATOR ANIMASI - Pinned at top) */}
+            <div className="flex items-center justify-center pt-1 pb-1 shrink-0">
               <div
-                className="tab-container relative flex flex-row items-center p-[2px] select-none"
+                className="tab-container relative grid grid-cols-2 p-[2px] select-none w-full max-w-[280px]"
                 style={{
                   backgroundColor: currentStyle.tabContainerBg,
                   border: currentStyle.tabContainerBorder,
                   borderRadius: isWinamp ? '0px' : '9px',
                 }}
               >
-                {/* Radio Input 1: Salin Jadwal */}
-                <input
-                  type="radio"
-                  name="pasteTabGroup"
-                  id="tab1_schedule"
-                  className="tab tab--1 absolute z-20 opacity-0 cursor-pointer w-[140px] h-[28px]"
-                  checked={activeTab === 'schedule'}
-                  onChange={() => {
-                    setActiveTab('schedule');
-                    setErrorMsg(null);
-                  }}
-                />
+                {/* Radio Input 1: Salin Shift */}
                 <label
-                  className="tab_label relative z-30 w-[140px] h-[28px] flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                  className="tab_label relative z-30 h-[28px] flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
                   style={{
                     color: activeTab === 'schedule' ? currentStyle.tabTextActive : currentStyle.tabTextInactive,
                     fontFamily: isWinamp ? 'monospace' : 'inherit',
                   }}
-                  htmlFor="tab1_schedule"
                 >
+                  <input
+                    type="radio"
+                    name="pasteTabGroup"
+                    id="tab1_schedule"
+                    className="sr-only"
+                    checked={activeTab === 'schedule'}
+                    onChange={() => {
+                      setActiveTab('schedule');
+                      setErrorMsg(null);
+                    }}
+                  />
                   Salin Shift
                 </label>
 
-                {/* Radio Input 2: Salin Absen (Masuk & Pulang) */}
-                <input
-                  type="radio"
-                  name="pasteTabGroup"
-                  id="tab2_absen"
-                  className="tab tab--2 absolute z-20 opacity-0 cursor-pointer w-[140px] h-[28px]"
-                  checked={activeTab === 'absen'}
-                  onChange={() => {
-                    setActiveTab('absen');
-                    setErrorMsg(null);
-                  }}
-                />
+                {/* Radio Input 2: Salin Presensi */}
                 <label
-                  className="tab_label relative z-30 w-[140px] h-[28px] flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                  className="tab_label relative z-30 h-[28px] flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
                   style={{
                     color: activeTab === 'absen' ? currentStyle.tabTextActive : currentStyle.tabTextInactive,
                     fontFamily: isWinamp ? 'monospace' : 'inherit',
                   }}
-                  htmlFor="tab2_absen"
                 >
+                  <input
+                    type="radio"
+                    name="pasteTabGroup"
+                    id="tab2_absen"
+                    className="sr-only"
+                    checked={activeTab === 'absen'}
+                    onChange={() => {
+                      setActiveTab('absen');
+                      setErrorMsg(null);
+                    }}
+                  />
                   Salin Presensi
                 </label>
 
                 {/* Sliding Indicator Pill */}
                 <div
-                  className="indicator absolute top-[2px] z-10 w-[140px] h-[28px] transition-all duration-200 ease-out"
+                  className="indicator absolute top-[2px] z-10 h-[28px] transition-all duration-200 ease-out pointer-events-none"
                   style={{
-                    left: activeTab === 'schedule' ? '2px' : 'calc(140px + 2px)',
+                    left: activeTab === 'schedule' ? '2px' : 'calc(50%)',
+                    width: 'calc(50% - 2px)',
                     backgroundColor: currentStyle.tabIndicatorBg,
                     borderRadius: currentStyle.tabIndicatorRadius,
                     border: currentStyle.tabIndicatorBorder || 'none',
@@ -638,14 +641,88 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               </div>
             </div>
 
-            {/* Collapsible / Floating Instructions */}
-            {(showHelp || (activeTab === 'schedule' ? !inputText : !inputTextAbsen)) && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
+            {/* SCROLLABLE FORM BODY (Allows full viewing of instructions, textarea, and preview on small screens) */}
+            <div className="flex-1 overflow-y-auto min-h-0 space-y-2.5 sm:space-y-3 pr-1 -mr-1">
+              {/* Collapsible / Floating Instructions */}
+              {showHelp && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="shrink-0 overflow-hidden"
+                >
+                  <div
+                    style={{
+                      backgroundColor: currentStyle.fieldBg,
+                      border: currentStyle.fieldBorder,
+                      boxShadow: currentStyle.fieldShadow,
+                      borderRadius: isWinamp ? '0px' : '10px',
+                    }}
+                    className="p-2.5 sm:p-3 text-[10.5px] sm:text-xs space-y-2"
+                  >
+                    <div
+                      className="flex items-center space-x-1.5 font-bold"
+                      style={{
+                        color: isLightMode
+                          ? isVista
+                            ? '#1e3a8a'
+                            : '#0e7c7b'
+                          : currentStyle.headingColor,
+                      }}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                      <span className="font-bold">
+                        {activeTab === 'schedule'
+                          ? 'Petunjuk Salin Jadwal Shift dari Excel:'
+                          : 'Petunjuk Salin Absen Masuk & Pulang (Smart Auto-Detect):'}
+                      </span>
+                    </div>
+
+                    {activeTab === 'schedule' ? (
+                      <div className="space-y-1.5 leading-relaxed" style={{ color: currentStyle.textColor }}>
+                        <p className="opacity-95">
+                          <strong className="font-bold">1.</strong> Buka file Excel, sorot <strong>1 baris horizontal</strong> berisi kode shift tanggal 1 s.d. {daysInMonth}, lalu tekan <strong>Ctrl + C</strong>.
+                        </p>
+                        <p className="opacity-95">
+                          <strong className="font-bold">2.</strong> Tempelkan ke kotak input di bawah menggunakan <strong>Ctrl + V</strong> (atau tombol Paste).
+                        </p>
+                        <div className="pt-0.5 flex flex-wrap gap-1 items-center">
+                          <span style={{ color: currentStyle.subtextColor }} className="text-[9.5px] sm:text-[10px] font-semibold">
+                            Format didukung:
+                          </span>
+                          {SHIFT_OPTIONS.map((s, idx) => (
+                            <span
+                              key={`${s}-${idx}`}
+                              className={`px-1.5 py-0.5 rounded-[4px] text-[9px] sm:text-[9.5px] font-bold ${
+                                SHIFT_COLORS[s]?.bg || 'bg-slate-700'
+                              } ${SHIFT_COLORS[s]?.text || 'text-white'}`}
+                            >
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5 leading-relaxed" style={{ color: currentStyle.textColor }}>
+                        <p className="opacity-95">
+                          <strong className="font-bold">1.</strong> Salin seluruh tabel/log kehadiran kotor langsung dari sistem/Excel (termasuk tanggal dan tulisan WIB, misal: <code className="px-1 py-0.5 rounded bg-black/10 dark:bg-white/10 text-[9.5px] font-mono">01 Sep 2026 WFO 12.46 WIB 22.31 WIB ...</code>).
+                        </p>
+                        <p className="opacity-95">
+                          <strong className="font-bold">2.</strong> Tempelkan di kotak bawah dengan <strong>Ctrl + V</strong>. Sistem akan <strong>otomatis memilah tanggal, Jam Masuk, dan Jam Pulang</strong> sekaligus!
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Debossed Inset Area for Paste Input */}
+              <div className="space-y-1 flex flex-col shrink-0">
+                <label style={{ color: currentStyle.subtextColor }} className="text-[10px] font-bold uppercase tracking-wider block">
+                  {activeTab === 'schedule' ? 'Kotak Tempel Teks Shift (Ctrl + V):' : 'Kotak Tempel Teks Absen / Laporan Kehadiran (Ctrl + V):'}
+                </label>
+
                 <div
                   style={{
                     backgroundColor: currentStyle.fieldBg,
@@ -653,274 +730,204 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                     boxShadow: currentStyle.fieldShadow,
                     borderRadius: isWinamp ? '0px' : '10px',
                   }}
-                  className="p-3 text-[11px] sm:text-xs space-y-1.5"
+                  className="p-2 sm:p-2.5 flex items-start gap-2 transition-all duration-200"
                 >
-                  <div
-                    className="flex items-center space-x-1.5 font-bold"
-                    style={{
-                      color: isLightMode
-                        ? isVista
-                          ? '#1e3a8a'
-                          : '#0e7c7b'
-                        : currentStyle.headingColor,
-                    }}
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>
-                      {activeTab === 'schedule'
-                        ? 'Petunjuk Salin Jadwal Shift dari Excel:'
-                        : 'Petunjuk Salin Absen Masuk & Pulang (Smart Auto-Detect):'}
+                  {activeTab === 'schedule' ? (
+                    <textarea
+                      id="excel-paste-area"
+                      ref={textareaRef}
+                      rows={3}
+                      value={inputText}
+                      onChange={(e) => {
+                        setInputText(e.target.value);
+                        setErrorMsg(null);
+                      }}
+                      placeholder="Klik di sini lalu tekan Ctrl+V (Contoh: G	L	N	OFF	SM	PM	M	CUTI ...)"
+                      className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
+                      style={{
+                        color: currentStyle.textColor,
+                        caretColor: currentStyle.accentColor,
+                      }}
+                    />
+                  ) : (
+                    <textarea
+                      id="excel-paste-absen-area"
+                      ref={textareaAbsenRef}
+                      rows={3}
+                      value={inputTextAbsen}
+                      onChange={(e) => {
+                        setInputTextAbsen(e.target.value);
+                        setErrorMsg(null);
+                      }}
+                      placeholder="Klik di sini lalu tekan Ctrl+V (Tempelkan data kotor / laporan log jam kerja contoh:&#10;01 Sep 2026  WFO  12.46 WIB  22.31 WIB  TL3&#10;02 Sep 2026  WFO  07.57 WIB  18.43 WIB  Hadir Normal ...)"
+                      className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
+                      style={{
+                        color: currentStyle.textColor,
+                        caretColor: currentStyle.accentColor,
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {errorMsg && (
+                <div className="p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs flex items-start space-x-2 shrink-0">
+                  <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* Live Preview Grid of Parsed Days */}
+              {activeTab === 'schedule' && inputText.trim().length > 0 && (
+                <div className="space-y-1.5 flex flex-col min-h-0 shrink-0">
+                  <div className="flex items-center justify-between text-xs font-bold px-0.5">
+                    <span style={{ color: currentStyle.subtextColor }} className="text-[11px]">
+                      Pratinjau Shift Parsed:
+                    </span>
+                    <span
+                      style={{
+                        color:
+                          validCountSchedule > 0
+                            ? isLightMode
+                              ? isVista
+                                ? '#2563eb'
+                                : '#0e7c7b'
+                              : currentStyle.headingColor
+                            : '#f59e0b',
+                      }}
+                      className="text-[11px] font-black"
+                    >
+                      {validCountSchedule} dari {daysInMonth} hari cocok
                     </span>
                   </div>
 
-                  {activeTab === 'schedule' ? (
-                    <>
-                      <p style={{ color: currentStyle.textColor }} className="opacity-90 leading-relaxed text-[11px]">
-                        1. Buka file Excel, sorot <strong>1 baris horizontal</strong> berisi kode shift tanggal 1 s.d. {daysInMonth}, lalu tekan <strong>Ctrl + C</strong>.
-                      </p>
-                      <p style={{ color: currentStyle.textColor }} className="opacity-90 leading-relaxed text-[11px]">
-                        2. Tempelkan ke kotak input di bawah menggunakan <strong>Ctrl + V</strong> (atau Paste).
-                      </p>
-                      <div className="pt-1 flex flex-wrap gap-1 items-center">
-                        <span style={{ color: currentStyle.subtextColor }} className="text-[10px] font-semibold">
-                          Format didukung:
-                        </span>
-                        {SHIFT_OPTIONS.map((s) => (
-                          <span
-                            key={s}
-                            className={`px-1.5 py-0.2 rounded-[4px] text-[9.5px] font-bold ${
-                              SHIFT_COLORS[s]?.bg || 'bg-slate-700'
-                            } ${SHIFT_COLORS[s]?.text || 'text-white'}`}
-                          >
-                            {s}
+                  <div
+                    style={{
+                      backgroundColor: currentStyle.fieldBg,
+                      border: currentStyle.fieldBorder,
+                      boxShadow: currentStyle.fieldShadow,
+                      borderRadius: isWinamp ? '0px' : '10px',
+                    }}
+                    className="grid grid-cols-7 sm:grid-cols-10 gap-1.5 max-h-32 sm:max-h-40 overflow-y-auto p-2.5 overscroll-contain"
+                  >
+                    {matchedDaysSchedule.map((item, idx) => {
+                      const isMatched = item.shift !== null;
+                      return (
+                        <div
+                          key={`sched-${item.day}-${idx}`}
+                          className={`flex flex-col items-center justify-center p-1 rounded-[6px] border text-center transition-all ${
+                            isMatched
+                              ? isLightMode
+                                ? 'border-teal-300/80 dark:border-blue-300 bg-white shadow-2xs'
+                                : 'border-white/20 bg-white/5'
+                              : isLightMode
+                              ? 'border-slate-300/50 bg-slate-200/40 opacity-50'
+                              : 'border-white/5 bg-transparent opacity-40'
+                          }`}
+                        >
+                          <span style={{ color: currentStyle.subtextColor }} className="text-[8.5px] font-bold">
+                            Tgl {item.day}
                           </span>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <p style={{ color: currentStyle.textColor }} className="opacity-90 leading-relaxed text-[11px]">
-                        1. Salin seluruh tabel/log kehadiran kotor langsung dari sistem/Excel (termasuk tanggal dan tulisan WIB, misal: <code>01 Sep 2026 WFO 12.46 WIB 22.31 WIB ...</code>).
-                      </p>
-                      <p style={{ color: currentStyle.textColor }} className="opacity-90 leading-relaxed text-[11px]">
-                        2. Tempelkan di kotak bawah dengan <strong>Ctrl + V</strong>. Sistem akan <strong>otomatis memilah tanggal, Jam Masuk, dan Jam Pulang</strong> sekaligus!
-                      </p>
-                    </>
-                  )}
+                          {isMatched && item.shift ? (
+                            <span
+                              className={`mt-0.5 px-1 py-0.2 rounded text-[9.5px] font-black leading-tight ${
+                                SHIFT_COLORS[item.shift].bg
+                              } ${SHIFT_COLORS[item.shift].text}`}
+                            >
+                              {item.shift}
+                            </span>
+                          ) : (
+                            <span
+                              style={{ color: currentStyle.subtextColor }}
+                              className="text-[9.5px] font-mono opacity-60 truncate max-w-full"
+                            >
+                              {item.raw ? item.raw.slice(0, 3) : '-'}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </motion.div>
-            )}
+              )}
 
-            {/* Debossed Inset Area for Paste Input */}
-            <div className="space-y-1 flex flex-col">
-              <label style={{ color: currentStyle.subtextColor }} className="text-[10px] font-bold uppercase tracking-wider block">
-                {activeTab === 'schedule' ? 'Kotak Tempel Teks Shift (Ctrl + V):' : 'Kotak Tempel Teks Absen / Laporan Kehadiran (Ctrl + V):'}
-              </label>
+              {/* Live Preview Grid for Salin Absen (Masuk & Pulang) */}
+              {activeTab === 'absen' && inputTextAbsen.trim().length > 0 && (
+                <div className="space-y-1.5 flex flex-col min-h-0 shrink-0">
+                  <div className="flex items-center justify-between text-xs font-bold px-0.5">
+                    <span style={{ color: currentStyle.subtextColor }} className="text-[11px]">
+                      Pratinjau Hasil Ekstraksi Jam (Masuk & Pulang):
+                    </span>
+                    <span
+                      style={{
+                        color:
+                          validCountAbsen > 0
+                            ? isLightMode
+                              ? isVista
+                                ? '#2563eb'
+                                : '#0e7c7b'
+                              : currentStyle.headingColor
+                            : '#f59e0b',
+                      }}
+                      className="text-[11px] font-black"
+                    >
+                      {validCountAbsen} dari {daysInMonth} hari terdeteksi
+                    </span>
+                  </div>
 
-              <div
-                style={{
-                  backgroundColor: currentStyle.fieldBg,
-                  border: currentStyle.fieldBorder,
-                  boxShadow: currentStyle.fieldShadow,
-                  borderRadius: isWinamp ? '0px' : '10px',
-                }}
-                className="p-2.5 flex items-start gap-2 transition-all duration-200"
-              >
-                {activeTab === 'schedule' ? (
-                  <textarea
-                    id="excel-paste-area"
-                    ref={textareaRef}
-                    rows={4}
-                    value={inputText}
-                    onChange={(e) => {
-                      setInputText(e.target.value);
-                      setErrorMsg(null);
-                    }}
-                    placeholder="Klik di sini lalu tekan Ctrl+V (Contoh: G	L	N	OFF	SM	PM	M	CUTI ...)"
-                    className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
+                  <div
                     style={{
-                      color: currentStyle.textColor,
-                      caretColor: currentStyle.accentColor,
+                      backgroundColor: currentStyle.fieldBg,
+                      border: currentStyle.fieldBorder,
+                      boxShadow: currentStyle.fieldShadow,
+                      borderRadius: isWinamp ? '0px' : '10px',
                     }}
-                  />
-                ) : (
-                  <textarea
-                    id="excel-paste-absen-area"
-                    ref={textareaAbsenRef}
-                    rows={5}
-                    value={inputTextAbsen}
-                    onChange={(e) => {
-                      setInputTextAbsen(e.target.value);
-                      setErrorMsg(null);
-                    }}
-                    placeholder="Klik di sini lalu tekan Ctrl+V (Tempelkan data kotor / laporan log jam kerja contoh:&#10;01 Sep 2026  WFO  12.46 WIB  22.31 WIB  TL3&#10;02 Sep 2026  WFO  07.57 WIB  18.43 WIB  Hadir Normal ...)"
-                    className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
-                    style={{
-                      color: currentStyle.textColor,
-                      caretColor: currentStyle.accentColor,
-                    }}
-                  />
-                )}
-              </div>
+                    className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 max-h-36 sm:max-h-44 overflow-y-auto p-2.5 overscroll-contain"
+                  >
+                    {matchedDaysAbsen.map((item, idx) => {
+                      const isMatched = item.jamMasuk !== null || item.jamPulang !== null;
+                      return (
+                        <div
+                          key={`absen-${item.day}-${idx}`}
+                          className={`flex flex-col items-center justify-between p-1.5 rounded-[6px] border text-center transition-all ${
+                            isMatched
+                              ? isLightMode
+                                ? 'border-teal-300/80 dark:border-blue-300 bg-white shadow-2xs'
+                                : 'border-white/20 bg-white/5'
+                              : isLightMode
+                              ? 'border-slate-300/50 bg-slate-200/40 opacity-40'
+                              : 'border-white/5 bg-transparent opacity-30'
+                          }`}
+                        >
+                          <span style={{ color: currentStyle.subtextColor }} className="text-[9px] font-bold border-b border-current/10 w-full pb-0.5 mb-1">
+                            Tgl {item.day}
+                          </span>
+
+                          {isMatched ? (
+                            <div className="flex flex-col items-center gap-0.5 w-full text-[9px] font-mono">
+                              <span className={`px-1 py-0.2 rounded w-full truncate font-black ${item.jamMasuk ? 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300' : 'opacity-40'}`}>
+                                M: {item.jamMasuk || '-'}
+                              </span>
+                              <span className={`px-1 py-0.2 rounded w-full truncate font-black ${item.jamPulang ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300' : 'opacity-40'}`}>
+                                P: {item.jamPulang || '-'}
+                              </span>
+                            </div>
+                          ) : (
+                            <span style={{ color: currentStyle.subtextColor }} className="text-[9.5px] font-mono opacity-50 py-1">
+                              -
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Error Message */}
-            {errorMsg && (
-              <div className="p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs flex items-start space-x-2">
-                <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                <span>{errorMsg}</span>
-              </div>
-            )}
-
-            {/* Live Preview Grid of Parsed Days */}
-            {activeTab === 'schedule' && inputText.trim().length > 0 && (
-              <div className="space-y-1.5 flex flex-col min-h-0 flex-1">
-                <div className="flex items-center justify-between text-xs font-bold px-0.5">
-                  <span style={{ color: currentStyle.subtextColor }} className="text-[11px]">
-                    Pratinjau Shift Parsed:
-                  </span>
-                  <span
-                    style={{
-                      color:
-                        validCountSchedule > 0
-                          ? isLightMode
-                            ? isVista
-                              ? '#2563eb'
-                              : '#0e7c7b'
-                            : currentStyle.headingColor
-                          : '#f59e0b',
-                    }}
-                    className="text-[11px] font-black"
-                  >
-                    {validCountSchedule} dari {daysInMonth} hari cocok
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    backgroundColor: currentStyle.fieldBg,
-                    border: currentStyle.fieldBorder,
-                    boxShadow: currentStyle.fieldShadow,
-                    borderRadius: isWinamp ? '0px' : '10px',
-                  }}
-                  className="grid grid-cols-7 sm:grid-cols-10 gap-1.5 max-h-32 sm:max-h-40 overflow-y-auto p-2.5 overscroll-contain"
-                >
-                  {matchedDaysSchedule.map((item, idx) => {
-                    const isMatched = item.shift !== null;
-                    return (
-                      <div
-                        key={`sched-${item.day}-${idx}`}
-                        className={`flex flex-col items-center justify-center p-1 rounded-[6px] border text-center transition-all ${
-                          isMatched
-                            ? isLightMode
-                              ? 'border-teal-300/80 dark:border-blue-300 bg-white shadow-2xs'
-                              : 'border-white/20 bg-white/5'
-                            : isLightMode
-                            ? 'border-slate-300/50 bg-slate-200/40 opacity-50'
-                            : 'border-white/5 bg-transparent opacity-40'
-                        }`}
-                      >
-                        <span style={{ color: currentStyle.subtextColor }} className="text-[8.5px] font-bold">
-                          Tgl {item.day}
-                        </span>
-                        {isMatched && item.shift ? (
-                          <span
-                            className={`mt-0.5 px-1 py-0.2 rounded text-[9.5px] font-black leading-tight ${
-                              SHIFT_COLORS[item.shift].bg
-                            } ${SHIFT_COLORS[item.shift].text}`}
-                          >
-                            {item.shift}
-                          </span>
-                        ) : (
-                          <span
-                            style={{ color: currentStyle.subtextColor }}
-                            className="text-[9.5px] font-mono opacity-60 truncate max-w-full"
-                          >
-                            {item.raw ? item.raw.slice(0, 3) : '-'}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Live Preview Grid for Salin Absen (Masuk & Pulang) */}
-            {activeTab === 'absen' && inputTextAbsen.trim().length > 0 && (
-              <div className="space-y-1.5 flex flex-col min-h-0 flex-1">
-                <div className="flex items-center justify-between text-xs font-bold px-0.5">
-                  <span style={{ color: currentStyle.subtextColor }} className="text-[11px]">
-                    Pratinjau Hasil Ekstraksi Jam (Masuk & Pulang):
-                  </span>
-                  <span
-                    style={{
-                      color:
-                        validCountAbsen > 0
-                          ? isLightMode
-                            ? isVista
-                              ? '#2563eb'
-                              : '#0e7c7b'
-                            : currentStyle.headingColor
-                          : '#f59e0b',
-                    }}
-                    className="text-[11px] font-black"
-                  >
-                    {validCountAbsen} dari {daysInMonth} hari terdeteksi
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    backgroundColor: currentStyle.fieldBg,
-                    border: currentStyle.fieldBorder,
-                    boxShadow: currentStyle.fieldShadow,
-                    borderRadius: isWinamp ? '0px' : '10px',
-                  }}
-                  className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 max-h-36 sm:max-h-44 overflow-y-auto p-2.5 overscroll-contain"
-                >
-                  {matchedDaysAbsen.map((item, idx) => {
-                    const isMatched = item.jamMasuk !== null || item.jamPulang !== null;
-                    return (
-                      <div
-                        key={`absen-${item.day}-${idx}`}
-                        className={`flex flex-col items-center justify-between p-1.5 rounded-[6px] border text-center transition-all ${
-                          isMatched
-                            ? isLightMode
-                              ? 'border-teal-300/80 dark:border-blue-300 bg-white shadow-2xs'
-                              : 'border-white/20 bg-white/5'
-                            : isLightMode
-                            ? 'border-slate-300/50 bg-slate-200/40 opacity-40'
-                            : 'border-white/5 bg-transparent opacity-30'
-                        }`}
-                      >
-                        <span style={{ color: currentStyle.subtextColor }} className="text-[9px] font-bold border-b border-current/10 w-full pb-0.5 mb-1">
-                          Tgl {item.day}
-                        </span>
-
-                        {isMatched ? (
-                          <div className="flex flex-col items-center gap-0.5 w-full text-[9px] font-mono">
-                            <span className={`px-1 py-0.2 rounded w-full truncate font-black ${item.jamMasuk ? 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300' : 'opacity-40'}`}>
-                              M: {item.jamMasuk || '-'}
-                            </span>
-                            <span className={`px-1 py-0.2 rounded w-full truncate font-black ${item.jamPulang ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300' : 'opacity-40'}`}>
-                              P: {item.jamPulang || '-'}
-                            </span>
-                          </div>
-                        ) : (
-                          <span style={{ color: currentStyle.subtextColor }} className="text-[9.5px] font-mono opacity-50 py-1">
-                            -
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons: Cancel and Apply */}
-            <div className="flex items-center justify-end gap-2.5 pt-2">
+            {/* Action Buttons: Cancel and Apply (Pinned at bottom) */}
+            <div className="flex items-center justify-end gap-2.5 pt-2.5 border-t border-current/10 shrink-0 mt-0.5">
               <button
                 type="button"
                 onClick={onClose}

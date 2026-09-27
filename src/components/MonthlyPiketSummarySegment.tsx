@@ -185,9 +185,9 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     </div>
                 ) : (
                     <div className="space-y-1.5 max-h-[305px] sm:max-h-[315px] overflow-y-auto no-scrollbar p-0.5">
-                        {monthPikets.map((item) => (
+                        {monthPikets.map((item, idx) => (
                             <div
-                                key={item.piketDateKey}
+                                key={`${item.piketDateKey}-${item.piketShift || ''}-${idx}`}
                                 onClick={() => onSelectDate?.(item.piketDay)}
                                 className={`w-full flex items-center justify-between py-1.5 px-2.5 rounded-lg transition-colors cursor-pointer text-xs ${getItemStyles()}`}
                             >

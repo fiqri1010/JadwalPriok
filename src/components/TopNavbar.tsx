@@ -7,7 +7,6 @@ import {
     Sparkles,
     Radio,
     Check,
-    ChevronDown,
 } from 'lucide-react';
 import { AppLogo } from './AppLogo';
 import { AppTheme } from '../types';
@@ -110,11 +109,6 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                             >
                                 <Palette className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-current opacity-90" />
                                 <span className="hidden sm:inline text-xs font-bold capitalize">{currentTheme}</span>
-                                <ChevronDown
-                                    className={`w-3.5 h-3.5 ml-0.5 shrink-0 transition-transform duration-200 ease-in-out ${
-                                        isThemeDropdownOpen ? 'rotate-180' : 'rotate-0'
-                                    } opacity-70`}
-                                />
                             </button>
                         </Tooltip>
 

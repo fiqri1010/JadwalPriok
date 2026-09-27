@@ -282,9 +282,17 @@ export const ShiftDropdown: React.FC<ShiftDropdownProps> = ({
             >
                 <div className={`flex items-center justify-center gap-0.5 min-w-0 ${compact ? 'flex-1' : ''}`}>
                     {SelectedShiftIcon && (
-                        <SelectedShiftIcon theme={theme} className={`${compact ? 'hidden min-[1280px]:inline-block w-2.5 h-2.5' : 'w-3.5 h-3.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5'} shrink-0 opacity-80`} />
+                        <SelectedShiftIcon theme={theme} className={`${compact ? ((normalizedValue || '').length >= 5 ? 'hidden min-[1400px]:inline-block' : 'hidden min-[1280px]:inline-block') + ' w-2.5 h-2.5' : 'w-3.5 h-3.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5'} shrink-0 opacity-80`} />
                     )}
-                    <span className={`whitespace-nowrap uppercase font-black tracking-tighter ${compact ? 'text-[9.5px] min-[400px]:text-[10px] sm:text-[10.5px] lg:text-[11.5px] leading-tight' : ''}`}>
+                    <span className={`whitespace-nowrap uppercase font-black ${
+                        compact
+                            ? (normalizedValue || '').length >= 5
+                                ? 'text-[7.5px] min-[360px]:text-[8px] min-[400px]:text-[9px] sm:text-[10px] lg:text-[11px] tracking-[-0.05em] leading-tight'
+                                : (normalizedValue || '').length === 4
+                                ? 'text-[8.5px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-[10.5px] lg:text-[11.5px] tracking-tighter leading-tight'
+                                : 'text-[9.5px] min-[400px]:text-[10px] sm:text-[10.5px] lg:text-[11.5px] tracking-tight leading-tight'
+                            : ''
+                    }`}>
                         {normalizedValue ? normalizedValue.toUpperCase() : (compact ? '-' : '-- SHIFT --')}
                     </span>
                 </div>

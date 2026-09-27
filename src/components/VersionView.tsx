@@ -26,10 +26,128 @@ export interface VersionItem {
 
 export const VERSION_HISTORY: VersionItem[] = [
     {
+        version: '0.3.33-beta',
+        releaseDate: '26 September 2026',
+        title: 'Integrasi Custom Popover Color Picker (Figma Style) & Sleek Property Panel',
+        isLatest: true,
+        isMajor: false,
+        tag: 'UI/UX Modern Color Picker & Property Panel',
+        changes: [
+            'Komponen CustomColorPicker (src/components/shift-studio/CustomColorPicker.tsx): Membuat pemilih warna melayang modern bergaya Figma/Webflow dengan tab Solid, Gradien, dan Motif, area canvas gradien, slider hue pelangi, slider opasitas, input Hex & %, serta palet cepat.',
+            'Sleek Property Panel: Merombak modal utama Konfigurasi Shift menjadi panel properti ringkas dengan tombol Color Swatches (Latar Shift, Teks, Garis Tepi) yang memanggil CustomColorPicker secara melayang.',
+            'Eliminasi Native Input Color: Menyingkirkan input warna bawaan browser untuk pengalaman UI profesional dan konsisten di seluruh platform.'
+        ]
+    },
+    {
+        version: '0.3.32-beta',
+        releaseDate: '26 September 2026',
+        title: 'Revamp Layout Modal Konfigurasi Shift Asimetris 2-Kolom & Pelestarian Kapitalisasi Teks',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UI/UX Layout Revamp & Badge Casing',
+        changes: [
+            'Revamp Modal Konfigurasi Shift 2 Kolom Asimetris: Mengubah tata letak tab "Desain Visual" pada modal Konfigurasi Shift menjadi dua kolom rapat (45% : 55%) tanpa perlu scroll ke bawah.',
+            'Kolom Kiri Ramping: Memposisikan Pratinjau Live Badge, Pemilih Warna Latar, dan Opacity Slider secara vertikal rapat di sebelah kiri.',
+            'Kolom Kanan Katalog Motif & Ikon: Menata ulang katalog motif pola menjadi grid Ramping 2-kolom, tombol unggah gambar kustom, dan pemicu pemilih ikon SVG di sebelah kanan.',
+            'Pelestarian Kapitalisasi Teks (Case Preservation): Mengizinkan input huruf kapital campuran/sebagian/sepenuhnya pada Tampilan Kalender (displayBadge) dan mempertahankan format casing asli pada badge kartu tanggal.'
+        ]
+    },
+    {
+        version: '0.3.31-beta',
+        releaseDate: '26 September 2026',
+        title: 'Penyelarasan Konsistensi Tema, Ikon Judul Halaman, & Tipografi Sistem',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UI/UX System & Theme Consistency',
+        changes: [
+            'Konsistensi Ikon Judul Halaman: Menambahkan dan menyelaraskan ikon visual pada setiap judul halaman utama (Kalender Kerja, Daftar Hari Libur, Pengaturan Aplikasi, dan Catatan Versi) agar identik dengan menu navigasi.',
+            'Penerapan Tema Terpadu: Memperbaiki kontras warna, border, dan kontainer elemen UI di seluruh tema (Default, Dark, Vista, Winamp, DarkFluid) agar tampil harmonis dan konsisten.',
+            'Penataan Tipografi & Font Khusus: Menjaga kerapian hierarki font sans utama sembari melestarikan font digital jam (.font-digital-7), font terminal hijau catatan versi (font-mono), dan gaya badge shift.'
+        ]
+    },
+    {
+        version: '0.3.30-beta',
+        releaseDate: '26 September 2026',
+        title: 'Penetapan Tampilan Dropdown Murni untuk Fitur Lihat Shift Profil',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UI/UX Dropdown Consistency',
+        changes: [
+            'Dropdown Murni Anchored: Menetapkan tampilan "Lihat Shift" pada profil aturan shift sebagai dropdown murni yang melekat langsung ke tombol pemicu (anchored), tanpa menggunakan modal popup atau backdrop layar penuh.',
+            'Kalkulasi Batas Viewport Pintar: Mengatur batas tinggi maksimal (max-height) dan arah buka otomatis (atas/bawah) agar daftar shift dapat digulir dengan mulus dan tidak terpotong tepi layar.'
+        ]
+    },
+    {
+        version: '0.3.29-beta',
+        releaseDate: '26 September 2026',
+        title: 'Penataan Bertingkat Tombol Pratinjau Perangkat di Samping Kotak Badge',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UI Shift Studio & Layout Refinement',
+        changes: [
+            'Tombol Pratinjau Perangkat Bertingkat: Memposisikan tombol beralih tampilan Desktop dan Mobile secara bertingkat (atas-bawah) di sisi kanan kotak pratinjau badge.',
+            'Area Pratinjau Lebih Lega: Memberikan ruang horizontal (flex-1) yang lebih lega bagi kartu badge shift agar nama, ikon, dan kode salin tampil leluasa tanpa desak-desakan.'
+        ]
+    },
+    {
+        version: '0.3.28-beta',
+        releaseDate: '26 September 2026',
+        title: 'Optimalisasi Layout Shift Berdampingan, Pembersihan Penomoran & Teks 5 Huruf Mobile',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UI/UX Mobile & Form Layout',
+        changes: [
+            'Pencegahan Overflow Teks Shift 5 Huruf: Menyesuaikan skala tipografi, tracking huruf, dan visibilitas ikon pada kata shift 5 huruf (seperti GRAHA, MALAM) di tampilan mobile agar teks pas sempurna di dalam kotak tanpa disingkat.',
+            'Tata Letak Berdampingan Tampilan Kalender & Kode Singkat: Menata input form "Tampilan Kalender" dan "Kode Singkat Salin" pada pengaturan shift menjadi 2 kolom berdampingan (kiri - kanan) pada seluruh resolusi layar.',
+            'Pembersihan Penomoran Form: Menghilangkan angka penomoran prefix (1., 2., 3.) pada judul form pengaturan shift agar desain lebih bersih, minimalis, dan modern.'
+        ]
+    },
+    {
+        version: '0.3.27-beta',
+        releaseDate: '26 September 2026',
+        title: 'Penataan Berdampingan (Kiri-Kanan) Jam Masuk & Jam Pulang Dasar',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UI Layout & Form Optimization',
+        changes: [
+            'Tata Letak Berdampingan (2 Kolom): Mengubah form input "Jam Masuk Dasar" dan "Jam Pulang Dasar" pada konfigurasi shift agar selalu tampil berdampingan (kiri - kanan) pada layar HP/mobile maupun desktop.',
+            'Penghematan Ruang Vertikal Form: Menghilangkan penumpukan baris vertikal (stacking) sehingga form jam kerja lebih ringkas, hemat ruang, dan nyaman diakses tanpa banyak scrolling.',
+            'Penyesuaian Tipografi & Input: Menyelaraskan teks label dan font monospace jam digital agar tetap proporsional dan presisi pada layar resolusi kecil.'
+        ]
+    },
+    {
+        version: '0.3.26-beta',
+        releaseDate: '26 September 2026',
+        title: 'Optimalisasi Responsivitas Dropdown Lihat Shift & Pratinjau Badge Kompak',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UI/UX Mobile & Shift Studio',
+        changes: [
+            'Tampilan Utuh Dropdown Lihat Shift (Mobile): Mengubah dropdown "Lihat Shift" di Profil Aturan Shift menjadi popup modal responsif di layar mobile, memastikan seluruh daftar shift (termasuk OFF, CUTI, dan kustom) tampil penuh tanpa terpotong batas bawah jendela.',
+            'Pencegahan Clipping Viewport: Menghitung ketinggian dinamis dan batas atas/bawah secara pintar pada tampilan desktop dan mobile agar tidak melampaui viewport perangkat.',
+            'Pratinjau Badge Live Kompak: Memperkecil tinggi section pratinjau badge di modal Edit Shift pada desktop maupun mobile, menghemat lebih dari 50% ruang vertikal sehingga pengaturan warna dan tab langsung terlihat.',
+            'Kemudahan Navigasi & Dismiss: Menambahkan tombol tutup (X) serta penutup otomatis saat klik backdrop/luar dan tombol Escape.'
+        ]
+    },
+    {
+        version: '0.3.25-beta',
+        releaseDate: '26 September 2026',
+        title: 'Perbaikan Tampilan Petunjuk Lengkap Salin Shift & Presensi Layar Kecil',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UI Bugfix & Mobile Responsive',
+        changes: [
+            'Tampilan Petunjuk Utuh (Poin 1 & 2): Memperbaiki petunjuk Salin Shift dan Salin Presensi pada layar kecil agar seluruh poin (poin 1 dan poin 2 serta format didukung) tampil lengkap tanpa terpotong.',
+            'Pencegahan Clipping Flexbox: Menambahkan shrink-0 pada kontainer petunjuk agar flexbox tidak menekan/memotong konten petunjuk saat tinggi layar terbatas.',
+            'Kontainer Form Scrollable: Menata ulang struktur modal dengan header dan tombol aksi yang tetap tersemat (pinned), serta bodi tengah yang dapat digulir (scrollable) dengan mulus pada layar HP/viewport sempit.',
+            'Pengoptimalan Baris Input Textarea: Mengadaptasi tinggi baris input textarea secara responsif (rows=3 pada mobile) untuk memberikan visibilitas maksimal bagi panduan dan pratinjau.'
+        ]
+    },
+    {
         version: '0.3.24-beta',
         releaseDate: '26 September 2026',
         title: 'Pemulihan Tampilan Catatan Kartu Tanggal (Marquee & Border)',
-        isLatest: true,
+        isLatest: false,
         isMajor: false,
         tag: 'UI Bugfix & Notes Visibility',
         changes: [

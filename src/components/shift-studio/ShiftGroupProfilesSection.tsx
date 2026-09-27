@@ -56,7 +56,7 @@ const getShiftIconComponent = (shiftNameOrKey: string, customIconName?: string) 
 };
 
 /**
- * Dropdown Popover "Lihat Shift" yang serupa persis dengan dropdown kartu tanggal kalender
+ * Dropdown Popover "Lihat Shift" murni yang selalu bertindak sebagai dropdown anchored ke tombol
  */
 const ShiftPreviewDropdown: React.FC<{
     shifts: ShiftItemConfig[];
@@ -66,10 +66,17 @@ const ShiftPreviewDropdown: React.FC<{
     theme?: AppTheme;
     groupName: string;
 }> = ({ shifts, isOpen, onClose, triggerRef, theme = 'default', groupName }) => {
-    const [coords, setCoords] = useState<{ top: number; left: number; width: number; openUpward: boolean }>({
-        top: 0,
+    const [coords, setCoords] = useState<{
+        top?: number;
+        bottom?: number;
+        left: number;
+        width: number;
+        maxHeight: number;
+        openUpward: boolean;
+    }>({
         left: 0,
-        width: 260,
+        width: 270,
+        maxHeight: 320,
         openUpward: false,
     });
     const menuRef = useRef<HTMLDivElement>(null);
@@ -80,25 +87,29 @@ const ShiftPreviewDropdown: React.FC<{
     const isVista = theme === 'vista';
 
     const updateCoords = useCallback(() => {
-        if (!triggerRef.current) return;
+        if (!triggerRef.current || typeof window === 'undefined') return;
         const rect = triggerRef.current.getBoundingClientRect();
-        const menuWidth = 270;
-        const estimatedHeight = 320;
+        const menuWidth = Math.min(275, window.innerWidth - 16);
+        const padding = 8;
 
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const spaceAbove = rect.top;
-        const openUpward = spaceBelow < estimatedHeight && spaceAbove > spaceBelow;
+        const spaceBelow = window.innerHeight - rect.bottom - padding;
+        const spaceAbove = rect.top - padding;
+        const openUpward = spaceBelow < 200 && spaceAbove > spaceBelow;
 
-        let top = openUpward ? rect.top - 6 : rect.bottom + 6;
+        const availableHeight = openUpward ? spaceAbove : spaceBelow;
+        const maxHeight = Math.max(160, Math.min(availableHeight, 330));
+
+        let top: number | undefined;
+        let bottom: number | undefined;
+
         if (openUpward) {
-            top = Math.max(8, rect.top - 6);
+            bottom = window.innerHeight - rect.top + 4;
         } else {
-            top = Math.min(window.innerHeight - 20, rect.bottom + 6);
+            top = rect.bottom + 4;
         }
 
         // Align right relative to button
         let left = rect.right - menuWidth;
-        const padding = 8;
         if (left + menuWidth > window.innerWidth - padding) {
             left = window.innerWidth - menuWidth - padding;
         }
@@ -108,8 +119,10 @@ const ShiftPreviewDropdown: React.FC<{
 
         setCoords({
             top,
+            bottom,
             left,
             width: menuWidth,
+            maxHeight,
             openUpward,
         });
     }, [triggerRef]);
@@ -208,119 +221,123 @@ const ShiftPreviewDropdown: React.FC<{
                             style={{
                                 ...getDropdownCardStyle(),
                                 position: 'fixed',
-                                top: coords.openUpward ? undefined : coords.top,
-                                bottom: coords.openUpward ? window.innerHeight - coords.top : undefined,
+                                top: coords.top,
+                                bottom: coords.bottom,
                                 left: coords.left,
                                 width: coords.width,
+                                maxHeight: `${coords.maxHeight}px`,
                                 zIndex: 10000,
                                 transformOrigin: coords.openUpward ? 'bottom right' : 'top right',
                                 willChange: 'transform, opacity',
                             }}
-                            className={`max-h-[60vh] sm:max-h-[350px] overflow-y-auto overscroll-contain py-2 flex flex-col gap-1 select-none transform-gpu ${
+                            className={`overflow-hidden flex flex-col select-none transform-gpu shadow-2xl ${
                                 isWinamp ? 'font-mono' : ''
                             }`}
                         >
                             {/* Header info in dropdown */}
-                            <div className="px-3 py-1 pb-1.5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between">
-                                <div className="min-w-0">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 block truncate">
+                            <div className="px-3 py-1.5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between shrink-0 bg-slate-50/70 dark:bg-white/5">
+                                <div className="min-w-0 flex-1 pr-2">
+                                    <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 block truncate">
                                         Daftar Shift Profil:
                                     </span>
                                     <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate block">
                                         {groupName}
                                     </span>
                                 </div>
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 shrink-0">
+                                <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 shrink-0">
                                     {shifts.length} shift
                                 </span>
                             </div>
 
-                            {/* Section 1: Reguler */}
-                            <div className="px-2 pt-1">
-                                <span className="text-[9px] font-bold uppercase text-slate-400 dark:text-zinc-500 px-1">
-                                    Shift Operasional / Kantor
-                                </span>
-                            </div>
-                            <ul className="flex flex-col gap-0.5 px-1.5 list-none m-0 p-0">
-                                {regularShifts.map((item) => {
-                                    const IconComponent = getShiftIconComponent(item.naming.displayBadge, item.visual?.iconName);
-                                    const norm = normalizeShift(item.naming.displayBadge);
-                                    const col = SHIFT_COLORS[norm] || SHIFT_COLORS['Graha'];
+                            {/* Scrollable List Body */}
+                            <div className="overflow-y-auto overscroll-contain py-1.5 px-1 flex-1 flex flex-col gap-1">
+                                {/* Section 1: Reguler */}
+                                <div className="px-2 pt-0.5 pb-0.5">
+                                    <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 px-1">
+                                        Shift Operasional / Kantor
+                                    </span>
+                                </div>
+                                <ul className="flex flex-col gap-0.5 px-1 list-none m-0 p-0">
+                                    {regularShifts.map((item) => {
+                                        const IconComponent = getShiftIconComponent(item.naming.displayBadge, item.visual?.iconName);
+                                        const norm = normalizeShift(item.naming.displayBadge);
+                                        const col = SHIFT_COLORS[norm] || SHIFT_COLORS['Graha'];
 
-                                    return (
-                                        <li
-                                            key={item.id}
-                                            className="group flex items-center justify-between px-2.5 py-1.5 rounded-[6px] transition-all duration-150 text-slate-800 dark:text-slate-100 hover:bg-slate-100/90 dark:hover:bg-white/10"
-                                        >
-                                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                                <div className={`p-1 rounded-[4px] shrink-0 ${col.bg} ${col.text} border ${col.border}`}>
-                                                    <IconComponent theme={theme} className="w-3.5 h-3.5" />
-                                                </div>
-                                                <div className="flex flex-col min-w-0 text-left py-0.5">
-                                                    <div className="flex items-center space-x-1">
-                                                        <span className="text-xs font-bold leading-normal truncate">
-                                                            {item.naming.fullName || item.naming.displayBadge}
-                                                        </span>
-                                                        <span className={`text-[9px] font-mono px-1 rounded uppercase font-black ${col.bg} ${col.text}`}>
-                                                            {item.naming.displayBadge}
-                                                        </span>
+                                        return (
+                                            <li
+                                                key={item.id}
+                                                className="group flex items-center justify-between px-2 py-1.5 rounded-[6px] transition-all duration-150 text-slate-800 dark:text-slate-100 hover:bg-slate-100/90 dark:hover:bg-white/10"
+                                            >
+                                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                    <div className={`p-1 rounded-[4px] shrink-0 ${col.bg} ${col.text} border ${col.border}`}>
+                                                        <IconComponent theme={theme} className="w-3.5 h-3.5" />
                                                     </div>
-                                                    <span className="text-[10px] text-slate-500 dark:text-zinc-400 truncate">
-                                                        {item.naming.dropdownSublabel || `${item.workTime.jamMasukDasar} - ${item.workTime.jamPulangDasar}`}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-
-                            {/* Section 2: Libur & Cuti / Piket */}
-                            {restAndPiketShifts.length > 0 && (
-                                <>
-                                    <div className="border-t my-1 border-slate-200/80 dark:border-white/10" />
-                                    <div className="px-2 pt-0.5">
-                                        <span className="text-[9px] font-bold uppercase text-slate-400 dark:text-zinc-500 px-1">
-                                            Libur, Cuti & Khusus
-                                        </span>
-                                    </div>
-                                    <ul className="flex flex-col gap-0.5 px-1.5 list-none m-0 p-0">
-                                        {restAndPiketShifts.map((item) => {
-                                            const IconComponent = getShiftIconComponent(item.naming.displayBadge, item.visual?.iconName);
-                                            const norm = normalizeShift(item.naming.displayBadge);
-                                            const col = SHIFT_COLORS[norm] || SHIFT_COLORS['OFF'];
-
-                                            return (
-                                                <li
-                                                    key={item.id}
-                                                    className="group flex items-center justify-between px-2.5 py-1.5 rounded-[6px] transition-all duration-150 text-slate-800 dark:text-slate-100 hover:bg-slate-100/90 dark:hover:bg-white/10"
-                                                >
-                                                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                                        <div className={`p-1 rounded-[4px] shrink-0 ${col.bg} ${col.text} border ${col.border}`}>
-                                                            <IconComponent theme={theme} className="w-3.5 h-3.5" />
-                                                        </div>
-                                                        <div className="flex flex-col min-w-0 text-left py-0.5">
-                                                            <div className="flex items-center space-x-1">
-                                                                <span className="text-xs font-bold leading-normal truncate">
-                                                                    {item.naming.fullName || item.naming.displayBadge}
-                                                                </span>
-                                                                {item.isPiket && (
-                                                                    <span className="text-[8.5px] px-1 py-0.2 rounded font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                                                                        Piket
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                            <span className="text-[10px] text-slate-500 dark:text-zinc-400 truncate">
-                                                                {item.naming.dropdownSublabel || 'Hari Istirahat / Izin'}
+                                                    <div className="flex flex-col min-w-0 text-left py-0.5">
+                                                        <div className="flex items-center space-x-1.5">
+                                                            <span className="text-xs font-bold leading-normal truncate">
+                                                                {item.naming.fullName || item.naming.displayBadge}
+                                                            </span>
+                                                            <span className={`text-[9px] font-mono px-1 rounded uppercase font-black ${col.bg} ${col.text}`}>
+                                                                {item.naming.displayBadge}
                                                             </span>
                                                         </div>
+                                                        <span className="text-[10px] text-slate-500 dark:text-zinc-400 truncate">
+                                                            {item.naming.dropdownSublabel || `${item.workTime.jamMasukDasar} - ${item.workTime.jamPulangDasar}`}
+                                                        </span>
                                                     </div>
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                </>
-                            )}
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+
+                                {/* Section 2: Libur & Cuti / Piket */}
+                                {restAndPiketShifts.length > 0 && (
+                                    <>
+                                        <div className="border-t my-1 border-slate-200/80 dark:border-white/10" />
+                                        <div className="px-2 pt-0.5 pb-0.5">
+                                            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 px-1">
+                                                Libur, Cuti & Khusus
+                                            </span>
+                                        </div>
+                                        <ul className="flex flex-col gap-0.5 px-1 list-none m-0 p-0">
+                                            {restAndPiketShifts.map((item) => {
+                                                const IconComponent = getShiftIconComponent(item.naming.displayBadge, item.visual?.iconName);
+                                                const norm = normalizeShift(item.naming.displayBadge);
+                                                const col = SHIFT_COLORS[norm] || SHIFT_COLORS['OFF'];
+
+                                                return (
+                                                    <li
+                                                        key={item.id}
+                                                        className="group flex items-center justify-between px-2 py-1.5 rounded-[6px] transition-all duration-150 text-slate-800 dark:text-slate-100 hover:bg-slate-100/90 dark:hover:bg-white/10"
+                                                    >
+                                                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                            <div className={`p-1 rounded-[4px] shrink-0 ${col.bg} ${col.text} border ${col.border}`}>
+                                                                <IconComponent theme={theme} className="w-3.5 h-3.5" />
+                                                            </div>
+                                                            <div className="flex flex-col min-w-0 text-left py-0.5">
+                                                                <div className="flex items-center space-x-1.5">
+                                                                    <span className="text-xs font-bold leading-normal truncate">
+                                                                        {item.naming.fullName || item.naming.displayBadge}
+                                                                    </span>
+                                                                    {item.isPiket && (
+                                                                        <span className="text-[8.5px] px-1 py-0.2 rounded font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                                                                            Piket
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <span className="text-[10px] text-slate-500 dark:text-zinc-400 truncate">
+                                                                    {item.naming.dropdownSublabel || 'Hari Istirahat / Izin'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </>
+                                )}
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>,

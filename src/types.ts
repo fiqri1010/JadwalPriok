@@ -4,7 +4,29 @@ export type AppTheme = 'default' | 'dark' | 'vista' | 'winamp' | 'darkFluid';
 
 // --- Visual Studio & Shift Configuration Models ---
 export type VisualColorMode = 'solid' | 'linear' | 'radial' | 'customCss';
-export type PresetPatternType = 'none' | 'stripes' | 'dots' | 'honeycomb' | 'grid' | 'waves' | 'carbon';
+export type PresetPatternType =
+    | 'none'
+    | 'topography'
+    | 'circuit'
+    | 'plus'
+    | 'dots'
+    | 'zigzag'
+    | 'wavy'
+    | 'stripes'
+    | 'honeycomb'
+    | 'grid'
+    | 'waves'
+    | 'carbon'
+    | 'bubbles'
+    | 'hexagons'
+    | 'diagonal'
+    | 'cross'
+    | 'diamonds'
+    | 'stars'
+    | 'triangles'
+    | 'chevron'
+    | 'concentric'
+    | string;
 
 export interface GradientColorStop {
     color: string;
@@ -16,11 +38,13 @@ export interface ShiftVisualStyle {
     solidColor: string;
     textColor: string;
     borderColor: string;
+    patternColor?: string;
     gradientType: 'linear' | 'radial';
     gradientAngle: number; // 0 - 360 deg
     colorStops: GradientColorStop[]; // 2 to 4 stops
     patternType: PresetPatternType;
-    patternOpacity: number; // 10 - 100%
+    patternOpacity: number; // 10 - 100% or 0.05 - 1.0
+    patternScale?: number; // 0.5 - 3.0 (scale/density factor)
     customPatternUrl?: string;
     iconType: 'svg' | 'customImage' | 'emoji' | 'none';
     iconName?: string;

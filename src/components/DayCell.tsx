@@ -532,11 +532,27 @@ export const DayCell = React.memo<DayCellProps>(({
                     <div className="w-full mt-1">
                         {normalizedShift ? (
                             <div
-                                className={`w-full py-0.5 px-0.5 rounded-[4px] text-center font-black uppercase border flex items-center justify-center gap-0.5 shadow-2xs ${shiftColor.bg} ${shiftColor.text} ${shiftColor.border}`}
-                                title={`Shift: ${normalizedShift.toUpperCase()}`}
+                                className={`w-full py-0.5 px-0.5 rounded-[4px] text-center font-black border flex items-center justify-center gap-0.5 shadow-2xs overflow-hidden ${shiftColor.bg} ${shiftColor.text} ${shiftColor.border}`}
+                                title={`Shift: ${normalizedShift}`}
                             >
-                                {ShiftIcon && <ShiftIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 opacity-80" />}
-                                <span className="font-black text-center uppercase whitespace-nowrap tracking-tighter text-[9.5px] min-[400px]:text-[10px] sm:text-[10.5px] lg:text-[11.5px]">{normalizedShift.toUpperCase()}</span>
+                                {ShiftIcon && (
+                                    <ShiftIcon
+                                        className={`${
+                                            normalizedShift.length >= 5 ? 'hidden min-[480px]:inline-block' : 'inline-block'
+                                        } w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 opacity-80`}
+                                    />
+                                )}
+                                <span
+                                    className={`font-black text-center whitespace-nowrap leading-none ${
+                                        normalizedShift.length >= 5
+                                            ? 'text-[7.5px] min-[360px]:text-[8px] min-[400px]:text-[9px] sm:text-[10px] lg:text-[11px] tracking-[-0.05em]'
+                                            : normalizedShift.length === 4
+                                            ? 'text-[8.5px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-[10.5px] lg:text-[11.5px] tracking-tighter'
+                                            : 'text-[9.5px] min-[400px]:text-[10px] sm:text-[10.5px] lg:text-[11.5px] tracking-tight'
+                                    }`}
+                                >
+                                    {normalizedShift}
+                                </span>
                             </div>
                         ) : (
                             <div

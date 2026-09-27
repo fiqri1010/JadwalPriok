@@ -80,11 +80,11 @@ export const ExcelColorMappingDialog: React.FC<ExcelColorMappingDialogProps> = (
                     </p>
 
                     <div className="space-y-2.5">
-                        {detectedColors.map((dc) => {
+                        {detectedColors.map((dc, idx) => {
                             const selectedId = mapping[dc.hex] || dc.matchedShiftId || '';
                             return (
                                 <div
-                                    key={dc.hex}
+                                    key={`${dc.hex}-${idx}`}
                                     className="p-3 rounded-2xl bg-current/5 border border-current/10 flex items-center justify-between space-x-3"
                                 >
                                     <div className="flex items-center space-x-2.5 truncate">
