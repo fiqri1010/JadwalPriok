@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 import {
     Calendar as CalendarIcon,
     Flag,
@@ -7,6 +8,30 @@ import {
 } from 'lucide-react';
 import { ThemeConfig } from '../themeConfig';
 import { Tooltip } from './Tooltip';
+
+const StyledSidebarWrapper = styled.div`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+
+  .container {
+    width: 100%;
+    height: 100%;
+    background: #f1f1f1;
+    background-image: linear-gradient(
+        90deg,
+        transparent 50px,
+        #ffb4b8 50px,
+        #ffb4b8 52px,
+        transparent 52px
+      ),
+      linear-gradient(#e1e1e1 0.1em, transparent 0.1em);
+    background-size: 100% 30px;
+  }
+`;
 
 interface DesktopSidebarProps {
     isOpen: boolean;
@@ -29,8 +54,13 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
                 isOpen ? 'w-40 lg:w-44 xl:w-48 p-1.5 lg:p-2.5 opacity-100 overflow-visible' : 'w-0 p-0 border-r-0 opacity-0 pointer-events-none overflow-hidden'
             } ${themeConfig.sidebarClass}`}
         >
+            {themeConfig.isPaperSketch && (
+                <StyledSidebarWrapper>
+                    <div className="container" />
+                </StyledSidebarWrapper>
+            )}
             {isOpen && (
-                <div className="flex flex-col h-full justify-between overflow-visible space-y-3">
+                <div className="flex flex-col h-full justify-between overflow-visible space-y-3 relative z-10">
                     {/* Top Group: Menu Navigasi Utama */}
                     <nav className="flex flex-col space-y-1">
                         {/* Section Header: Menu Utama */}
@@ -64,7 +94,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
 
                         {/* Section Header: Pengaturan & Lainnya */}
                         <div className="px-2.5 pt-0.5 pb-1 text-[9.5px] font-black uppercase tracking-wider opacity-60">
-                            Sistem & Bantuan
+                            Konfigurasi & Info
                         </div>
 
                         {/* 2. Libur */}

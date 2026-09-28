@@ -132,6 +132,53 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
         }
     };
 
+    // Paper Sketch Edition Title Bar
+    if (theme === 'paperSketch') {
+        return (
+            <div
+                data-tauri-drag-region="true"
+                onMouseDown={handleStartDragging}
+                className="hidden sm:block w-full shrink-0 select-none font-['Gaegu'] text-sm bg-[#ffffff] border-b-[2.5px] border-[#2b2b2b] shadow-[0_2px_0px_#2b2b2b] cursor-default relative z-[999999]"
+            >
+                <div data-tauri-drag-region="true" className="h-7.5 px-3 flex items-center justify-between text-[#2b2b2b] bg-[#ffffff]">
+                    <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
+                        <AppLogo className="h-4.5 w-4.5 rounded-sm border border-[#2b2b2b] shrink-0" />
+                        <span data-tauri-drag-region="true" className="font-['Gochi_Hand'] font-bold text-[#2b2b2b] text-base truncate">
+                            {title} <span className="text-xs font-mono opacity-60 hidden md:inline">({subtitle})</span>
+                        </span>
+                    </div>
+
+                    <div className="flex items-center space-x-1 shrink-0">
+                        <button
+                            type="button"
+                            onClick={handleMinimize}
+                            className="h-5 w-6 rounded-sm border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] hover:bg-[#2ec4b6]/30 shadow-[1px_1px_0px_#2b2b2b] flex items-center justify-center transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+                            title="Minimize"
+                        >
+                            <Minus className="h-3 w-3" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleToggleMaximize}
+                            className="h-5 w-6 rounded-sm border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] hover:bg-[#2ec4b6]/30 shadow-[1px_1px_0px_#2b2b2b] flex items-center justify-center transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+                            title={isFullscreen ? 'Restore' : 'Maximize'}
+                        >
+                            {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="h-5 w-6 rounded-sm border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] hover:bg-[#ff4747] hover:text-white shadow-[1px_1px_0px_#2b2b2b] flex items-center justify-center transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+                            title="Tutup Jendela"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // Windows Vista Aero Glass Title Bar
     if (theme === 'vista') {
         return (

@@ -18,6 +18,26 @@
 </head>
 <body>
     <div id="root"></div>
+
+    <!-- Filter SVG untuk Efek Remukan & Serat Kertas Kuno (Paper Sketch Edition) -->
+    <svg width="0" height="0" style="position: absolute; width: 0; height: 0; pointer-events: none; overflow: hidden;" aria-hidden="true">
+        <filter id="paper-features" x="0%" y="0%" width="100%" height="100%">
+            <!-- 1. Menghasilkan pola kerutan/remukan acak yang tajam -->
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" result="noise" />
+            <feDiffuseLighting in="noise" lighting-color="#fff" surfaceScale="2.5" result="light">
+                <feDistantLight azimuth="60" elevation="55" />
+            </feDiffuseLighting>
+            
+            <!-- 2. Menghasilkan serat halus kertas -->
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="fine-noise" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.05 0" result="grain" />
+            
+            <!-- 3. Menggabungkan efek remukan dan serat ke tekstur dasar -->
+            <feBlend mode="multiply" in="light" in2="SourceGraphic" result="blend1" />
+            <feBlend mode="multiply" in="grain" in2="blend1" />
+        </filter>
+    </svg>
+
     <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

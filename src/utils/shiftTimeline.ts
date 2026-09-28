@@ -9,7 +9,18 @@ export function loadShiftGroups(): ShiftGroupProfile[] {
         if (stored) {
             const parsed = JSON.parse(stored);
             if (Array.isArray(parsed) && parsed.length > 0) {
-                return parsed;
+                return parsed.map((grp: ShiftGroupProfile) => ({
+                    ...grp,
+                    shifts: Array.isArray(grp.shifts)
+                        ? grp.shifts.map((s) => ({
+                              ...s,
+                              naming: {
+                                  ...s.naming,
+                                  displayBadge: s.naming?.displayBadge ? s.naming.displayBadge.toUpperCase() : '',
+                              },
+                          }))
+                        : grp.shifts,
+                }));
             }
         }
     } catch (e) {

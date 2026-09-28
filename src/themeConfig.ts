@@ -214,75 +214,75 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             penugasanColors,
 
             // 1. Kanvas Utama (Paper sketch grid background, ink text)
-            wrapperClass: 'h-[100dvh] max-h-[100dvh] w-full bg-[#f2efeb] text-[#2b2b2b] flex flex-col font-sans relative selection:bg-[#2ec4b6] selection:text-[#2b2b2b] overflow-hidden',
+            wrapperClass: 'h-[100dvh] max-h-[100dvh] w-full bg-[#f2efeb] text-[#2b2b2b] flex flex-col font-[\'Gaegu\'] font-bold relative selection:bg-[#2ec4b6] selection:text-[#2b2b2b] overflow-hidden',
 
             // 2. Top Header / Navbar: paper background, ink borders, Gochi Hand title & Space Mono build badge
-            navbarClass: 'sticky top-0 z-50 bg-[#ffffff] text-[#2b2b2b] border-b-[3px] border-[#2b2b2b] shadow-[0_4px_0px_#2b2b2b] shrink-0',
+            navbarClass: 'sticky top-0 z-50 bg-[#ffffff] text-[#2b2b2b] border-b-[3px] border-[#2b2b2b] shadow-[0_4px_0px_#2b2b2b] shrink-0 font-[\'Gaegu\']',
             logoContainerClass: 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-[6px] bg-[#ffffff] text-[#2b2b2b] border-[2.5px] border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] shrink-0',
-            titleClass: 'text-sm sm:text-base md:text-xl font-bold tracking-tight truncate text-[#2b2b2b] font-[\'Gochi_Hand\'] tracking-wide',
-            versionBadgeClass: 'bg-[#f2efeb] text-[#2b2b2b] border-2 border-[#2b2b2b] text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-md font-mono font-bold shadow-[1px_1px_0px_#2b2b2b]',
-            subtitleClass: 'hidden sm:block text-[10.5px] text-[#2b2b2b]/70 font-mono tracking-wider line-clamp-1 uppercase',
+            titleClass: 'text-base sm:text-lg md:text-2xl font-bold tracking-tight truncate text-[#2b2b2b] font-[\'Gochi_Hand\'] tracking-wide',
+            versionBadgeClass: 'bg-[#f2efeb] text-[#2b2b2b] border-2 border-[#2b2b2b] text-[10px] sm:text-[11px] px-1.5 py-0.2 rounded-md font-mono font-bold shadow-[1px_1px_0px_#2b2b2b]',
+            subtitleClass: 'hidden sm:block text-xs text-[#2b2b2b]/70 font-mono tracking-wider line-clamp-1 uppercase',
             supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 rounded-lg bg-[#ffffff] px-2.5 py-1 text-xs border-2 border-[#2b2b2b] text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-mono',
-            holidayBtnClass: 'flex items-center space-x-1.5 rounded-lg bg-[#ff4747] hover:bg-[#ff3333] px-2.5 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\'] text-sm tracking-wide',
-            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-3 text-xs font-bold text-[#2b2b2b] transition-all duration-150 cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] select-none font-[\'Gaegu\'] text-sm active:translate-x-0.5 active:translate-y-0.5',
-            themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-60 rounded-xl bg-[#ffffff] p-2 flex flex-col gap-1 text-[#2b2b2b] shadow-[5px_5px_0px_#2b2b2b] border-[2.5px] border-[#2b2b2b] animate-in fade-in zoom-in-95 duration-150 font-sans',
-            settingsBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-2.5 py-1.5 text-xs font-bold text-[#2b2b2b] transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
-            syncBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-2.5 py-1.5 text-xs font-bold text-[#2b2b2b] transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
-            saveBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-2.5 py-1.5 text-xs font-bold text-[#2b2b2b] transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
+            holidayBtnClass: 'flex items-center space-x-1.5 rounded-lg bg-[#ff4747] hover:bg-[#ff3333] px-2.5 py-1.5 text-sm font-bold text-white transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\'] tracking-wide',
+            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-3 text-sm font-bold text-[#2b2b2b] transition-all duration-150 cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] select-none font-[\'Gaegu\'] active:translate-x-0.5 active:translate-y-0.5',
+            themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-60 rounded-xl bg-[#ffffff] p-2 flex flex-col gap-1 text-[#2b2b2b] shadow-[5px_5px_0px_#2b2b2b] border-[2.5px] border-[#2b2b2b] animate-in fade-in zoom-in-95 duration-150 font-[\'Gaegu\'] font-bold',
+            settingsBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-2.5 py-1.5 text-xs font-bold text-[#2b2b2b] transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\']',
+            syncBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-2.5 py-1.5 text-xs font-bold text-[#2b2b2b] transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\']',
+            saveBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-2.5 py-1.5 text-xs font-bold text-[#2b2b2b] transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\']',
 
             // 3. View Switcher & Navigasi Bulan: Card putih dengan border sketch
-            viewSwitcherCardClass: 'flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2 bg-[#ffffff] p-1.5 sm:p-2 rounded-xl border-2 border-[#2b2b2b] shadow-[4px_4px_0px_#2b2b2b]',
-            viewSwitcherPillsWrapperClass: 'flex flex-row flex-nowrap items-center overflow-x-auto no-scrollbar scroll-smooth p-1 gap-1 rounded-lg bg-[#f2efeb] border-2 border-[#2b2b2b] max-w-full min-w-0 shrink flex-1',
+            viewSwitcherCardClass: 'flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2 bg-[#ffffff] p-1.5 sm:p-2 rounded-xl border-2 border-[#2b2b2b] shadow-[4px_4px_0px_#2b2b2b] font-[\'Gaegu\']',
+            viewSwitcherPillsWrapperClass: 'flex flex-row flex-nowrap items-center overflow-x-auto no-scrollbar scroll-smooth p-1 gap-1 rounded-lg bg-[#f2efeb] border-2 border-[#2b2b2b] max-w-full min-w-0 shrink flex-1 font-[\'Gaegu\']',
             tabActiveClass: 'bg-[#ff4747] text-white shadow-[2px_2px_0px_#2b2b2b] font-bold rounded-md font-[\'Gaegu\'] text-base tracking-wide',
             tabInactiveClass: 'text-[#2b2b2b] hover:text-[#2b2b2b] hover:bg-[#2ec4b6]/25 rounded-md transition-colors duration-150 font-[\'Gaegu\'] text-base',
             monthNavBtnClass: 'rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] p-1.5 sm:p-2 text-[#2b2b2b] hover:bg-[#2ec4b6] transition-colors cursor-pointer shrink-0 shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
-            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#f2efeb] px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base font-bold text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] transition-all cursor-pointer w-[140px] min-[380px]:w-[150px] sm:w-[176px] shrink-0 font-[\'Gochi_Hand\'] tracking-wide',
-            todayBtnClass: 'flex items-center space-x-1 rounded-lg border-2 border-[#2b2b2b] bg-[#2ec4b6] hover:bg-[#26a89c] text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shrink-0 shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-sm tracking-wide active:translate-x-0.5 active:translate-y-0.5',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#f2efeb] px-2 sm:px-3 py-1 sm:py-1.5 text-base sm:text-lg font-bold text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] transition-all cursor-pointer w-[140px] min-[380px]:w-[150px] sm:w-[176px] shrink-0 font-[\'Gochi_Hand\'] tracking-wide',
+            todayBtnClass: 'flex items-center space-x-1 rounded-lg border-2 border-[#2b2b2b] bg-[#2ec4b6] hover:bg-[#26a89c] text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shrink-0 shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-base tracking-wide active:translate-x-0.5 active:translate-y-0.5',
 
             // 4. Sub-toolbar Aksi Kalender
-            subToolbarCardClass: 'flex items-center justify-between rounded-xl bg-[#ffffff] p-1.5 sm:p-2.5 lg:px-3.5 shadow-[4px_4px_0px_#2b2b2b] border-2 border-[#2b2b2b] gap-2',
-            subToolbarTitleClass: 'text-xs sm:text-sm font-bold text-[#2b2b2b] truncate font-[\'Gochi_Hand\'] text-base tracking-wide',
+            subToolbarCardClass: 'flex items-center justify-between rounded-xl bg-[#ffffff] p-1.5 sm:p-2.5 lg:px-3.5 shadow-[4px_4px_0px_#2b2b2b] border-2 border-[#2b2b2b] gap-2 font-[\'Gaegu\']',
+            subToolbarTitleClass: 'text-sm sm:text-base font-bold text-[#2b2b2b] truncate font-[\'Gochi_Hand\'] tracking-wide',
             subToolbarDotClass: 'flex h-2.5 w-2.5 rounded-full bg-[#ff4747] border border-[#2b2b2b] shrink-0',
-            pasteBtnClass: 'flex items-center space-x-1.5 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#2ec4b6] text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
-            undoBtnClass: 'flex items-center space-x-1.5 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#2ec4b6] text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
-            resetBtnClass: 'flex items-center space-x-1.5 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#ff4747] hover:text-white text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all shadow-[2px_2px_0px_#2b2b2b] cursor-pointer active:translate-x-0.5 active:translate-y-0.5',
-            lockBtnClass: 'flex items-center space-x-1.5 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] text-[#2b2b2b] hover:bg-[#2ec4b6] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
-            expandBtnClass: 'flex items-center space-x-1.5 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#2ec4b6] text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
+            pasteBtnClass: 'flex items-center space-x-1.5 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#2ec4b6] text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-sm font-bold transition-all cursor-pointer shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\']',
+            undoBtnClass: 'flex items-center space-x-1.5 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#2ec4b6] text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-sm font-bold transition-all cursor-pointer shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\']',
+            resetBtnClass: 'flex items-center space-x-1.5 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#ff4747] hover:text-white text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-sm font-bold transition-all shadow-[2px_2px_0px_#2b2b2b] cursor-pointer active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\']',
+            lockBtnClass: 'flex items-center space-x-1.5 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] text-[#2b2b2b] hover:bg-[#2ec4b6] px-2 sm:px-2.5 py-1 sm:py-1.5 text-sm font-bold transition-all cursor-pointer shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\']',
+            expandBtnClass: 'flex items-center space-x-1.5 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#2ec4b6] text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-sm font-bold transition-all cursor-pointer shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\']',
 
             // 5. Area Grid Kalender
-            calendarContainerCardClass: 'rounded-xl sm:rounded-2xl bg-[#ffffff] p-1.5 sm:p-2.5 lg:p-3 shadow-[6px_6px_0px_#2b2b2b] border-[2.5px] border-[#2b2b2b]',
-            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 mb-1.5 sm:mb-2 rounded-lg bg-[#f2efeb] py-1.5 text-center text-xs sm:text-sm font-mono font-bold border-2 border-[#2b2b2b]',
+            calendarContainerCardClass: 'rounded-xl sm:rounded-2xl bg-[#ffffff] p-1.5 sm:p-2.5 lg:p-3 shadow-[6px_6px_0px_#2b2b2b] border-[2.5px] border-[#2b2b2b] font-[\'Gaegu\']',
+            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 mb-1.5 sm:mb-2 rounded-lg bg-[#f2efeb] py-1.5 text-center text-sm sm:text-base font-[\'Gochi_Hand\'] font-bold border-2 border-[#2b2b2b]',
             weekdayNameTextClass: 'text-[#2b2b2b]',
             weekendNameTextClass: 'text-[#ff4747]',
             emptyCellClass: 'rounded-lg bg-[#f2efeb]/80 border-2 border-dashed border-[#2b2b2b]/30 p-1',
 
             // 6. Summary Cards Panel
-            summaryPanelCardClass: 'rounded-xl sm:rounded-2xl bg-[#ffffff] p-3 sm:p-3.5 shadow-[4px_4px_0px_#2b2b2b] border-2 border-[#2b2b2b]',
+            summaryPanelCardClass: 'rounded-xl sm:rounded-2xl bg-[#ffffff] p-3 sm:p-3.5 shadow-[4px_4px_0px_#2b2b2b] border-2 border-[#2b2b2b] font-[\'Gaegu\']',
             summaryTitleClass: 'text-sm sm:text-base font-bold text-[#2b2b2b] flex items-center font-[\'Gochi_Hand\'] tracking-wide',
             summaryHeaderBorderClass: 'border-b-2 border-dashed border-[#2b2b2b] pb-2',
             summarySubtextClass: 'text-xs text-[#2b2b2b]/70 font-mono',
 
             // 7. Modal & Pop-up
-            modalCardClass: 'rounded-2xl bg-[#ffffff] border-[3px] border-[#2b2b2b] shadow-[8px_8px_0px_#2b2b2b] text-[#2b2b2b]',
-            modalHeaderClass: 'border-b-2 border-[#2b2b2b] bg-[#f2efeb] px-4 py-3',
+            modalCardClass: 'rounded-2xl bg-[#ffffff] border-[3px] border-[#2b2b2b] shadow-[8px_8px_0px_#2b2b2b] text-[#2b2b2b] font-[\'Gaegu\']',
+            modalHeaderClass: 'border-b-2 border-[#2b2b2b] bg-[#f2efeb] px-4 py-3 font-[\'Gochi_Hand\']',
             modalTitleClass: 'text-base sm:text-lg font-bold text-[#2b2b2b] font-[\'Gochi_Hand\'] tracking-wide',
-            modalBodyClass: 'bg-[#ffffff] text-[#2b2b2b]',
+            modalBodyClass: 'bg-[#ffffff] text-[#2b2b2b] font-[\'Gaegu\']',
 
             // 8. Mobile Drawer & FAB
             mobileFabClass: 'flex h-13 w-13 items-center justify-center rounded-2xl bg-[#ff4747] text-white shadow-[3px_3px_0px_#2b2b2b] border-2 border-[#2b2b2b] active:scale-95 transition-all cursor-pointer',
-            mobileDrawerClass: 'relative z-10 w-full max-w-lg rounded-t-3xl bg-[#ffffff] p-5 shadow-2xl animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto border-t-[3px] border-[#2b2b2b] text-[#2b2b2b]',
+            mobileDrawerClass: 'relative z-10 w-full max-w-lg rounded-t-3xl bg-[#ffffff] p-5 shadow-2xl animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto border-t-[3px] border-[#2b2b2b] text-[#2b2b2b] font-[\'Gaegu\']',
             mobileDrawerHeaderClass: 'border-b-2 border-[#2b2b2b] pb-3 bg-[#f2efeb]',
             mobileDrawerTitleClass: 'text-base font-bold text-[#2b2b2b] font-[\'Gochi_Hand\'] tracking-wide',
             mobileDrawerSubtextClass: 'text-xs text-[#2b2b2b]/70 font-mono',
-            mobileDrawerNavBtnActive: 'bg-[#ff4747] text-white font-bold rounded-lg border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-lg',
-            mobileDrawerNavBtnInactive: 'text-[#2b2b2b] hover:bg-[#2ec4b6]/20 rounded-lg font-[\'Gaegu\'] text-lg',
-            mobileNavItemActiveClass: 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]',
-            mobileNavItemInactiveClass: 'text-[#2b2b2b] hover:bg-[#2ec4b6]/20',
+            mobileDrawerNavBtnActive: 'bg-[#ff4747] text-white font-bold rounded-lg border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-sm tracking-wide',
+            mobileDrawerNavBtnInactive: 'text-[#2b2b2b] hover:bg-[#2ec4b6]/20 rounded-lg font-[\'Gaegu\'] text-sm tracking-wide',
+            mobileNavItemActiveClass: 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\']',
+            mobileNavItemInactiveClass: 'text-[#2b2b2b] hover:bg-[#2ec4b6]/20 font-[\'Gaegu\']',
 
             // 9. Desktop Left Side Menu
-            sidebarClass: 'bg-[#ffffff] border-r-[2.5px] border-[#2b2b2b] shadow-[4px_0_0px_#2b2b2b] text-[#2b2b2b]',
-            sidebarItemActiveClass: 'bg-[#ff4747] text-white font-bold rounded-lg border-2 border-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b] font-[\'Gaegu\'] text-lg rotate-[1deg]',
-            sidebarItemInactiveClass: 'text-[#2b2b2b] hover:bg-[#2ec4b6] hover:rotate-[-1deg] rounded-lg border-2 border-transparent hover:border-[#2b2b2b] transition-all font-[\'Gaegu\'] text-lg',
+            sidebarClass: 'border-r-[2.5px] border-[#2b2b2b] shadow-[4px_0_0px_#2b2b2b] text-[#2b2b2b] relative overflow-hidden font-[\'Gaegu\']',
+            sidebarItemActiveClass: 'bg-[#ff4747] text-white font-bold rounded-lg border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-sm tracking-wide',
+            sidebarItemInactiveClass: 'text-[#2b2b2b] hover:bg-[#2ec4b6] rounded-lg border-2 border-transparent hover:border-[#2b2b2b] hover:shadow-[1px_1px_0px_#2b2b2b] transition-all font-[\'Gaegu\'] text-sm tracking-wide',
             sidebarDividerClass: 'border-b-2 border-dashed border-[#2b2b2b]',
         };
     }
@@ -680,7 +680,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
 
         // 5. Area Grid Kalender
         calendarContainerCardClass: 'rounded-lg bg-white p-1 sm:p-2 lg:p-2.5 shadow-xs border border-[#E2E8F0]',
-        dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 mb-1 sm:mb-1.5 rounded-lg bg-[#F6F7F8] py-1 sm:py-1 px-1 text-center text-[10.5px] min-[380px]:text-[11.5px] sm:text-xs lg:text-sm font-black border border-[#E2E8F0]',
+        dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 mb-1 sm:mb-1.5 rounded-lg bg-[#F6F7F8] py-1 sm:py-1 text-center text-[10.5px] min-[380px]:text-[11.5px] sm:text-xs lg:text-sm font-black border border-[#E2E8F0]',
         weekdayNameTextClass: 'text-[#011627]',
         weekendNameTextClass: 'text-[#FF3366]',
         emptyCellClass: 'rounded-lg bg-[#F6F7F8]/60 p-1',

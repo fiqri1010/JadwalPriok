@@ -478,6 +478,36 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
         tabTextInactive: '#334155',
       };
     }
+    if (isPaperSketch) {
+      return {
+        outerBg: '#2b2b2b',
+        outerRadius: '16px',
+        outerShadow: '6px 6px 0px #2b2b2b',
+        innerBg: '#ffffff',
+        innerRadius: '14px',
+        headingColor: '#2b2b2b',
+        subtextColor: '#555555',
+        fieldBg: '#f2efeb',
+        fieldBorder: '2px solid #2b2b2b',
+        fieldShadow: 'none',
+        accentColor: '#ff4747',
+        textColor: '#2b2b2b',
+        btnCancelBg: '#ffffff',
+        btnCancelBorder: '#2b2b2b',
+        btnCancelText: '#2b2b2b',
+        btnApplyBg: '#ff4747',
+        btnApplyText: '#ffffff',
+        previewBorder: 'border-2 border-[#2b2b2b]',
+        tabContainerBg: '#f2efeb',
+        tabContainerBorder: '2px solid #2b2b2b',
+        tabIndicatorBg: '#ff4747',
+        tabIndicatorRadius: '7px',
+        tabIndicatorBorder: '1.5px solid #2b2b2b',
+        tabIndicatorShadow: '2px 2px 0px #2b2b2b',
+        tabTextActive: '#ffffff',
+        tabTextInactive: '#2b2b2b',
+      };
+    }
     // Default light / teal theme (#F6F7F8 / #FFFFFF / #2EC4B6 / #011627)
     return {
       outerBg: 'linear-gradient(163deg, #2EC4B6 0%, #20A4F3 100%)',
@@ -602,11 +632,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                     style={{ color: currentStyle.headingColor }}
                     className="text-sm sm:text-base font-black tracking-tight leading-tight truncate"
                   >
-                    {activeTab === 'excel_grid'
-                      ? 'Paste dari Excel (Spreadsheet)'
-                      : activeTab === 'schedule'
-                      ? 'Salin Jadwal Shift (Teks)'
-                      : 'Salin Presensi (Teks Log)'}
+                    Salin Shift dan Presensi ke Aplikasi
                   </h2>
                   <p
                     style={{ color: currentStyle.subtextColor }}
@@ -659,7 +685,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                   borderRadius: isWinamp ? '0px' : '9px',
                 }}
               >
-                {/* Radio Input 1: Paste dari Excel */}
+                {/* Radio Input 1: Shift by Excel */}
                 <label
                   className="tab_label relative z-30 h-[28px] flex items-center justify-center text-[11px] sm:text-xs font-bold transition-colors cursor-pointer text-center px-1"
                   style={{
@@ -678,10 +704,10 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                       setErrorMsg(null);
                     }}
                   />
-                  Paste Excel
+                  Shift by Excel
                 </label>
 
-                {/* Radio Input 2: Salin Shift */}
+                {/* Radio Input 2: Shift by Text */}
                 <label
                   className="tab_label relative z-30 h-[28px] flex items-center justify-center text-[11px] sm:text-xs font-bold transition-colors cursor-pointer text-center px-1"
                   style={{
@@ -700,10 +726,10 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                       setErrorMsg(null);
                     }}
                   />
-                  Teks Shift
+                  Shift by Text
                 </label>
 
-                {/* Radio Input 3: Salin Presensi */}
+                {/* Radio Input 3: Data Presensi */}
                 <label
                   className="tab_label relative z-30 h-[28px] flex items-center justify-center text-[11px] sm:text-xs font-bold transition-colors cursor-pointer text-center px-1"
                   style={{
@@ -722,7 +748,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                       setErrorMsg(null);
                     }}
                   />
-                  Teks Presensi
+                  Data Presensi
                 </label>
 
                 {/* Sliding Indicator Pill */}
@@ -795,6 +821,9 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                         </p>
                         <p className="opacity-95">
                           <strong className="font-bold">3.</strong> Sistem akan <strong>otomatis memindai & mendeteksi kode shift</strong> untuk tanggal 1 s.d. {daysInMonth} pada bulan aktif.
+                        </p>
+                        <p className="opacity-95">
+                          <strong className="font-bold">4.</strong> Pengaturan pemetaan warna & kode teks shift <strong>disimpan otomatis ke sistem</strong>, sehingga saat Anda menempel Excel di kemudian hari, aturan warna akan otomatis diterapkan kembali.
                         </p>
                       </div>
                     ) : activeTab === 'schedule' ? (

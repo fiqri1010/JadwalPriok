@@ -32,7 +32,9 @@ export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
             />
             <div
                 className={`relative z-10 w-full max-w-lg rounded-t-3xl p-5 shadow-2xl animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto ${
-                    currentTheme === 'darkFluid'
+                    currentTheme === 'paperSketch'
+                        ? 'bg-[#ffffff] text-[#2b2b2b] border-t-[3.5px] border-[#2b2b2b] shadow-[0_-8px_0px_#2b2b2b] font-[\'Gaegu\'] text-base'
+                        : currentTheme === 'darkFluid'
                         ? 'bg-[#1D1B20] text-[#E6E0E9] border-t border-white/10'
                         : currentTheme === 'winamp'
                         ? 'bg-[#1C1C1E] text-[#00FF00] border-2 border-[#555555] font-mono'
@@ -43,17 +45,17 @@ export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                         : 'bg-white text-slate-900'
                 }`}
             >
-                <div className={`mx-auto mb-3 h-1.5 w-12 rounded-full ${currentTheme === 'darkFluid' ? 'bg-white/20' : 'bg-slate-300'}`} />
+                <div className={`mx-auto mb-3 h-1.5 w-12 rounded-full ${currentTheme === 'paperSketch' ? 'bg-[#2b2b2b]' : currentTheme === 'darkFluid' ? 'bg-white/20' : 'bg-slate-300'}`} />
 
                 {/* Drawer Header */}
-                <div className={`flex items-center justify-between border-b pb-3 ${currentTheme === 'darkFluid' ? 'border-white/10' : 'border-slate-100'}`}>
+                <div className={`flex items-center justify-between border-b pb-3 ${currentTheme === 'paperSketch' ? 'border-b-2 border-dashed border-[#2b2b2b]' : currentTheme === 'darkFluid' ? 'border-white/10' : 'border-slate-100'}`}>
                     <div className="flex items-center space-x-2.5">
                         <AppLogo className="h-9 w-9 rounded-xl shadow-xs shrink-0" />
                         <div>
-                            <h3 className={`text-sm font-extrabold ${currentTheme === 'darkFluid' ? 'text-[#E6E0E9]' : currentTheme === 'winamp' ? 'text-[#00FF00]' : 'text-[#39393A]'}`}>
+                            <h3 className={`text-base font-extrabold ${currentTheme === 'paperSketch' ? 'font-[\'Gochi_Hand\'] text-xl text-[#2b2b2b]' : currentTheme === 'darkFluid' ? 'text-[#E6E0E9]' : currentTheme === 'winamp' ? 'text-[#00FF00]' : 'text-[#39393A]'}`}>
                                 Menu Kalender
                             </h3>
-                            <p className={`text-[11px] font-medium ${currentTheme === 'darkFluid' ? 'text-[#CAC4D0]' : currentTheme === 'winamp' ? 'text-emerald-400' : 'text-slate-500'}`}>
+                            <p className={`text-xs font-medium ${currentTheme === 'paperSketch' ? 'text-[#2b2b2b]/70 font-mono' : currentTheme === 'darkFluid' ? 'text-[#CAC4D0]' : currentTheme === 'winamp' ? 'text-emerald-400' : 'text-slate-500'}`}>
                                 JadwalPriok
                             </p>
                         </div>
@@ -61,7 +63,7 @@ export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                     <button
                         type="button"
                         onClick={onClose}
-                        className={`rounded-full p-1.5 ${currentTheme === 'darkFluid' ? 'text-[#CAC4D0] hover:bg-white/10 hover:text-white' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'}`}
+                        className={`rounded-full p-1.5 ${currentTheme === 'paperSketch' ? 'border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] hover:bg-[#ff4747] hover:text-white shadow-[1px_1px_0px_#2b2b2b]' : currentTheme === 'darkFluid' ? 'text-[#CAC4D0] hover:bg-white/10 hover:text-white' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'}`}
                     >
                         <X className="h-5 w-5" />
                     </button>

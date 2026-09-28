@@ -114,8 +114,8 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                 {/* Header */}
                 <div className="flex items-center justify-between p-3.5 border-b border-slate-200/80 dark:border-zinc-800 shrink-0 bg-white dark:bg-[#1E1E1E]">
                     <div className="flex items-center space-x-2.5">
-                        <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold text-xs shrink-0">
-                            {draftShift.naming.displayBadge || 'SHIFT'}
+                        <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold text-xs shrink-0 font-mono uppercase">
+                            {(draftShift.naming.displayBadge || 'SHIFT').toUpperCase()}
                         </div>
                         <div>
                             <div className="flex items-center space-x-2">
@@ -197,7 +197,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                             }`}
                                         >
                                             <Smile className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
-                                            <span>Icon & Nama</span>
+                                            <span>Ikon & Nama</span>
                                         </button>
                                     </li>
 
@@ -287,20 +287,10 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                 </div>
                             )}
 
-                            {/* Tab 2: Icon & Nama (Naming rules & Icon Selection) */}
+                            {/* Tab 2: Ikon & Nama (Naming rules & Icon Selection) */}
                             {activeTab === 'icon_nama' && (
                                 <div className="space-y-4 w-full animate-in fade-in duration-150 max-w-3xl">
-                                    {/* Aturan Penamaan & Kode */}
-                                    <div className="min-w-0">
-                                        <ShiftNamingInput
-                                            naming={draftShift.naming}
-                                            onChange={(naming) => updateDraftShift({ ...draftShift, naming })}
-                                            currentShiftId={draftShift.id}
-                                            existingShifts={existingShifts}
-                                        />
-                                    </div>
-
-                                    {/* Logo & Ikon Selection Card */}
+                                    {/* Logo & Ikon Selection Card (Ditempatkan di Atas) */}
                                     <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/50 border border-slate-200/80 dark:border-zinc-800/80 shadow-2xs space-y-3.5">
                                         <div className="flex items-center space-x-2.5 border-b border-slate-200/80 dark:border-zinc-800 pb-2">
                                             <Smile className="w-5 h-5 text-teal-600 dark:text-teal-400" />
@@ -371,6 +361,16 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                                 </button>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    {/* Aturan Penamaan & Kode (Ditempatkan di Bawah Logo) */}
+                                    <div className="min-w-0">
+                                        <ShiftNamingInput
+                                            naming={draftShift.naming}
+                                            onChange={(naming) => updateDraftShift({ ...draftShift, naming })}
+                                            currentShiftId={draftShift.id}
+                                            existingShifts={existingShifts}
+                                        />
                                     </div>
                                 </div>
                             )}

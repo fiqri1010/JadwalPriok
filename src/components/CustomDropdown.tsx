@@ -50,6 +50,7 @@ export function CustomDropdown<T extends string | number>({
     const isVista = theme === 'vista';
     const isDark = theme === 'dark';
     const isDarkFluid = theme === 'darkFluid';
+    const isPaperSketch = theme === 'paperSketch';
 
     // Dismiss saat klik di luar dropdown
     useEffect(() => {
@@ -89,6 +90,16 @@ export function CustomDropdown<T extends string | number>({
                 optionHover: 'hover:bg-sky-100 hover:text-slate-950',
                 optionSelected: 'bg-sky-100/90 text-sky-950 font-black border border-sky-300',
                 arrowFill: '#0284c7',
+                activeBg: '#ffffff',
+            };
+        }
+        if (isPaperSketch) {
+            return {
+                triggerBg: 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] font-bold',
+                optionsBg: 'bg-white text-[#2b2b2b] border-[2.5px] border-[#2b2b2b] shadow-[5px_5px_0px_#2b2b2b] font-[\'Gaegu\'] rounded-xl',
+                optionHover: 'hover:bg-[#2ec4b6]/25 hover:text-[#2b2b2b]',
+                optionSelected: 'bg-[#ff4747] text-white font-bold border border-[#2b2b2b] shadow-[1.5px_1.5px_0px_#2b2b2b]',
+                arrowFill: '#2b2b2b',
                 activeBg: '#ffffff',
             };
         }

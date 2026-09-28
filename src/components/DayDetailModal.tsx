@@ -57,6 +57,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     const isDarkFluid = theme === 'darkFluid';
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
+    const isPaperSketch = theme === 'paperSketch';
 
     const normalizedShift = normalizeShift(data?.shift || '');
 
@@ -68,7 +69,11 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     const fullDateLabel = `${indonesianDayNames[dayOfWeek]}, ${dayNumber} ${indonesianMonthNames[month - 1]} ${year}`;
 
     const dateNumberColor = isHoliday || isWeekend
-        ? 'text-rose-500 font-black'
+        ? isPaperSketch
+            ? 'text-[#ff4747] font-[\'Gochi_Hand\']'
+            : 'text-rose-500 font-black'
+        : isPaperSketch
+        ? 'text-[#2b2b2b] font-[\'Gochi_Hand\']'
         : isWinamp
         ? 'text-[#00FF00] font-black'
         : isDarkFluid
@@ -79,6 +84,16 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
 
     // Theme-specific modal card styles
     const getCardStyle = (): React.CSSProperties => {
+        if (isPaperSketch) {
+            return {
+                borderRadius: '16px',
+                backgroundColor: '#ffffff',
+                color: '#2b2b2b',
+                border: '3px solid #2b2b2b',
+                boxShadow: '8px 8px 0px #2b2b2b',
+                fontFamily: "'Gaegu', cursive, sans-serif",
+            };
+        }
         if (isWinamp) {
             return {
                 borderRadius: '0px',
@@ -305,7 +320,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                 type="button"
                                 onClick={onClose}
                                 className={`p-1.5 rounded-[6px] transition-colors cursor-pointer ${
-                                    isWinamp
+                                    isPaperSketch
+                                        ? 'border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] hover:bg-[#ff4747] hover:text-white shadow-[1px_1px_0px_#2b2b2b]'
+                                        : isWinamp
                                         ? 'hover:bg-zinc-800 text-[#00FF00]'
                                         : isVista
                                         ? 'hover:bg-rose-500/20 hover:text-rose-600 text-sky-800'
@@ -321,7 +338,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                     {/* Swipe Hint Pill */}
                     <div className="flex items-center justify-center relative z-10">
                         <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full ${
-                            isWinamp
+                            isPaperSketch
+                                ? 'text-[#2b2b2b] bg-[#f2efeb] border-2 border-[#2b2b2b] font-[\'Gaegu\'] text-xs font-bold'
+                                : isWinamp
                                 ? 'text-[#00FF00]/70 bg-black border border-zinc-800'
                             : isDark || isDarkFluid
                                 ? 'text-slate-300 bg-white/5 border border-white/10'
@@ -387,7 +406,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                     type="button"
                                     onClick={() => onRequestTimePick('jamMasuk', `Jam Masuk - Tgl ${dayNumber}`, data?.jamMasuk || '')}
                                     className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
-                                        isWinamp
+                                        isPaperSketch
+                                            ? 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] hover:bg-[#2ec4b6]/25 font-mono'
+                                            : isWinamp
                                             ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
                                             : isDark || isDarkFluid
                                             ? 'bg-[#2B2930] text-[#E6E0E9] border-white/10 hover:border-indigo-400/50'
@@ -405,7 +426,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                     value={data?.jamMasuk || ''}
                                     onChange={(e) => onUpdate({ jamMasuk: e.target.value })}
                                     className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs rounded-[6px] border ${
-                                        isWinamp
+                                        isPaperSketch
+                                            ? 'border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                            : isWinamp
                                             ? 'bg-black border-zinc-700 text-[#00FF00]'
                                             : isDark || isDarkFluid
                                             ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
@@ -434,7 +457,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                     type="button"
                                     onClick={() => onRequestTimePick('jamPulang', `Jam Pulang - Tgl ${dayNumber}`, data?.jamPulang || '')}
                                     className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
-                                        isWinamp
+                                        isPaperSketch
+                                            ? 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] hover:bg-[#2ec4b6]/25 font-mono'
+                                            : isWinamp
                                             ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
                                             : isDark || isDarkFluid
                                             ? 'bg-[#2B2930] text-[#E6E0E9] border-white/10 hover:border-indigo-400/50'
@@ -452,7 +477,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                     value={data?.jamPulang || ''}
                                     onChange={(e) => onUpdate({ jamPulang: e.target.value })}
                                     className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs rounded-[6px] border ${
-                                        isWinamp
+                                        isPaperSketch
+                                            ? 'border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                            : isWinamp
                                             ? 'bg-black border-zinc-700 text-[#00FF00]'
                                             : isDark || isDarkFluid
                                             ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
@@ -499,13 +526,17 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                 onClick={() => onRequestTimePick('absenCeisa', `Absen CEISA - Tgl ${dayNumber}`, data?.absenCeisa || '')}
                                 className={`w-full py-1.5 px-2.5 text-center font-mono text-xs rounded-[6px] border transition-colors flex items-center justify-center space-x-1.5 cursor-pointer ${
                                     data?.absenCeisa
-                                        ? isWinamp
+                                        ? isPaperSketch
+                                            ? 'bg-[#2ec4b6]/25 border-2 border-[#2b2b2b] text-[#2b2b2b] font-bold shadow-[2px_2px_0px_#2b2b2b]'
+                                            : isWinamp
                                             ? 'bg-black border-[#00FF00] text-[#00FF00] font-bold'
                                             : isDark || isDarkFluid
                                             ? 'bg-indigo-600/30 border-indigo-500/40 text-indigo-200 font-bold'
                                             : isVista
                                             ? 'bg-sky-400/25 border-sky-400/80 text-sky-950 font-bold shadow-xs'
                                             : 'bg-sky-500/20 border-sky-400/50 text-sky-800 font-bold shadow-2xs'
+                                        : isPaperSketch
+                                        ? 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/25 shadow-[2px_2px_0px_#2b2b2b]'
                                         : isWinamp
                                         ? 'bg-black text-zinc-500 border-zinc-700 hover:border-[#00FF00]'
                                         : isDark || isDarkFluid
@@ -525,7 +556,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                 value={data?.absenCeisa || ''}
                                 onChange={(e) => onUpdate({ absenCeisa: e.target.value })}
                                 className={`w-full py-1.5 px-2.5 text-center font-mono text-xs rounded-[6px] border ${
-                                    isWinamp
+                                    isPaperSketch
+                                        ? 'border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                        : isWinamp
                                         ? 'bg-black border-zinc-700 text-[#00FF00]'
                                         : isDark || isDarkFluid
                                         ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
@@ -556,7 +589,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                             onChange={(val) => onUpdate({ note: val })}
                             onEnterSubmit={onClose}
                             className={
-                                isWinamp
+                                isPaperSketch
+                                    ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] placeholder-slate-400 focus:border-[#ff4747] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-base'
+                                    : isWinamp
                                     ? 'bg-black border-zinc-700 text-[#00FF00] placeholder-zinc-600 focus:border-[#00FF00] font-mono'
                                     : isDark || isDarkFluid
                                     ? 'bg-[#2B2930] border-white/10 text-slate-100 placeholder-slate-500 focus:border-indigo-400'
@@ -579,7 +614,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                             <div className="relative z-10">
                                 <div
                                     className={`w-full py-2 px-3 rounded-[6px] border flex items-center justify-center font-bold text-xs transition-all ${
-                                        isWinamp
+                                        isPaperSketch
+                                            ? 'bg-[#2ec4b6]/20 border-2 border-[#2b2b2b] text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                            : isWinamp
                                             ? 'bg-black border-[#00FF00] text-[#00FF00] font-mono'
                                             : isDark || isDarkFluid
                                             ? 'bg-amber-500/15 border-amber-500/30 text-amber-200'
@@ -603,7 +640,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                             type="button"
                             onClick={onClose}
                             className={`w-full py-2 rounded-[6px] text-xs font-black transition-all shadow-md cursor-pointer ${
-                                isWinamp
+                                isPaperSketch
+                                    ? 'bg-[#ff4747] text-white hover:bg-[#ff3333] border-2 border-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b] font-[\'Gaegu\'] text-base font-bold active:translate-x-0.5 active:translate-y-0.5'
+                                    : isWinamp
                                     ? 'bg-[#00FF00] text-black hover:bg-emerald-400 font-mono'
                                     : isDarkFluid
                                     ? 'bg-[#D0BCFF] text-[#381E72] hover:bg-[#E8DEF8]'

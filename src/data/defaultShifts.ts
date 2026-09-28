@@ -11,7 +11,7 @@ export const DEFAULT_SHIFT_GROUP: ShiftGroupProfile = {
             key: 'Graha',
             naming: {
                 fullName: 'Graha (Shift Pagi Kantor)',
-                displayBadge: 'Graha',
+                displayBadge: 'GRAHA',
                 copyCode: 'G',
                 dropdownSublabel: 'FCL 07.30 - 17.00',
             },
@@ -229,7 +229,7 @@ export const DEFAULT_SHIFT_GROUP: ShiftGroupProfile = {
             key: 'Malam',
             naming: {
                 fullName: 'Malam',
-                displayBadge: 'Malam',
+                displayBadge: 'MALAM',
                 copyCode: 'M',
                 dropdownSublabel: '17.00-20.00 & 04.30',
             },

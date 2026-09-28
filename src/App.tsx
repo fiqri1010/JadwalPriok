@@ -14,6 +14,7 @@ import { ExportDropdown } from './components/ExportDropdown';
 import { TopNavbar } from './components/TopNavbar';
 import { SubToolbarHeader } from './components/SubToolbarHeader';
 import { CalendarActionToolbar } from './components/CalendarActionToolbar';
+import { CalendarContextMenu, ContextMenuPosition } from './components/CalendarContextMenu';
 import { ResetConfirmModal } from './components/ResetConfirmModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { MobileMenuDrawer } from './components/MobileMenuDrawer';
@@ -307,6 +308,23 @@ export const App: React.FC = () => {
         return calculatePiketMatches(daysState, daftarLibur, selectedYear, selectedMonth);
     }, [daysState, daftarLibur, selectedYear, selectedMonth]);
 
+    // Selection state for dates in calendar
+    const [selectedDays, setSelectedDays] = useState<number[]>([]);
+    const [lastSelectedDay, setLastSelectedDay] = useState<number | null>(null);
+
+    // History and Future stacks for Undo / Redo
+    const [historyStack, setHistoryStack] = useState<Record<string, DayData>[]>([]);
+    const [futureStack, setFutureStack] = useState<Record<string, DayData>[]>([]);
+
+    // Context Menu State
+    const [contextMenuPos, setContextMenuPos] = useState<ContextMenuPosition | null>(null);
+
+    // Helper to push state before changes
+    const pushToHistory = useCallback((stateToSave: Record<string, DayData>) => {
+        setHistoryStack((prev) => [...prev.slice(-25), { ...stateToSave }]);
+        setFutureStack([]);
+    }, []);
+
     // Undo stack for Reset Bulan
     const [undoBackup, setUndoBackup] = useState<{
         month: number;
@@ -538,6 +556,9 @@ export const App: React.FC = () => {
             }
         }
 
+        // Push current state to undo history
+        pushToHistory(daysState);
+
         setUndoBackup({
             month: selectedMonth,
             year: selectedYear,
@@ -557,20 +578,117 @@ export const App: React.FC = () => {
         showToast(`Jadwal bulan ${MONTH_NAMES[selectedMonth - 1]} ${selectedYear} berhasil direset.`);
     };
 
+    const handleUndo = useCallback(() => {
+        if (historyStack.length > 0) {
+            const previousState = historyStack[historyStack.length - 1];
+            setHistoryStack((prev) => prev.slice(0, -1));
+            setFutureStack((prev) => [...prev, daysState]);
+            setDaysState(previousState);
+            showToast('Perubahan berhasil dibatalkan (Undo).');
+        } else if (undoBackup) {
+            setDaysState((prev) => ({
+                ...prev,
+                ...undoBackup.data,
+            }));
+            setUndoBackup(null);
+            showToast('Reset jadwal berhasil dibatalkan (Undo).');
+        }
+    }, [historyStack, daysState, undoBackup]);
+
+    const handleRedo = useCallback(() => {
+        if (futureStack.length > 0) {
+            const nextState = futureStack[futureStack.length - 1];
+            setFutureStack((prev) => prev.slice(0, -1));
+            setHistoryStack((prev) => [...prev, daysState]);
+            setDaysState(nextState);
+            showToast('Perubahan berhasil dikembalikan (Redo).');
+        }
+    }, [futureStack, daysState]);
+
     const handleUndoReset = () => {
-        if (!undoBackup) return;
-
-        setDaysState((prev) => ({
-            ...prev,
-            ...undoBackup.data,
-        }));
-
-        setUndoBackup(null);
-        showToast('Reset jadwal berhasil dibatalkan (Undo).');
+        handleUndo();
     };
+
+    // Selection Handlers
+    const handleSelectAll = useCallback(() => {
+        const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+        const allDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+        setSelectedDays(allDays);
+        showToast(`Seluruh ${daysInMonth} hari bulan ${MONTH_NAMES[selectedMonth - 1]} dipilih.`);
+    }, [selectedYear, selectedMonth]);
+
+    const handleSelectDay = useCallback((dayNum: number, e: React.MouseEvent) => {
+        if (e.shiftKey && lastSelectedDay !== null) {
+            const start = Math.min(lastSelectedDay, dayNum);
+            const end = Math.max(lastSelectedDay, dayNum);
+            const range = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+            setSelectedDays((prev) => Array.from(new Set([...prev, ...range])));
+        } else if (e.ctrlKey || e.metaKey) {
+            setSelectedDays((prev) =>
+                prev.includes(dayNum) ? prev.filter((d) => d !== dayNum) : [...prev, dayNum]
+            );
+            setLastSelectedDay(dayNum);
+        } else {
+            setSelectedDays([dayNum]);
+            setLastSelectedDay(dayNum);
+        }
+    }, [lastSelectedDay]);
+
+    const handleOpenContextMenu = useCallback((e: React.MouseEvent, dayNum?: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (dayNum !== undefined) {
+            if (!selectedDays.includes(dayNum)) {
+                setSelectedDays([dayNum]);
+                setLastSelectedDay(dayNum);
+            }
+        }
+        setContextMenuPos({
+            x: e.clientX,
+            y: e.clientY,
+            targetDay: dayNum,
+        });
+    }, [selectedDays]);
+
+    const handleCopySelected = useCallback(() => {
+        const targetDays = selectedDays.length > 0
+            ? selectedDays
+            : (contextMenuPos?.targetDay ? [contextMenuPos.targetDay] : []);
+
+        if (targetDays.length === 0) {
+            showToast('Pilih setidaknya satu tanggal untuk disalin.');
+            return;
+        }
+
+        const sortedDays = [...targetDays].sort((a, b) => a - b);
+        const rows = sortedDays.map((d) => {
+            const key = `${selectedYear}-${selectedMonth}-${d}`;
+            const data = daysState[key];
+            return `${d}\t${data?.shift || ''}\t${data?.jamMasuk || ''}\t${data?.jamPulang || ''}\t${data?.absenCeisa || ''}\t${data?.note || ''}`;
+        });
+
+        const tsvContent = ['Tanggal\tShift\tJam Masuk\tJam Pulang\tAbsen CEISA\tCatatan', ...rows].join('\n');
+
+        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+            navigator.clipboard.writeText(tsvContent).catch(() => {});
+        }
+        showToast(`Data shift & presensi ${sortedDays.length} hari berhasil disalin.`);
+    }, [selectedDays, contextMenuPos, selectedYear, selectedMonth, daysState]);
+
+    const handlePasteContext = useCallback(() => {
+        setIsPasteModalOpen(true);
+    }, []);
+
+    // Clear selection on Month or Year change
+    useEffect(() => {
+        setSelectedDays([]);
+        setLastSelectedDay(null);
+        setContextMenuPos(null);
+    }, [selectedYear, selectedMonth]);
 
     // Import / Paste Handlers
     const handleApplyPastedSchedule = (batchData: Record<string, Partial<DayData>>) => {
+        pushToHistory(daysState);
         setDaysState((prev) => {
             const next = { ...prev };
             Object.entries(batchData).forEach(([dateKey, partial]) => {
@@ -710,10 +828,96 @@ export const App: React.FC = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isMobile, expandedDesktopDay, daysInCurrentMonth]);
 
+    // Global Right-Click (Context Menu) on App
+    useEffect(() => {
+        const handleGlobalContextMenu = (e: MouseEvent) => {
+            // If inside an open modal or drawer, do not intercept
+            if (isPasteModalOpen || isResetConfirmOpen || isMonthYearPickerOpen || isMobileMenuOpen) {
+                return;
+            }
+
+            // If not in calendar tab, do not intercept
+            if (pageTab !== 'calendar') {
+                return;
+            }
+
+            // Always prevent browser & system default context menu
+            e.preventDefault();
+            e.stopPropagation();
+
+            const target = e.target as HTMLElement | null;
+            const dayEl = target?.closest('[data-day-number]') as HTMLElement | null;
+            const dayNumber = dayEl ? parseInt(dayEl.getAttribute('data-day-number') || '', 10) : undefined;
+            const validDay = (dayNumber && !isNaN(dayNumber) && dayNumber >= 1 && dayNumber <= 31) ? dayNumber : undefined;
+
+            if (validDay !== undefined) {
+                if (!selectedDays.includes(validDay)) {
+                    setSelectedDays([validDay]);
+                    setLastSelectedDay(validDay);
+                }
+            }
+
+            setContextMenuPos({
+                x: e.clientX,
+                y: e.clientY,
+                targetDay: validDay,
+            });
+        };
+
+        window.addEventListener('contextmenu', handleGlobalContextMenu, { capture: true });
+        document.addEventListener('contextmenu', handleGlobalContextMenu, { capture: true });
+        return () => {
+            window.removeEventListener('contextmenu', handleGlobalContextMenu, { capture: true });
+            document.removeEventListener('contextmenu', handleGlobalContextMenu, { capture: true });
+        };
+    }, [isPasteModalOpen, isResetConfirmOpen, isMonthYearPickerOpen, isMobileMenuOpen, pageTab, selectedDays]);
+
+    // Global keyboard shortcuts for Calendar operations (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+Z, Ctrl+Y)
+    useEffect(() => {
+        const handleGlobalKeys = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement | null;
+            const isTyping = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+            if (isTyping) return;
+
+            // Never intercept keys when any modal or spreadsheet is active
+            if (isPasteModalOpen || isResetConfirmOpen || isMonthYearPickerOpen || isMobileMenuOpen) return;
+            if (pageTab !== 'calendar') return;
+
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) {
+                e.preventDefault();
+                handleSelectAll();
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
+                if (selectedDays.length > 0) {
+                    e.preventDefault();
+                    handleCopySelected();
+                }
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
+                e.preventDefault();
+                handlePasteContext();
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+                if (e.shiftKey) {
+                    e.preventDefault();
+                    handleRedo();
+                } else {
+                    e.preventDefault();
+                    handleUndo();
+                }
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+                e.preventDefault();
+                handleRedo();
+            }
+        };
+
+        window.addEventListener('keydown', handleGlobalKeys);
+        return () => window.removeEventListener('keydown', handleGlobalKeys);
+    }, [isPasteModalOpen, isResetConfirmOpen, isMonthYearPickerOpen, isMobileMenuOpen, pageTab, selectedDays, handleSelectAll, handleCopySelected, handlePasteContext, handleUndo, handleRedo]);
+
     return (
         <div
             data-theme={currentTheme}
-            className={`min-h-screen flex flex-col ${themeConfig.wrapperClass} font-sans selection:bg-teal-500 selection:text-white`}
+            className={`min-h-screen flex flex-col ${themeConfig.wrapperClass} ${
+                currentTheme === 'paperSketch' ? "font-['Gaegu']" : 'font-sans'
+            } selection:bg-teal-500 selection:text-white`}
         >
             {/* Window Title Bar */}
             <div className="sticky top-0 z-[999999] shrink-0 w-full">
@@ -820,24 +1024,39 @@ export const App: React.FC = () => {
                                         const totalCells = firstDayOffset + daysInCurrentMonth;
                                         const totalRows = Math.ceil(totalCells / 7);
 
-                                        // Calculated aspect ratio based on total rows (4, 5, or 6) so full calendar month fits viewport height
+                                        // Dynamic autoscale aspect ratio and minimum height based on viewport and total rows
                                         const getGridAspectStyle = (rows: number): React.CSSProperties => {
                                             if (isMobile) {
-                                                return { aspectRatio: '1 / 1' }; // Perfect square on mobile view for spaciousness
+                                                return {
+                                                    aspectRatio: '1 / 1',
+                                                    minHeight: 'clamp(54px, 12.5vw, 80px)',
+                                                };
                                             }
                                             if (rows >= 6) {
-                                                return { aspectRatio: '1.6 / 1' }; // Taller cell on desktop for 6-row months
+                                                return {
+                                                    aspectRatio: '1.2 / 1',
+                                                    minHeight: 'clamp(84px, 11vh, 120px)',
+                                                };
                                             }
                                             if (rows === 5) {
-                                                return { aspectRatio: '1.4 / 1' }; // Taller cell on desktop for 5-row months
+                                                return {
+                                                    aspectRatio: '1.18 / 1',
+                                                    minHeight: 'clamp(88px, 12vh, 130px)',
+                                                };
                                             }
-                                            return { aspectRatio: '1.2 / 1' }; // Taller cell on desktop for <=4-row months
+                                            return {
+                                                aspectRatio: '1.12 / 1',
+                                                minHeight: 'clamp(94px, 13vh, 140px)',
+                                            };
                                         };
 
                                         const cellAspectStyle = getGridAspectStyle(totalRows);
 
                                         return (
-                                            <div className="grid grid-cols-7 gap-1 sm:gap-1.5 relative">
+                                            <div 
+                                                className="grid grid-cols-7 gap-1 sm:gap-1.5 relative w-full"
+                                                onContextMenu={(e) => handleOpenContextMenu(e)}
+                                            >
                                                 {/* Empty prefix cells to align Day 1 with its correct day of the week */}
                                                 {Array.from({ length: firstDayOffset }).map((_, emptyIdx) => (
                                                     <div
@@ -891,7 +1110,9 @@ export const App: React.FC = () => {
                                                                 isLocked={dayData.isLocked ?? true}
                                                                 holiday={holiday}
                                                                 theme={currentTheme}
-                                                                
+                                                                isSelected={selectedDays.includes(dayNumber)}
+                                                                onSelectDay={handleSelectDay}
+                                                                onContextMenu={handleOpenContextMenu}
                                                                 isExpandedDesktop={!isMobile && expandedDesktopDay === dayNumber}
                                                                 isRightEdge={isRightEdge}
                                                                 isBottomEdge={isBottomEdge}
@@ -1164,6 +1385,24 @@ export const App: React.FC = () => {
                     );
                 })()
             )}
+
+            {/* Right Click Context Menu for Calendar Operations */}
+            <CalendarContextMenu
+                isOpen={contextMenuPos !== null}
+                position={contextMenuPos}
+                onClose={() => setContextMenuPos(null)}
+                theme={currentTheme}
+                hasSelection={selectedDays.length > 0 || (contextMenuPos?.targetDay !== undefined)}
+                selectedCount={selectedDays.length}
+                canUndo={historyStack.length > 0 || undoBackup !== null}
+                canRedo={futureStack.length > 0}
+                onSelectAll={handleSelectAll}
+                onCopy={handleCopySelected}
+                onPaste={handlePasteContext}
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                onReset={() => setIsResetConfirmOpen(true)}
+            />
 
             {/* Toast Notification */}
             <ToastNotification

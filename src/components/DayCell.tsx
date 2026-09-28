@@ -33,11 +33,14 @@ interface DayCellProps {
     isExpandedDesktop?: boolean;
     isRightEdge?: boolean;
     isBottomEdge?: boolean;
+    isSelected?: boolean;
     onToggleExpandDesktop?: (dayNumber: number) => void;
     onCloseExpandDesktop?: () => void;
     onUpdate?: (newData: Partial<DayData>) => void;
     onRequestTimePick?: (field: 'jamMasuk' | 'jamPulang' | 'absenCeisa', title: string, currentValue: string) => void;
     onOpenDetail?: (dayNumber: number) => void;
+    onContextMenu?: (e: React.MouseEvent, dayNumber: number) => void;
+    onSelectDay?: (dayNumber: number, e: React.MouseEvent) => void;
     piketMatchInfo?: PiketMatchInfo;
     offMatchInfo?: OffMatchInfo;
     nextDayData?: DayData;
@@ -218,11 +221,14 @@ export const DayCell = React.memo<DayCellProps>(({
     isExpandedDesktop = false,
     isRightEdge = false,
     isBottomEdge = false,
+    isSelected = false,
     onToggleExpandDesktop,
     onCloseExpandDesktop,
     onUpdate,
     onRequestTimePick,
     onOpenDetail,
+    onContextMenu,
+    onSelectDay,
     piketMatchInfo,
     offMatchInfo,
     nextDayData,
@@ -402,14 +408,14 @@ export const DayCell = React.memo<DayCellProps>(({
                 WebkitBackdropFilter: 'blur(20px) saturate(190%)',
             };
         }
-        // Default light theme: modern flat/clean solid white with subtle elevation
+        // Default light theme: modern flat/clean solid white with clear crisp border & distinctive elevation shadow
         return {
             borderRadius: '8px',
             backgroundColor: '#ffffff',
-            border: elevated ? '1px solid #cbd5e1' : '1px solid rgba(0, 0, 0, 0.04)',
+            border: elevated ? '1.5px solid #94a3b8' : '1px solid #cbd5e1',
             boxShadow: elevated
-                ? '0 12px 24px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06)'
-                : '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+                ? '0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                : '0 2px 6px -1px rgba(0, 0, 0, 0.08), 0 1px 4px -1px rgba(0, 0, 0, 0.05)',
         };
     };
 
@@ -448,11 +454,20 @@ export const DayCell = React.memo<DayCellProps>(({
         >
             {/* 1. COMPACT VIEW ON MOBILE: 1:1 SQUARE ASPECT RATIO */}
             <div
+                data-day-number={dayNumber}
                 role="button"
                 tabIndex={0}
                 aria-label={`Detail tanggal ${dayNumber}`}
                 style={getCardStyle(false)}
-                onClick={() => onOpenDetail?.(dayNumber)}
+                onClick={(e) => {
+                    onSelectDay?.(dayNumber, e);
+                    onOpenDetail?.(dayNumber);
+                }}
+                onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onContextMenu?.(e, dayNumber);
+                }}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
@@ -468,7 +483,7 @@ export const DayCell = React.memo<DayCellProps>(({
                         ? 'text-slate-200 hover:border-indigo-400/50'
                         : 'text-slate-900 hover:border-indigo-400/50'
                 }`}
-                title="Klik untuk membuka kartu detail tanggal ini"
+                title="Klik untuk membuka kartu detail tanggal ini (Klik kanan untuk menu salin/presensi)"
             >
                 {/* Top Section: Tanggal & Indikator + Shift langsung di bawah tanggal */}
                 <div className="w-full shrink-0">
@@ -593,6 +608,7 @@ export const DayCell = React.memo<DayCellProps>(({
 
             {/* 2. DESKTOP VIEW: UNIFIED EXPANDING CARD (MORPHS FROM 1:1 TO 4:4 / 2x2 ON CLICK) */}
             <div
+                data-day-number={dayNumber}
                 ref={expandedCardRef}
                 role="button"
                 tabIndex={0}
@@ -601,10 +617,16 @@ export const DayCell = React.memo<DayCellProps>(({
                     ...getCardStyle(isExpandedDesktop),
                     zIndex: isExpandedDesktop ? 70 : isDropdownOpen ? 45 : 1,
                 }}
-                onClick={() => {
+                onClick={(e) => {
+                    onSelectDay?.(dayNumber, e);
                     if (!isExpandedDesktop) {
                         onToggleExpandDesktop?.(dayNumber);
                     }
+                }}
+                onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onContextMenu?.(e, dayNumber);
                 }}
                 onKeyDown={(e) => {
                     if (!isExpandedDesktop && (e.key === 'Enter' || e.key === ' ')) {
@@ -1043,7 +1065,14 @@ export const DayCell = React.memo<DayCellProps>(({
 
     return (
         <div
-            className={`relative w-full aspect-square ${
+            data-day-number={dayNumber}
+            onContextMenu={(e) => {
+                if (onContextMenu) {
+                    e.preventDefault();
+                    onContextMenu(e, dayNumber);
+                }
+            }}
+            className={`relative w-full h-full rounded-[8px] transition-all duration-150 ${
                 isExpandedDesktop
                     ? 'z-[60] overflow-visible'
                     : isDropdownOpen

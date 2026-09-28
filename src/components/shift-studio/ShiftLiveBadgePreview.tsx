@@ -149,8 +149,8 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
                             {renderPatternOverlay()}
                             <div className="relative z-10 flex items-center space-x-1 min-w-0 max-w-full">
                                 {renderIcon('w-3.5 h-3.5 shrink-0')}
-                                <span className="tracking-tight truncate max-w-[110px] sm:max-w-[140px]" title={naming.displayBadge || 'SHIFT'}>
-                                    {naming.displayBadge || 'SHIFT'}
+                                <span className="tracking-tight truncate max-w-[110px] sm:max-w-[140px] uppercase" title={(naming.displayBadge || 'SHIFT').toUpperCase()}>
+                                    {(naming.displayBadge || 'SHIFT').toUpperCase()}
                                 </span>
                             </div>
                         </div>
@@ -158,7 +158,7 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
                         /* Mobile Preview Card Badge */
                         <div className="flex items-center space-x-1.5 min-w-0 flex-1 justify-center">
                             <div
-                                className="relative w-5 h-5 rounded-[4px] font-black text-[9.5px] shadow-2xs border flex items-center justify-center select-none overflow-hidden shrink-0"
+                                className="relative w-5 h-5 rounded-[4px] font-black text-[9.5px] shadow-2xs border flex items-center justify-center select-none overflow-hidden shrink-0 uppercase"
                                 style={{
                                     ...getBackgroundStyle(),
                                     color: visual.textColor || '#FFFFFF',
@@ -166,7 +166,7 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
                                 }}
                             >
                                 {renderPatternOverlay()}
-                                <span className="relative z-10 truncate max-w-full">{naming.copyCode || (naming.displayBadge || 'S').slice(0, 1)}</span>
+                                <span className="relative z-10 truncate max-w-full">{(naming.copyCode || (naming.displayBadge || 'S').slice(0, 1)).toUpperCase()}</span>
                             </div>
                             <div className="text-[10px] leading-tight text-slate-600 dark:text-zinc-300 min-w-0 flex-1 max-w-[130px] sm:max-w-[180px]">
                                 <span className="font-bold block truncate w-full" title={naming.fullName || 'Nama Shift'}>

@@ -147,6 +147,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   const isDarkFluid = theme === 'darkFluid';
   const isDark = theme === 'dark';
   const isVista = theme === 'vista';
+  const isPaperSketch = theme === 'paperSketch';
   const isDefault = theme === 'default';
 
   // Format display text
@@ -272,6 +273,20 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         btnNav: 'hover:bg-white/80 text-sky-900 border border-white/70 bg-white/40 backdrop-blur-xs',
         btnToday: 'bg-gradient-to-b from-sky-400 to-blue-600 text-white font-bold hover:from-sky-500 hover:to-blue-700 shadow-xs border border-white/50',
         btnQuick: 'bg-white/60 text-sky-900 border border-white/70 hover:bg-white/90 backdrop-blur-xs shadow-2xs',
+      };
+    }
+    if (isPaperSketch) {
+      return {
+        inputWrapper: 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] font-bold',
+        dropdown: 'bg-white text-[#2b2b2b] border-[2.5px] border-[#2b2b2b] shadow-[6px_6px_0px_#2b2b2b] rounded-xl overflow-hidden font-[\'Gaegu\']',
+        header: 'bg-[#f2efeb] border-b-2 border-dashed border-[#2b2b2b] text-[#2b2b2b]',
+        daySelected: 'bg-[#ff4747] text-white font-black shadow-[2px_2px_0px_#2b2b2b] border border-[#2b2b2b]',
+        dayToday: 'border-2 border-[#2ec4b6] text-[#2b2b2b] font-bold bg-[#2ec4b6]/20',
+        dayNormal: 'text-[#2b2b2b] hover:bg-[#2ec4b6]/30 hover:text-[#2b2b2b] font-bold',
+        dayOther: 'text-[#2b2b2b]/30 hover:bg-[#2b2b2b]/5',
+        btnNav: 'hover:bg-[#2ec4b6] text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[1.5px_1.5px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
+        btnToday: 'bg-[#2ec4b6] text-[#2b2b2b] font-bold hover:bg-[#26a89c] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]',
+        btnQuick: 'bg-[#f2efeb] text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/30 shadow-[1.5px_1.5px_0px_#2b2b2b]',
       };
     }
     // Default Clean Light Theme

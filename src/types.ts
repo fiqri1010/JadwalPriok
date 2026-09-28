@@ -148,6 +148,7 @@ export const EXCEL_SHIFT_MAPPING: Record<string, ShiftType> = {
     OFF: 'OFF',
     SM: 'SM',
     S2: 'SM',
+    P: 'PM',
     PM: 'PM',
     M: 'Malam',
     MALAM: 'Malam',
