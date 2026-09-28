@@ -3,15 +3,43 @@ import { AppLogo } from './AppLogo';
 import { FULL_APP_TITLE } from '../version';
 import {
     Minus,
+    Plus,
     Square,
     Copy,
     X,
     Zap,
     Maximize2,
-    Minimize2
+    Minimize2,
+    Percent
 } from 'lucide-react';
 import { AppTheme } from '../types';
 import { isTauriEnvironment } from '../lib/fileDownload';
+
+export const LOCAL_STORAGE_UI_ZOOM_KEY = 'jadwalpriok_ui_zoom_level';
+
+export function getInitialZoom(): number {
+    if (typeof window === 'undefined') return 100;
+    try {
+        const saved = localStorage.getItem(LOCAL_STORAGE_UI_ZOOM_KEY);
+        if (saved) {
+            const parsed = parseInt(saved, 10);
+            if (!isNaN(parsed) && parsed >= 60 && parsed <= 160) {
+                return parsed;
+            }
+        }
+    } catch {}
+    return 100;
+}
+
+export function applyUiZoom(zoomLevel: number) {
+    if (typeof document === 'undefined') return;
+    try {
+        (document.documentElement.style as any).zoom = `${zoomLevel}%`;
+        localStorage.setItem(LOCAL_STORAGE_UI_ZOOM_KEY, String(zoomLevel));
+    } catch (e) {
+        console.warn('Gagal mengubah zoom UI:', e);
+    }
+}
 
 interface WindowTitleBarProps {
     theme: AppTheme;
@@ -29,6 +57,12 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
     onClose
 }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [zoomLevel, setZoomLevel] = useState<number>(getInitialZoom);
+
+    // Apply zoom and keep in sync
+    useEffect(() => {
+        applyUiZoom(zoomLevel);
+    }, [zoomLevel]);
 
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -63,6 +97,21 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                 }
             }
         }
+    };
+
+    const handleZoomIn = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setZoomLevel((prev) => Math.min(150, prev + 10));
+    };
+
+    const handleZoomOut = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setZoomLevel((prev) => Math.max(70, prev - 10));
+    };
+
+    const handleResetZoom = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setZoomLevel(100);
     };
 
     const handleMinimize = async () => {
@@ -149,6 +198,35 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                     </div>
 
                     <div className="flex items-center space-x-1 shrink-0">
+                        {/* Zoom Controls: "-", "%", "+" (6px jarak ke tombol minimize) */}
+                        <div className="flex items-center space-x-0.5 mr-[6px]">
+                            <button
+                                type="button"
+                                onClick={handleZoomOut}
+                                className="h-5 w-5 rounded-sm border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] hover:bg-[#2ec4b6]/30 shadow-[1px_1px_0px_#2b2b2b] flex items-center justify-center transition-all cursor-pointer font-bold active:translate-x-0.5 active:translate-y-0.5"
+                                title="Perkecil Ukuran Tampilan UI (-)"
+                            >
+                                <Minus className="h-2.5 w-2.5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleResetZoom}
+                                className="h-5 px-1.5 rounded-sm border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] hover:bg-[#2ec4b6]/30 shadow-[1px_1px_0px_#2b2b2b] flex items-center justify-center text-[10px] font-mono font-bold transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+                                title="Reset Ukuran UI ke 100%"
+                            >
+                                {zoomLevel}%
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleZoomIn}
+                                className="h-5 w-5 rounded-sm border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] hover:bg-[#2ec4b6]/30 shadow-[1px_1px_0px_#2b2b2b] flex items-center justify-center transition-all cursor-pointer font-bold active:translate-x-0.5 active:translate-y-0.5"
+                                title="Perbesar Ukuran Tampilan UI (+)"
+                            >
+                                <Plus className="h-2.5 w-2.5" />
+                            </button>
+                        </div>
+
+                        {/* Window Controls */}
                         <button
                             type="button"
                             onClick={handleMinimize}
@@ -211,6 +289,34 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
 
                     {/* Window Controls: Minimize, Maximize, Close */}
                     <div className="flex items-center space-x-1.5 z-10 shrink-0 -mr-1">
+                        {/* Zoom Controls: "-", "%", "+" (6px jarak ke tombol minimize) */}
+                        <div className="flex items-center space-x-0.5 mr-[6px]">
+                            <button
+                                type="button"
+                                onClick={handleZoomOut}
+                                title="Perkecil Ukuran Tampilan UI (-)"
+                                className="h-5 w-5 rounded-xs flex items-center justify-center bg-white/40 hover:bg-white/70 border border-white/70 text-sky-950 shadow-2xs transition-all cursor-pointer active:scale-95"
+                            >
+                                <Minus className="h-2.5 w-2.5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleResetZoom}
+                                title="Reset Ukuran UI ke 100%"
+                                className="h-5 px-1.5 rounded-xs flex items-center justify-center bg-white/40 hover:bg-white/70 border border-white/70 text-sky-950 text-[10px] font-bold shadow-2xs transition-all cursor-pointer active:scale-95"
+                            >
+                                {zoomLevel}%
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleZoomIn}
+                                title="Perbesar Ukuran Tampilan UI (+)"
+                                className="h-5 w-5 rounded-xs flex items-center justify-center bg-white/40 hover:bg-white/70 border border-white/70 text-sky-950 shadow-2xs transition-all cursor-pointer active:scale-95"
+                            >
+                                <Plus className="h-2.5 w-2.5" />
+                            </button>
+                        </div>
+
                         <button
                             type="button"
                             onClick={handleMinimize}
@@ -270,6 +376,34 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
 
                     {/* Winamp Controls: Minimize, Maximize, Close */}
                     <div className="flex items-center space-x-1 shrink-0">
+                        {/* Zoom Controls: "-", "%", "+" (6px jarak ke tombol minimize) */}
+                        <div className="flex items-center space-x-0.5 mr-[6px]">
+                            <button
+                                type="button"
+                                onClick={handleZoomOut}
+                                title="Perkecil Ukuran Tampilan UI (-)"
+                                className="h-4 w-4 bg-[#323b42] hover:bg-[#485560] border-t border-l border-[#6a7d8d] border-b border-r border-[#0a0d0f] text-[#00ff66] flex items-center justify-center text-[10px] font-mono font-bold cursor-pointer"
+                            >
+                                -
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleResetZoom}
+                                title="Reset Ukuran UI ke 100%"
+                                className="h-4 px-1 bg-[#323b42] hover:bg-[#485560] border-t border-l border-[#6a7d8d] border-b border-r border-[#0a0d0f] text-[#00ff66] flex items-center justify-center text-[9px] font-mono font-bold cursor-pointer"
+                            >
+                                {zoomLevel}%
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleZoomIn}
+                                title="Perbesar Ukuran Tampilan UI (+)"
+                                className="h-4 w-4 bg-[#323b42] hover:bg-[#485560] border-t border-l border-[#6a7d8d] border-b border-r border-[#0a0d0f] text-[#00ff66] flex items-center justify-center text-[10px] font-mono font-bold cursor-pointer"
+                            >
+                                +
+                            </button>
+                        </div>
+
                         <button
                             type="button"
                             onClick={handleMinimize}
@@ -317,6 +451,34 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                     </div>
 
                     <div className="flex items-center space-x-0.5 shrink-0">
+                        {/* Zoom Controls: "-", "%", "+" (6px jarak ke tombol minimize) */}
+                        <div className="flex items-center space-x-0.5 mr-[6px]">
+                            <button
+                                type="button"
+                                onClick={handleZoomOut}
+                                className="h-5 w-5 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                                title="Perkecil Ukuran Tampilan UI (-)"
+                            >
+                                <Minus className="h-2.5 w-2.5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleResetZoom}
+                                className="h-5 px-1.5 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-white/10 text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                                title="Reset Ukuran UI ke 100%"
+                            >
+                                {zoomLevel}%
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleZoomIn}
+                                className="h-5 w-5 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                                title="Perbesar Ukuran Tampilan UI (+)"
+                            >
+                                <Plus className="h-2.5 w-2.5" />
+                            </button>
+                        </div>
+
                         <button
                             type="button"
                             onClick={handleMinimize}
@@ -364,6 +526,34 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                     </div>
 
                     <div className="flex items-center space-x-0.5 shrink-0">
+                        {/* Zoom Controls: "-", "%", "+" (6px jarak ke tombol minimize) */}
+                        <div className="flex items-center space-x-0.5 mr-[6px]">
+                            <button
+                                type="button"
+                                onClick={handleZoomOut}
+                                className="h-5 w-5 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                                title="Perkecil Ukuran Tampilan UI (-)"
+                            >
+                                <Minus className="h-2.5 w-2.5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleResetZoom}
+                                className="h-5 px-1.5 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                                title="Reset Ukuran UI ke 100%"
+                            >
+                                {zoomLevel}%
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleZoomIn}
+                                className="h-5 w-5 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                                title="Perbesar Ukuran Tampilan UI (+)"
+                            >
+                                <Plus className="h-2.5 w-2.5" />
+                            </button>
+                        </div>
+
                         <button
                             type="button"
                             onClick={handleMinimize}
@@ -410,6 +600,34 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                 </div>
 
                 <div className="flex items-center space-x-0.5 shrink-0">
+                    {/* Zoom Controls: "-", "%", "+" (6px jarak ke tombol minimize) */}
+                    <div className="flex items-center space-x-0.5 mr-[6px]">
+                        <button
+                            type="button"
+                            onClick={handleZoomOut}
+                            className="h-5 w-5 rounded flex items-center justify-center text-slate-500 hover:text-[#011627] hover:bg-slate-100 transition-colors cursor-pointer font-bold"
+                            title="Perkecil Ukuran Tampilan UI (-)"
+                        >
+                            <Minus className="h-2.5 w-2.5" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleResetZoom}
+                            className="h-5 px-1.5 rounded flex items-center justify-center text-slate-600 hover:text-[#011627] hover:bg-slate-100 text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                            title="Reset Ukuran UI ke 100%"
+                        >
+                            {zoomLevel}%
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleZoomIn}
+                            className="h-5 w-5 rounded flex items-center justify-center text-slate-500 hover:text-[#011627] hover:bg-slate-100 transition-colors cursor-pointer font-bold"
+                            title="Perbesar Ukuran Tampilan UI (+)"
+                        >
+                            <Plus className="h-2.5 w-2.5" />
+                        </button>
+                    </div>
+
                     <button
                         type="button"
                         onClick={handleMinimize}

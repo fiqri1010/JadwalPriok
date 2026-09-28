@@ -39,7 +39,6 @@ interface DayCellProps {
     onUpdate?: (newData: Partial<DayData>) => void;
     onRequestTimePick?: (field: 'jamMasuk' | 'jamPulang' | 'absenCeisa', title: string, currentValue: string) => void;
     onOpenDetail?: (dayNumber: number) => void;
-    onContextMenu?: (e: React.MouseEvent, dayNumber: number) => void;
     onSelectDay?: (dayNumber: number, e: React.MouseEvent) => void;
     piketMatchInfo?: PiketMatchInfo;
     offMatchInfo?: OffMatchInfo;
@@ -227,7 +226,6 @@ export const DayCell = React.memo<DayCellProps>(({
     onUpdate,
     onRequestTimePick,
     onOpenDetail,
-    onContextMenu,
     onSelectDay,
     piketMatchInfo,
     offMatchInfo,
@@ -463,11 +461,6 @@ export const DayCell = React.memo<DayCellProps>(({
                     onSelectDay?.(dayNumber, e);
                     onOpenDetail?.(dayNumber);
                 }}
-                onContextMenu={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onContextMenu?.(e, dayNumber);
-                }}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
@@ -575,15 +568,15 @@ export const DayCell = React.memo<DayCellProps>(({
                                     />
                                 )}
                                 <span
-                                    className={`font-black text-center whitespace-nowrap leading-none ${
+                                    className={`font-black text-center whitespace-nowrap uppercase leading-none ${
                                         normalizedShift.length >= 5
-                                            ? 'text-[7.5px] min-[360px]:text-[8px] min-[400px]:text-[9px] sm:text-[10px] lg:text-[11px] tracking-[-0.05em]'
+                                            ? 'text-[7px] min-[360px]:text-[7.5px] min-[400px]:text-[8.5px] sm:text-[9.5px] lg:text-[11px] tracking-[-0.05em]'
                                             : normalizedShift.length === 4
                                             ? 'text-[8.5px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-[10.5px] lg:text-[11.5px] tracking-tighter'
                                             : 'text-[9.5px] min-[400px]:text-[10px] sm:text-[10.5px] lg:text-[11.5px] tracking-tight'
                                     }`}
                                 >
-                                    {normalizedShift}
+                                    {normalizedShift.toUpperCase()}
                                 </span>
                             </div>
                         ) : (
@@ -622,11 +615,6 @@ export const DayCell = React.memo<DayCellProps>(({
                     if (!isExpandedDesktop) {
                         onToggleExpandDesktop?.(dayNumber);
                     }
-                }}
-                onContextMenu={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onContextMenu?.(e, dayNumber);
                 }}
                 onKeyDown={(e) => {
                     if (!isExpandedDesktop && (e.key === 'Enter' || e.key === ' ')) {
@@ -1066,12 +1054,6 @@ export const DayCell = React.memo<DayCellProps>(({
     return (
         <div
             data-day-number={dayNumber}
-            onContextMenu={(e) => {
-                if (onContextMenu) {
-                    e.preventDefault();
-                    onContextMenu(e, dayNumber);
-                }
-            }}
             className={`relative w-full h-full rounded-[8px] transition-all duration-150 ${
                 isExpandedDesktop
                     ? 'z-[60] overflow-visible'

@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { ClipboardPaste, X, Check, AlertCircle, Sparkles, HelpCircle, FileSpreadsheet } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SHIFT_OPTIONS, ShiftType, SHIFT_COLORS, DayData, EXCEL_SHIFT_MAPPING, AppTheme } from '../types';
-import { ExcelSpreadsheet, MatchedDayShift } from './ExcelSpreadsheet';
+import { ExcelSpreadsheet, MatchedDayShift, ExcelSpreadsheetRef } from './ExcelSpreadsheet';
+import { PasteContextMenu, PasteContextMenuPosition } from './PasteContextMenu';
 
 export type PasteTab = 'excel_grid' | 'schedule' | 'absen';
 
@@ -14,6 +15,7 @@ interface PasteExcelModalProps {
   selectedMonth: number;
   onApply: (updates: Record<string, Partial<DayData>>) => void;
   initialText?: string;
+  initialTab?: PasteTab;
   theme?: AppTheme;
 }
 
@@ -31,9 +33,16 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
   selectedMonth,
   onApply,
   initialText = '',
+  initialTab = 'excel_grid',
   theme = 'default',
 }) => {
-  const [activeTab, setActiveTab] = useState<PasteTab>('excel_grid');
+  const [activeTab, setActiveTab] = useState<PasteTab>(initialTab);
+
+  useEffect(() => {
+    if (isOpen && initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
 
   const [spreadsheetShifts, setSpreadsheetShifts] = useState<MatchedDayShift[]>([]);
   const [spreadsheetValidCount, setSpreadsheetValidCount] = useState<number>(0);
@@ -47,7 +56,9 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
   const [inputTextAbsen, setInputTextAbsen] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [contextMenuPos, setContextMenuPos] = useState<PasteContextMenuPosition | null>(null);
 
+  const spreadsheetRef = useRef<ExcelSpreadsheetRef>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const textareaAbsenRef = useRef<HTMLTextAreaElement>(null);
 
@@ -61,6 +72,99 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
   const isLightMode = isDefault || isVista || isPaperSketch;
 
   const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+  // Handler Klik Kanan Kustom pada Menu Salin
+  const handleModalContextMenu = (e: React.MouseEvent) => {
+    // Prevent browser native context menu
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Show custom Paste Context Menu at pointer position
+    setContextMenuPos({
+      x: e.clientX,
+      y: e.clientY,
+      tabType: activeTab,
+    });
+  };
+
+  const handlePasteClipboard = async () => {
+    if (activeTab === 'excel_grid') {
+      spreadsheetRef.current?.pasteClipboard();
+      return;
+    }
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        const text = await navigator.clipboard.readText();
+        if (activeTab === 'schedule') {
+          setInputText(text);
+          setErrorMsg(null);
+        } else if (activeTab === 'absen') {
+          setInputTextAbsen(text);
+          setErrorMsg(null);
+        }
+      }
+    } catch (err) {
+      console.warn('Clipboard read error:', err);
+    }
+  };
+
+  const handleLoadSample = () => {
+    if (activeTab === 'excel_grid') {
+      spreadsheetRef.current?.loadSample();
+      return;
+    }
+    if (activeTab === 'schedule') {
+      const sampleCodes = Array.from({ length: daysInMonth })
+        .map((_, i) => {
+          const cycle = ['P', 'S', 'M', 'OFF', 'SM', 'PM', 'L', 'G', 'CUTI'];
+          return cycle[i % cycle.length];
+        })
+        .join('\t');
+      setInputText(sampleCodes);
+      setErrorMsg(null);
+    } else if (activeTab === 'absen') {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const mStr = months[(selectedMonth - 1) % 12];
+      const sampleLines = Array.from({ length: Math.min(daysInMonth, 7) })
+        .map((_, i) => {
+          const d = String(i + 1).padStart(2, '0');
+          return `${d} ${mStr} ${selectedYear}\tWFO\t07.45 WIB\t17.15 WIB\tHadir Normal`;
+        })
+        .join('\n');
+      setInputTextAbsen(sampleLines);
+      setErrorMsg(null);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (activeTab === 'schedule') {
+      textareaRef.current?.focus();
+      textareaRef.current?.select();
+    } else if (activeTab === 'absen') {
+      textareaAbsenRef.current?.focus();
+      textareaAbsenRef.current?.select();
+    }
+  };
+
+  const handleClear = () => {
+    if (activeTab === 'excel_grid') {
+      spreadsheetRef.current?.resetGrid();
+      return;
+    }
+    if (activeTab === 'schedule') {
+      setInputText('');
+      setErrorMsg(null);
+    } else if (activeTab === 'absen') {
+      setInputTextAbsen('');
+      setErrorMsg(null);
+    }
+  };
+
+  const handleResetColorMap = () => {
+    if (activeTab === 'excel_grid') {
+      spreadsheetRef.current?.resetColorMap();
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -564,6 +668,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           onClick={(e) => e.stopPropagation()}
+          onContextMenu={handleModalContextMenu}
           style={{
             backgroundImage: currentStyle.outerBg,
             borderRadius: currentStyle.outerRadius,
@@ -573,6 +678,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
         >
           {/* .form-card2 Inner Form Container */}
           <div
+            onContextMenu={handleModalContextMenu}
             style={{
               backgroundColor: currentStyle.innerBg,
               borderRadius: currentStyle.innerRadius,
@@ -866,8 +972,9 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
 
               {/* TAB 1 CONTENT: EXCEL SPREADSHEET (Copy-Paste Format Excel with react-spreadsheet) */}
               {activeTab === 'excel_grid' && (
-                <div className="w-full">
+                <div className="w-full" onContextMenu={handleModalContextMenu}>
                   <ExcelSpreadsheet
+                    ref={spreadsheetRef}
                     selectedYear={selectedYear}
                     selectedMonth={selectedMonth}
                     daysInMonth={daysInMonth}
@@ -879,7 +986,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
 
               {/* TAB 2 & 3 CONTENT: Debossed Inset Area for Paste Text Input */}
               {activeTab !== 'excel_grid' && (
-                <div className="space-y-1 flex flex-col shrink-0">
+                <div className="space-y-1 flex flex-col shrink-0" onContextMenu={handleModalContextMenu}>
                   <label style={{ color: currentStyle.subtextColor }} className="text-[10px] font-bold uppercase tracking-wider block">
                     {activeTab === 'schedule'
                       ? 'Kotak Tempel Teks Shift (Ctrl + V):'
@@ -894,6 +1001,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                       borderRadius: isWinamp ? '0px' : '10px',
                     }}
                     className="p-2 sm:p-2.5 flex items-start gap-2 transition-all duration-200"
+                    onContextMenu={handleModalContextMenu}
                   >
                     {activeTab === 'schedule' ? (
                       <textarea
@@ -901,6 +1009,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                         ref={textareaRef}
                         rows={3}
                         value={inputText}
+                        onContextMenu={handleModalContextMenu}
                         onChange={(e) => {
                           setInputText(e.target.value);
                           setErrorMsg(null);
@@ -918,6 +1027,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                         ref={textareaAbsenRef}
                         rows={3}
                         value={inputTextAbsen}
+                        onContextMenu={handleModalContextMenu}
                         onChange={(e) => {
                           setInputTextAbsen(e.target.value);
                           setErrorMsg(null);
@@ -1145,6 +1255,19 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
             </div>
           </div>
         </motion.div>
+
+        {/* Custom Right-Click Context Menu inside Paste Modal */}
+        <PasteContextMenu
+          isOpen={contextMenuPos !== null}
+          position={contextMenuPos}
+          onClose={() => setContextMenuPos(null)}
+          theme={theme}
+          onPasteClipboard={handlePasteClipboard}
+          onLoadSample={handleLoadSample}
+          onSelectAll={handleSelectAll}
+          onClear={handleClear}
+          onResetColorMap={handleResetColorMap}
+        />
       </div>
     </AnimatePresence>
   );

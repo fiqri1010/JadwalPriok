@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
 import {
   Sparkles,
   RotateCcw,
@@ -11,6 +11,13 @@ import { SHIFT_OPTIONS, ShiftType, SHIFT_COLORS, EXCEL_SHIFT_MAPPING, AppTheme, 
 
 export const COLOR_TRANSPARENT_KEY = '__NO_COLOR__';
 export const LOCAL_STORAGE_EXCEL_COLOR_MAP_KEY = 'jadwalpriok_excel_colormap_v1';
+
+export interface ExcelSpreadsheetRef {
+  pasteClipboard: () => void;
+  loadSample: () => void;
+  resetGrid: () => void;
+  resetColorMap: () => void;
+}
 
 export function loadSavedExcelColorMap(): Record<string, ShiftType | ''> {
   if (typeof window === 'undefined') return {};
@@ -47,16 +54,22 @@ const MONTH_NAMES_ID = [
 ];
 
 // Helper untuk normalisasi warna ke HEX 6-digit standar
-export const normalizeColor = (colorStr?: string): string | null => {
+export const normalizeColor = (colorStr?: string | null): string | null => {
   if (!colorStr) return null;
   const str = colorStr.trim().toLowerCase();
   if (
+    str === '' ||
     str === 'transparent' ||
     str === 'rgba(0, 0, 0, 0)' ||
     str === 'rgba(0,0,0,0)' ||
     str === 'inherit' ||
     str === 'initial' ||
-    str === 'none'
+    str === 'unset' ||
+    str === 'windowtext' ||
+    str === 'auto' ||
+    str === 'none' ||
+    str === 'canvas' ||
+    str === 'canvastext'
   ) {
     return null;
   }
@@ -65,56 +78,124 @@ export const normalizeColor = (colorStr?: string): string | null => {
   if (
     str === '#fff' ||
     str === '#ffffff' ||
+    str === '#ffffffff' ||
     str === 'rgb(255, 255, 255)' ||
     str === 'rgb(255,255,255)' ||
     str === 'rgba(255, 255, 255, 1)' ||
+    str === 'rgba(255,255,255,1)' ||
     str === 'white'
   ) {
     return '#ffffff';
   }
 
-  // Hex format
+  // Pure black
+  if (
+    str === '#000' ||
+    str === '#000000' ||
+    str === '#ff000000' ||
+    str === '#000000ff' ||
+    str === 'rgb(0, 0, 0)' ||
+    str === 'rgb(0,0,0)' ||
+    str === 'rgba(0, 0, 0, 1)' ||
+    str === 'rgba(0,0,0,1)' ||
+    str === 'black'
+  ) {
+    return '#000000';
+  }
+
+  // Hex with leading #
   if (str.startsWith('#')) {
-    if (str.length === 4) {
-      return `#${str[1]}${str[1]}${str[2]}${str[2]}${str[3]}${str[3]}`;
+    const raw = str.slice(1);
+    if (raw.length === 3) {
+      return `#${raw[0]}${raw[0]}${raw[1]}${raw[1]}${raw[2]}${raw[2]}`.toLowerCase();
     }
-    return str.slice(0, 7);
+    if (raw.length === 6) {
+      return `#${raw}`.toLowerCase();
+    }
+    if (raw.length === 8) {
+      if (raw.startsWith('ff')) {
+        return `#${raw.slice(2)}`.toLowerCase();
+      }
+      if (raw.endsWith('ff')) {
+        return `#${raw.slice(0, 6)}`.toLowerCase();
+      }
+      return `#${raw.slice(2)}`.toLowerCase();
+    }
+  }
+
+  // Hex WITHOUT leading # (e.g. font color="FF0000" or color="0070C0" or "115E59")
+  if (/^[0-9a-f]{6}$/i.test(str)) {
+    return `#${str}`.toLowerCase();
+  }
+  if (/^[0-9a-f]{3}$/i.test(str)) {
+    return `#${str[0]}${str[0]}${str[1]}${str[1]}${str[2]}${str[2]}`.toLowerCase();
+  }
+  if (/^[0-9a-f]{8}$/i.test(str)) {
+    if (str.startsWith('ff')) {
+      return `#${str.slice(2)}`.toLowerCase();
+    }
+    return `#${str.slice(0, 6)}`.toLowerCase();
   }
 
   // RGB / RGBA format
   const rgbMatch = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
   if (rgbMatch) {
-    const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0');
-    const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0');
-    const b = parseInt(rgbMatch[3], 10).toString(16).padStart(2, '0');
-    return `#${r}${g}${b}`;
+    const r = Math.min(255, parseInt(rgbMatch[1], 10)).toString(16).padStart(2, '0');
+    const g = Math.min(255, parseInt(rgbMatch[2], 10)).toString(16).padStart(2, '0');
+    const b = Math.min(255, parseInt(rgbMatch[3], 10)).toString(16).padStart(2, '0');
+    return `#${r}${g}${b}`.toLowerCase();
   }
 
-  // Named HTML colors common in Excel
+  // Named HTML colors dictionary
   const namedColors: Record<string, string> = {
-    red: '#ff0000',
-    green: '#008000',
-    blue: '#0000ff',
-    yellow: '#ffff00',
-    orange: '#ffa500',
-    purple: '#800080',
-    cyan: '#00ffff',
-    magenta: '#ff00ff',
-    pink: '#ffc0cb',
-    gray: '#808080',
-    grey: '#808080',
-    lightgray: '#d3d3d3',
-    lightgrey: '#d3d3d3',
+    aliceblue: '#f0f8ff', antiquewhite: '#faebd7', aqua: '#00ffff', aquamarine: '#7fffd4',
+    azure: '#f0ffff', beige: '#f5f5dc', bisque: '#ffe4c4', black: '#000000',
+    blanchedalmond: '#ffebcd', blue: '#0000ff', blueviolet: '#8a2be2', brown: '#a52a2a',
+    burlywood: '#deb887', cadetblue: '#5f9ea0', chartreuse: '#7fff00', chocolate: '#d2691e',
+    coral: '#ff7f50', cornflowerblue: '#6495ed', cornsilk: '#fff8dc', crimson: '#dc143c',
+    cyan: '#00ffff', darkblue: '#00008b', darkcyan: '#008b8b', darkgoldenrod: '#b8860b',
+    darkgray: '#a9a9a9', darkgreen: '#006400', darkgrey: '#a9a9a9', darkkhaki: '#bdb76b',
+    darkmagenta: '#8b008b', darkolivegreen: '#556b2f', darkorange: '#ff8c00', darkorchid: '#9932cc',
+    darkred: '#8b0000', darksalmon: '#e9967a', darkseagreen: '#8fbc8f', darkslateblue: '#483d8b',
+    darkslategray: '#2f4f4f', darkslategrey: '#2f4f4f', darkturquoise: '#00ced1', darkviolet: '#9400d3',
+    deeppink: '#ff1493', deepskyblue: '#00bfff', dimgray: '#696969', dimgrey: '#696969',
+    dodgerblue: '#1e90ff', firebrick: '#b22222', floralwhite: '#fffaf0', forestgreen: '#228b22',
+    fuchsia: '#ff00ff', gainsboro: '#dcdcdc', ghostwhite: '#f8f8ff', gold: '#ffd700',
+    goldenrod: '#daa520', gray: '#808080', green: '#008000', greenyellow: '#adff2f',
+    grey: '#808080', honeydew: '#f0fff0', hotpink: '#ff69b4', indianred: '#cd5c5c',
+    indigo: '#4b0082', ivory: '#fffff0', khaki: '#f0e68c', lavender: '#e6e6fa',
+    lavenderblush: '#fff0f5', lawngreen: '#7cfc00', lemonchiffon: '#fffacd', lightblue: '#add8e6',
+    lightcoral: '#f08080', lightcyan: '#e0ffff', lightgoldenrodyellow: '#fafad2', lightgray: '#d3d3d3',
+    lightgreen: '#90ee90', lightgrey: '#d3d3d3', lightpink: '#ffb6c1', lightsalmon: '#ffa07a',
+    lightseagreen: '#20b2aa', lightskyblue: '#87cefa', lightslategray: '#778899', lightslategrey: '#778899',
+    lightsteelblue: '#b0c4de', lightyellow: '#ffffe0', lime: '#00ff00', limegreen: '#32cd32',
+    linen: '#faf0e6', magenta: '#ff00ff', maroon: '#800000', mediumaquamarine: '#66cdaa',
+    mediumblue: '#0000cd', mediumorchid: '#ba55d3', mediumpurple: '#9370db', mediumseagreen: '#3cb371',
+    mediumslateblue: '#7b68ee', mediumspringgreen: '#00fa9a', mediumturquoise: '#48d1cc',
+    mediumvioletred: '#c71585', midnightblue: '#191970', mintcream: '#f5fffa', mistyrose: '#ffe4e1',
+    moccasin: '#ffe4b5', navajowhite: '#ffdead', navy: '#000080', oldlace: '#fdf5e6',
+    olive: '#808000', olivedrab: '#6b8e23', orange: '#ffa500', orangered: '#ff4500',
+    orchid: '#da70d6', palegoldenrod: '#eee8aa', palegreen: '#98fb98', paleturquoise: '#afeeee',
+    palevioletred: '#db7093', papayawhip: '#ffefd5', peachpuff: '#ffdab9', peru: '#cd853f',
+    pink: '#ffc0cb', plum: '#dda0dd', powderblue: '#b0e0e6', purple: '#800080',
+    rebeccapurple: '#663399', red: '#ff0000', rosybrown: '#bc8f8f', royalblue: '#4169e1',
+    saddlebrown: '#8b4513', salmon: '#fa8072', sandybrown: '#f4a460', seagreen: '#2e8b57',
+    seashell: '#fff5ee', sienna: '#a0522d', silver: '#c0c0c0', skyblue: '#87ceeb',
+    slateblue: '#6a5acd', slategray: '#708090', slategrey: '#708090', snow: '#fffafa',
+    springgreen: '#00ff7f', steelblue: '#4682b4', tan: '#d2b48c', teal: '#008080',
+    thistle: '#d8bfd8', tomato: '#ff6347', turquoise: '#40e0d0', violet: '#ee82ee',
+    wheat: '#f5deb3', white: '#ffffff', whitesmoke: '#f5f5f5', yellow: '#ffff00',
+    yellowgreen: '#9acd32',
   };
 
   if (namedColors[str]) {
     return namedColors[str];
   }
 
-  return str;
+  return null;
 };
 
-// Estimasi otomatis Shift berdasarkan warna sel Excel
+// Estimasi otomatis Shift berdasarkan warna sel atau teks Excel
 export const guessShiftFromColor = (hexColor: string | null, cellText?: string): ShiftType | null => {
   if (cellText) {
     const clean = cellText.trim().toUpperCase();
@@ -135,29 +216,33 @@ export const guessShiftFromColor = (hexColor: string | null, cellText?: string):
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
 
-  // 1. Merah / Pink / Coral / Rose -> OFF
-  if (r > 180 && g < 160 && b < 160) return 'OFF';
-  if (r > 200 && r - g > 40 && r - b > 40) return 'OFF';
+  // 1. Merah / Pink / Coral / Rose / Maroon / Crimson -> OFF
+  if (r > 160 && g < 150 && b < 150) return 'OFF';
+  if (r > 190 && r - g > 30 && r - b > 30) return 'OFF';
+  if (r > 120 && g < 70 && b < 70) return 'OFF'; // dark red / crimson / maroon (#991b1b, #800000, #8b0000)
 
-  // 2. Ungu / Magenta / Lilac -> CUTI
-  if (r > 150 && b > 150 && g < 150) return 'CUTI';
-  if (r > 190 && b > 180 && g < 180) return 'CUTI';
+  // 2. Ungu / Magenta / Lilac / Violet / Indigo -> CUTI
+  if (r > 130 && b > 130 && g < 140) return 'CUTI';
+  if (r > 160 && b > 150 && g < 170) return 'CUTI';
+  if (r > 90 && b > 120 && g < 80) return 'CUTI'; // dark purple (#6b21a8, #7e22ce, #800080)
 
   // 3. Biru / Indigo / Navy / Sky -> PM atau TPSL
-  if (b > 170 && b > r + 30 && b > g + 20) return 'PM';
-  if (b > 140 && g > 120 && r < 120) return 'TPSL';
+  if (b > 150 && b > r + 20 && b > g + 10) return 'PM';
+  if (b > 120 && g > 100 && r < 100) return 'TPSL'; // cyan/sky blue
+  if (b > 100 && r < 80 && g < 100) return 'PM'; // navy/dark blue (#000080, #3730a3, #1e3a8a)
 
   // 4. Hijau / Mint / Teal / Lime -> Graha atau NPCT atau SM
-  if (g > 160 && g > r + 20 && g > b + 20) return 'SM';
-  if (g > 140 && b > 140 && r < 120) return 'Graha';
-  if (g > 130 && r > 130 && b < 100) return 'NPCT';
+  if (g > 140 && g > r + 15 && g > b + 15) return 'SM';
+  if (g > 110 && b > 110 && r < 90) return 'Graha'; // teal / cyan (#115e59, #0f766e, #14b8a6)
+  if (g > 110 && r > 110 && b < 80) return 'NPCT'; // lime / olive
+  if (g > 80 && r < 80 && b < 80) return 'SM'; // dark green (#166534, #006400, #15803d)
 
-  // 5. Kuning / Amber / Oranye -> SM
-  if (r > 200 && g > 170 && b < 140) return 'SM';
-  if (r > 210 && g > 130 && b < 100) return 'PM';
+  // 5. Kuning / Amber / Oranye -> SM atau PM
+  if (r > 180 && g > 150 && b < 130) return 'SM';
+  if (r > 190 && g > 110 && b < 90) return 'PM';
 
   // 6. Abu-abu gelap / Gelap -> Malam
-  if (r < 100 && g < 100 && b < 100 && r + g + b > 50) return 'Malam';
+  if (r < 110 && g < 110 && b < 110 && r + g + b > 30) return 'Malam';
 
   return null;
 };
@@ -168,21 +253,33 @@ export const parseInlineStyle = (cssText: string): React.CSSProperties => {
   if (!cssText) return styleObj;
 
   cssText.split(';').forEach((rule) => {
-    const [property, value] = rule.split(':');
-    if (property && value) {
-      const propLower = property.trim().toLowerCase();
+    const parts = rule.split(':');
+    if (parts.length >= 2) {
+      const property = parts[0].trim();
+      const value = parts.slice(1).join(':').trim();
+      const propLower = property.toLowerCase();
       if (
         propLower.startsWith('border-top') ||
         propLower.startsWith('border-right') ||
         propLower.startsWith('border-bottom') ||
         propLower.startsWith('border-left') ||
-        propLower.startsWith('mso-') ||
         propLower.startsWith('vnd.')
       ) {
         return;
       }
+      // Khusus mso background/color
+      if (propLower === 'mso-pattern' || propLower === 'mso-background-source') {
+        const msoBgMatch = value.match(/#[0-9a-fA-F]{3,6}|rgb\([^)]+\)/);
+        if (msoBgMatch) {
+          styleObj['backgroundColor'] = msoBgMatch[0];
+        }
+        return;
+      }
+      if (propLower.startsWith('mso-')) {
+        return;
+      }
       const camelCaseProp = propLower.replace(/-./g, (c) => c.toUpperCase().replace('-', ''));
-      styleObj[camelCaseProp] = value.trim();
+      styleObj[camelCaseProp] = value;
     }
   });
   return styleObj as React.CSSProperties;
@@ -191,19 +288,140 @@ export const parseInlineStyle = (cssText: string): React.CSSProperties => {
 // Fungsi helper untuk mengekstrak class-based styles dari tag <style> bawaan Excel
 export const parseExcelStylesheet = (doc: Document): Record<string, React.CSSProperties> => {
   const stylesMap: Record<string, React.CSSProperties> = {};
-  const styleElement = doc.querySelector('style');
-  if (!styleElement) return stylesMap;
+  const styleElements = doc.querySelectorAll('style');
+  if (!styleElements || styleElements.length === 0) return stylesMap;
 
-  const cssText = styleElement.textContent || '';
-  const regex = /\.([a-zA-Z0-9_-]+)\s*\{([^}]+)\}/g;
-  let match: RegExpExecArray | null;
+  styleElements.forEach((styleEl) => {
+    const cssText = styleEl.textContent || '';
+    const regex = /([^{]+)\{([^}]+)\}/g;
+    let match: RegExpExecArray | null;
 
-  while ((match = regex.exec(cssText)) !== null) {
-    const className = match[1];
-    const properties = match[2];
-    stylesMap[className] = parseInlineStyle(properties);
-  }
+    while ((match = regex.exec(cssText)) !== null) {
+      const selectors = match[1].split(',');
+      const properties = match[2];
+      const parsedStyle = parseInlineStyle(properties);
+
+      selectors.forEach((sel) => {
+        const cleanSel = sel.trim();
+        // Match class names like .xl65 or td.xl65 or .font5
+        const classMatch = cleanSel.match(/\.([a-zA-Z0-9_-]+)/);
+        if (classMatch) {
+          const cls = classMatch[1];
+          stylesMap[cls] = { ...(stylesMap[cls] || {}), ...parsedStyle };
+        }
+      });
+    }
+  });
+
   return stylesMap;
+};
+
+// Fungsi terpadu untuk mem-parsing HTML tabel dari Excel / Google Sheets ke daftar ExcelCellData
+export const parseExcelHtmlToCells = (htmlText: string): ExcelCellData[] => {
+  const flatCells: ExcelCellData[] = [];
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+    const excelStyles = parseExcelStylesheet(doc);
+    const rows = doc.querySelectorAll('tr');
+
+    if (rows.length > 0) {
+      Array.from(rows).forEach((row) => {
+        const rowBg = row.getAttribute('bgcolor');
+        const cells = row.querySelectorAll('td, th');
+        Array.from(cells).forEach((cell) => {
+          let combinedStyle: React.CSSProperties = {};
+
+          // 1. Class styles dari tag <style>
+          cell.classList.forEach((className) => {
+            if (excelStyles[className]) {
+              combinedStyle = { ...combinedStyle, ...excelStyles[className] };
+            }
+          });
+
+          // 2. Inline styles pada <td> / <th>
+          const inlineStyleStr = cell.getAttribute('style') || '';
+          const inlineStyleObj = parseInlineStyle(inlineStyleStr);
+          combinedStyle = { ...combinedStyle, ...inlineStyleObj };
+
+          // 3. Atribut bgcolor bawaan HTML tabel lama
+          const bgcolorAttr = cell.getAttribute('bgcolor') || rowBg;
+          if (bgcolorAttr && !combinedStyle.backgroundColor) {
+            combinedStyle.backgroundColor = bgcolorAttr;
+          }
+
+          // 4. Tag <font color="..."> langsung atau turunan
+          const fontChild = cell.querySelector('font[color]');
+          if (fontChild && !combinedStyle.color) {
+            combinedStyle.color = fontChild.getAttribute('color') || undefined;
+          }
+
+          // 5. Cek seluruh child element di dalam sel (span, b, strong, font, div, p, em, i, u)
+          const styledChildren = cell.querySelectorAll('span, b, strong, font, p, div, em, i, u');
+          styledChildren.forEach((child) => {
+            // Cek class styling pada child
+            child.classList.forEach((cls) => {
+              if (excelStyles[cls]) {
+                if (excelStyles[cls].color && !combinedStyle.color) {
+                  combinedStyle.color = excelStyles[cls].color;
+                }
+                if (excelStyles[cls].backgroundColor && !combinedStyle.backgroundColor) {
+                  combinedStyle.backgroundColor = excelStyles[cls].backgroundColor;
+                }
+              }
+            });
+
+            // Cek inline style pada child
+            const childStyleAttr = child.getAttribute('style');
+            if (childStyleAttr) {
+              const childStyle = parseInlineStyle(childStyleAttr);
+              if (childStyle.color && !combinedStyle.color) {
+                combinedStyle.color = childStyle.color;
+              }
+              if (childStyle.backgroundColor && !combinedStyle.backgroundColor) {
+                combinedStyle.backgroundColor = childStyle.backgroundColor;
+              }
+            }
+
+            // Cek font color attribute pada child
+            if (child.tagName.toLowerCase() === 'font' && child.hasAttribute('color') && !combinedStyle.color) {
+              combinedStyle.color = child.getAttribute('color') || undefined;
+            }
+          });
+
+          const cleanStyle: Record<string, any> = {};
+          Object.keys(combinedStyle).forEach((key) => {
+            if (
+              !key.startsWith('mso') &&
+              !key.startsWith('vnd') &&
+              !key.startsWith('borderTop') &&
+              !key.startsWith('borderRight') &&
+              !key.startsWith('borderBottom') &&
+              !key.startsWith('borderLeft')
+            ) {
+              cleanStyle[key] = (combinedStyle as any)[key];
+            }
+          });
+
+          const cellText = (cell as HTMLElement).innerText?.trim() || cell.textContent?.trim() || '';
+          const rawBg = cleanStyle.backgroundColor || cleanStyle.background || bgcolorAttr;
+          const normalizedBg = normalizeColor(rawBg);
+          const normalizedTextColor = normalizeColor(cleanStyle.color);
+
+          flatCells.push({
+            value: cellText,
+            style: { ...cleanStyle, textAlign: 'center' } as React.CSSProperties,
+            raw: cellText,
+            bgColor: normalizedBg,
+            textColor: normalizedTextColor,
+          });
+        });
+      });
+    }
+  } catch (err) {
+    console.warn('Gagal mem-parsing HTML table Excel:', err);
+  }
+  return flatCells;
 };
 
 export interface ExcelCellData {
@@ -211,6 +429,7 @@ export interface ExcelCellData {
   style?: React.CSSProperties;
   raw?: string;
   bgColor?: string | null;
+  textColor?: string | null;
 }
 
 export interface MatchedDayShift {
@@ -224,7 +443,7 @@ export interface MatchedDayShift {
 
 export interface DetectedColorItem {
   color: string;
-  categoryType: 'color' | 'text' | 'blank';
+  categoryType: 'color' | 'text_color' | 'text' | 'blank';
   isNoColor?: boolean;
   count: number;
   assignedShift: ShiftType | '';
@@ -241,13 +460,13 @@ interface ExcelSpreadsheetProps {
   onApplyDirect?: (updates: Record<string, Partial<DayData>>) => void;
 }
 
-export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
+export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheetProps>(({
   selectedYear,
   selectedMonth,
   daysInMonth,
   theme = 'default',
   onParsedShiftsChange,
-}) => {
+}, ref) => {
   const isWinamp = theme === 'winamp';
   const isDarkFluid = theme === 'darkFluid';
   const isDark = theme === 'dark';
@@ -324,9 +543,10 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
 
   // Kumpulkan kategori warna unik dan kode teks unik dari grid data
   // Membaca:
-  // 1. Sel berwarna (colorKey = hex warna)
-  // 2. Sel dengan teks tapi tanpa warna (colorKey = `TEXT_${cleanText}`) -> Muncul sebagai Kode Teks "P", "OFF", dll.
-  // 3. Sel kosong melompong (colorKey = `__BLANK_EMPTY__`) -> Muncul sebagai Sel Kosong (Polos)
+  // 1. Sel berwarna latar (colorKey = hex warna latar)
+  // 2. Sel dengan warna teks/font (colorKey = `TEXT_COLOR_${hexWarnaTeks}`)
+  // 3. Sel dengan teks tapi tanpa warna (colorKey = `TEXT_${cleanText}`) -> Muncul sebagai Kode Teks "P", "OFF", dll.
+  // 4. Sel kosong melompong (colorKey = `__BLANK_EMPTY__`) -> Muncul sebagai Sel Kosong (Polos)
   const detectedColorsList = useMemo((): DetectedColorItem[] => {
     if (!gridData || gridData.length === 0) return [];
 
@@ -335,7 +555,7 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
       {
         count: number;
         sampleText: string;
-        categoryType: 'color' | 'text' | 'blank';
+        categoryType: 'color' | 'text_color' | 'text' | 'blank';
         colorKey: string;
         displayColor: string | null;
       }
@@ -343,20 +563,30 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
 
     gridData.forEach((row) => {
       row.forEach((cell) => {
-        const bg = normalizeColor(cell.bgColor || cell.style?.backgroundColor);
+        const bg = normalizeColor(cell.bgColor || cell.style?.backgroundColor || (cell.style as any)?.background);
+        const textCol = normalizeColor(cell.textColor || cell.style?.color);
         const rawText = cell.value ? cell.value.trim() : '';
         const cleanText = rawText.toUpperCase();
-        const hasBg = Boolean(bg && bg !== '#ffffff' && bg !== 'transparent');
+        
+        const isNoBg = !bg || bg === '#ffffff' || bg === 'transparent';
+        const hasBg = !isNoBg && Boolean(bg);
+
+        const isDefaultTextColor = !textCol || textCol === '#000000' || textCol === '#011627' || textCol === 'black' || textCol === '#333333' || textCol === '#111827';
+        const hasCustomTextColor = !isDefaultTextColor && Boolean(textCol);
         const hasText = cleanText.length > 0;
 
         let key = '';
-        let categoryType: 'color' | 'text' | 'blank' = 'blank';
+        let categoryType: 'color' | 'text_color' | 'text' | 'blank' = 'blank';
         let displayColor: string | null = null;
 
         if (hasBg && bg) {
           key = bg;
           categoryType = 'color';
           displayColor = bg;
+        } else if (hasCustomTextColor && textCol) {
+          key = `TEXT_COLOR_${textCol}`;
+          categoryType = 'text_color';
+          displayColor = textCol;
         } else if (hasText) {
           key = `TEXT_${cleanText}`;
           categoryType = 'text';
@@ -397,6 +627,11 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
           guessShiftFromColor(val.colorKey, val.sampleText) ||
           matchShiftCode(val.sampleText) ||
           '';
+      } else if (val.categoryType === 'text_color') {
+        defaultAssigned =
+          guessShiftFromColor(val.displayColor, val.sampleText) ||
+          matchShiftCode(val.sampleText) ||
+          '';
       } else {
         defaultAssigned = '';
       }
@@ -404,7 +639,7 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
       items.push({
         color: key,
         categoryType: val.categoryType,
-        isNoColor: val.categoryType !== 'color',
+        isNoColor: val.categoryType === 'text' || val.categoryType === 'blank',
         count: val.count,
         assignedShift: defaultAssigned,
         sampleText: val.sampleText,
@@ -414,10 +649,11 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
 
     // Urutan tampil:
     // 1. Sel dengan warna latar
-    // 2. Sel dengan teks (tanpa warna latar, misalnya "P", "OFF")
-    // 3. Sel kosong melompong (Polos)
+    // 2. Sel dengan warna teks (Font Color)
+    // 3. Sel dengan teks (tanpa warna latar)
+    // 4. Sel kosong melompong (Polos)
     return items.sort((a, b) => {
-      const order = { color: 1, text: 2, blank: 3 };
+      const order = { color: 1, text_color: 2, text: 3, blank: 4 };
       return order[a.categoryType] - order[b.categoryType];
     });
   }, [gridData, customColorMap, matchShiftCode]);
@@ -432,32 +668,41 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
       cell?: ExcelCellData
     ): { shift: ShiftType | null; detectedBy: 'text' | 'color' | 'custom_map' | 'none' } => {
       if (!cell) return { shift: null, detectedBy: 'none' };
-      const cellBg = normalizeColor(cell.bgColor || cell.style?.backgroundColor);
-      const isNoColor = !cellBg || cellBg === '#ffffff' || cellBg === 'transparent';
+      const cellBg = normalizeColor(cell.bgColor || cell.style?.backgroundColor || (cell.style as any)?.background);
+      const cellTextColor = normalizeColor(cell.textColor || cell.style?.color);
+      const isNoBg = !cellBg || cellBg === '#ffffff' || cellBg === 'transparent';
       const rawText = cell.value ? cell.value.trim() : '';
       const cleanText = rawText.toUpperCase();
-      const hasBg = !isNoColor && Boolean(cellBg);
+      const hasBg = !isNoBg && Boolean(cellBg);
+      const isDefaultTextColor = !cellTextColor || cellTextColor === '#000000' || cellTextColor === '#011627' || cellTextColor === 'black' || cellTextColor === '#333333';
+      const hasCustomTextColor = !isDefaultTextColor && Boolean(cellTextColor);
       const hasText = cleanText.length > 0;
 
-      // Tentukan mapKey sesuai kategori
-      let mapKey = '';
-      if (hasBg && cellBg) {
-        mapKey = cellBg;
-      } else if (hasText) {
-        mapKey = `TEXT_${cleanText}`;
-      } else {
-        mapKey = '__BLANK_EMPTY__';
+      // 1. Cek jika pengguna melakukan pemetaan manual pada warna latar
+      if (hasBg && cellBg && customColorMap[cellBg] !== undefined) {
+        if (customColorMap[cellBg] === '') return { shift: null, detectedBy: 'none' };
+        return { shift: customColorMap[cellBg] as ShiftType, detectedBy: 'custom_map' };
       }
 
-      // 1. Cek jika pengguna melakukan pemetaan manual pada dropdown
-      if (customColorMap[mapKey] !== undefined) {
-        if (customColorMap[mapKey] === '') {
-          return { shift: null, detectedBy: 'none' };
-        }
-        return { shift: customColorMap[mapKey] as ShiftType, detectedBy: 'custom_map' };
+      // 2. Cek jika ada pemetaan manual untuk warna teks (Font Color)
+      if (hasCustomTextColor && cellTextColor && customColorMap[`TEXT_COLOR_${cellTextColor}`] !== undefined) {
+        if (customColorMap[`TEXT_COLOR_${cellTextColor}`] === '') return { shift: null, detectedBy: 'none' };
+        return { shift: customColorMap[`TEXT_COLOR_${cellTextColor}`] as ShiftType, detectedBy: 'custom_map' };
       }
 
-      // 2. Cek apakah teks sel cocok dengan kode shift resmi
+      // 3. Cek jika ada pemetaan manual untuk kode teks
+      if (hasText && customColorMap[`TEXT_${cleanText}`] !== undefined) {
+        if (customColorMap[`TEXT_${cleanText}`] === '') return { shift: null, detectedBy: 'none' };
+        return { shift: customColorMap[`TEXT_${cleanText}`] as ShiftType, detectedBy: 'custom_map' };
+      }
+
+      // 4. Cek jika ada pemetaan manual untuk sel polos
+      if (!hasBg && !hasCustomTextColor && !hasText && customColorMap['__BLANK_EMPTY__'] !== undefined) {
+        if (customColorMap['__BLANK_EMPTY__'] === '') return { shift: null, detectedBy: 'none' };
+        return { shift: customColorMap['__BLANK_EMPTY__'] as ShiftType, detectedBy: 'custom_map' };
+      }
+
+      // 5. Cek apakah teks sel cocok dengan kode shift resmi
       if (hasText) {
         const textMatch = matchShiftCode(cleanText);
         if (textMatch) {
@@ -465,11 +710,19 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
         }
       }
 
-      // 3. Cek warna latar belakang sel jika memiliki warna
+      // 6. Cek warna latar belakang sel jika memiliki warna
       if (hasBg && cellBg) {
         const colorMatch = guessShiftFromColor(cellBg, rawText);
         if (colorMatch) {
           return { shift: colorMatch, detectedBy: 'color' };
+        }
+      }
+
+      // 7. Cek warna teks (Font Color) jika memiliki warna khusus
+      if (hasCustomTextColor && cellTextColor) {
+        const textColorMatch = guessShiftFromColor(cellTextColor, rawText);
+        if (textColorMatch) {
+          return { shift: textColorMatch, detectedBy: 'color' };
         }
       }
 
@@ -746,67 +999,12 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
     (clipboardData: DataTransfer | null) => {
       if (!clipboardData || editingCell) return;
 
-      const flatCells: ExcelCellData[] = [];
+      let flatCells: ExcelCellData[] = [];
 
       // 1. Coba baca format HTML dari Excel / Google Sheets
       const htmlData = clipboardData.getData('text/html');
       if (htmlData) {
-        try {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(htmlData, 'text/html');
-          const excelStyles = parseExcelStylesheet(doc);
-          const rows = doc.querySelectorAll('tr');
-
-          if (rows.length > 0) {
-            Array.from(rows).forEach((row) => {
-              const cells = row.querySelectorAll('td, th');
-              Array.from(cells).forEach((cell) => {
-                let combinedStyle: React.CSSProperties = {};
-                cell.classList.forEach((className) => {
-                  if (excelStyles[className]) {
-                    combinedStyle = { ...combinedStyle, ...excelStyles[className] };
-                  }
-                });
-
-                const inlineStyleStr = cell.getAttribute('style') || '';
-                const inlineStyleObj = parseInlineStyle(inlineStyleStr);
-                combinedStyle = { ...combinedStyle, ...inlineStyleObj };
-
-                const bgcolorAttr = cell.getAttribute('bgcolor');
-                if (bgcolorAttr && !combinedStyle.backgroundColor) {
-                  combinedStyle.backgroundColor = bgcolorAttr;
-                }
-
-                const cleanStyle: Record<string, any> = {};
-                Object.keys(combinedStyle).forEach((key) => {
-                  if (
-                    !key.startsWith('mso') &&
-                    !key.startsWith('vnd') &&
-                    !key.startsWith('borderTop') &&
-                    !key.startsWith('borderRight') &&
-                    !key.startsWith('borderBottom') &&
-                    !key.startsWith('borderLeft')
-                  ) {
-                    cleanStyle[key] = (combinedStyle as any)[key];
-                  }
-                });
-
-                const cellText = (cell as HTMLElement).innerText?.trim() || cell.textContent?.trim() || '';
-                const rawBg = cleanStyle.backgroundColor || cleanStyle.background || bgcolorAttr;
-                const normalizedBg = normalizeColor(rawBg);
-
-                flatCells.push({
-                  value: cellText,
-                  style: { ...cleanStyle, textAlign: 'center' } as React.CSSProperties,
-                  raw: cellText,
-                  bgColor: normalizedBg,
-                });
-              });
-            });
-          }
-        } catch (err) {
-          console.warn('Gagal mem-parsing HTML table Excel, beralih ke teks biasa:', err);
-        }
+        flatCells = parseExcelHtmlToCells(htmlData);
       }
 
       // 2. Fallback jika bukan HTML tabel: baca teks biasa (TSV / CSV / Dipisah Spasi)
@@ -829,6 +1027,7 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
                 style: { textAlign: 'center' },
                 raw: cellVal.trim(),
                 bgColor: null,
+                textColor: null,
               });
             });
           });
@@ -900,32 +1099,8 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
           if (item.types.includes('text/html')) {
             const blob = await item.getType('text/html');
             const htmlText = await blob.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(htmlText, 'text/html');
-            const table = doc.querySelector('table');
-            if (table) {
-              const cssClassesMap = parseExcelStylesheet(doc);
-              const flatCells: ExcelCellData[] = [];
-              const rows = Array.from(table.querySelectorAll('tr'));
-              rows.forEach((row) => {
-                const cells = Array.from(row.querySelectorAll('td, th'));
-                cells.forEach((td) => {
-                  const cellText = td.textContent ? td.textContent.trim() : '';
-                  const rawInlineStyle = td.getAttribute('style') || '';
-                  const inlineStyleObj = parseInlineStyle(rawInlineStyle);
-                  const classAttr = td.getAttribute('class') || '';
-                  const classStyleObj = classAttr && cssClassesMap[classAttr] ? cssClassesMap[classAttr] : {};
-                  const mergedStyle: React.CSSProperties = { ...classStyleObj, ...inlineStyleObj, textAlign: 'center' };
-                  const bgVal = (mergedStyle.backgroundColor as string) || td.getAttribute('bgcolor') || undefined;
-                  const normalizedBg = normalizeColor(bgVal);
-                  flatCells.push({
-                    value: cellText,
-                    style: mergedStyle,
-                    raw: cellText,
-                    bgColor: normalizedBg,
-                  });
-                });
-              });
+            if (htmlText) {
+              const flatCells = parseExcelHtmlToCells(htmlText);
               if (flatCells.length > 0) {
                 applyPastedCells(flatCells);
                 return;
@@ -949,6 +1124,7 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
                     style: { textAlign: 'center' },
                     raw: cellVal.trim(),
                     bgColor: null,
+                    textColor: null,
                   });
                 });
               });
@@ -977,6 +1153,7 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
                 style: { textAlign: 'center' },
                 raw: cellVal.trim(),
                 bgColor: null,
+                textColor: null,
               });
             });
           });
@@ -1032,6 +1209,21 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
     // Muat ulang aturan tersimpan dari sistem agar tidak hilang saat reset spreadsheet
     setCustomColorMap(loadSavedExcelColorMap());
   };
+
+  useImperativeHandle(ref, () => ({
+    pasteClipboard: () => {
+      handleDirectPasteFromClipboard();
+    },
+    loadSample: () => {
+      loadExampleTemplate();
+    },
+    resetGrid: () => {
+      handleReset();
+    },
+    resetColorMap: () => {
+      handleClearSavedColorRules();
+    },
+  }));
 
   const getCellBorderClass = () => {
     if (isPaperSketch) return 'border-[1.5px] border-[#2b2b2b]';
@@ -1188,7 +1380,14 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
                         </div>
                       ) : (
                         <div className="w-full h-full flex items-center justify-center truncate">
-                          <span className="font-mono text-xs font-bold">{cell.value}</span>
+                          <span
+                            className="font-mono text-xs font-bold"
+                            style={{
+                              color: cell.textColor || cell.style?.color || undefined,
+                            }}
+                          >
+                            {cell.value}
+                          </span>
                         </div>
                       )}
                     </td>
@@ -1302,8 +1501,19 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
                       <div
                         className="w-7 h-7 rounded-lg border border-black/20 shrink-0 shadow-2xs"
                         style={{ backgroundColor: item.displayColor || item.color }}
-                        title={`Warna: ${item.color}`}
+                        title={`Warna Latar: ${item.color}`}
                       />
+                    ) : item.categoryType === 'text_color' ? (
+                      <div
+                        className="w-7 h-7 rounded-lg border shrink-0 shadow-2xs flex items-center justify-center font-mono font-black text-xs bg-slate-100 dark:bg-slate-900"
+                        style={{
+                          color: item.displayColor || '#000000',
+                          borderColor: item.displayColor ? `${item.displayColor}66` : 'rgba(0,0,0,0.2)',
+                        }}
+                        title={`Warna Teks (Font): ${item.displayColor}`}
+                      >
+                        {item.sampleText || 'A'}
+                      </div>
                     ) : item.categoryType === 'text' ? (
                       <div
                         className="w-7 h-7 rounded-lg border border-teal-500/40 bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 shrink-0 shadow-2xs flex items-center justify-center font-mono font-black text-xs"
@@ -1326,6 +1536,10 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
                           <span>
                             Kode Teks <strong className="text-teal-700 dark:text-teal-300 font-mono">"{item.sampleText}"</strong>
                           </span>
+                        ) : item.categoryType === 'text_color' ? (
+                          <span>
+                            Warna Teks <strong className="font-mono" style={{ color: item.displayColor || undefined }}>"{item.sampleText || item.displayColor}"</strong> ({item.displayColor})
+                          </span>
                         ) : item.categoryType === 'color' ? (
                           <span>
                             {item.sampleText ? `"${item.sampleText}" (${item.color})` : `Warna ${item.color}`}
@@ -1335,7 +1549,7 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
                         )}
                       </span>
                       <span className="block text-[9.5px] opacity-65">
-                        {item.count} sel {item.categoryType === 'text' ? '(Tanpa warna latar)' : ''}
+                        {item.count} sel {item.categoryType === 'text_color' ? '(Font Color)' : item.categoryType === 'text' ? '(Tanpa warna latar)' : ''}
                       </span>
                     </div>
                   </div>
@@ -1450,4 +1664,4 @@ export const ExcelSpreadsheet: React.FC<ExcelSpreadsheetProps> = ({
       )}
     </div>
   );
-};
+});

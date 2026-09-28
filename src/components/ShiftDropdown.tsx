@@ -36,12 +36,12 @@ interface ShiftItemConfig {
 }
 
 const REGULAR_SHIFTS: ShiftItemConfig[] = [
-    { key: 'Graha', label: 'Graha', sublabel: 'FCL 07.30 - 17.00', icon: Building2 },
+    { key: 'Graha', label: 'GRAHA', sublabel: 'FCL 07.30 - 17.00', icon: Building2 },
     { key: 'NPCT', label: 'NPCT', sublabel: 'FCL 07.30 - 17.00', icon: Container },
     { key: 'TPSL', label: 'TPSL', sublabel: 'FCL/LCL 07.30 - 17.00', icon: Ship },
     { key: 'SM', label: 'SM (Shift Siang)', sublabel: '12.30 - 22.00', icon: Sun },
     { key: 'PM', label: 'PM (Pagi-Malam)', sublabel: '07.30-20.00 & 04.30', icon: Sunset },
-    { key: 'Malam', label: 'Malam', sublabel: '17.00-20.00 & 04.30', icon: Moon },
+    { key: 'Malam', label: 'MALAM', sublabel: '17.00-20.00 & 04.30', icon: Moon },
 ];
 
 const REST_SHIFTS: ShiftItemConfig[] = [

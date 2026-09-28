@@ -14,7 +14,6 @@ import { ExportDropdown } from './components/ExportDropdown';
 import { TopNavbar } from './components/TopNavbar';
 import { SubToolbarHeader } from './components/SubToolbarHeader';
 import { CalendarActionToolbar } from './components/CalendarActionToolbar';
-import { CalendarContextMenu, ContextMenuPosition } from './components/CalendarContextMenu';
 import { ResetConfirmModal } from './components/ResetConfirmModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { MobileMenuDrawer } from './components/MobileMenuDrawer';
@@ -232,6 +231,7 @@ export const App: React.FC = () => {
     const [activeModalDay, setActiveModalDay] = useState<number | null>(null);
     const [expandedDesktopDay, setExpandedDesktopDay] = useState<number | null>(null);
     const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
+    const [pasteModalTab, setPasteModalTab] = useState<'excel_grid' | 'schedule' | 'absen'>('excel_grid');
     const [isMonthYearPickerOpen, setIsMonthYearPickerOpen] = useState(false);
     const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
     const [timePickerTarget, setTimePickerTarget] = useState<{
@@ -315,9 +315,6 @@ export const App: React.FC = () => {
     // History and Future stacks for Undo / Redo
     const [historyStack, setHistoryStack] = useState<Record<string, DayData>[]>([]);
     const [futureStack, setFutureStack] = useState<Record<string, DayData>[]>([]);
-
-    // Context Menu State
-    const [contextMenuPos, setContextMenuPos] = useState<ContextMenuPosition | null>(null);
 
     // Helper to push state before changes
     const pushToHistory = useCallback((stateToSave: Record<string, DayData>) => {
@@ -634,33 +631,13 @@ export const App: React.FC = () => {
         }
     }, [lastSelectedDay]);
 
-    const handleOpenContextMenu = useCallback((e: React.MouseEvent, dayNum?: number) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (dayNum !== undefined) {
-            if (!selectedDays.includes(dayNum)) {
-                setSelectedDays([dayNum]);
-                setLastSelectedDay(dayNum);
-            }
-        }
-        setContextMenuPos({
-            x: e.clientX,
-            y: e.clientY,
-            targetDay: dayNum,
-        });
-    }, [selectedDays]);
-
     const handleCopySelected = useCallback(() => {
-        const targetDays = selectedDays.length > 0
-            ? selectedDays
-            : (contextMenuPos?.targetDay ? [contextMenuPos.targetDay] : []);
-
-        if (targetDays.length === 0) {
+        if (selectedDays.length === 0) {
             showToast('Pilih setidaknya satu tanggal untuk disalin.');
             return;
         }
 
-        const sortedDays = [...targetDays].sort((a, b) => a - b);
+        const sortedDays = [...selectedDays].sort((a, b) => a - b);
         const rows = sortedDays.map((d) => {
             const key = `${selectedYear}-${selectedMonth}-${d}`;
             const data = daysState[key];
@@ -673,9 +650,15 @@ export const App: React.FC = () => {
             navigator.clipboard.writeText(tsvContent).catch(() => {});
         }
         showToast(`Data shift & presensi ${sortedDays.length} hari berhasil disalin.`);
-    }, [selectedDays, contextMenuPos, selectedYear, selectedMonth, daysState]);
+    }, [selectedDays, selectedYear, selectedMonth, daysState]);
+
+    const handleOpenPasteTab = useCallback((tab: 'excel_grid' | 'schedule' | 'absen') => {
+        setPasteModalTab(tab);
+        setIsPasteModalOpen(true);
+    }, []);
 
     const handlePasteContext = useCallback(() => {
+        setPasteModalTab('excel_grid');
         setIsPasteModalOpen(true);
     }, []);
 
@@ -683,7 +666,6 @@ export const App: React.FC = () => {
     useEffect(() => {
         setSelectedDays([]);
         setLastSelectedDay(null);
-        setContextMenuPos(null);
     }, [selectedYear, selectedMonth]);
 
     // Import / Paste Handlers
@@ -827,50 +809,6 @@ export const App: React.FC = () => {
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isMobile, expandedDesktopDay, daysInCurrentMonth]);
-
-    // Global Right-Click (Context Menu) on App
-    useEffect(() => {
-        const handleGlobalContextMenu = (e: MouseEvent) => {
-            // If inside an open modal or drawer, do not intercept
-            if (isPasteModalOpen || isResetConfirmOpen || isMonthYearPickerOpen || isMobileMenuOpen) {
-                return;
-            }
-
-            // If not in calendar tab, do not intercept
-            if (pageTab !== 'calendar') {
-                return;
-            }
-
-            // Always prevent browser & system default context menu
-            e.preventDefault();
-            e.stopPropagation();
-
-            const target = e.target as HTMLElement | null;
-            const dayEl = target?.closest('[data-day-number]') as HTMLElement | null;
-            const dayNumber = dayEl ? parseInt(dayEl.getAttribute('data-day-number') || '', 10) : undefined;
-            const validDay = (dayNumber && !isNaN(dayNumber) && dayNumber >= 1 && dayNumber <= 31) ? dayNumber : undefined;
-
-            if (validDay !== undefined) {
-                if (!selectedDays.includes(validDay)) {
-                    setSelectedDays([validDay]);
-                    setLastSelectedDay(validDay);
-                }
-            }
-
-            setContextMenuPos({
-                x: e.clientX,
-                y: e.clientY,
-                targetDay: validDay,
-            });
-        };
-
-        window.addEventListener('contextmenu', handleGlobalContextMenu, { capture: true });
-        document.addEventListener('contextmenu', handleGlobalContextMenu, { capture: true });
-        return () => {
-            window.removeEventListener('contextmenu', handleGlobalContextMenu, { capture: true });
-            document.removeEventListener('contextmenu', handleGlobalContextMenu, { capture: true });
-        };
-    }, [isPasteModalOpen, isResetConfirmOpen, isMonthYearPickerOpen, isMobileMenuOpen, pageTab, selectedDays]);
 
     // Global keyboard shortcuts for Calendar operations (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+Z, Ctrl+Y)
     useEffect(() => {
@@ -1055,7 +993,6 @@ export const App: React.FC = () => {
                                         return (
                                             <div 
                                                 className="grid grid-cols-7 gap-1 sm:gap-1.5 relative w-full"
-                                                onContextMenu={(e) => handleOpenContextMenu(e)}
                                             >
                                                 {/* Empty prefix cells to align Day 1 with its correct day of the week */}
                                                 {Array.from({ length: firstDayOffset }).map((_, emptyIdx) => (
@@ -1112,7 +1049,6 @@ export const App: React.FC = () => {
                                                                 theme={currentTheme}
                                                                 isSelected={selectedDays.includes(dayNumber)}
                                                                 onSelectDay={handleSelectDay}
-                                                                onContextMenu={handleOpenContextMenu}
                                                                 isExpandedDesktop={!isMobile && expandedDesktopDay === dayNumber}
                                                                 isRightEdge={isRightEdge}
                                                                 isBottomEdge={isBottomEdge}
@@ -1300,6 +1236,7 @@ export const App: React.FC = () => {
                     selectedYear={selectedYear}
                     selectedMonth={selectedMonth}
                     onApply={handleApplyPastedSchedule}
+                    initialTab={pasteModalTab}
                     theme={currentTheme}
                 />
             )}
@@ -1385,24 +1322,6 @@ export const App: React.FC = () => {
                     );
                 })()
             )}
-
-            {/* Right Click Context Menu for Calendar Operations */}
-            <CalendarContextMenu
-                isOpen={contextMenuPos !== null}
-                position={contextMenuPos}
-                onClose={() => setContextMenuPos(null)}
-                theme={currentTheme}
-                hasSelection={selectedDays.length > 0 || (contextMenuPos?.targetDay !== undefined)}
-                selectedCount={selectedDays.length}
-                canUndo={historyStack.length > 0 || undoBackup !== null}
-                canRedo={futureStack.length > 0}
-                onSelectAll={handleSelectAll}
-                onCopy={handleCopySelected}
-                onPaste={handlePasteContext}
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                onReset={() => setIsResetConfirmOpen(true)}
-            />
 
             {/* Toast Notification */}
             <ToastNotification
