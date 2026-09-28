@@ -146,7 +146,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                 <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden min-h-0 bg-slate-50/20 dark:bg-zinc-900/10">
                     
                     {/* Left Sidebar: Preview badge, Vertical Tabs menu, and Undo/Redo/Reset at the bottom */}
-                    <div className="w-full md:w-[260px] lg:w-[280px] shrink-0 border-b md:border-b-0 md:border-r border-slate-200/80 dark:border-zinc-800 bg-slate-50/60 dark:bg-black/20 flex flex-col justify-between p-3.5 gap-3 overflow-visible md:overflow-hidden">
+                    <div className="w-full md:w-[200px] lg:w-[215px] shrink-0 border-b md:border-b-0 md:border-r border-slate-200/80 dark:border-zinc-800 bg-slate-50/60 dark:bg-black/20 flex flex-col justify-between p-3 py-3.5 gap-3 overflow-visible md:overflow-hidden">
                         
                         <div className="space-y-4">
                             {/* Kotak Pratinjau Badge - Kompak menyamai lebar tab menu */}

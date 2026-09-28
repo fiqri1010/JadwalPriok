@@ -416,6 +416,44 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
     const isVista = currentTheme === 'vista';
     const isDark = currentTheme === 'dark' || currentTheme === 'darkFluid';
 
+    const getChoiceBoxStyles = (mode: PeriodMode) => {
+        const isActive = periodMode === mode;
+        if (isActive) {
+            if (isWinamp) return 'border-[#00FF00] bg-[#00FF00]/10 text-[#00FF00]';
+            if (isVista) return 'border-sky-400 bg-sky-500/10 text-sky-900';
+            if (isDark) return 'border-teal-500/85 bg-teal-500/15 text-teal-300';
+            return 'border-teal-500 bg-teal-500/10 text-teal-800 dark:text-teal-300';
+        }
+        if (isWinamp) return 'border-[#00FF00]/20 hover:bg-zinc-900/50 text-[#00FF00]/70';
+        if (isVista) return 'border-sky-200/50 hover:bg-sky-50/50 text-slate-600';
+        if (isDark) return 'border-slate-800 hover:bg-slate-800/20 text-slate-300';
+        return 'border-slate-200 hover:bg-slate-50 text-slate-600';
+    };
+
+    const getTabClass = (tab: 'date_range' | 'period_range') => {
+        const isActive = activeTab === tab;
+        if (isActive) {
+            if (isWinamp) return 'bg-[#00FF00] text-black font-black rounded-none';
+            if (isVista) return 'bg-sky-600 text-white font-black shadow-xs';
+            return 'bg-teal-600 text-white font-black shadow-xs';
+        }
+        return 'opacity-70 hover:opacity-100';
+    };
+
+    const getGridBtnClass = (mode: PeriodMode) => {
+        const isActive = periodMode === mode;
+        if (isActive) {
+            if (isWinamp) return 'bg-[#00FF00] text-black border-[#00FF00] font-black rounded-none';
+            if (isVista) return 'bg-sky-600 text-white border-sky-700 font-black shadow-xs';
+            return 'bg-teal-600 text-white border-teal-700 font-black shadow-xs';
+        }
+        if (isWinamp) return 'border-[#00FF00]/30 hover:bg-[#00FF00]/10 text-[#00FF00] rounded-none';
+        if (isVista) return 'border-sky-200 hover:bg-sky-50 text-sky-850';
+        return 'border-current/15 hover:bg-current/10 text-slate-700 dark:text-slate-300';
+    };
+
+    const radioAccentClass = isWinamp ? 'accent-[#00FF00]' : isVista ? 'accent-sky-600' : 'accent-teal-600';
+
     return (
         <div className={`relative inline-block ${isOpen ? 'z-[9999]' : 'z-20'}`} ref={dropdownRef}>
             {/* Click-outside backdrop */}
@@ -449,7 +487,7 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
             {/* Main Export Dialog Popup */}
             {isOpen && (
                 <div
-                    className={`absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-md rounded-2xl p-3.5 sm:p-4 shadow-2xl border z-[9999] animate-in fade-in zoom-in-95 duration-100 origin-top-right select-none max-h-[88vh] overflow-y-auto ${
+                    className={`absolute right-0 mt-2 w-[245px] sm:w-[280px] md:w-[295px] rounded-2xl p-2.5 sm:p-3 shadow-2xl border z-[9999] animate-in fade-in zoom-in-95 duration-100 origin-top-right select-none max-h-[85vh] overflow-y-auto custom-scrollbar ${
                         isWinamp
                             ? 'bg-black border-2 border-[#00FF00] font-mono text-[#00FF00]'
                             : isVista
@@ -460,17 +498,17 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                     }`}
                 >
                     {/* Header */}
-                    <div className="flex items-center justify-between pb-3 border-b border-current/10 mb-3">
-                        <div className="flex items-center space-x-2">
-                            <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400">
-                                <Download className="h-4 w-4" />
+                    <div className="flex items-center justify-between pb-1.5 border-b border-current/10 mb-1.5">
+                        <div className="flex items-center space-x-1.5">
+                            <div className="p-1 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                                <Download className="h-3 w-3" />
                             </div>
                             <div>
-                                <span className="text-sm font-black block leading-none">Ekspor Jadwal</span>
-                                <span className="text-[10px] opacity-60 font-semibold">Pilih periode dan format unduhan</span>
+                                <span className="text-[11px] sm:text-[12.5px] font-black block leading-none">Ekspor Jadwal</span>
+                                <span className="text-[9px] opacity-60 font-semibold">Pilih periode & format unduhan</span>
                             </div>
                         </div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/20">
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/20 shrink-0">
                             {filteredEntries.length} Hari
                         </span>
                     </div>
@@ -478,8 +516,8 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                     {/* ========================================================================= */}
                     {/* PEMILIHAN DATA YANG AKAN DIEKSPOR (DIATAS KOTAK-KOTAK TOMBOL EKSPOR)      */}
                     {/* ========================================================================= */}
-                    <div className="mb-4">
-                        <label className="text-[10.5px] font-black uppercase tracking-wider opacity-70 block mb-1.5">
+                    <div className="mb-2">
+                        <label className="text-[9px] font-black uppercase tracking-wider opacity-70 block mb-0.5">
                             Data yang Dipilih untuk Diekspor:
                         </label>
 
@@ -487,90 +525,82 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                         <button
                             type="button"
                             onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-                            className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
+                            className={`w-full flex items-center justify-between p-1.5 rounded-lg border text-left cursor-pointer transition-all ${
                                 isSelectorOpen
                                     ? 'ring-2 ring-teal-500/40 border-teal-500/50 bg-teal-500/5'
                                     : 'border-current/15 hover:border-current/30 bg-current/5'
                             }`}
                         >
-                            <div className="flex items-center space-x-2.5 min-w-0 pr-2">
-                                <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 shrink-0">
-                                    <Filter className="h-4 w-4" />
+                            <div className="flex items-center space-x-1.5 min-w-0 pr-1 flex-1">
+                                <div className="p-1 rounded-md bg-teal-500/10 text-teal-600 dark:text-teal-400 shrink-0">
+                                    <Filter className="h-3 w-3" />
                                 </div>
-                                <div className="min-w-0">
-                                    <span className="text-xs font-bold truncate block text-teal-700 dark:text-teal-300">
+                                <div className="min-w-0 flex-1">
+                                    <span className="text-[11px] font-bold truncate block text-teal-700 dark:text-teal-300">
                                         {rangeLabel}
                                     </span>
-                                    <span className="text-[10px] opacity-60 truncate block font-medium">
+                                    <span className="text-[9px] opacity-65 truncate block font-medium">
                                         {activeTab === 'date_range' ? 'Kustom Rentang Tanggal' : 'Filter Periode Jadwal'}
                                     </span>
                                 </div>
                             </div>
                             <div className="flex items-center space-x-1 shrink-0">
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-current/10">
+                                <span className="text-[8.5px] font-bold px-1 py-0.2 rounded bg-current/10">
                                     {isSelectorOpen ? 'Tutup' : 'Ubah'}
                                 </span>
                                 {isSelectorOpen ? (
-                                    <ChevronUp className="h-4 w-4 opacity-70" />
+                                    <ChevronUp className="h-3 w-3 opacity-70" />
                                 ) : (
-                                    <ChevronDown className="h-4 w-4 opacity-70" />
+                                    <ChevronDown className="h-3 w-3 opacity-70" />
                                 )}
                             </div>
                         </button>
 
                         {/* Collapsible Dropdown Selection Menu with 2 Tabs */}
                         {isSelectorOpen && (
-                            <div className="mt-2 p-3 rounded-xl border border-current/15 bg-current/[0.03] space-y-3 animate-in fade-in duration-150">
+                            <div className="mt-1.5 p-1.5 rounded-lg border border-current/15 bg-current/[0.03] space-y-1.5 animate-in fade-in duration-150">
                                 {/* 2 Tabs: Tab 1 (Rentang Tanggal) & Tab 2 (Rentang Periode) */}
-                                <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-current/10">
+                                <div className="grid grid-cols-2 gap-1 p-0.5 rounded-lg bg-current/10">
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab('date_range')}
-                                        className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
-                                            activeTab === 'date_range'
-                                                ? 'bg-teal-600 text-white shadow-xs'
-                                                : 'opacity-70 hover:opacity-100'
-                                        }`}
+                                        className={`py-1 px-1.5 rounded-md text-[10.5px] font-bold transition-all flex items-center justify-center space-x-1 cursor-pointer ${getTabClass('date_range')}`}
                                     >
-                                        <CalendarRange className="h-3.5 w-3.5" />
+                                        <CalendarRange className="h-3 w-3 shrink-0" />
                                         <span>Rentang Tanggal</span>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab('period_range')}
-                                        className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
-                                            activeTab === 'period_range'
-                                                ? 'bg-teal-600 text-white shadow-xs'
-                                                : 'opacity-70 hover:opacity-100'
-                                        }`}
+                                        className={`py-1 px-1.5 rounded-md text-[10.5px] font-bold transition-all flex items-center justify-center space-x-1 cursor-pointer ${getTabClass('period_range')}`}
                                     >
-                                        <Calendar className="h-3.5 w-3.5" />
+                                        <Calendar className="h-3 w-3 shrink-0" />
                                         <span>Rentang Periode</span>
                                     </button>
                                 </div>
 
                                 {/* Tab 1 Content: Rentang Tanggal */}
                                 {activeTab === 'date_range' && (
-                                    <div className="space-y-2.5 pt-1">
+                                    <div className="space-y-2 pt-0.5">
                                         {/* Kotak Pilihan Rentang Tanggal & Preset */}
-                                        <div className="p-2.5 rounded-xl border border-current/15 bg-current/[0.02] space-y-2.5">
+                                        <div className="p-2 rounded-xl border border-current/15 bg-current/[0.02] space-y-2">
                                             <div className="grid grid-cols-2 gap-2 relative z-30">
                                                 <div>
-                                                    <label className="text-[10px] font-bold opacity-75 block mb-1">Dari Tanggal</label>
+                                                    <label className="text-[9px] font-bold opacity-75 block mb-0.5">Dari Tanggal</label>
                                                     <CustomDatePicker
                                                         value={startDate}
                                                         onChange={(val) => setStartDate(val)}
-                                                        placeholder="Pilih tanggal mulai"
+                                                        placeholder="Mulai"
                                                         theme={currentTheme as any}
                                                         align="left"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="text-[10px] font-bold opacity-75 block mb-1">Sampai Tanggal</label>
+                                                    <label className="text-[9px] font-bold opacity-75 block mb-0.5">Sampai Tanggal</label>
                                                     <CustomDatePicker
                                                         value={endDate}
                                                         onChange={(val) => setEndDate(val)}
-                                                        placeholder="Pilih tanggal akhir"
+                                                        placeholder="Akhir"
                                                         theme={currentTheme as any}
                                                         align="right"
                                                     />
@@ -578,14 +608,14 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                                             </div>
 
                                             {/* Quick Preset Buttons */}
-                                            <div className="flex items-center gap-1.5 pt-0.5">
+                                            <div className="flex items-center gap-1">
                                                 <button
                                                     type="button"
                                                     onClick={() => {
                                                         setStartDate(defaultStart);
                                                         setEndDate(defaultEnd);
                                                     }}
-                                                    className="px-2.5 py-1 rounded-md text-[10.5px] font-bold border border-current/20 hover:bg-current/10 cursor-pointer transition-colors"
+                                                    className="px-2 py-0.5 rounded text-[10px] font-bold border border-current/20 hover:bg-current/10 cursor-pointer transition-colors"
                                                 >
                                                     Bulan Ini
                                                 </button>
@@ -598,22 +628,22 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                                                         setStartDate(start.toISOString().split('T')[0]);
                                                         setEndDate(now.toISOString().split('T')[0]);
                                                     }}
-                                                    className="px-2.5 py-1 rounded-md text-[10.5px] font-bold border border-current/20 hover:bg-current/10 cursor-pointer transition-colors"
+                                                    className="px-2 py-0.5 rounded text-[10px] font-bold border border-current/20 hover:bg-current/10 cursor-pointer transition-colors"
                                                 >
                                                     30 Hari Terakhir
                                                 </button>
                                             </div>
                                         </div>
 
-                                        {/* Tombol Terapkan Pilihan di LUAR dan di BAWAH kotak rentang tanggal */}
-                                        <div className="pt-1 flex justify-end">
+                                        {/* Tombol Terapkan Pilihan */}
+                                        <div className="pt-0.5 flex justify-end">
                                             <button
                                                 type="button"
                                                 onClick={() => setIsSelectorOpen(false)}
-                                                className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs cursor-pointer transition-all active:scale-95 flex items-center space-x-1.5"
+                                                className="px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-[10.5px] font-bold shadow-xs cursor-pointer transition-all active:scale-95 flex items-center space-x-1"
                                             >
-                                                <Check className="w-3.5 h-3.5" />
-                                                <span>Terapkan Pilihan ({filteredEntries.length} Hari)</span>
+                                                <Check className="w-3 h-3 shrink-0" />
+                                                <span>Terapkan ({filteredEntries.length} Hari)</span>
                                             </button>
                                         </div>
                                     </div>
@@ -621,27 +651,23 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
 
                                 {/* Tab 2 Content: Rentang Periode */}
                                 {activeTab === 'period_range' && (
-                                    <div className="space-y-2.5 pt-1">
+                                    <div className="space-y-2 pt-0.5">
                                         {/* 1. Dropdown bulan tertentu dengan pilihan tahun */}
                                         <div
                                             onClick={() => setPeriodMode('specific_month')}
-                                            className={`p-2 rounded-lg border transition-all relative z-30 ${
-                                                periodMode === 'specific_month'
-                                                    ? 'border-teal-500 bg-teal-500/10'
-                                                    : 'border-current/15 hover:bg-current/5'
-                                            }`}
+                                            className={`p-1.5 rounded-lg border transition-all relative z-30 ${getChoiceBoxStyles('specific_month')}`}
                                         >
-                                            <div className="flex items-center space-x-2 mb-1.5 cursor-pointer">
+                                            <div className="flex items-center space-x-1.5 mb-1 cursor-pointer">
                                                 <input
                                                     type="radio"
                                                     name="period_choice"
                                                     checked={periodMode === 'specific_month'}
                                                     onChange={() => setPeriodMode('specific_month')}
-                                                    className="accent-teal-600"
+                                                    className={radioAccentClass}
                                                 />
-                                                <span className="text-xs font-bold">Bulan & Tahun</span>
+                                                <span className="text-[11px] font-bold">Bulan & Tahun</span>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-2 pl-5 relative z-40">
+                                            <div className="grid grid-cols-2 gap-1.5 pl-4.5 relative z-40">
                                                 <CustomDropdown
                                                     value={targetSpecificMonth}
                                                     onChange={(val) => {
@@ -654,6 +680,8 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                                                     }))}
                                                     theme={currentTheme as any}
                                                     hideSelectedInList={false}
+                                                    className="w-full"
+                                                    width="w-full"
                                                 />
                                                 <CustomDropdown
                                                     value={targetSpecificMonthYear}
@@ -667,6 +695,8 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                                                     }))}
                                                     theme={currentTheme as any}
                                                     hideSelectedInList={false}
+                                                    className="w-full"
+                                                    width="w-full"
                                                 />
                                             </div>
                                         </div>
@@ -674,23 +704,19 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                                         {/* 2. Dropdown tahun tertentu */}
                                         <div
                                             onClick={() => setPeriodMode('specific_year')}
-                                            className={`p-2 rounded-lg border transition-all relative z-20 ${
-                                                periodMode === 'specific_year'
-                                                    ? 'border-teal-500 bg-teal-500/10'
-                                                    : 'border-current/15 hover:bg-current/5'
-                                            }`}
+                                            className={`p-1.5 rounded-lg border transition-all relative z-20 ${getChoiceBoxStyles('specific_year')}`}
                                         >
-                                            <div className="flex items-center space-x-2 mb-1.5 cursor-pointer">
+                                            <div className="flex items-center space-x-1.5 mb-1 cursor-pointer">
                                                 <input
                                                     type="radio"
                                                     name="period_choice"
                                                     checked={periodMode === 'specific_year'}
                                                     onChange={() => setPeriodMode('specific_year')}
-                                                    className="accent-teal-600"
+                                                    className={radioAccentClass}
                                                 />
-                                                <span className="text-xs font-bold">Tahun tertentu</span>
+                                                <span className="text-[11px] font-bold">Tahun tertentu</span>
                                             </div>
-                                            <div className="pl-5 relative z-30">
+                                            <div className="pl-4.5 relative z-30">
                                                 <CustomDropdown
                                                     value={targetSpecificYear}
                                                     onChange={(val) => {
@@ -703,118 +729,98 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                                                     }))}
                                                     theme={currentTheme as any}
                                                     hideSelectedInList={false}
+                                                    className="w-full"
+                                                    width="w-full"
                                                 />
                                             </div>
                                         </div>
 
                                         {/* 3. Folded isi pilihan grid 2x3: Q1, Q2, S1 / Q3, Q4, S2 */}
-                                        <div className="pt-1 relative z-10">
+                                        <div className="pt-0.5 relative z-10">
                                             <button
                                                 type="button"
                                                 onClick={() => setIsFoldedGridOpen(!isFoldedGridOpen)}
-                                                className="w-full flex items-center justify-between py-1.5 px-2 rounded-lg bg-current/5 border border-current/15 text-xs font-bold cursor-pointer"
+                                                className={`w-full flex items-center justify-between py-1 px-1.5 rounded-lg bg-current/5 border border-current/15 text-[11px] font-bold cursor-pointer ${
+                                                    isWinamp ? 'border-[#00FF00]/30 text-[#00FF00]' : ''
+                                                }`}
                                             >
-                                                <span className="flex items-center space-x-1.5">
-                                                    <CalendarDays className="h-3.5 w-3.5 text-teal-600" />
-                                                    <span>Pilihan Kuartal & Semester ({targetSpecificYear})</span>
+                                                <span className="flex items-center space-x-1 flex-1 min-w-0 pr-1">
+                                                    <CalendarDays className={`h-3 w-3 shrink-0 ${isWinamp ? 'text-[#00FF00]' : isVista ? 'text-sky-600' : 'text-teal-600'}`} />
+                                                    <span className="truncate">Kuartal & Semester ({targetSpecificYear})</span>
                                                 </span>
                                                 {isFoldedGridOpen ? (
-                                                    <ChevronUp className="h-3.5 w-3.5 opacity-60" />
+                                                    <ChevronUp className="h-3 w-3 opacity-60 shrink-0" />
                                                 ) : (
-                                                    <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+                                                    <ChevronDown className="h-3 w-3 opacity-60 shrink-0" />
                                                 )}
                                             </button>
 
                                             {isFoldedGridOpen && (
-                                                <div className="grid grid-cols-3 gap-1.5 pt-2">
+                                                <div className="grid grid-cols-3 gap-1 pt-1.5">
                                                     {/* Row 1: Q1, Q2, S1 */}
                                                     <button
                                                         type="button"
                                                         onClick={() => setPeriodMode('q1')}
-                                                        className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
-                                                            periodMode === 'q1'
-                                                                ? 'bg-teal-600 text-white border-teal-700 font-bold shadow-xs'
-                                                                : 'border-current/15 hover:bg-current/10 text-xs font-semibold'
-                                                        }`}
+                                                        className={`p-1 rounded-md border text-center transition-all cursor-pointer ${getGridBtnClass('q1')}`}
                                                     >
-                                                        <div className="text-xs font-black">Q1</div>
-                                                        <div className="text-[9px] opacity-75">Jan - Mar</div>
+                                                        <div className="text-[10px] font-black">Q1</div>
+                                                        <div className="text-[8px] opacity-75">Jan - Mar</div>
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => setPeriodMode('q2')}
-                                                        className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
-                                                            periodMode === 'q2'
-                                                                ? 'bg-teal-600 text-white border-teal-700 font-bold shadow-xs'
-                                                                : 'border-current/15 hover:bg-current/10 text-xs font-semibold'
-                                                        }`}
+                                                        className={`p-1 rounded-md border text-center transition-all cursor-pointer ${getGridBtnClass('q2')}`}
                                                     >
-                                                        <div className="text-xs font-black">Q2</div>
-                                                        <div className="text-[9px] opacity-75">Apr - Jun</div>
+                                                        <div className="text-[10px] font-black">Q2</div>
+                                                        <div className="text-[8px] opacity-75">Apr - Jun</div>
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => setPeriodMode('s1')}
-                                                        className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
-                                                            periodMode === 's1'
-                                                                ? 'bg-teal-600 text-white border-teal-700 font-bold shadow-xs'
-                                                                : 'border-current/15 hover:bg-current/10 text-xs font-semibold'
-                                                        }`}
+                                                        className={`p-1 rounded-md border text-center transition-all cursor-pointer ${getGridBtnClass('s1')}`}
                                                     >
-                                                        <div className="text-xs font-black">S1</div>
-                                                        <div className="text-[9px] opacity-75">Sem 1 (6 Bln)</div>
+                                                        <div className="text-[10px] font-black">S1</div>
+                                                        <div className="text-[8px] opacity-75">Sem 1</div>
                                                     </button>
 
                                                     {/* Row 2: Q3, Q4, S2 */}
                                                     <button
                                                         type="button"
                                                         onClick={() => setPeriodMode('q3')}
-                                                        className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
-                                                            periodMode === 'q3'
-                                                                ? 'bg-teal-600 text-white border-teal-700 font-bold shadow-xs'
-                                                                : 'border-current/15 hover:bg-current/10 text-xs font-semibold'
-                                                        }`}
+                                                        className={`p-1 rounded-md border text-center transition-all cursor-pointer ${getGridBtnClass('q3')}`}
                                                     >
-                                                        <div className="text-xs font-black">Q3</div>
-                                                        <div className="text-[9px] opacity-75">Jul - Sep</div>
+                                                        <div className="text-[10px] font-black">Q3</div>
+                                                        <div className="text-[8px] opacity-75">Jul - Sep</div>
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => setPeriodMode('q4')}
-                                                        className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
-                                                            periodMode === 'q4'
-                                                                ? 'bg-teal-600 text-white border-teal-700 font-bold shadow-xs'
-                                                                : 'border-current/15 hover:bg-current/10 text-xs font-semibold'
-                                                        }`}
+                                                        className={`p-1 rounded-md border text-center transition-all cursor-pointer ${getGridBtnClass('q4')}`}
                                                     >
-                                                        <div className="text-xs font-black">Q4</div>
-                                                        <div className="text-[9px] opacity-75">Okt - Des</div>
+                                                        <div className="text-[10px] font-black">Q4</div>
+                                                        <div className="text-[8px] opacity-75">Okt - Des</div>
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => setPeriodMode('s2')}
-                                                        className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
-                                                            periodMode === 's2'
-                                                                ? 'bg-teal-600 text-white border-teal-700 font-bold shadow-xs'
-                                                                : 'border-current/15 hover:bg-current/10 text-xs font-semibold'
-                                                        }`}
+                                                        className={`p-1 rounded-md border text-center transition-all cursor-pointer ${getGridBtnClass('s2')}`}
                                                     >
-                                                        <div className="text-xs font-black">S2</div>
-                                                        <div className="text-[9px] opacity-75">Sem 2 (6 Bln)</div>
+                                                        <div className="text-[10px] font-black">S2</div>
+                                                        <div className="text-[8px] opacity-75">Sem 2</div>
                                                     </button>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Tombol Terapkan Pilihan di LUAR dan di BAWAH kotak pilihan kuartal */}
-                                        <div className="pt-1 flex justify-end">
+                                        {/* Tombol Terapkan Pilihan */}
+                                        <div className="pt-0.5 flex justify-end">
                                             <button
                                                 type="button"
                                                 onClick={() => setIsSelectorOpen(false)}
-                                                className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs cursor-pointer transition-all active:scale-95 flex items-center space-x-1.5"
+                                                className="px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-[10.5px] font-bold shadow-xs cursor-pointer transition-all active:scale-95 flex items-center space-x-1"
                                             >
-                                                <Check className="w-3.5 h-3.5" />
-                                                <span>Terapkan Pilihan ({filteredEntries.length} Hari)</span>
+                                                <Check className="w-3 h-3 shrink-0" />
+                                                <span>Terapkan ({filteredEntries.length} Hari)</span>
                                             </button>
                                         </div>
                                     </div>
@@ -826,8 +832,8 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                     {/* ========================================================================= */}
                     {/* KOTAK-KOTAK TOMBOL EKSPOR (DILETAKKAN DI BAWAH PEMILIHAN DATA)            */}
                     {/* ========================================================================= */}
-                    <div className="space-y-1.5">
-                        <label className="text-[10.5px] font-black uppercase tracking-wider opacity-70 block mb-1">
+                    <div className="space-y-1">
+                        <label className="text-[9px] font-black uppercase tracking-wider opacity-70 block mb-0.5">
                             Pilih Format Ekspor:
                         </label>
 
@@ -836,27 +842,33 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                             type="button"
                             disabled={exportLoading !== null}
                             onClick={handleExportPDF}
-                            className="w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl text-xs font-bold transition-all cursor-pointer bg-rose-500/10 hover:bg-rose-500/20 text-rose-800 dark:text-rose-300 border border-rose-500/20 disabled:opacity-50 text-left"
+                            className={`w-full flex items-center justify-between p-1 sm:p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 text-left min-w-0 border ${
+                                isWinamp
+                                    ? 'bg-black hover:bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00] rounded-none'
+                                    : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-500/20'
+                            }`}
                         >
-                            <div className="flex items-center space-x-3">
-                                <div className="p-2 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-400 shrink-0">
-                                    <FileText className="h-4 w-4" />
+                            <div className="flex items-center space-x-2 min-w-0 flex-1 pr-1">
+                                <div className={`p-1 rounded-md shrink-0 ${
+                                    isWinamp ? 'bg-transparent text-[#00FF00]' : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
+                                }`}>
+                                    <FileText className="h-3 w-3" />
                                 </div>
-                                <div>
-                                    <span className="font-extrabold text-xs sm:text-sm block leading-tight">
+                                <div className="min-w-0 flex-1">
+                                    <span className="font-extrabold text-[10px] sm:text-[11px] block leading-tight truncate">
                                         Ekspor ke PDF (.pdf)
                                     </span>
-                                    <span className="text-[10px] opacity-70 block font-normal">
-                                        Dokumen laporan visual & tabel jadwal siap cetak
+                                    <span className="text-[8.5px] sm:text-[9px] opacity-75 block font-medium leading-tight truncate">
+                                        Laporan visual & tabel jadwal cetak
                                     </span>
                                 </div>
                             </div>
                             {exportLoading === 'pdf' ? (
-                                <Loader2 className="h-4 w-4 animate-spin text-rose-500" />
+                                <Loader2 className="h-3 w-3 animate-spin text-current shrink-0" />
                             ) : exportSuccess === 'pdf' ? (
-                                <Check className="h-4 w-4 text-emerald-500" />
+                                <Check className="h-3 w-3 text-emerald-500 shrink-0" />
                             ) : (
-                                <Download className="h-4 w-4 opacity-60" />
+                                <Download className="h-3 w-3 opacity-60 shrink-0" />
                             )}
                         </button>
 
@@ -865,27 +877,33 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                             type="button"
                             disabled={exportLoading !== null}
                             onClick={handleExportPNG}
-                            className="w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl text-xs font-bold transition-all cursor-pointer bg-sky-500/10 hover:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-500/20 disabled:opacity-50 text-left"
+                            className={`w-full flex items-center justify-between p-1 sm:p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 text-left min-w-0 border ${
+                                isWinamp
+                                    ? 'bg-black hover:bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00] rounded-none'
+                                    : 'bg-sky-500/10 hover:bg-sky-500/20 text-sky-800 dark:text-sky-300 border-sky-500/20'
+                            }`}
                         >
-                            <div className="flex items-center space-x-3">
-                                <div className="p-2 rounded-lg bg-sky-500/20 text-sky-600 dark:text-sky-400 shrink-0">
-                                    <ImageIcon className="h-4 w-4" />
+                            <div className="flex items-center space-x-2 min-w-0 flex-1 pr-1">
+                                <div className={`p-1 rounded-md shrink-0 ${
+                                    isWinamp ? 'bg-transparent text-[#00FF00]' : 'bg-sky-500/20 text-sky-600 dark:text-sky-400'
+                                }`}>
+                                    <ImageIcon className="h-3 w-3" />
                                 </div>
-                                <div>
-                                    <span className="font-extrabold text-xs sm:text-sm block leading-tight">
+                                <div className="min-w-0 flex-1">
+                                    <span className="font-extrabold text-[10px] sm:text-[11px] block leading-tight truncate">
                                         Ekspor ke PNG (.png)
                                     </span>
-                                    <span className="text-[10px] opacity-70 block font-normal">
+                                    <span className="text-[8.5px] sm:text-[9px] opacity-75 block font-medium leading-tight truncate">
                                         Gambar kalender resolusi tinggi HD
                                     </span>
                                 </div>
                             </div>
                             {exportLoading === 'png' ? (
-                                <Loader2 className="h-4 w-4 animate-spin text-sky-500" />
+                                <Loader2 className="h-3 w-3 animate-spin text-current shrink-0" />
                             ) : exportSuccess === 'png' ? (
-                                <Check className="h-4 w-4 text-emerald-500" />
+                                <Check className="h-3 w-3 text-emerald-500 shrink-0" />
                             ) : (
-                                <Download className="h-4 w-4 opacity-60" />
+                                <Download className="h-3 w-3 opacity-60 shrink-0" />
                             )}
                         </button>
 
@@ -894,27 +912,33 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                             type="button"
                             disabled={exportLoading !== null}
                             onClick={handleExportExcel}
-                            className="w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl text-xs font-bold transition-all cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 disabled:opacity-50 text-left"
+                            className={`w-full flex items-center justify-between p-1 sm:p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 text-left min-w-0 border ${
+                                isWinamp
+                                    ? 'bg-black hover:bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00] rounded-none'
+                                    : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-500/20'
+                            }`}
                         >
-                            <div className="flex items-center space-x-3">
-                                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
-                                    <FileSpreadsheet className="h-4 w-4" />
+                            <div className="flex items-center space-x-2 min-w-0 flex-1 pr-1">
+                                <div className={`p-1 rounded-md shrink-0 ${
+                                    isWinamp ? 'bg-transparent text-[#00FF00]' : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                }`}>
+                                    <FileSpreadsheet className="h-3 w-3" />
                                 </div>
-                                <div>
-                                    <span className="font-extrabold text-xs sm:text-sm block leading-tight">
+                                <div className="min-w-0 flex-1">
+                                    <span className="font-extrabold text-[10px] sm:text-[11px] block leading-tight truncate">
                                         Ekspor ke Excel (.xlsx)
                                     </span>
-                                    <span className="text-[10px] opacity-70 block font-normal">
+                                    <span className="text-[8.5px] sm:text-[9px] opacity-75 block font-medium leading-tight truncate">
                                         Spreadsheet data jadwal lengkap & catatan
                                     </span>
                                 </div>
                             </div>
                             {exportLoading === 'xlsx' ? (
-                                <Loader2 className="h-4 w-4 animate-spin text-emerald-500" />
+                                <Loader2 className="h-3 w-3 animate-spin text-current shrink-0" />
                             ) : exportSuccess === 'xlsx' ? (
-                                <Check className="h-4 w-4 text-emerald-500" />
+                                <Check className="h-3 w-3 text-emerald-500 shrink-0" />
                             ) : (
-                                <Download className="h-4 w-4 opacity-60" />
+                                <Download className="h-3 w-3 opacity-60 shrink-0" />
                             )}
                         </button>
 
@@ -923,35 +947,41 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                             type="button"
                             disabled={exportLoading !== null}
                             onClick={handleExportJSON}
-                            className="w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl text-xs font-bold transition-all cursor-pointer bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border border-indigo-500/20 disabled:opacity-50 text-left"
+                            className={`w-full flex items-center justify-between p-1 sm:p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 text-left min-w-0 border ${
+                                isWinamp
+                                    ? 'bg-black hover:bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00] rounded-none'
+                                    : 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border-indigo-500/20'
+                            }`}
                         >
-                            <div className="flex items-center space-x-3">
-                                <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 shrink-0">
-                                    <Code className="h-4 w-4" />
+                            <div className="flex items-center space-x-2 min-w-0 flex-1 pr-1">
+                                <div className={`p-1 rounded-md shrink-0 ${
+                                    isWinamp ? 'bg-transparent text-[#00FF00]' : 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400'
+                                }`}>
+                                    <Code className="h-3 w-3" />
                                 </div>
-                                <div>
-                                    <span className="font-extrabold text-xs sm:text-sm block leading-tight">
+                                <div className="min-w-0 flex-1">
+                                    <span className="font-extrabold text-[10px] sm:text-[11px] block leading-tight truncate">
                                         Ekspor ke JSON (.json)
                                     </span>
-                                    <span className="text-[10px] opacity-70 block font-normal">
-                                        Cadangan lengkap data jadwal untuk pemulihan
+                                    <span className="text-[8.5px] sm:text-[9px] opacity-75 block font-medium leading-tight truncate">
+                                        Cadangan data jadwal untuk pemulihan
                                     </span>
                                 </div>
                             </div>
                             {exportLoading === 'json' ? (
-                                <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+                                <Loader2 className="h-3 w-3 animate-spin text-current shrink-0" />
                             ) : exportSuccess === 'json' ? (
-                                <Check className="h-4 w-4 text-emerald-500" />
+                                <Check className="h-3 w-3 text-emerald-500 shrink-0" />
                             ) : (
-                                <Download className="h-4 w-4 opacity-60" />
+                                <Download className="h-3 w-3 opacity-60 shrink-0" />
                             )}
                         </button>
                     </div>
 
                     {/* Footer Tip */}
-                    <div className="pt-3 mt-3 border-t border-current/10 text-center">
-                        <span className="text-[10px] opacity-60 font-medium">
-                            📁 File akan disimpan langsung ke sistem Anda menggunakan dialog penyimpanan resmi.
+                    <div className="pt-2 mt-2 border-t border-current/10 text-center">
+                        <span className="text-[9px] opacity-60 font-medium">
+                            📁 File disimpan langsung ke sistem Anda menggunakan dialog penyimpanan resmi.
                         </span>
                     </div>
                 </div>

@@ -77,6 +77,7 @@ export function CustomDropdown<T extends string | number>({
                 triggerBg: 'bg-[#000000] text-[#00FF00] border border-[#00FF00] font-mono',
                 optionsBg: 'bg-[#000000] text-[#00FF00] border-2 border-[#00FF00] font-mono shadow-[0_4px_16px_rgba(0,255,0,0.3)]',
                 optionHover: 'hover:bg-[#00FF00] hover:text-black font-mono',
+                optionSelected: 'bg-[#00FF00]/25 text-[#00FF00] font-black border border-[#00FF00]/50 font-mono',
                 arrowFill: '#00FF00',
                 activeBg: '#000000',
             };
@@ -86,6 +87,7 @@ export function CustomDropdown<T extends string | number>({
                 triggerBg: 'bg-white text-slate-900 border border-sky-300/80 shadow-xs',
                 optionsBg: 'bg-white text-slate-900 border border-sky-300 shadow-2xl ring-1 ring-sky-100',
                 optionHover: 'hover:bg-sky-100 hover:text-slate-950',
+                optionSelected: 'bg-sky-100/90 text-sky-950 font-black border border-sky-300',
                 arrowFill: '#0284c7',
                 activeBg: '#ffffff',
             };
@@ -95,17 +97,19 @@ export function CustomDropdown<T extends string | number>({
                 triggerBg: 'bg-[#2a2f3b] text-white border border-[#3e4452] shadow-md',
                 optionsBg: 'bg-[#2a2f3b] text-white border border-[#3e4452] shadow-2xl ring-1 ring-white/10',
                 optionHover: 'hover:bg-[#323741] hover:text-white',
+                optionSelected: 'bg-teal-500/20 text-teal-400 font-black border border-teal-500/30',
                 arrowFill: '#ffffff',
                 activeBg: '#2a2f3b',
             };
         }
-        // Default Light Mode
+        // Default Light Mode (Premium light gray/white theme)
         return {
-            triggerBg: 'bg-[#2a2f3b] text-white border border-[#3e4452] shadow-md dark:bg-[#2a2f3b] dark:text-white',
-            optionsBg: 'bg-[#2a2f3b] text-white border border-[#3e4452] shadow-2xl ring-1 ring-black/10',
-            optionHover: 'hover:bg-[#323741] hover:text-white',
-            arrowFill: '#ffffff',
-            activeBg: '#2a2f3b',
+            triggerBg: 'bg-white text-slate-800 border border-slate-200/90 hover:border-slate-300 shadow-3xs',
+            optionsBg: 'bg-white text-slate-800 border border-slate-200 shadow-xl ring-1 ring-black/5',
+            optionHover: 'hover:bg-slate-100 hover:text-slate-900',
+            optionSelected: 'bg-teal-50 text-teal-700 font-black border border-teal-500/20',
+            arrowFill: '#475569',
+            activeBg: '#ffffff',
         };
     };
 
@@ -200,7 +204,7 @@ export function CustomDropdown<T extends string | number>({
                                 }}
                                 className={`option p-[5px] px-2.5 rounded-[5px] text-xs font-semibold flex items-center justify-between gap-2 transition-all duration-300 cursor-pointer ${
                                     isSelected
-                                        ? 'bg-indigo-600/30 font-bold border border-indigo-500/30'
+                                        ? styles.optionSelected
                                         : styles.optionHover
                                 } ${optionClassName}`}
                             >

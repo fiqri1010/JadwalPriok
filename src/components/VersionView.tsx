@@ -26,10 +26,85 @@ export interface VersionItem {
 
 export const VERSION_HISTORY: VersionItem[] = [
     {
+        version: '0.3.68-beta',
+        releaseDate: '28 September 2026',
+        title: 'Ultra-Snug Settings, Theme-Aligned CustomDropdown & Compact Export Menu',
+        isLatest: true,
+        isMajor: false,
+        tag: 'Compact UI & Theme Refinement',
+        changes: [
+            'Pengecilan & Kompaktifikasi Dropdown Ekspor: Mengurangi lebar modal dialog ekspor menjadi lebih ramping (max-w-[295px]), menyusutkan padding (p-2.5 sm:p-3) serta merampingkan tombol opsi format (PDF, PNG, Excel, JSON) dan ukuran ikon untuk mencegah pemotongan (truncation/clipping) saat diskalakan otomatis.',
+            'Optimalisasi Layout Katalog Motif Pola: Memperbaiki grid motif pola menggunakan minmax(60px, 1fr) dan menetapkan tinggi tile statis (h-[50px] sm:h-[56px]) agar tulisan label dan ikon checkmark tidak menumpuk (overlay), terpotong, atau meluap.',
+            'Pemutakhiran Warna Pilihan Aktif CustomDropdown: Menambahkan status highlight warna item terpilih (optionSelected) yang adaptif dan lolos uji kontras tinggi pada masing-masing tema (Winamp, Vista, Dark, Light) untuk memproses kegunaan estetika antarmuka.',
+            'Penyusutan Kepadatan Form Preferensi Shift: Merampingkan ukuran padding dan margin (p-2) pada menu Preferensi Waktu Kerja (ShiftWorkTimeConfig) dan Kriteria Piket (ShiftPiketTagConfig) agar memprioritaskan tinggi yang lebih pendek demi memaksimalkan ruang layar kecil.'
+        ]
+    },
+    {
+        version: '0.3.67-beta',
+        releaseDate: '28 September 2026',
+        title: 'Seamless Color Picker Theming System',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Theming & Color Picker Integration',
+        changes: [
+            'Sistem Penyesuaian Tema Color Picker (Theme-Aware Color Picker): Menghapus warna background gelap hardcoded pada studio pemilih warna (ShiftColorStudio) dan mengintegrasikan state observer dinamis untuk mendeteksi perubahan tema global (Default/Light, Dark, Dark Fluid, Vista, Winamp).',
+            'Sinkronisasi Desain Kontrol Pemilih Warna: Menambahkan aturan override CSS khusus pada selector .rbgcp-wrapper di index.css untuk menyelaraskan skema warna, input teks, slider, tombol, dan border color picker secara mulus dengan tema aktif.'
+        ]
+    },
+    {
+        version: '0.3.66-beta',
+        releaseDate: '28 September 2026',
+        title: 'Auto-Filling Pattern Grid & Autoscale Protection',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Responsive Grid & Auto-Scaling',
+        changes: [
+            'Optimalisasi Grid Motif Pola (Auto-Filling): Mengonversi baris kolom grid motif pola menggunakan CSS Grid auto-fill minmax(54px, 1fr) sehingga rasio visual tile motif dapat menyesuaikan ukuran layar secara fleksibel (autoscale) tanpa mengalami kepatuhan truncation, clipping, maupun overflow.'
+        ]
+    },
+    {
+        version: '0.3.65-beta',
+        releaseDate: '28 September 2026',
+        title: 'Reordering Piket Config Toggles for Superior UX Flow',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UX Form Reordering & Logical Sequence',
+        changes: [
+            'Reposisional Kriteria Piket & Hari Libur: Memindahkan kriteria "Piket Hari Kerja Dengan OFF" ke posisi tengah (di antara "Piket Hari Kerja" dan "Piket Hari Libur / Tanggal Merah") untuk menyajikan alur pemahaman konfigurasi yang lebih runtut dan logis.'
+        ]
+    },
+    {
+        version: '0.3.64-beta',
+        releaseDate: '28 September 2026',
+        title: 'Snug Sidebar Layout, Compact Pattern Tile Grid & Anti-Truncation Flexi-Time Inputs',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UI Spacing & Form Layout Optimization',
+        changes: [
+            'Optimalisasi Lebar Panel Sidebar Modal Shift: Memperkecil lebar panel sidebar kiri pratinjau dan tab menu konfigurasi agar proporsional dan hemat ruang pada monitor desktop.',
+            'Katalog Motif Pola Bebas Overlay: Menghilangkan teks "Polos" ganda pada tile kosong dan memperkecil padding serta ukuran preview motif agar hemat ruang dan bebas tumpang tindih.',
+            'Tata Letak Kolom Penamaan Baru: Menata "Nama Lengkap" sejajar dengan "Nama di Badge" di Row 1, serta "Kode Singkat Salin" sejajar dengan "Sublabel Dropdown" di Row 2 dengan deskripsi petunjuk baru.',
+            'Input Jam Batas Flexi Bebas Terpotong: Mendesain ulang layout input Batas Flexi Masuk dan Pulang menggunakan list-layout vertikal terkompresi dengan lebar input w-24 yang longgar agar menit jam tidak terpotong oleh browser clock icon.',
+            'Peringatan Durasi Kerja Lebih Ringkas: Memperpendek pesan deskripsi total jam kerja pada validator box agar tidak meluber keluar layar pada resolusi laptop kecil.'
+        ]
+    },
+    {
+        version: '0.3.63-beta',
+        releaseDate: '28 September 2026',
+        title: 'Penamaan Badge Shift & Kepatuhan Huruf Kapital Otomatis',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Form Control & Capitalization Rule',
+        changes: [
+            'Pengubahan Label Konfigurasi Shift: Mengubah label form "Tampilan Kalender" menjadi "Nama di Badge" agar lebih intuitif bagi pengguna.',
+            'Kapitalisasi Otomatis Nama di Badge: Menambahkan aturan paksa huruf besar (uppercase) otomatis pada input "Nama di Badge" baik saat mengetik maupun nilai yang disimpan dalam konfigurasi shift.'
+        ]
+    },
+    {
         version: '0.3.62-beta',
         releaseDate: '27 September 2026',
         title: 'Harmonisasi Rasio UI, Font Sans-Serif Jam Lembur/Masuk-Pulang & Caching Model AI',
-        isLatest: true,
+        isLatest: false,
         isMajor: true,
         tag: 'UI/UX Harmonisasi & Cache Storage AI',
         changes: [

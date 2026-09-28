@@ -1863,28 +1863,128 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
    ========================================================= */
 .rbgcp-wrapper {
     font-family: inherit;
-    background-color: #121212 !important;
-    color: #ffffff !important;
     border-radius: 12px;
 }
 
-.rbgcp-wrapper,
-.rbgcp-wrapper > div {
-    background-color: #121212 !important;
-    color: #ffffff !important;
+/* Default / Light theme style overrides */
+[data-theme="default"] .rbgcp-wrapper,
+[data-theme="light"] .rbgcp-wrapper,
+.rbgcp-wrapper {
+    background-color: #f8fafc !important; /* bg-slate-50 */
+    border: 1px solid #e2e8f0 !important;
+    color: #334155 !important;
+}
+[data-theme="default"] .rbgcp-wrapper > div,
+[data-theme="light"] .rbgcp-wrapper > div {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+}
+[data-theme="default"] .rbgcp-wrapper input,
+[data-theme="light"] .rbgcp-wrapper input {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+}
+[data-theme="default"] .rbgcp-wrapper button,
+[data-theme="default"] .rbgcp-wrapper span,
+[data-theme="default"] .rbgcp-wrapper label,
+[data-theme="light"] .rbgcp-wrapper button,
+[data-theme="light"] .rbgcp-wrapper span,
+[data-theme="light"] .rbgcp-wrapper label {
+    color: #334155 !important;
 }
 
-.rbgcp-wrapper input {
+/* Dark theme style overrides */
+[data-theme="dark"] .rbgcp-wrapper {
+    background-color: #18181b !important; /* bg-zinc-900 */
+    border: 1px solid #27272a !important;
+    color: #f4f4f5 !important;
+}
+[data-theme="dark"] .rbgcp-wrapper > div {
+    background-color: #18181b !important;
+    color: #f4f4f5 !important;
+}
+[data-theme="dark"] .rbgcp-wrapper input {
     background-color: #27272a !important;
     color: #ffffff !important;
     border: 1px solid #3f3f46 !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
+}
+[data-theme="dark"] .rbgcp-wrapper button,
+[data-theme="dark"] .rbgcp-wrapper span,
+[data-theme="dark"] .rbgcp-wrapper label {
+    color: #e4e4e7 !important;
 }
 
-.rbgcp-wrapper button,
-.rbgcp-wrapper span,
-.rbgcp-wrapper label {
+/* Dark Fluid theme style overrides */
+[data-theme="darkFluid"] .rbgcp-wrapper {
+    background-color: #1c1b1f !important;
+    border: 1px solid #36343b !important;
+    color: #e6e1e5 !important;
+}
+[data-theme="darkFluid"] .rbgcp-wrapper > div {
+    background-color: #1c1b1f !important;
+    color: #e6e1e5 !important;
+}
+[data-theme="darkFluid"] .rbgcp-wrapper input {
+    background-color: #2d2a31 !important;
     color: #ffffff !important;
+    border: 1px solid #49454f !important;
+    border-radius: 8px !important;
+}
+[data-theme="darkFluid"] .rbgcp-wrapper button,
+[data-theme="darkFluid"] .rbgcp-wrapper span,
+[data-theme="darkFluid"] .rbgcp-wrapper label {
+    color: #e6e1e5 !important;
+}
+
+/* Vista theme style overrides */
+[data-theme="vista"] .rbgcp-wrapper {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid #93c5fd !important;
+    color: #1e3a8a !important;
+    box-shadow: 0 4px 12px rgba(14, 116, 224, 0.1) !important;
+}
+[data-theme="vista"] .rbgcp-wrapper > div {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    color: #1e3a8a !important;
+}
+[data-theme="vista"] .rbgcp-wrapper input {
+    background-color: #f0f9ff !important;
+    color: #1e3a8a !important;
+    border: 1px solid #93c5fd !important;
+    border-radius: 8px !important;
+}
+[data-theme="vista"] .rbgcp-wrapper button,
+[data-theme="vista"] .rbgcp-wrapper span,
+[data-theme="vista"] .rbgcp-wrapper label {
+    color: #1e3a8a !important;
+}
+
+/* Winamp theme style overrides */
+[data-theme="winamp"] .rbgcp-wrapper {
+    background-color: #000000 !important;
+    border: 1.5px solid #00ff00 !important;
+    color: #00ff00 !important;
+    font-family: monospace !important;
+    border-radius: 0px !important;
+}
+[data-theme="winamp"] .rbgcp-wrapper > div {
+    background-color: #000000 !important;
+    color: #00ff00 !important;
+    border-radius: 0px !important;
+}
+[data-theme="winamp"] .rbgcp-wrapper input {
+    background-color: #000000 !important;
+    color: #00ff00 !important;
+    border: 1.5px solid #00ff00 !important;
+    border-radius: 0px !important;
+}
+[data-theme="winamp"] .rbgcp-wrapper button,
+[data-theme="winamp"] .rbgcp-wrapper span,
+[data-theme="winamp"] .rbgcp-wrapper label {
+    color: #00ff00 !important;
 }
 
 

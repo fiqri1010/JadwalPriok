@@ -52,41 +52,59 @@ export const ShiftNamingInput: React.FC<ShiftNamingInputProps> = ({
                     <span className="text-xs font-bold">Sistem Penamaan Shift:</span>
                 </div>
 
-                {/* Full Name */}
-                <div className="space-y-1">
-                    <div className="flex justify-between items-center text-xs">
-                        <label className="font-bold text-slate-800 dark:text-slate-200">Nama Lengkap (Full Name):</label>
-                        <span className="text-[10px] opacity-60">Untuk laporan & detail</span>
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Contoh: Terminal Peti Kemas Surabaya Lapangan / NPCT Pagi"
-                        value={naming.fullName}
-                        onChange={(e) => handleFullNameChange(e.target.value)}
-                        className="w-full p-2.5 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500"
-                    />
-                </div>
-
-                {/* Display Badge & Copy Code (Bersebelahan di mobile & desktop) */}
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-                    {/* Display Badge */}
-                    <div className="space-y-1">
+                {/* Row 1: Nama Lengkap (Left, col-span-2) & Nama di Badge (Right, col-span-1) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
+                    {/* Nama Lengkap */}
+                    <div className="md:col-span-2 space-y-1">
                         <div className="flex justify-between items-center text-xs">
-                            <label className="font-bold text-slate-800 dark:text-slate-200 truncate">Tampilan Kalender:</label>
+                            <label className="font-bold text-slate-800 dark:text-slate-200">Nama Lengkap:</label>
+                            <span className="text-[10px] opacity-60">Untuk laporan & detail</span>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Contoh: Terminal Peti Kemas Surabaya Lapangan / NPCT Pagi"
+                            value={naming.fullName}
+                            onChange={(e) => handleFullNameChange(e.target.value)}
+                            className="w-full p-2.5 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500"
+                        />
+                    </div>
+
+                    {/* Nama di Badge */}
+                    <div className="md:col-span-1 space-y-1">
+                        <div className="flex justify-between items-center text-xs">
+                            <label className="font-bold text-slate-800 dark:text-slate-200 truncate">Nama di Badge:</label>
                         </div>
                         <input
                             type="text"
                             maxLength={5}
-                            placeholder="TPSL, NPCT, Graha"
-                            value={naming.displayBadge}
-                            onChange={(e) => onChange({ ...naming, displayBadge: e.target.value.slice(0, 5) })}
-                            className="w-full p-2.5 text-xs font-bold rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500 text-center sm:text-left font-mono"
+                            placeholder="TPSL, NPCT, GRAHA"
+                            value={naming.displayBadge.toUpperCase()}
+                            onChange={(e) => onChange({ ...naming, displayBadge: e.target.value.slice(0, 5).toUpperCase() })}
+                            className="w-full p-2.5 text-xs font-bold uppercase rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500 text-center sm:text-left font-mono"
                         />
                         <p className="text-[9.5px] opacity-60 leading-tight">Badge di kotak kalender (2–5 huruf).</p>
                     </div>
+                </div>
+
+                {/* Row 2: Sublabel / Deskripsi Dropdown (Left, col-span-2) & Kode Singkat Salin (Right, col-span-1) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3 pt-1">
+                    {/* Dropdown Sublabel Description */}
+                    <div className="md:col-span-2 space-y-1">
+                        <div className="flex justify-between items-center text-xs">
+                            <label className="font-bold text-slate-800 dark:text-slate-200">Sublabel / Deskripsi Dropdown:</label>
+                            <span className="text-[10px] opacity-60">Keterangan jam di dropdown</span>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Contoh: FCL 07.30 - 17.00 / 12.30 - 22.00"
+                            value={naming.dropdownSublabel}
+                            onChange={(e) => onChange({ ...naming, dropdownSublabel: e.target.value })}
+                            className="w-full p-2.5 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500"
+                        />
+                    </div>
 
                     {/* Copy Code */}
-                    <div className="space-y-1">
+                    <div className="md:col-span-1 space-y-1">
                         <div className="flex justify-between items-center text-xs">
                             <label className="font-bold text-slate-800 dark:text-slate-200 truncate">Kode Singkat Salin:</label>
                         </div>
@@ -98,23 +116,8 @@ export const ShiftNamingInput: React.FC<ShiftNamingInputProps> = ({
                             onChange={(e) => onChange({ ...naming, copyCode: e.target.value.slice(0, 3).toUpperCase() })}
                             className="w-full p-2.5 text-xs font-bold uppercase rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500 text-center sm:text-left font-mono"
                         />
-                        <p className="text-[9.5px] opacity-60 leading-tight">Kode salin teks WA/SMS (1–3 huruf).</p>
+                        <p className="text-[9.5px] opacity-60 leading-tight">Kode untuk ketentuan salin jadwal</p>
                     </div>
-                </div>
-
-                {/* Dropdown Sublabel Description */}
-                <div className="space-y-1 pt-1">
-                    <div className="flex justify-between items-center text-xs">
-                        <label className="font-bold text-slate-800 dark:text-slate-200">Sublabel / Deskripsi Dropdown:</label>
-                        <span className="text-[10px] opacity-60">Keterangan jam di dropdown</span>
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Contoh: FCL 07.30 - 17.00 / 12.30 - 22.00"
-                        value={naming.dropdownSublabel}
-                        onChange={(e) => onChange({ ...naming, dropdownSublabel: e.target.value })}
-                        className="w-full p-2.5 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500"
-                    />
                 </div>
             </div>
 

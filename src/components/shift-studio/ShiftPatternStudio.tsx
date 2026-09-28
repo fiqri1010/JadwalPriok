@@ -63,9 +63,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
         const item = BADGE_PATTERNS.find((p) => p.id === patternId);
         if (!item || item.id === 'none') {
             return (
-                <div className="w-full h-full bg-slate-200/50 dark:bg-zinc-800/80 flex items-center justify-center text-[10px] font-bold opacity-50">
-                    Polos
-                </div>
+                <div className="w-full h-full bg-slate-100/30 dark:bg-zinc-800/30" />
             );
         }
 
@@ -134,7 +132,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
     };
 
     return (
-        <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 space-y-4 font-sans shadow-2xs w-full min-w-0 lg:h-full lg:min-h-[515px] flex flex-col justify-between">
+        <div className="p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 space-y-2 font-sans shadow-2xs w-full min-w-0 lg:h-full lg:min-h-[445px] flex flex-col justify-between">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -149,7 +147,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                     Pilih Motif Pola (30 Koleksi Grid):
                 </span>
 
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-2 max-h-48 sm:max-h-56 lg:max-h-[290px] lg:h-[265px] overflow-y-auto p-1.5 pr-2 border border-slate-200/80 dark:border-zinc-800/80 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 custom-scrollbar flex-1">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-1.5 max-h-36 sm:max-h-40 lg:max-h-[195px] lg:h-[185px] overflow-y-auto p-1 border border-slate-200/80 dark:border-zinc-800/80 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 custom-scrollbar flex-1">
                     {BADGE_PATTERNS.map((pattern) => {
                         const isSelected = (visual.patternType || 'none') === pattern.id && !visual.customPatternUrl;
                         return (
@@ -163,27 +161,27 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                         customPatternUrl: undefined,
                                     });
                                 }}
-                                className={`p-1.5 sm:p-2 rounded-xl border flex flex-col items-center justify-between text-center transition-all cursor-pointer relative group ${
+                                className={`p-1 rounded-lg border flex flex-col items-center justify-between text-center transition-all cursor-pointer relative group min-w-0 h-[50px] sm:h-[56px] shrink-0 ${
                                     isSelected
-                                        ? 'border-2 border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-black shadow-xs scale-[1.02]'
-                                        : 'border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-800/60 hover:bg-slate-100 dark:hover:bg-zinc-700/80 text-slate-700 dark:text-zinc-300 hover:scale-[1.01]'
+                                        ? 'border-2 border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-extrabold shadow-xs scale-[1.01]'
+                                        : 'border-slate-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-800/60 hover:bg-slate-100 dark:hover:bg-zinc-700/80 text-slate-700 dark:text-zinc-300'
                                 }`}
                                 title={pattern.name}
                             >
                                 {/* Checkmark indicator on active tile */}
                                 {isSelected && (
-                                    <div className="absolute top-0.5 right-0.5 z-10 w-4 h-4 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-xs">
-                                        <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                    <div className="absolute top-0.5 right-0.5 z-10 w-3.5 h-3.5 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-xs">
+                                        <Check className="w-2 h-2 stroke-[3]" />
                                     </div>
                                 )}
 
                                 {/* Mini Pattern Box */}
-                                <div className="w-full h-7 sm:h-10 rounded-lg border border-slate-200/60 dark:border-zinc-700/60 bg-[#161616] overflow-hidden shadow-2xs relative">
+                                <div className="w-full h-5.5 sm:h-6 rounded-md border border-slate-200/40 dark:border-zinc-700/40 bg-[#161616] overflow-hidden shadow-3xs relative shrink-0">
                                     {renderTilePatternSvg(pattern.id)}
                                 </div>
 
                                 {/* Short Name Label Underneath */}
-                                <span className="text-[9.5px] sm:text-[10px] font-black truncate w-full mt-1.5 leading-none">
+                                <span className="text-[9px] sm:text-[9.5px] font-bold truncate w-full mt-1 leading-tight text-slate-700 dark:text-zinc-300">
                                     {pattern.shortName || pattern.name}
                                 </span>
                             </button>
@@ -193,12 +191,12 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
             </div>
 
             {/* Dynamic Sliders Section: Opasitas, Skala/Kepadatan & Ketebalan Motif */}
-            <div className="space-y-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/80">
+            <div className="space-y-2 pt-2 border-t border-slate-200/60 dark:border-zinc-800/80">
                 {/* Row 1: Opasitas & Skala/Kepadatan Sliders */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
                     {/* Slider 1: Opasitas Motif */}
                     <div
-                        className="space-y-1.5 p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 shadow-3xs"
+                        className="space-y-1 p-1.5 sm:p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 shadow-3xs"
                         title="Hover & Scroll mouse untuk mengubah opasitas motif"
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
@@ -221,7 +219,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
 
                     {/* Slider 2: Skala / Kepadatan Motif */}
                     <div
-                        className="space-y-1.5 p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 shadow-3xs"
+                        className="space-y-1 p-1.5 sm:p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 shadow-3xs"
                         title="Hover & Scroll mouse untuk mengubah skala/kepadatan motif"
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
@@ -245,7 +243,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
 
                 {/* Row 2: Slider 3 Ketebalan Motif */}
                 <div
-                    className="space-y-1.5 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 w-full shadow-3xs"
+                    className="space-y-1 p-1.5 sm:p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 w-full shadow-3xs"
                     title="Hover & Scroll mouse untuk mengubah ketebalan motif"
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}

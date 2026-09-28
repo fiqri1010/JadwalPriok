@@ -13,6 +13,76 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
     const [targetMode, setTargetMode] = useState<'bg' | 'text' | 'border' | 'motif'>('bg');
     const colorPickerWrapperRef = useRef<HTMLDivElement>(null);
 
+    // Dynamic theme state detection
+    const [activeTheme, setActiveTheme] = useState<string>(() => {
+        return document.documentElement.getAttribute('data-theme') || 'default';
+    });
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'default';
+            setActiveTheme(currentTheme);
+        });
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+        });
+        return () => observer.disconnect();
+    }, []);
+
+    // Theme style mapping for container and tabs
+    const getThemeClasses = () => {
+        switch (activeTheme) {
+            case 'winamp':
+                return {
+                    container: 'bg-black border-[#00FF00] text-[#00FF00] font-mono rounded-none',
+                    labelSpan: 'text-[#00FF00] font-bold',
+                    tabHeader: 'bg-black border-[#00FF00]',
+                    tabActive: 'bg-[#00FF00]/10 text-[#00FF00] border-[#00ff00] font-black rounded-none',
+                    tabInactive: 'text-[#00FF00] hover:bg-zinc-900 border-transparent',
+                    pickerWrapper: 'bg-black border-[#00FF00] rounded-none'
+                };
+            case 'vista':
+                return {
+                    container: 'bg-white/80 backdrop-blur-md border-sky-300/80 text-blue-950 shadow-sm rounded-2xl',
+                    labelSpan: 'text-blue-900 font-black',
+                    tabHeader: 'bg-sky-50/50 border-sky-100',
+                    tabActive: 'bg-white text-blue-700 shadow-2xs font-extrabold border-sky-300/80',
+                    tabInactive: 'text-blue-800 hover:bg-sky-100/30 border-transparent',
+                    pickerWrapper: 'bg-white/95 border-sky-200 shadow-sm'
+                };
+            case 'darkFluid':
+                return {
+                    container: 'bg-[#1C1B1F] border-[#36343B] text-[#E6E1E5] rounded-2xl',
+                    labelSpan: 'text-zinc-400 font-black',
+                    tabHeader: 'bg-[#25232A] border-[#36343B]',
+                    tabActive: 'bg-[#49454F] text-[#D0BCFF] font-extrabold border-transparent',
+                    tabInactive: 'text-zinc-400 hover:bg-zinc-800/40 border-transparent',
+                    pickerWrapper: 'bg-[#1C1B1F] border-[#36343B]'
+                };
+            case 'dark':
+                return {
+                    container: 'bg-[#18181B] border-zinc-800 text-zinc-100 rounded-2xl',
+                    labelSpan: 'text-zinc-400 font-black',
+                    tabHeader: 'bg-[#09090B] border-zinc-800',
+                    tabActive: 'bg-zinc-800 text-teal-400 shadow-3xs font-extrabold border-zinc-700',
+                    tabInactive: 'text-zinc-400 hover:bg-zinc-800/30 border-transparent',
+                    pickerWrapper: 'bg-[#18181B] border-zinc-800'
+                };
+            default: // light
+                return {
+                    container: 'bg-slate-50 border-slate-200 text-slate-800 rounded-2xl shadow-3xs',
+                    labelSpan: 'text-slate-500 font-black',
+                    tabHeader: 'bg-slate-100/80 border-slate-200',
+                    tabActive: 'bg-white text-teal-600 shadow-3xs font-extrabold border-slate-300',
+                    tabInactive: 'text-slate-500 hover:bg-slate-200/50 border-transparent',
+                    pickerWrapper: 'bg-slate-50 border-slate-200'
+                };
+        }
+    };
+
+    const themeStyles = getThemeClasses();
+
     // Attach mouse wheel scroll handler to range sliders and numeric inputs inside ColorPicker + pause parent scrollbar
     useEffect(() => {
         const wrapper = colorPickerWrapperRef.current;
@@ -140,25 +210,25 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
     };
 
     return (
-        <div className="p-3 sm:p-4 rounded-2xl bg-[#121212] border border-zinc-800 space-y-4 font-sans shadow-2xs w-full overflow-visible min-w-0 text-white lg:h-full lg:min-h-[515px] flex flex-col justify-between">
+        <div className={`p-2 sm:p-2.5 rounded-2xl border space-y-2.5 font-sans shadow-2xs w-full overflow-visible min-w-0 lg:h-full lg:min-h-[445px] flex flex-col justify-between transition-colors ${themeStyles.container}`}>
             {/* Target Selector Tabs (Latar / Teks / Border / Motif) */}
             <div className="space-y-1.5">
-                <span className="text-[10px] sm:text-[11px] font-black text-zinc-400 uppercase tracking-wider block">
+                <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider block transition-colors ${themeStyles.labelSpan}`}>
                     Target Elemen Warna:
                 </span>
-                <div className="flex items-center gap-1 p-1.5 rounded-xl bg-[#1a1a1e] border border-zinc-800 text-xs sm:text-[12.5px] font-black">
+                <div className={`flex items-center gap-1 p-1 rounded-xl border text-[11px] sm:text-xs font-black transition-colors ${themeStyles.tabHeader}`}>
                     <button
                         type="button"
                         onClick={() => setTargetMode('bg')}
-                        className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                        className={`flex-1 py-1 px-1 sm:py-1.5 sm:px-1.5 rounded-lg flex items-center justify-center space-x-1 transition-all cursor-pointer border ${
                             targetMode === 'bg'
-                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-black border border-zinc-700'
-                                : 'text-zinc-400 hover:text-white'
+                                ? themeStyles.tabActive
+                                : themeStyles.tabInactive
                         }`}
                         title="Edit Warna Latar"
                     >
                         <div
-                            className="w-3 h-3 rounded-full border border-white/50 shadow-2xs shrink-0"
+                            className="w-2.5 h-2.5 rounded-full border border-white/50 shadow-2xs shrink-0"
                             style={{ background: getBgColorString() }}
                         />
                         <span>Latar</span>
@@ -167,15 +237,15 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                     <button
                         type="button"
                         onClick={() => setTargetMode('text')}
-                        className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                        className={`flex-1 py-1 px-1 sm:py-1.5 sm:px-1.5 rounded-lg flex items-center justify-center space-x-1 transition-all cursor-pointer border ${
                             targetMode === 'text'
-                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-black border border-zinc-700'
-                                : 'text-zinc-400 hover:text-white'
+                                ? themeStyles.tabActive
+                                : themeStyles.tabInactive
                         }`}
                         title="Edit Warna Teks"
                     >
                         <div
-                            className="w-3 h-3 rounded-full border border-white/50 shadow-2xs shrink-0"
+                            className="w-2.5 h-2.5 rounded-full border border-white/50 shadow-2xs shrink-0"
                             style={{ backgroundColor: visual.textColor || '#FFFFFF' }}
                         />
                         <span>Teks</span>
@@ -184,15 +254,15 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                     <button
                         type="button"
                         onClick={() => setTargetMode('border')}
-                        className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                        className={`flex-1 py-1 px-1 sm:py-1.5 sm:px-1.5 rounded-lg flex items-center justify-center space-x-1 transition-all cursor-pointer border ${
                             targetMode === 'border'
-                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-black border border-zinc-700'
-                                : 'text-zinc-400 hover:text-white'
+                                ? themeStyles.tabActive
+                                : themeStyles.tabInactive
                         }`}
                         title="Edit Warna Border"
                     >
                         <div
-                            className="w-3 h-3 rounded-full border border-white/50 shadow-2xs shrink-0"
+                            className="w-2.5 h-2.5 rounded-full border border-white/50 shadow-2xs shrink-0"
                             style={{ backgroundColor: visual.borderColor || '#83C5BE' }}
                         />
                         <span>Border</span>
@@ -201,15 +271,15 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                     <button
                         type="button"
                         onClick={() => setTargetMode('motif')}
-                        className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                        className={`flex-1 py-1 px-1 sm:py-1.5 sm:px-1.5 rounded-lg flex items-center justify-center space-x-1 transition-all cursor-pointer border ${
                             targetMode === 'motif'
-                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-black border border-zinc-700'
-                                : 'text-zinc-400 hover:text-white'
+                                ? themeStyles.tabActive
+                                : themeStyles.tabInactive
                         }`}
                         title="Edit Warna Pattern Motif"
                     >
                         <div
-                            className="w-3 h-3 rounded-full border border-white/50 shadow-2xs shrink-0"
+                            className="w-2.5 h-2.5 rounded-full border border-white/50 shadow-2xs shrink-0"
                             style={{ backgroundColor: visual.patternColor || '#FFFFFF' }}
                         />
                         <span>Motif</span>
@@ -221,14 +291,14 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
             <div className="w-full flex justify-center shrink-0 overflow-visible py-1 flex-1">
                 <div
                     ref={colorPickerWrapperRef}
-                    className="rbgcp-wrapper bg-[#121212] p-3 sm:p-4 rounded-xl text-white w-full overflow-visible flex flex-col justify-center items-center shrink-0 min-w-0 select-none border border-zinc-800/80 shadow-md flex-1"
+                    className={`rbgcp-wrapper p-1.5 sm:p-2.5 rounded-xl w-full overflow-visible flex flex-col justify-center items-center shrink-0 min-w-0 select-none border shadow-md flex-1 transition-all ${themeStyles.pickerWrapper}`}
                     title="Hover & Scroll mouse pada slider/angka untuk mengubah nilai"
                 >
                     <ColorPicker
                         value={getCurrentValue()}
                         onChange={handleColorChange}
                         width={270}
-                        height={90}
+                        height={80}
                         hidePresets={false}
                         hideInputs={false}
                         hideControls={false}

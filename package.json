@@ -1,7 +1,7 @@
 {
   "name": "jadwal-priok",
   "private": true,
-  "version": "0.3.62-beta",
+  "version": "0.3.68-beta",
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
