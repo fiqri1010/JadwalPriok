@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ClipboardPaste, X, Check, AlertCircle, Sparkles, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { SHIFT_OPTIONS, ShiftType, SHIFT_COLORS, DayData, EXCEL_SHIFT_MAPPING, AppTheme } from '../types';
+import { SHIFT_OPTIONS, ShiftType, SHIFT_COLORS, DayData, EXCEL_SHIFT_MAPPING, AppTheme, ShiftItemConfig } from '../types';
+import { findClosestShiftByColor } from '../utils/excelColorMatcher';
 
 interface PasteExcelModalProps {
   isOpen: boolean;
@@ -30,10 +31,20 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
   initialText = '',
   theme = 'default',
 }) => {
-  const [activeTab, setActiveTab] = useState<'schedule' | 'absen'>('schedule');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'absen' | 'visualGrid'>('schedule');
 
   const [inputText, setInputText] = useState(initialText);
   const [inputTextAbsen, setInputTextAbsen] = useState('');
+  const [parsedCellItems, setParsedCellItems] = useState<{ text: string; bgColor: string }[]>([]);
+  const [visualGridData, setVisualGridData] = useState<{ day: number; shift: ShiftType | null; raw: string; bgColor: string }[]>(() => {
+    const days = new Date(selectedYear, selectedMonth, 0).getDate();
+    return Array.from({ length: days }, (_, i) => ({
+      day: i + 1,
+      shift: null,
+      raw: '',
+      bgColor: '',
+    }));
+  });
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
@@ -54,6 +65,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
     if (isOpen) {
       setInputText(initialText);
       setInputTextAbsen('');
+      setParsedCellItems([]);
       setErrorMsg(null);
       setTimeout(() => {
         if (activeTab === 'schedule') {
@@ -69,31 +81,199 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
 
   if (!isOpen) return null;
 
-  // --- PARSER 1: Salin Jadwal (Shift Codes) ---
-  const parseShifts = (text: string) => {
-    if (!text || !text.trim()) return [];
-    const firstLine = text.replace(/\r/g, '').split('\n').find((l) => l.trim().length > 0) || '';
-    let rawCells = firstLine.split('\t');
-    if (rawCells.length <= 1 && firstLine.includes(',')) {
-      rawCells = firstLine.split(',');
-    } else if (rawCells.length <= 1 && firstLine.includes(';')) {
-      rawCells = firstLine.split(';');
-    } else if (rawCells.length <= 1 && firstLine.includes(' ')) {
-      rawCells = firstLine.split(/\s+/);
+  // --- HTML Clipboard Paste Handler (Cell Background Color Support) ---
+  const handlePasteTextarea = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const htmlData = e.clipboardData.getData('text/html');
+    if (htmlData) {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlData, 'text/html');
+        const cells = Array.from(doc.querySelectorAll('td, th'));
+        if (cells.length > 0) {
+          e.preventDefault();
+          const items: { text: string; bgColor: string }[] = [];
+          cells.forEach((cell) => {
+            const text = cell.textContent?.trim() || '';
+            const style = (cell as HTMLElement).getAttribute('style') || '';
+            const bgcolor = (cell as HTMLElement).getAttribute('bgcolor') || '';
+            let bgColor = bgcolor;
+            if (!bgColor && style) {
+              const bgMatch = style.match(/(?:background-color|background)\s*:\s*([^;]+)/i);
+              if (bgMatch) {
+                bgColor = bgMatch[1].trim();
+              }
+            }
+            items.push({ text, bgColor });
+          });
+          setParsedCellItems(items);
+          setInputText(items.map((i) => i.text).join('\t'));
+          setErrorMsg(null);
+          return;
+        }
+      } catch (err) {
+        console.error('HTML paste parse error:', err);
+      }
     }
-
-    return rawCells.map((c) => c.trim().toUpperCase());
   };
 
-  const parsedCells = parseShifts(inputText);
+  // --- HTML Clipboard Paste Handler for Visual Grid Tab ---
+  const handleVisualGridPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const htmlData = e.clipboardData.getData('text/html');
+    const textData = e.clipboardData.getData('text/plain');
+
+    let cells: { text: string; bgColor: string }[] = [];
+
+    if (htmlData) {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlData, 'text/html');
+        const domCells = Array.from(doc.querySelectorAll('td, th'));
+        if (domCells.length > 0) {
+          e.preventDefault();
+          domCells.forEach((cell) => {
+            const text = cell.textContent?.trim() || '';
+            const style = (cell as HTMLElement).getAttribute('style') || '';
+            const bgcolor = (cell as HTMLElement).getAttribute('bgcolor') || '';
+            let bgColor = bgcolor;
+            if (!bgColor && style) {
+              const bgMatch = style.match(/(?:background-color|background)\s*:\s*([^;]+)/i);
+              if (bgMatch) bgColor = bgMatch[1].trim();
+            }
+            cells.push({ text, bgColor });
+          });
+        }
+      } catch (err) {
+        console.error('Visual grid HTML parse error:', err);
+      }
+    }
+
+    if (cells.length === 0 && textData) {
+      e.preventDefault();
+      const lines = textData.replace(/\r/g, '').split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
+      lines.forEach((line) => {
+        let rowCells = line.split('\t');
+        if (rowCells.length <= 1 && line.includes(',')) rowCells = line.split(',');
+        else if (rowCells.length <= 1 && line.includes(';')) rowCells = line.split(';');
+        else if (rowCells.length <= 1 && line.includes(' ')) rowCells = line.split(/\s+/);
+        rowCells.forEach((rc) => {
+          const cleaned = rc.trim().replace(/^["']|["']$/g, '');
+          if (cleaned) cells.push({ text: cleaned, bgColor: '' });
+        });
+      });
+    }
+
+    if (cells.length > 0) {
+      setVisualGridData((prev) => {
+        return prev.map((item, idx) => {
+          const pasted = cells[idx];
+          if (!pasted) return item;
+          const raw = pasted.text.toUpperCase();
+          let matched: ShiftType | null = null;
+
+          if (pasted.bgColor) {
+            const colorMatched = findClosestShiftByColor(pasted.bgColor, defaultAvailableShifts);
+            if (colorMatched) matched = colorMatched.key as ShiftType;
+          }
+          if (!matched && raw) {
+            if (EXCEL_SHIFT_MAPPING[raw]) matched = EXCEL_SHIFT_MAPPING[raw];
+            else {
+              const found = SHIFT_OPTIONS.find((opt) => opt.toUpperCase() === raw);
+              if (found) matched = found;
+            }
+          }
+          return {
+            day: item.day,
+            shift: matched,
+            raw: pasted.text,
+            bgColor: pasted.bgColor,
+          };
+        });
+      });
+      setErrorMsg(null);
+    }
+  };
+
+  // --- PARSER 1: Salin Jadwal (Shift Codes & Cell Colors for both horizontal and vertical Excel layouts) ---
+  const getParsedScheduleItems = (): { text: string; bgColor: string }[] => {
+    if (parsedCellItems && parsedCellItems.length > 0) {
+      return parsedCellItems;
+    }
+    if (!inputText || !inputText.trim()) return [];
+
+    const lines = inputText.replace(/\r/g, '').split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
+    const allItems: { text: string; bgColor: string }[] = [];
+
+    // Check if it's a single horizontal row or multiple vertical rows with tabs/commas
+    if (lines.length === 1 || (lines.length > 1 && lines[0].includes('\t'))) {
+      lines.forEach((line) => {
+        let rowCells = line.split('\t');
+        if (rowCells.length <= 1 && line.includes(',')) {
+          rowCells = line.split(',');
+        } else if (rowCells.length <= 1 && line.includes(';')) {
+          rowCells = line.split(';');
+        } else if (rowCells.length <= 1 && line.includes(' ')) {
+          rowCells = line.split(/\s+/);
+        }
+        rowCells.forEach((rc) => {
+          const cleaned = rc.trim().replace(/^["']|["']$/g, '');
+          if (cleaned) {
+            allItems.push({ text: cleaned.toUpperCase(), bgColor: '' });
+          }
+        });
+      });
+    } else {
+      // Vertical column format (each non-empty line is 1 day/cell)
+      lines.forEach((line) => {
+        const cleaned = line.trim().replace(/^["']|["']$/g, '');
+        if (cleaned) {
+          allItems.push({ text: cleaned.toUpperCase(), bgColor: '' });
+        }
+      });
+    }
+
+    return allItems;
+  };
+
+  const scheduleItems = getParsedScheduleItems();
   const matchedDaysSchedule: { day: number; shift: ShiftType | null; raw: string }[] = [];
   let validCountSchedule = 0;
 
+  const defaultAvailableShifts: ShiftItemConfig[] = SHIFT_OPTIONS.map((s, idx) => ({
+    id: `default-${s}-${idx}`,
+    key: s,
+    naming: { fullName: s, displayBadge: s, copyCode: s, dropdownSublabel: '' },
+    workTime: { jamMasukDasar: '08:00', jamPulangDasar: '17:00', earliestFlexiIn: '', latestFlexiIn: '', earliestFlexiOut: '', latestFlexiOut: '', minLemburMinutes: 0, maxLemburMinutes: 0 },
+    visual: {
+      colorMode: 'solid' as const,
+      solidColor: SHIFT_COLORS[s]?.bg?.replace('bg-[', '').replace(']', '') || '#3b82f6',
+      textColor: '#ffffff',
+      borderColor: '#000000',
+      gradientType: 'linear' as const,
+      gradientAngle: 0,
+      colorStops: [],
+      patternType: 'none' as const,
+      patternOpacity: 1,
+      iconType: 'none' as const,
+    },
+    isPiket: false,
+    isVisibleInDropdown: true,
+  }));
+
   for (let i = 0; i < daysInMonth; i++) {
-    const raw = parsedCells[i] || '';
+    const cellItem = scheduleItems[i] || { text: '', bgColor: '' };
+    const raw = cellItem.text;
     let matched: ShiftType | null = null;
 
-    if (raw) {
+    // 1. Try color matching if background color exists from pasted HTML table cells
+    if (cellItem.bgColor) {
+      const colorMatched = findClosestShiftByColor(cellItem.bgColor, defaultAvailableShifts);
+      if (colorMatched) {
+        matched = colorMatched.key as ShiftType;
+      }
+    }
+
+    // 2. Fallback to text matching
+    if (!matched && raw) {
       if (EXCEL_SHIFT_MAPPING[raw]) {
         matched = EXCEL_SHIFT_MAPPING[raw];
       } else {
@@ -265,6 +445,23 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
 
       const updates: Record<string, Partial<DayData>> = {};
       for (const item of matchedDaysSchedule) {
+        if (item.shift) {
+          const key = `${selectedYear}-${selectedMonth}-${item.day}`;
+          updates[key] = { shift: item.shift };
+        }
+      }
+
+      onApply(updates);
+      onClose();
+    } else if (activeTab === 'visualGrid') {
+      const validCount = visualGridData.filter((i) => i.shift !== null).length;
+      if (validCount === 0) {
+        setErrorMsg('Belum ada kotak tabel warna Excel yang terisi shift. Silakan tempel (Ctrl+V) tabel Excel Anda di atas.');
+        return;
+      }
+
+      const updates: Record<string, Partial<DayData>> = {};
+      for (const item of visualGridData) {
         if (item.shift) {
           const key = `${selectedYear}-${selectedMonth}-${item.day}`;
           updates[key] = { shift: item.shift };
@@ -575,7 +772,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
             {/* SEGMENTED TAB SELECTOR (RADIO BUTTONS WITH INDIKATOR ANIMASI - Pinned at top) */}
             <div className="flex items-center justify-center pt-1 pb-1 shrink-0">
               <div
-                className="tab-container relative grid grid-cols-2 p-[2px] select-none w-full max-w-[280px]"
+                className="tab-container relative grid grid-cols-3 p-[2px] select-none w-full max-w-[420px]"
                 style={{
                   backgroundColor: currentStyle.tabContainerBg,
                   border: currentStyle.tabContainerBorder,
@@ -626,12 +823,34 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                   Salin Presensi
                 </label>
 
+                {/* Radio Input 3: Grid Excel Warna */}
+                <label
+                  className="tab_label relative z-30 h-[28px] flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                  style={{
+                    color: activeTab === 'visualGrid' ? currentStyle.tabTextActive : currentStyle.tabTextInactive,
+                    fontFamily: isWinamp ? 'monospace' : 'inherit',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="pasteTabGroup"
+                    id="tab3_visualGrid"
+                    className="sr-only"
+                    checked={activeTab === 'visualGrid'}
+                    onChange={() => {
+                      setActiveTab('visualGrid');
+                      setErrorMsg(null);
+                    }}
+                  />
+                  Grid Excel Warna
+                </label>
+
                 {/* Sliding Indicator Pill */}
                 <div
                   className="indicator absolute top-[2px] z-10 h-[28px] transition-all duration-200 ease-out pointer-events-none"
                   style={{
-                    left: activeTab === 'schedule' ? '2px' : 'calc(50%)',
-                    width: 'calc(50% - 2px)',
+                    left: activeTab === 'schedule' ? '2px' : activeTab === 'absen' ? '33.33%' : '66.66%',
+                    width: 'calc(33.33% - 2px)',
                     backgroundColor: currentStyle.tabIndicatorBg,
                     borderRadius: currentStyle.tabIndicatorRadius,
                     border: currentStyle.tabIndicatorBorder || 'none',
@@ -720,7 +939,11 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               {/* Debossed Inset Area for Paste Input */}
               <div className="space-y-1 flex flex-col shrink-0">
                 <label style={{ color: currentStyle.subtextColor }} className="text-[10px] font-bold uppercase tracking-wider block">
-                  {activeTab === 'schedule' ? 'Kotak Tempel Teks Shift (Ctrl + V):' : 'Kotak Tempel Teks Absen / Laporan Kehadiran (Ctrl + V):'}
+                  {activeTab === 'schedule'
+                    ? 'Kotak Tempel Teks Shift (Ctrl + V):'
+                    : activeTab === 'visualGrid'
+                    ? 'Kotak Tempel Tabel Excel Warna (Ctrl + V):'
+                    : 'Kotak Tempel Teks Absen / Laporan Kehadiran (Ctrl + V):'}
                 </label>
 
                 <div
@@ -742,7 +965,20 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                         setInputText(e.target.value);
                         setErrorMsg(null);
                       }}
+                      onPaste={handlePasteTextarea}
                       placeholder="Klik di sini lalu tekan Ctrl+V (Contoh: G	L	N	OFF	SM	PM	M	CUTI ...)"
+                      className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
+                      style={{
+                        color: currentStyle.textColor,
+                        caretColor: currentStyle.accentColor,
+                      }}
+                    />
+                  ) : activeTab === 'visualGrid' ? (
+                    <textarea
+                      id="excel-visual-grid-area"
+                      rows={3}
+                      onPaste={handleVisualGridPaste}
+                      placeholder="Klik di sini lalu tekan Ctrl+V untuk menempelkan tabel Excel strip berwarna Anda..."
                       className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
                       style={{
                         color: currentStyle.textColor,
@@ -775,6 +1011,71 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                 <div className="p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs flex items-start space-x-2 shrink-0">
                   <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                   <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* Visual Grid Table Boxes View for activeTab === 'visualGrid' */}
+              {activeTab === 'visualGrid' && (
+                <div className="space-y-1.5 flex flex-col min-h-0 shrink-0">
+                  <div className="flex items-center justify-between text-xs font-bold px-0.5">
+                    <span style={{ color: currentStyle.subtextColor }} className="text-[11px]">
+                      Strip Kotak Tabel Warna Excel (Tanggal 1 s.d. {daysInMonth}):
+                    </span>
+                    <span className="text-[11px] font-black text-emerald-600 dark:text-emerald-400">
+                      {visualGridData.filter((i) => i.shift !== null).length} dari {daysInMonth} hari terpetakan
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      backgroundColor: currentStyle.fieldBg,
+                      border: currentStyle.fieldBorder,
+                      boxShadow: currentStyle.fieldShadow,
+                      borderRadius: isWinamp ? '0px' : '10px',
+                    }}
+                    className="grid grid-cols-4 sm:grid-cols-7 md:grid-cols-10 gap-1.5 max-h-52 overflow-y-auto p-2.5"
+                  >
+                    {visualGridData.map((item, idx) => {
+                      const shiftColorInfo = item.shift ? SHIFT_COLORS[item.shift] : null;
+                      const customBgStyle = item.bgColor
+                        ? { backgroundColor: item.bgColor, color: '#000000' }
+                        : {};
+
+                      return (
+                        <div
+                          key={`visual-box-${item.day}-${idx}`}
+                          className={`flex flex-col items-center justify-between p-1.5 rounded-lg border transition-all text-center ${
+                            item.shift
+                              ? 'border-emerald-500/60 shadow-2xs font-bold'
+                              : 'border-current/10 opacity-70'
+                          } ${shiftColorInfo?.bg || ''}`}
+                          style={customBgStyle}
+                        >
+                          <span className="text-[9px] font-black opacity-80 border-b border-current/15 w-full pb-0.5 mb-1">
+                            Tgl {item.day}
+                          </span>
+
+                          <select
+                            value={item.shift || ''}
+                            onChange={(e) => {
+                              const val = e.target.value as ShiftType;
+                              setVisualGridData((prev) =>
+                                prev.map((d) => (d.day === item.day ? { ...d, shift: val || null } : d))
+                              );
+                            }}
+                            className="w-full bg-black/10 dark:bg-white/10 text-[10px] font-black rounded px-1 py-0.5 border border-current/20 outline-none cursor-pointer text-center"
+                          >
+                            <option value="" className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-slate-100">-</option>
+                            {SHIFT_OPTIONS.map((opt) => (
+                              <option key={`opt-v-${item.day}-${opt}`} value={opt} className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-slate-100">
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 

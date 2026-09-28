@@ -382,7 +382,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                   >
                     {MONTH_NAMES_ID.map((mName, idx) => (
                       <button
-                        key={mName}
+                        key={`month-${mName}-${idx}`}
                         type="button"
                         onClick={() => {
                           setViewMonth(idx);
@@ -430,7 +430,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                   >
                     {yearOptions.map((yr) => (
                       <button
-                        key={yr}
+                        key={`year-${yr}`}
                         type="button"
                         onClick={() => {
                           setViewYear(yr);
