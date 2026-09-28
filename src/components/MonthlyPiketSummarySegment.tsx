@@ -117,32 +117,32 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
     return (
         <div className={`w-full overflow-hidden select-none ${getContainerStyles()} ${className}`}>
             {/* Header Segmen */}
-            <div className={`px-3 py-2 flex items-center justify-between ${getHeaderStyles()}`}>
-                <div className="flex items-center space-x-2">
+            <div className={`px-3 py-2 flex items-center justify-between gap-2 min-w-0 ${getHeaderStyles()}`}>
+                <div className="flex items-center space-x-1.5 min-w-0 flex-1">
                     <BriefcaseIcon theme={theme} className="w-4 h-4 shrink-0" />
-                    <span className="text-xs font-bold uppercase tracking-wide">
+                    <span className="text-xs font-bold uppercase tracking-wide truncate" title={`JADWAL PIKET ${INDONESIAN_MONTH_NAMES[selectedMonth - 1].toUpperCase()}`}>
                         JADWAL PIKET {INDONESIAN_MONTH_NAMES[selectedMonth - 1].toUpperCase()}
                     </span>
                 </div>
-                <span className="text-[11.5px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                <span className="text-[11px] sm:text-[11.5px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 whitespace-nowrap shrink-0">
                     {totalPiket} Piket
                 </span>
             </div>
 
             {/* Content: Stat Badges + List */}
-            <div className="p-2.5 space-y-2">
-                {/* Unified Adaptive Grid: 4x1 on mobile and narrow sidebars, 2x2 on wide viewports */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-1.5 text-center">
+            <div className="p-2 space-y-1.5">
+                {/* Unified Adaptive Grid: 2x2 pada mobile view, 4x1 (mendatar) di layar lebar, dan 2x2 di sidebar desktop */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-1 text-center">
                     {/* Box 1: Piket-Off */}
                     <Tooltip content="Piket dengan libur pengganti." containerClassName="w-full">
                         <div
-                            className="py-1 sm:py-1.5 px-2 rounded-lg border bg-indigo-500/10 border-indigo-500/15 text-indigo-700 dark:text-indigo-400 flex flex-col items-center justify-between min-h-[38px] sm:min-h-[42px] min-w-0 hover:bg-indigo-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className="py-1 px-1.5 rounded-md border bg-indigo-500/10 border-indigo-500/15 text-indigo-700 dark:text-indigo-400 flex flex-col items-center justify-center min-h-[34px] min-w-0 hover:bg-indigo-500/15 cursor-help transition-all shadow-3xs w-full"
                         >
-                            <div className="text-[8px] sm:text-[9.5px] font-black uppercase tracking-tight opacity-95 truncate w-full flex items-center justify-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0 animate-pulse" />
-                                <span>Piket-Off</span>
+                            <div className="text-[7.5px] min-[380px]:text-[8px] sm:text-[8.5px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
+                                <span className="w-1 h-1 rounded-full bg-indigo-500 shrink-0 animate-pulse" />
+                                <span className="truncate">Piket-Off</span>
                             </div>
-                            <div className="text-[10px] sm:text-[11px] font-extrabold text-indigo-600 dark:text-indigo-300 w-full truncate mt-0.5">
+                            <div className="text-[9.5px] min-[380px]:text-[10px] sm:text-[10.5px] font-black text-indigo-600 dark:text-indigo-300 w-full truncate mt-0.5 leading-none">
                                 {piketWithOffCount} Hari
                             </div>
                         </div>
@@ -151,13 +151,13 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     {/* Box 2: Piket-no OFF */}
                     <Tooltip content="Piket tanpa libur pengganti." containerClassName="w-full">
                         <div
-                            className="py-1 sm:py-1.5 px-2 rounded-lg border bg-slate-500/10 border-slate-500/15 text-slate-700 dark:text-slate-400 flex flex-col items-center justify-between min-h-[38px] sm:min-h-[42px] min-w-0 hover:bg-slate-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className="py-1 px-1.5 rounded-md border bg-slate-500/10 border-slate-500/15 text-slate-700 dark:text-slate-400 flex flex-col items-center justify-center min-h-[34px] min-w-0 hover:bg-slate-500/15 cursor-help transition-all shadow-3xs w-full"
                         >
-                            <div className="text-[8px] sm:text-[9.5px] font-black uppercase tracking-tight opacity-95 truncate w-full flex items-center justify-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-                                <span>Piket-no OFF</span>
+                            <div className="text-[7.5px] min-[380px]:text-[8px] sm:text-[8.5px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
+                                <span className="w-1 h-1 rounded-full bg-slate-400 shrink-0" />
+                                <span className="truncate">Piket-no OFF</span>
                             </div>
-                            <div className="text-[10px] sm:text-[11px] font-extrabold text-slate-600 dark:text-slate-300 w-full truncate mt-0.5">
+                            <div className="text-[9.5px] min-[380px]:text-[10px] sm:text-[10.5px] font-black text-slate-600 dark:text-slate-300 w-full truncate mt-0.5 leading-none">
                                 {piketWithoutOffCount} Hari
                             </div>
                         </div>
@@ -166,13 +166,13 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     {/* Box 3: Off Ready */}
                     <Tooltip content="Jatah libur pengganti yang sudah terjadwal di kalender." containerClassName="w-full">
                         <div
-                            className="py-1 sm:py-1.5 px-2 rounded-lg border bg-emerald-500/10 border-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex flex-col items-center justify-between min-h-[38px] sm:min-h-[42px] min-w-0 hover:bg-emerald-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className="py-1 px-1.5 rounded-md border bg-emerald-500/10 border-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex flex-col items-center justify-center min-h-[34px] min-w-0 hover:bg-emerald-500/15 cursor-help transition-all shadow-3xs w-full"
                         >
-                            <div className="text-[8px] sm:text-[9.5px] font-black uppercase tracking-tight opacity-95 truncate w-full flex items-center justify-center gap-1">
-                                <CheckCircle2 className="w-2.5 h-2.5 shrink-0 text-emerald-500" />
-                                <span>Off Ready</span>
+                            <div className="text-[7.5px] min-[380px]:text-[8px] sm:text-[8.5px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
+                                <CheckCircle2 className="w-2 h-2 shrink-0 text-emerald-500" />
+                                <span className="truncate">Off Ready</span>
                             </div>
-                            <div className="text-[10px] sm:text-[11px] font-extrabold text-emerald-600 dark:text-emerald-300 w-full truncate mt-0.5">
+                            <div className="text-[9.5px] min-[380px]:text-[10px] sm:text-[10.5px] font-black text-emerald-600 dark:text-emerald-300 w-full truncate mt-0.5 leading-none">
                                 {matchedPiketCount} Hari
                             </div>
                         </div>
@@ -181,13 +181,13 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     {/* Box 4: Off Delay */}
                     <Tooltip content="Jatah libur pengganti yang belum dijadwalkan." containerClassName="w-full">
                         <div
-                            className="py-1 sm:py-1.5 px-2 rounded-lg border bg-amber-500/10 border-amber-500/15 text-amber-700 dark:text-amber-400 flex flex-col items-center justify-between min-h-[38px] sm:min-h-[42px] min-w-0 hover:bg-amber-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className="py-1 px-1.5 rounded-md border bg-amber-500/10 border-amber-500/15 text-amber-700 dark:text-amber-400 flex flex-col items-center justify-center min-h-[34px] min-w-0 hover:bg-amber-500/15 cursor-help transition-all shadow-3xs w-full"
                         >
-                            <div className="text-[8px] sm:text-[9.5px] font-black uppercase tracking-tight opacity-95 truncate w-full flex items-center justify-center gap-1">
-                                <Clock className="w-2.5 h-2.5 shrink-0 text-amber-500" />
-                                <span>Off Delay</span>
+                            <div className="text-[7.5px] min-[380px]:text-[8px] sm:text-[8.5px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
+                                <Clock className="w-2 h-2 shrink-0 text-amber-500" />
+                                <span className="truncate">Off Delay</span>
                             </div>
-                            <div className="text-[10px] sm:text-[11px] font-extrabold text-amber-600 dark:text-amber-300 w-full truncate mt-0.5">
+                            <div className="text-[9.5px] min-[380px]:text-[10px] sm:text-[10.5px] font-black text-amber-600 dark:text-amber-300 w-full truncate mt-0.5 leading-none">
                                 {pendingPiketCount} Hari
                             </div>
                         </div>

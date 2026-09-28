@@ -134,22 +134,22 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
     };
 
     return (
-        <div className="p-1.5 sm:p-2 rounded-2xl bg-white dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 space-y-1.5 font-sans shadow-2xs w-full min-w-0">
+        <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 space-y-4 font-sans shadow-2xs w-full min-w-0 lg:h-full lg:min-h-[515px] flex flex-col justify-between">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-1.5">
-                    <Layers className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
-                    <span className="text-xs font-bold">Katalog Motif Pola (Hero Patterns by Steve Schoger):</span>
+                <div className="flex items-center space-x-2">
+                    <Layers className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                    <span className="text-xs sm:text-[13px] font-black">Katalog Motif Pola (Hero Patterns by Steve Schoger):</span>
                 </div>
             </div>
 
             {/* Pattern Tile Grid Catalog */}
-            <div className="space-y-0.5">
+            <div className="space-y-1.5 flex-1 flex flex-col min-h-0">
                 <span className="text-[10px] font-bold opacity-75 uppercase tracking-wider block">
                     Pilih Motif Pola (30 Koleksi Grid):
                 </span>
 
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-1 sm:gap-1.5 max-h-44 sm:max-h-48 overflow-y-auto p-1.5 pr-2 border border-slate-200/80 dark:border-zinc-800/80 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 custom-scrollbar">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-2 max-h-48 sm:max-h-56 lg:max-h-[290px] lg:h-[265px] overflow-y-auto p-1.5 pr-2 border border-slate-200/80 dark:border-zinc-800/80 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 custom-scrollbar flex-1">
                     {BADGE_PATTERNS.map((pattern) => {
                         const isSelected = (visual.patternType || 'none') === pattern.id && !visual.customPatternUrl;
                         return (
@@ -163,27 +163,27 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                         customPatternUrl: undefined,
                                     });
                                 }}
-                                className={`p-1 sm:p-1.5 rounded-xl border flex flex-col items-center justify-between text-center transition-all cursor-pointer relative group ${
+                                className={`p-1.5 sm:p-2 rounded-xl border flex flex-col items-center justify-between text-center transition-all cursor-pointer relative group ${
                                     isSelected
-                                        ? 'border-2 border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold shadow-xs scale-[1.02]'
+                                        ? 'border-2 border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-black shadow-xs scale-[1.02]'
                                         : 'border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-800/60 hover:bg-slate-100 dark:hover:bg-zinc-700/80 text-slate-700 dark:text-zinc-300 hover:scale-[1.01]'
                                 }`}
                                 title={pattern.name}
                             >
                                 {/* Checkmark indicator on active tile */}
                                 {isSelected && (
-                                    <div className="absolute top-0.5 right-0.5 z-10 w-3.5 h-3.5 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-xs">
+                                    <div className="absolute top-0.5 right-0.5 z-10 w-4 h-4 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-xs">
                                         <Check className="w-2.5 h-2.5 stroke-[3]" />
                                     </div>
                                 )}
 
                                 {/* Mini Pattern Box */}
-                                <div className="w-full h-6 sm:h-7 rounded-lg border border-slate-200/60 dark:border-zinc-700/60 bg-[#161616] overflow-hidden shadow-2xs relative">
+                                <div className="w-full h-7 sm:h-10 rounded-lg border border-slate-200/60 dark:border-zinc-700/60 bg-[#161616] overflow-hidden shadow-2xs relative">
                                     {renderTilePatternSvg(pattern.id)}
                                 </div>
 
                                 {/* Short Name Label Underneath */}
-                                <span className="text-[9px] sm:text-[9.5px] font-bold truncate w-full mt-0.5">
+                                <span className="text-[9.5px] sm:text-[10px] font-black truncate w-full mt-1.5 leading-none">
                                     {pattern.shortName || pattern.name}
                                 </span>
                             </button>
@@ -193,19 +193,19 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
             </div>
 
             {/* Dynamic Sliders Section: Opasitas, Skala/Kepadatan & Ketebalan Motif */}
-            <div className="space-y-1.5 pt-1 border-t border-slate-200/60 dark:border-zinc-800/80">
+            <div className="space-y-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/80">
                 {/* Row 1: Opasitas & Skala/Kepadatan Sliders */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
                     {/* Slider 1: Opasitas Motif */}
                     <div
-                        className="space-y-0.5 p-1 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800"
+                        className="space-y-1.5 p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 shadow-3xs"
                         title="Hover & Scroll mouse untuk mengubah opasitas motif"
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
                     >
-                        <div className="flex justify-between items-center text-[10px] font-bold">
+                        <div className="flex justify-between items-center text-[10.5px] font-bold">
                             <span className="opacity-75">Opasitas Motif:</span>
-                            <span className="font-mono text-teal-600 dark:text-teal-400">{Math.round(opacityVal * 100)}%</span>
+                            <span className="font-mono text-teal-600 dark:text-teal-400 font-extrabold">{Math.round(opacityVal * 100)}%</span>
                         </div>
                         <input
                             type="range"
@@ -221,14 +221,14 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
 
                     {/* Slider 2: Skala / Kepadatan Motif */}
                     <div
-                        className="space-y-0.5 p-1 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800"
+                        className="space-y-1.5 p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 shadow-3xs"
                         title="Hover & Scroll mouse untuk mengubah skala/kepadatan motif"
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
                     >
-                        <div className="flex justify-between items-center text-[10px] font-bold">
+                        <div className="flex justify-between items-center text-[10.5px] font-bold">
                             <span className="opacity-75">Skala / Kepadatan:</span>
-                            <span className="font-mono text-teal-600 dark:text-teal-400">{scaleVal.toFixed(1)}x</span>
+                            <span className="font-mono text-teal-600 dark:text-teal-400 font-extrabold">{scaleVal.toFixed(1)}x</span>
                         </div>
                         <input
                             type="range"
@@ -243,16 +243,16 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                     </div>
                 </div>
 
-                {/* Row 2: Slider 3 Ketebalan Motif (Sepanjang UI komponen Opasitas dan Skala/Kepadatan) */}
+                {/* Row 2: Slider 3 Ketebalan Motif */}
                 <div
-                    className="space-y-0.5 p-1 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 w-full"
+                    className="space-y-1.5 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 w-full shadow-3xs"
                     title="Hover & Scroll mouse untuk mengubah ketebalan motif"
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
-                    <div className="flex justify-between items-center text-[10px] font-bold">
+                    <div className="flex justify-between items-center text-[10.5px] font-bold">
                         <span className="opacity-75">Ketebalan Motif:</span>
-                        <span className="font-mono text-teal-600 dark:text-teal-400">{strokeWidthVal.toFixed(1)}px</span>
+                        <span className="font-mono text-teal-600 dark:text-teal-400 font-extrabold">{strokeWidthVal.toFixed(1)}px</span>
                     </div>
                     <input
                         type="range"
@@ -268,7 +268,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
             </div>
 
             {/* Custom Pattern Upload & CSS */}
-            <div className="pt-2 border-t border-slate-200/60 dark:border-zinc-800 space-y-1.5">
+            <div className="pt-3 border-t border-slate-200/60 dark:border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between gap-2">
                     <span className="text-[10.5px] font-bold truncate">Pola Kustom:</span>
                     <input
@@ -278,27 +278,27 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                         onChange={handleFileUpload}
                         className="hidden"
                     />
-                    <div className="flex items-center space-x-1.5 shrink-0">
+                    <div className="flex items-center space-x-2 shrink-0">
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="px-2 py-1 text-[10px] font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white flex items-center space-x-1 cursor-pointer shrink-0 transition-all active:scale-95"
+                            className="px-2.5 py-1.5 text-[10.5px] font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white flex items-center space-x-1.5 cursor-pointer shrink-0 transition-all active:scale-95 shadow-2xs"
                             title="Unggah berkas gambar/SVG pola"
                         >
-                            <Upload className="w-2.5 h-2.5" />
+                            <Upload className="w-3 h-3" />
                             <span>Pilih Gambar</span>
                         </button>
                         <button
                             type="button"
                             onClick={() => setIsCssInputOpen(!isCssInputOpen)}
-                            className={`px-2 py-1 text-[10px] font-bold rounded-lg border flex items-center space-x-1 cursor-pointer shrink-0 transition-all active:scale-95 ${
+                            className={`px-2.5 py-1.5 text-[10.5px] font-bold rounded-lg border flex items-center space-x-1.5 cursor-pointer shrink-0 transition-all active:scale-95 ${
                                 isCssInputOpen
                                     ? 'bg-teal-600 border-teal-500 text-white shadow-2xs'
                                     : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700'
                             }`}
                             title="Tulis pola motif dengan CSS"
                         >
-                            <Code2 className="w-2.5 h-2.5" />
+                            <Code2 className="w-3 h-3" />
                             <span>CSS</span>
                         </button>
                     </div>
@@ -306,12 +306,12 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
 
                 {/* Inline CSS Pattern Editor */}
                 {isCssInputOpen && (
-                    <div className="p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 space-y-1.5 animate-in fade-in duration-150">
+                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 space-y-2 animate-in fade-in duration-150">
                         <div className="flex items-center justify-between flex-wrap gap-1">
                             <div className="flex items-center space-x-1.5 flex-wrap">
                                 <span className="text-[10px] font-bold opacity-75">Preset CSS Pola:</span>
                                 <span className="text-[9.5px] opacity-40">•</span>
-                                <span className="text-[9.5px] text-slate-500 dark:text-zinc-400 font-medium">Tools Preset</span>
+                                <span className="text-[9.5px] text-slate-500 dark:text-zinc-400 font-medium font-sans">Tools</span>
                                 <span className="text-[9.5px] text-slate-400">→</span>
                                 <a
                                     href="https://www.magicpattern.design/tools/css-backgrounds"
@@ -395,7 +395,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                     }
                                 }}
                                 placeholder="repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 8px)"
-                                className="flex-1 px-2 py-1 text-[10px] font-mono rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:border-teal-500"
+                                className="flex-1 px-2.5 py-1.5 text-[10px] font-mono rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:border-teal-500"
                             />
                             <button
                                 type="button"
@@ -404,7 +404,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                         onChange({ ...visual, customPatternUrl: cssPatternInput.trim() });
                                     }
                                 }}
-                                className="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white shrink-0 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                                className="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white shrink-0 cursor-pointer transition-all active:scale-95 shadow-2xs"
                             >
                                 Pasang
                             </button>
@@ -413,21 +413,21 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                 )}
 
                 {visual.customPatternUrl && (
-                    <div className="flex items-center justify-between p-1 rounded-lg bg-teal-500/10 border border-teal-500/30">
+                    <div className="flex items-center justify-between p-1.5 rounded-lg bg-teal-500/10 border border-teal-500/30">
                         <div className="flex items-center space-x-2 truncate min-w-0">
                             {isCustomPatternImage(visual.customPatternUrl) ? (
                                 <img
                                     src={visual.customPatternUrl}
                                     alt="Custom Pattern"
-                                    className="w-4 h-4 rounded object-cover border border-teal-500/30 shrink-0"
+                                    className="w-5 h-5 rounded object-cover border border-teal-500/30 shrink-0"
                                 />
                             ) : (
                                 <div
-                                    className="w-4 h-4 rounded border border-teal-500/30 shrink-0 overflow-hidden bg-slate-800"
+                                    className="w-5 h-5 rounded border border-teal-500/30 shrink-0 overflow-hidden bg-slate-800"
                                     style={parseCssPatternToStyle(visual.customPatternUrl, 0.5)}
                                 />
                             )}
-                            <span className="text-[9.5px] font-medium truncate">
+                            <span className="text-[10px] font-bold truncate">
                                 {isCustomPatternImage(visual.customPatternUrl) ? 'Pola Gambar Kustom Aktif' : 'Pola CSS Kustom Aktif'}
                             </span>
                         </div>
@@ -437,10 +437,10 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                 onChange({ ...visual, customPatternUrl: undefined });
                                 setCssPatternInput('');
                             }}
-                            className="p-0.5 rounded text-rose-500 hover:bg-rose-500/10 cursor-pointer shrink-0"
+                            className="p-1 rounded text-rose-500 hover:bg-rose-500/10 cursor-pointer shrink-0"
                             title="Hapus pola kustom"
                         >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-3.5 h-3.5" />
                         </button>
                     </div>
                 )}

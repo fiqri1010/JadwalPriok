@@ -110,54 +110,54 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {/* Flexi In */}
-                            <div className="p-2 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1">
-                                <span className="text-[10px] font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 block">
+                            <div className="p-3 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1.5">
+                                <span className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wide text-indigo-600 dark:text-indigo-400 block">
                                     Batas Flexi Masuk (In):
                                 </span>
-                                <div className="grid grid-cols-2 gap-1.5">
+                                <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <span className="text-[9px] opacity-60 block">Terawal:</span>
+                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Terawal:</span>
                                         <input
                                             type="time"
                                             value={workTime.earliestFlexiIn === '-' ? '' : workTime.earliestFlexiIn}
                                             onChange={(e) => handleTimeChange('earliestFlexiIn', e.target.value || '-')}
-                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
                                         />
                                     </div>
                                     <div>
-                                        <span className="text-[9px] opacity-60 block">Terakhir:</span>
+                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Terakhir:</span>
                                         <input
                                             type="time"
                                             value={workTime.latestFlexiIn === '-' ? '' : workTime.latestFlexiIn}
                                             onChange={(e) => handleTimeChange('latestFlexiIn', e.target.value || '-')}
-                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             {/* Flexi Out */}
-                            <div className="p-2 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1">
-                                <span className="text-[10px] font-bold uppercase tracking-wide text-cyan-600 dark:text-cyan-400 block">
+                            <div className="p-3 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1.5">
+                                <span className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wide text-cyan-600 dark:text-cyan-400 block">
                                     Batas Flexi Pulang (Out):
                                 </span>
-                                <div className="grid grid-cols-2 gap-1.5">
+                                <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <span className="text-[9px] opacity-60 block">Terawal:</span>
+                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Terawal:</span>
                                         <input
                                             type="time"
                                             value={workTime.earliestFlexiOut === '-' ? '' : workTime.earliestFlexiOut}
                                             onChange={(e) => handleTimeChange('earliestFlexiOut', e.target.value || '-')}
-                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
                                         />
                                     </div>
                                     <div>
-                                        <span className="text-[9px] opacity-60 block">Terakhir:</span>
+                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Terakhir:</span>
                                         <input
                                             type="time"
                                             value={workTime.latestFlexiOut === '-' ? '' : workTime.latestFlexiOut}
                                             onChange={(e) => handleTimeChange('latestFlexiOut', e.target.value || '-')}
-                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
                                         />
                                     </div>
                                 </div>
@@ -235,11 +235,11 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
 
                     {workTime.isSplitShift && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-zinc-800/80">
-                            <div className="p-2 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1">
-                                <span className="text-[10px] font-bold text-amber-500 block">Sesi 1 (Pagi):</span>
-                                <div className="grid grid-cols-2 gap-1.5">
+                            <div className="p-3 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1.5">
+                                <span className="text-[10px] font-black text-amber-500 block">Sesi 1 (Pagi):</span>
+                                <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <span className="text-[9px] opacity-60 block">Masuk:</span>
+                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Masuk:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession1?.masuk || '07:30'}
@@ -252,11 +252,11 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
                                         />
                                     </div>
                                     <div>
-                                        <span className="text-[9px] opacity-60 block">Pulang:</span>
+                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Pulang:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession1?.pulang || '17:00'}
@@ -269,17 +269,17 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="p-2 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1">
-                                <span className="text-[10px] font-bold text-indigo-400 block">Sesi 2 (Malam - Subuh):</span>
-                                <div className="grid grid-cols-2 gap-1.5">
+                            <div className="p-3 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1.5">
+                                <span className="text-[10px] font-black text-indigo-400 block">Sesi 2 (Malam - Subuh):</span>
+                                <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <span className="text-[9px] opacity-60 block">Masuk:</span>
+                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Masuk:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession2?.masuk || '20:00'}
@@ -292,11 +292,11 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
                                         />
                                     </div>
                                     <div>
-                                        <span className="text-[9px] opacity-60 block">Pulang:</span>
+                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Pulang:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession2?.pulang || '04:30'}
@@ -309,7 +309,7 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full h-7 px-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
                                         />
                                     </div>
                                 </div>

@@ -567,31 +567,11 @@ export const DayCell = React.memo<DayCellProps>(({
                         )}
                     </div>
 
-                    {/* Jam Absen pada kartu mobile jika terisi */}
-                    {renderAttendanceTimeBadge()}
+                    {/* Jam Absen disembunyikan di kartu mobile sesuai permintaan (sudah ada indikator lembur) */}
                 </div>
 
-                {/* Bottom area: Catatan teks berjalan pada kartu mobile ketika ada catatan */}
-                {data?.note ? (
-                    <div className="w-full shrink-0 mt-auto pt-0.5">
-                        <div
-                            className={`w-full py-0.5 border-y text-[8px] sm:text-[8.5px] font-semibold transition-colors overflow-hidden ${
-                                isWinamp
-                                    ? 'border-zinc-800 text-[#00FF00]/90 font-mono'
-                                    : isDark || isDarkFluid
-                                    ? 'border-white/10 text-slate-300'
-                                    : isVista
-                                    ? 'border-sky-300/50 text-sky-950 font-bold'
-                                    : 'border-slate-200 text-slate-700'
-                            }`}
-                            title={data.note}
-                        >
-                            <MarqueeText text={data.note} />
-                        </div>
-                    </div>
-                ) : (
-                    <div className="h-0.5 shrink-0" aria-hidden="true" />
-                )}
+                {/* Bottom area: Catatan disembunyikan pada kartu mobile sesuai permintaan */}
+                <div className="h-0.5 shrink-0" aria-hidden="true" />
             </div>
 
             {/* 2. DESKTOP VIEW: UNIFIED EXPANDING CARD (MORPHS FROM 1:1 TO 4:4 / 2x2 ON CLICK) */}
@@ -673,7 +653,7 @@ export const DayCell = React.memo<DayCellProps>(({
                         </div>
 
                         <div className="flex items-center gap-1 shrink-0">
-                            {lemburInfo && (
+                             {lemburInfo && (
                                 <Tooltip
                                     content={<span><strong>{lemburInfo.fullText}</strong></span>}
                                     placement="top"
@@ -792,7 +772,7 @@ export const DayCell = React.memo<DayCellProps>(({
                 {/* Bottom area: Catatan teks dengan garis atas & bawah + teks berjalan ketika compact */}
                 {!isExpandedDesktop && (
                     data?.note ? (
-                        <div className="w-full shrink-0 mt-auto pt-0.5">
+                        <div className="w-full shrink-0 mt-auto pt-0.5 hidden xl:block">
                             <div
                                 className={`w-full py-0.5 border-y text-[8.5px] sm:text-[9.5px] font-semibold transition-colors overflow-hidden ${
                                     isWinamp

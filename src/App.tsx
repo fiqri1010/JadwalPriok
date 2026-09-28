@@ -822,13 +822,16 @@ export const App: React.FC = () => {
 
                                         // Calculated aspect ratio based on total rows (4, 5, or 6) so full calendar month fits viewport height
                                         const getGridAspectStyle = (rows: number): React.CSSProperties => {
+                                            if (isMobile) {
+                                                return { aspectRatio: '1 / 1' }; // Perfect square on mobile view for spaciousness
+                                            }
                                             if (rows >= 6) {
-                                                return { aspectRatio: '1.95 / 1' };
+                                                return { aspectRatio: '1.6 / 1' }; // Taller cell on desktop for 6-row months
                                             }
                                             if (rows === 5) {
-                                                return { aspectRatio: '1.65 / 1' };
+                                                return { aspectRatio: '1.4 / 1' }; // Taller cell on desktop for 5-row months
                                             }
-                                            return { aspectRatio: '1.35 / 1' };
+                                            return { aspectRatio: '1.2 / 1' }; // Taller cell on desktop for <=4-row months
                                         };
 
                                         const cellAspectStyle = getGridAspectStyle(totalRows);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Save, Palette, Tag, Clock, Briefcase, Smile, Undo2, Redo2, RotateCcw, Check } from 'lucide-react';
+import { X, Save, Palette, Tag, Clock, Briefcase, Smile, Undo2, Redo2, RotateCcw, Check, Settings } from 'lucide-react';
 import { ShiftItemConfig, AppTheme } from '../../types';
 import { ShiftColorStudio } from './ShiftColorStudio';
 import { ShiftPatternStudio } from './ShiftPatternStudio';
@@ -110,7 +110,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
     return createPortal(
         <div className="fixed inset-0 sm:top-7 z-[10000] overflow-y-auto p-2 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 flex justify-center items-start sm:items-center">
             <div className="fixed inset-0 sm:top-7" onClick={onClose} />
-            <div className="relative z-10 w-full max-w-5xl my-auto h-[90vh] md:h-[660px] flex flex-col rounded-2xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200/90 dark:border-slate-700 overflow-hidden">
+            <div className="relative z-10 w-full max-w-5xl my-auto h-[90vh] md:h-[85vh] md:max-h-[660px] md:min-h-[580px] flex flex-col rounded-2xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200/90 dark:border-slate-700 overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between p-3.5 border-b border-slate-200/80 dark:border-zinc-800 shrink-0 bg-white dark:bg-[#1E1E1E]">
                     <div className="flex items-center space-x-2.5">
@@ -212,7 +212,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                                     : 'bg-transparent text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/40 hover:text-slate-900 dark:hover:text-slate-100 border-transparent'
                                             }`}
                                         >
-                                            <Clock className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
+                                            <Settings className="w-4 h-4 shrink-0 transition-transform group-hover:rotate-45 duration-300" />
                                             <span>Rule Set</span>
                                         </button>
                                     </li>
@@ -268,9 +268,9 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                             
                             {/* Tab 1: Latar (Color Picker & Motif Side-by-Side) */}
                             {activeTab === 'latar' && (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start w-full animate-in fade-in duration-150">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:items-stretch w-full animate-in fade-in duration-150">
                                     {/* Column 1: Color Picker */}
-                                    <div className="min-w-0">
+                                    <div className="min-w-0 lg:h-full flex flex-col">
                                         <ShiftColorStudio
                                             visual={draftShift.visual}
                                             onChange={(visual) => updateDraftShift({ ...draftShift, visual })}
@@ -278,7 +278,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                     </div>
                                     
                                     {/* Column 2: Motif Pattern Selection */}
-                                    <div className="min-w-0">
+                                    <div className="min-w-0 lg:h-full flex flex-col">
                                         <ShiftPatternStudio
                                             visual={draftShift.visual}
                                             onChange={(visual) => updateDraftShift({ ...draftShift, visual })}

@@ -103,21 +103,20 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
     const styles = getMinimalistStyles();
 
     return (
-        <div className={`w-full min-w-0 select-none flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 ${styles.wrapper}`}>
-            {/* 1. Judul Statis di Kiri (De-duplication) */}
-            <div className="flex items-center space-x-2 min-w-0">
-                <span className={styles.dot} aria-hidden="true" />
-                <CalendarCheck2 className="h-4 w-4 sm:h-4.5 sm:w-4.5 text-teal-600 dark:text-teal-400 shrink-0" />
-                <h2 className={styles.title}>
+        <div className={`w-full min-w-0 select-none flex flex-col md:flex-row items-center justify-center md:justify-between text-center md:text-left gap-2 sm:gap-2.5 ${styles.wrapper}`}>
+            {/* 1. Judul Statis: Rata Tengah di Mobile, Rata Kiri di Desktop (Tanpa Dot) */}
+            <div className="flex items-center justify-center md:justify-start space-x-2 min-w-0">
+                <CalendarCheck2 className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-teal-600 dark:text-teal-400 shrink-0" />
+                <h2 className={`${styles.title} text-sm sm:text-base md:text-md lg:text-lg font-bold tracking-tight`}>
                     {staticTitle}
                 </h2>
             </div>
 
-            {/* 2. Navigasi Tanpa Bingkai (Frameless Navigation) & Aksi di Kanan */}
-            <div className="flex items-center space-x-2 shrink-0">
+            {/* 2. Navigasi Tanpa Bingkai: Rata Tengah di Mobile, Rata Kanan di Desktop */}
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 shrink-0">
                 {showMonthNavigation && (
-                    <div className="flex items-center space-x-1">
-                        {/* 3. Tombol "Sekarang" (Subtle / Ghost Style) */}
+                    <div className="flex items-center justify-center md:justify-end space-x-1.5">
+                        {/* 3. Tombol "Sekarang" */}
                         {onJumpToToday && (
                             <Tooltip
                                 content={<span>Lompat ke <strong>Hari Ini</strong></span>}
@@ -137,8 +136,8 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
                             </Tooltip>
                         )}
 
-                        {/* Navigasi Bulan Tanpa Bingkai: [Panah Kiri] -- [Teks Bulan & Tahun] -- [Panah Kanan] */}
-                        <div className="flex items-center space-x-0.5">
+                        {/* Navigasi Bulan Tanpa Bingkai */}
+                        <div className="flex items-center justify-center md:justify-end space-x-0.5">
                             {onPrevMonth && (
                                 <Tooltip content={<span>Bulan Sebelumnya</span>} placement="bottom">
                                     <button
@@ -183,9 +182,9 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
                     </div>
                 )}
 
-                {/* Right Content (misal tombol Ekspor) berdampingan harmonis */}
+                {/* Right Content */}
                 {rightContent && (
-                    <div className="flex items-center space-x-1 shrink-0">
+                    <div className="flex items-center justify-center md:justify-end space-x-1 shrink-0">
                         {rightContent}
                     </div>
                 )}

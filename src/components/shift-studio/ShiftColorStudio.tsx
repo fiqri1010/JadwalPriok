@@ -140,19 +140,19 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
     };
 
     return (
-        <div className="p-1.5 sm:p-2 rounded-2xl bg-[#121212] border border-zinc-800 space-y-1.5 font-sans shadow-2xs w-full overflow-visible min-w-0 text-white">
+        <div className="p-3 sm:p-4 rounded-2xl bg-[#121212] border border-zinc-800 space-y-4 font-sans shadow-2xs w-full overflow-visible min-w-0 text-white lg:h-full lg:min-h-[515px] flex flex-col justify-between">
             {/* Target Selector Tabs (Latar / Teks / Border / Motif) */}
-            <div className="space-y-0.5">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+            <div className="space-y-1.5">
+                <span className="text-[10px] sm:text-[11px] font-black text-zinc-400 uppercase tracking-wider block">
                     Target Elemen Warna:
                 </span>
-                <div className="flex items-center gap-1 p-1 rounded-xl bg-[#1a1a1e] border border-zinc-800 text-xs sm:text-[12.5px] font-bold">
+                <div className="flex items-center gap-1 p-1.5 rounded-xl bg-[#1a1a1e] border border-zinc-800 text-xs sm:text-[12.5px] font-black">
                     <button
                         type="button"
                         onClick={() => setTargetMode('bg')}
-                        className={`flex-1 py-1 px-1.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                        className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
                             targetMode === 'bg'
-                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-extrabold border border-zinc-700'
+                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-black border border-zinc-700'
                                 : 'text-zinc-400 hover:text-white'
                         }`}
                         title="Edit Warna Latar"
@@ -167,9 +167,9 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                     <button
                         type="button"
                         onClick={() => setTargetMode('text')}
-                        className={`flex-1 py-1 px-1.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                        className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
                             targetMode === 'text'
-                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-extrabold border border-zinc-700'
+                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-black border border-zinc-700'
                                 : 'text-zinc-400 hover:text-white'
                         }`}
                         title="Edit Warna Teks"
@@ -184,9 +184,9 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                     <button
                         type="button"
                         onClick={() => setTargetMode('border')}
-                        className={`flex-1 py-1 px-1.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                        className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
                             targetMode === 'border'
-                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-extrabold border border-zinc-700'
+                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-black border border-zinc-700'
                                 : 'text-zinc-400 hover:text-white'
                         }`}
                         title="Edit Warna Border"
@@ -201,9 +201,9 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                     <button
                         type="button"
                         onClick={() => setTargetMode('motif')}
-                        className={`flex-1 py-1 px-1.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+                        className={`flex-1 py-2 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
                             targetMode === 'motif'
-                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-extrabold border border-zinc-700'
+                                ? 'bg-zinc-800 text-teal-400 shadow-2xs font-black border border-zinc-700'
                                 : 'text-zinc-400 hover:text-white'
                         }`}
                         title="Edit Warna Pattern Motif"
@@ -218,10 +218,10 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
             </div>
 
             {/* Pro-Tool Native Panel Wrapper with Hover Wheel Scroll & Pause Parent Scroll Enabled */}
-            <div className="w-full flex justify-center shrink-0 overflow-visible py-0.5">
+            <div className="w-full flex justify-center shrink-0 overflow-visible py-1 flex-1">
                 <div
                     ref={colorPickerWrapperRef}
-                    className="rbgcp-wrapper bg-[#121212] p-1.5 sm:p-2 rounded-xl text-white w-full overflow-visible flex justify-center shrink-0 min-w-0 select-none border border-zinc-800/80"
+                    className="rbgcp-wrapper bg-[#121212] p-3 sm:p-4 rounded-xl text-white w-full overflow-visible flex flex-col justify-center items-center shrink-0 min-w-0 select-none border border-zinc-800/80 shadow-md flex-1"
                     title="Hover & Scroll mouse pada slider/angka untuk mengubah nilai"
                 >
                     <ColorPicker

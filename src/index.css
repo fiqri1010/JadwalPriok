@@ -98,6 +98,17 @@ textarea,
     caret-color: auto !important;
 }
 
+/* Sembunyikan indikator jam bawaan browser pada input time agar angka tidak terpotong pada input sempit */
+input[type="time"]::-webkit-calendar-picker-indicator {
+    background: none !important;
+    display: none !important;
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
 button, [role="button"], a, label[for], input[type="checkbox"], input[type="radio"], select, .cursor-pointer {
     cursor: pointer !important;
 }

@@ -359,7 +359,7 @@ export const VERSION_HISTORY: VersionItem[] = [
         ]
     },
     {
-        version: '0.3.9-beta',
+        version: 'v.0.3.09',
         releaseDate: '26 September 2026',
         title: 'Peningkatan Lapisan Z-Index Dropdown Ekspor Header',
         isLatest: false,

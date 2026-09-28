@@ -147,14 +147,16 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
                             }}
                         >
                             {renderPatternOverlay()}
-                            <div className="relative z-10 flex items-center space-x-1">
-                                {renderIcon('w-3 h-3')}
-                                <span className="tracking-tight">{naming.displayBadge || 'SHIFT'}</span>
+                            <div className="relative z-10 flex items-center space-x-1 min-w-0 max-w-full">
+                                {renderIcon('w-3.5 h-3.5 shrink-0')}
+                                <span className="tracking-tight truncate max-w-[110px] sm:max-w-[140px]" title={naming.displayBadge || 'SHIFT'}>
+                                    {naming.displayBadge || 'SHIFT'}
+                                </span>
                             </div>
                         </div>
                     ) : (
                         /* Mobile Preview Card Badge */
-                        <div className="flex items-center space-x-1.5">
+                        <div className="flex items-center space-x-1.5 min-w-0 flex-1 justify-center">
                             <div
                                 className="relative w-5 h-5 rounded-[4px] font-black text-[9.5px] shadow-2xs border flex items-center justify-center select-none overflow-hidden shrink-0"
                                 style={{
@@ -164,11 +166,15 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
                                 }}
                             >
                                 {renderPatternOverlay()}
-                                <span className="relative z-10">{naming.copyCode || (naming.displayBadge || 'S').slice(0, 1)}</span>
+                                <span className="relative z-10 truncate max-w-full">{naming.copyCode || (naming.displayBadge || 'S').slice(0, 1)}</span>
                             </div>
-                            <div className="text-[10px] leading-tight text-slate-600 dark:text-zinc-300 min-w-0">
-                                <span className="font-bold block truncate max-w-[110px] sm:max-w-[130px]">{naming.fullName || 'Nama Shift'}</span>
-                                <span className="block text-[9px] text-slate-400 dark:text-zinc-500">Salin: &apos;{naming.copyCode || 'S'}&apos;</span>
+                            <div className="text-[10px] leading-tight text-slate-600 dark:text-zinc-300 min-w-0 flex-1 max-w-[130px] sm:max-w-[180px]">
+                                <span className="font-bold block truncate w-full" title={naming.fullName || 'Nama Shift'}>
+                                    {naming.fullName || 'Nama Shift'}
+                                </span>
+                                <span className="block text-[9px] text-slate-400 dark:text-zinc-500 truncate w-full" title={`Salin: '${naming.copyCode || 'S'}'`}>
+                                    Salin: &apos;{naming.copyCode || 'S'}&apos;
+                                </span>
                             </div>
                         </div>
                     )}
