@@ -118,11 +118,11 @@ export const ShiftCardList: React.FC<ShiftCardListProps> = ({
 
             {/* List of Shift Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {shifts.map((s) => {
+                {shifts.map((s, idx) => {
                     const isOffOrCuti = s.key === 'OFF' || s.key === 'CUTI';
                     return (
                         <div
-                            key={s.id}
+                            key={`shift-card-${s.id}-${idx}`}
                             className={`p-3.5 rounded-lg border transition-all flex flex-col justify-between space-y-3 ${
                                 s.isVisibleInDropdown
                                     ? 'bg-white dark:bg-[#1E1E1E] border-slate-200/90 dark:border-zinc-800 hover:border-teal-500/50 shadow-xs'

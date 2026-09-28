@@ -86,8 +86,23 @@ export const ShiftNamingInput: React.FC<ShiftNamingInputProps> = ({
                     </div>
                 </div>
 
-                {/* Row 2: Kode Singkat Salin (Left, col-span-1) & Sublabel / Deskripsi Dropdown (Right, col-span-2) */}
+                {/* Row 2: Sublabel / Deskripsi Dropdown (Left, col-span-2) & Kode Singkat Salin (Right, col-span-1) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3 pt-1">
+                    {/* Dropdown Sublabel Description */}
+                    <div className="md:col-span-2 space-y-1">
+                        <div className="flex justify-between items-center text-xs">
+                            <label className="font-bold text-slate-800 dark:text-slate-200">Sublabel / Deskripsi Dropdown:</label>
+                            <span className="text-[10px] opacity-60">Keterangan jam di dropdown</span>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Contoh: FCL 07.30 - 17.00 / 12.30 - 22.00"
+                            value={naming.dropdownSublabel}
+                            onChange={(e) => onChange({ ...naming, dropdownSublabel: e.target.value })}
+                            className="w-full p-2.5 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500"
+                        />
+                    </div>
+
                     {/* Copy Code */}
                     <div className="md:col-span-1 space-y-1">
                         <div className="flex justify-between items-center text-xs">
@@ -102,21 +117,6 @@ export const ShiftNamingInput: React.FC<ShiftNamingInputProps> = ({
                             className="w-full p-2.5 text-xs font-bold uppercase rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500 text-center sm:text-left font-mono"
                         />
                         <p className="text-[9.5px] opacity-60 leading-tight">Kode untuk ketentuan salin jadwal</p>
-                    </div>
-
-                    {/* Dropdown Sublabel Description */}
-                    <div className="md:col-span-2 space-y-1">
-                        <div className="flex justify-between items-center text-xs">
-                            <label className="font-bold text-slate-800 dark:text-slate-200">Sublabel / Deskripsi Dropdown:</label>
-                            <span className="text-[10px] opacity-60">Keterangan jam di dropdown</span>
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Contoh: FCL 07.30 - 17.00 / 12.30 - 22.00"
-                            value={naming.dropdownSublabel}
-                            onChange={(e) => onChange({ ...naming, dropdownSublabel: e.target.value })}
-                            className="w-full p-2.5 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-teal-500"
-                        />
                     </div>
                 </div>
             </div>

@@ -621,12 +621,12 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                                             Tahun tidak ditemukan
                                         </div>
                                     ) : (
-                                        filteredYears.map((yr) => {
+                                        filteredYears.map((yr, idx) => {
                                             const isSelected = yr === activeYear;
                                             const isCurrent = yr === currentRunningYear;
                                             return (
                                                 <button
-                                                    key={yr}
+                                                    key={`holiday-yr-${yr}-${idx}`}
                                                     ref={isSelected ? activeYearBtnRef : undefined}
                                                     type="button"
                                                     onClick={() => {

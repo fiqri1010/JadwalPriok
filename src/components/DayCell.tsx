@@ -258,13 +258,18 @@ export const DayCell = React.memo<DayCellProps>(({
     const isDarkFluid = theme === 'darkFluid';
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
+    const isPaperSketch = theme === 'paperSketch';
 
     const normalizedShift = normalizeShift(data?.shift || '');
     const shiftColor = SHIFT_COLORS[normalizedShift] || SHIFT_COLORS[''];
     const ShiftIcon = getShiftIcon(normalizedShift);
 
     const dateNumberColor = isHoliday || isWeekend
-        ? 'text-rose-500 font-black'
+        ? isPaperSketch
+            ? 'text-[#ff4747] font-[\'Gochi_Hand\'] font-bold text-base sm:text-lg'
+            : 'text-rose-500 font-black'
+        : isPaperSketch
+        ? 'text-[#2b2b2b] font-[\'Gochi_Hand\'] font-bold text-base sm:text-lg'
         : isWinamp
         ? 'text-[#00FF00] font-black'
         : isDarkFluid
@@ -350,6 +355,16 @@ export const DayCell = React.memo<DayCellProps>(({
 
     // Standard card styling with theme-based gradients and borders
     const getCardStyle = (elevated: boolean = false): React.CSSProperties => {
+        if (isPaperSketch) {
+            return {
+                borderRadius: '4px 12px 6px 15px / 12px 4px 15px 6px',
+                backgroundColor: '#ffffff',
+                border: elevated ? '3px solid #ff4747' : isToday ? '2.5px solid #ff4747' : '2.5px solid #2b2b2b',
+                boxShadow: elevated
+                    ? '6px 6px 0px #2b2b2b'
+                    : '3px 3px 0px #2b2b2b',
+            };
+        }
         if (isWinamp) {
             return {
                 borderRadius: '0px',
@@ -445,7 +460,9 @@ export const DayCell = React.memo<DayCellProps>(({
                     }
                 }}
                 className={`md:hidden flex flex-col justify-between p-1 sm:p-1.5 transition-transform duration-150 ease-out select-none w-full h-full cursor-pointer hover:scale-[1.02] active:scale-[0.98] transform-gpu outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 overflow-hidden ${
-                    isWinamp
+                    isPaperSketch
+                        ? 'text-[#2b2b2b]'
+                        : isWinamp
                         ? 'text-[#00FF00] font-mono'
                         : isDark || isDarkFluid
                         ? 'text-slate-200 hover:border-indigo-400/50'
@@ -600,7 +617,9 @@ export const DayCell = React.memo<DayCellProps>(({
                         ? 'overflow-visible w-[calc(200%+0.375rem)] min-h-[max(270px,calc(200%+0.375rem))] p-3 sm:p-3.5 cursor-default'
                         : 'overflow-hidden rounded-[8px] w-full h-full px-1.5 py-1 sm:px-2 sm:py-1.5 cursor-pointer hover:scale-[1.015] active:scale-[0.99] hover:z-40 focus-within:z-40'
                 } ${
-                    isWinamp
+                    isPaperSketch
+                        ? 'text-[#2b2b2b]'
+                        : isWinamp
                         ? 'text-[#00FF00] font-mono text-xs'
                         : isDark || isDarkFluid
                         ? 'text-slate-200'
@@ -614,7 +633,9 @@ export const DayCell = React.memo<DayCellProps>(({
                     <div
                         className={`flex items-start justify-between gap-1 min-w-0 transition-all duration-200 ${
                             isExpandedDesktop
-                                ? isWinamp
+                                ? isPaperSketch
+                                    ? 'pb-1.5 border-b-2 border-dashed border-[#2b2b2b]'
+                                    : isWinamp
                                     ? 'pb-1.5 border-b border-zinc-800'
                                     : isDark || isDarkFluid
                                     ? 'pb-1.5 border-b border-white/10'
@@ -797,6 +818,7 @@ export const DayCell = React.memo<DayCellProps>(({
                 <AnimatePresence>
                     {isExpandedDesktop && (
                         <motion.div
+                            key={`expanded-desktop-form-${dateKey || dayNumber}`}
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 4, transition: { duration: 0.1 } }}

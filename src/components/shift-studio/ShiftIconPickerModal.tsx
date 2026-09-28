@@ -87,6 +87,10 @@ import {
     ShoppingBag,
     ShoppingCart,
     Store,
+    PersonStanding,
+    UserRound,
+    UserRoundCheck,
+    UserRoundSearch,
     Sailboat,
     Map,
     MapPin,
@@ -149,27 +153,8 @@ import {
     Users,
     User,
     UserCheck,
-    UserX,
-    UserMinus,
     UserCog,
     UserPlus,
-    UserRound,
-    UserRoundCheck,
-    UserRoundX,
-    UserRoundPlus,
-    UserRoundCog,
-    UserRoundSearch,
-    UserRoundPen,
-    UsersRound,
-    UserPen,
-    UserSearch,
-    UserLock,
-    PersonStanding,
-    Baby,
-    Accessibility,
-    Contact,
-    ContactRound,
-    Headset,
     GraduationCap,
     School,
     Hospital,
@@ -451,25 +436,8 @@ export const ICON_CATALOG: CatalogIconItem[] = [
     { name: 'Users', category: 'Profesi & Kantor', keywords: 'tim rekan kerja grup karyawan orang rapat staf divisi kantor', component: Users },
     { name: 'User', category: 'Profesi & Kantor', keywords: 'pegawai staf individu akun profil orang user person', component: User },
     { name: 'UserCheck', category: 'Profesi & Kantor', keywords: 'presensi hadir absensi terverifikasi absensi masuk hadir bertugas', component: UserCheck },
-    { name: 'UserX', category: 'Profesi & Kantor', keywords: 'absen tidak hadir alpha izin cuti keluar orang', component: UserX },
-    { name: 'UserMinus', category: 'Profesi & Kantor', keywords: 'kurang staf hapus pegawai orang', component: UserMinus },
     { name: 'UserRoundCheck', category: 'Profesi & Kantor', keywords: 'presensi absensi user sah terverifikasi petugas siap', component: UserRoundCheck },
-    { name: 'UserRoundX', category: 'Profesi & Kantor', keywords: 'tidak hadir alpha silang orang', component: UserRoundX },
-    { name: 'UserRoundPlus', category: 'Profesi & Kantor', keywords: 'tambah anggota tim baru orang', component: UserRoundPlus },
-    { name: 'UserRoundCog', category: 'Profesi & Kantor', keywords: 'setting user profil admin orang', component: UserRoundCog },
     { name: 'UserRoundSearch', category: 'Profesi & Kantor', keywords: 'cari staf rekrutmen pegawai pencarian data user profil', component: UserRoundSearch },
-    { name: 'UserRoundPen', category: 'Profesi & Kantor', keywords: 'edit profil ubah data orang', component: UserRoundPen },
-    { name: 'UsersRound', category: 'Profesi & Kantor', keywords: 'tim rekan kerja grup karyawan orang', component: UsersRound },
-    { name: 'UserPen', category: 'Profesi & Kantor', keywords: 'edit user tulis data orang', component: UserPen },
-    { name: 'UserSearch', category: 'Profesi & Kantor', keywords: 'cari staf pencarian profil orang', component: UserSearch },
-    { name: 'UserLock', category: 'Profesi & Kantor', keywords: 'privasi akun terkunci orang', component: UserLock },
-    { name: 'PersonStanding', category: 'Profesi & Kantor', keywords: 'orang berdiri postur manusia', component: PersonStanding },
-    { name: 'Baby', category: 'Profesi & Kantor', keywords: 'bayi anak cuti melahirkan keluarga', component: Baby },
-    { name: 'Accessibility', category: 'Profesi & Kantor', keywords: 'disabilitas fasilitas khusus ramah', component: Accessibility },
-    { name: 'Contact', category: 'Profesi & Kantor', keywords: 'kontak kartu nama buku telepon orang', component: Contact },
-    { name: 'ContactRound', category: 'Profesi & Kantor', keywords: 'kontak profil buku alamat orang', component: ContactRound },
-    { name: 'Headset', category: 'Profesi & Kantor', keywords: 'cs customer service operator call center', component: Headset },
-    { name: 'HardHat', category: 'Profesi & Kantor', keywords: 'helm proyek pekerja lapangan k3 konstruksi', component: HardHat },
     { name: 'UserCog', category: 'Profesi & Kantor', keywords: 'admin pengelola setelan teknisi setting manajemen akun', component: UserCog },
     { name: 'UserPlus', category: 'Profesi & Kantor', keywords: 'tambah staf karyawan baru anggota tim daftar akun user', component: UserPlus },
     { name: 'GraduationCap', category: 'Profesi & Kantor', keywords: 'toga wisuda sekolah kuliah training pelatihan sarjana diklat', component: GraduationCap },
@@ -941,9 +909,9 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                             </div>
 
                             <div className="flex flex-wrap gap-1.5 pt-0.5">
-                                {categories.map((cat) => (
+                                {categories.map((cat, idx) => (
                                     <button
-                                        key={cat}
+                                        key={`cat-${cat}-${idx}`}
                                         type="button"
                                         onClick={() => setSelectedCategory(cat)}
                                         className={`px-2.5 py-1.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
@@ -973,9 +941,9 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                             >
                                 Semua Emoji
                             </button>
-                            {Object.keys(CATEGORIZED_EMOJIS).map((catName) => (
+                            {Object.keys(CATEGORIZED_EMOJIS).map((catName, idx) => (
                                 <button
-                                    key={catName}
+                                    key={`emoji-cat-${catName}-${idx}`}
                                     type="button"
                                     onClick={() => setSelectedEmojiCategory(catName)}
                                     className={`px-2.5 py-1.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
@@ -998,12 +966,12 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                         <>
                             {/* SVG Grid */}
                             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 gap-2">
-                                {filteredIcons.map((item) => {
+                                {filteredIcons.map((item, idx) => {
                                     const IconComp = item.component;
                                     const isSelected = draftVisual.iconType === 'svg' && draftVisual.iconName === item.name;
                                     return (
                                         <button
-                                            key={item.name}
+                                            key={`svg-icon-${item.name}-${idx}`}
                                             type="button"
                                             onClick={() => handleSelectSvg(item.name)}
                                             className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all text-center group cursor-pointer ${
@@ -1033,17 +1001,17 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                         <div className="space-y-4">
                             {/* Emoji Sections */}
                             <div className="space-y-4">
-                                {Object.entries(CATEGORIZED_EMOJIS).map(([catTitle, emojiList]) => {
+                                {Object.entries(CATEGORIZED_EMOJIS).map(([catTitle, emojiList], catIdx) => {
                                     if (selectedEmojiCategory !== 'Semua' && selectedEmojiCategory !== catTitle) return null;
                                     return (
-                                        <div key={catTitle} className="space-y-2 p-3 rounded-2xl bg-current/5 border border-current/10">
+                                        <div key={`emoji-section-${catTitle}-${catIdx}`} className="space-y-2 p-3 rounded-2xl bg-current/5 border border-current/10">
                                             <h4 className="text-xs font-bold text-indigo-500">{catTitle}</h4>
                                             <div className="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-12 gap-2">
                                                 {emojiList.map((em, idx) => {
                                                     const isSelected = draftVisual.iconType === 'emoji' && draftVisual.emoji === em;
                                                     return (
                                                         <button
-                                                            key={idx}
+                                                            key={`emoji-btn-${catTitle}-${em}-${idx}`}
                                                             type="button"
                                                             onClick={() => handleSelectEmoji(em)}
                                                             className={`text-2xl p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${

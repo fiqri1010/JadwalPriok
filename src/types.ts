@@ -1,6 +1,6 @@
 export const SHIFT_OPTIONS = ['Graha', 'NPCT', 'TPSL', 'OFF', 'SM', 'PM', 'Malam', 'CUTI'] as const;
 export type ShiftType = typeof SHIFT_OPTIONS[number] | '';
-export type AppTheme = 'default' | 'dark' | 'vista' | 'winamp' | 'darkFluid';
+export type AppTheme = 'default' | 'dark' | 'vista' | 'winamp' | 'darkFluid' | 'paperSketch';
 
 // --- Visual Studio & Shift Configuration Models ---
 export type VisualColorMode = 'solid' | 'linear' | 'radial' | 'customCss';

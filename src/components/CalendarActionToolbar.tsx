@@ -39,6 +39,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
     const isDarkFluid = currentTheme === 'darkFluid';
     const isDark = currentTheme === 'dark';
     const isVista = currentTheme === 'vista';
+    const isPaperSketch = currentTheme === 'paperSketch';
 
     const hasUndoBackup =
         lastResetBackupState !== null &&
@@ -49,6 +50,9 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
 
     const getContainerStyles = () => {
         if (compact) {
+            if (isPaperSketch) {
+                return 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] rounded-lg shadow-[2px_2px_0px_#2b2b2b] p-1 sm:p-1.5';
+            }
             if (isWinamp) {
                 return 'bg-[#191919] border border-[#00FF00]/60 font-mono text-[#00FF00] rounded-none p-1 sm:p-1.5 shadow-[1px_1px_0_#000]';
             }
@@ -64,6 +68,9 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
             return 'bg-white/90 border border-slate-200 text-slate-900 rounded-lg shadow-2xs p-1 sm:p-1.5';
         }
 
+        if (isPaperSketch) {
+            return 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] rounded-xl shadow-[4px_4px_0px_#2b2b2b] p-2 sm:p-2.5 lg:p-3';
+        }
         if (isWinamp) {
             return 'bg-[#191919] border border-[#00FF00] font-mono text-[#00FF00] rounded-none shadow-[2px_2px_0_#000] p-2 sm:p-2.5 lg:p-3';
         }
@@ -103,7 +110,9 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                         type="button"
                         onClick={onTempelJadwal}
                         className={`w-full flex ${compact ? 'flex-row items-center justify-center gap-1 sm:gap-1.5 py-1 sm:py-1.5 px-1.5' : 'flex-col items-center justify-center py-1 sm:py-1.5 lg:py-2 px-1'} rounded-md sm:rounded-lg border transition-all cursor-pointer ${
-                            isWinamp
+                            isPaperSketch
+                                ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] hover:bg-[#2ec4b6] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5'
+                                : isWinamp
                                 ? 'bg-black border-zinc-700 text-[#00FF00] hover:bg-[#00FF00] hover:text-black'
                                 : isVista
                                 ? 'bg-white/80 border-sky-200 text-teal-700 hover:bg-teal-50'
@@ -138,6 +147,8 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                         className={`w-full flex ${compact ? 'flex-row items-center justify-center gap-1 sm:gap-1.5 py-1 sm:py-1.5 px-1.5' : 'flex-col items-center justify-center py-1 sm:py-1.5 lg:py-2 px-1'} rounded-md sm:rounded-lg border transition-all cursor-pointer ${
                             !canUndo
                                 ? 'opacity-30 cursor-not-allowed pointer-events-none border-transparent'
+                                : isPaperSketch
+                                ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] hover:bg-[#2ec4b6] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5'
                                 : isWinamp
                                 ? 'bg-black border-zinc-700 text-sky-400 hover:bg-sky-400 hover:text-black'
                                 : isVista
@@ -171,6 +182,8 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                         className={`w-full flex ${compact ? 'flex-row items-center justify-center gap-1 sm:gap-1.5 py-1 sm:py-1.5 px-1.5' : 'flex-col items-center justify-center py-1 sm:py-1.5 lg:py-2 px-1'} rounded-md sm:rounded-lg border transition-all cursor-pointer ${
                             areAllLocked
                                 ? 'opacity-30 cursor-not-allowed pointer-events-none border-transparent'
+                                : isPaperSketch
+                                ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] hover:bg-[#ff4747] hover:text-white shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5'
                                 : isWinamp
                                 ? 'bg-black border-zinc-700 text-rose-500 hover:bg-rose-500 hover:text-white'
                                 : isVista
@@ -202,7 +215,11 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                         onClick={onToggleAllLock}
                         className={`w-full flex ${compact ? 'flex-row items-center justify-center gap-1 sm:gap-1.5 py-1 sm:py-1.5 px-1.5' : 'flex-col items-center justify-center py-1 sm:py-1.5 lg:py-2 px-1'} rounded-md sm:rounded-lg border transition-all cursor-pointer ${
                             areAllLocked
-                                ? 'bg-amber-500/20 text-amber-500 border-amber-500/50 font-bold'
+                                ? isPaperSketch
+                                    ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold'
+                                    : 'bg-amber-500/20 text-amber-500 border-amber-500/50 font-bold'
+                                : isPaperSketch
+                                ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] hover:bg-[#2ec4b6] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5'
                                 : isWinamp
                                 ? 'bg-black border-zinc-700 text-[#00FF00] hover:bg-zinc-800'
                                 : isVista

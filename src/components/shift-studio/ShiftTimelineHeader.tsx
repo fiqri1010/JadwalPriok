@@ -84,11 +84,11 @@ export const ShiftTimelineHeader: React.FC<ShiftTimelineHeaderProps> = ({
                 <div className="p-3.5 rounded-2xl bg-current/5 border border-current/10 space-y-2 animate-in fade-in duration-200">
                     <span className="text-[10px] font-bold opacity-60 uppercase tracking-wider block">Linimasa Kelompok Shift:</span>
                     <div className="divide-y divide-current/10">
-                        {allGroups.map((grp) => {
+                        {allGroups.map((grp, idx) => {
                             const isSelected = grp.id === activeGroup.id;
                             return (
                                 <div
-                                    key={grp.id}
+                                    key={`timeline-grp-${grp.id}-${idx}`}
                                     className="py-2 flex items-center justify-between text-xs"
                                 >
                                     <div className="space-y-0.5">

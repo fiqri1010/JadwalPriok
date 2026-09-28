@@ -382,7 +382,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                   >
                     {MONTH_NAMES_ID.map((mName, idx) => (
                       <button
-                        key={`month-${mName}-${idx}`}
+                        key={`${mName}-${idx}`}
                         type="button"
                         onClick={() => {
                           setViewMonth(idx);
@@ -428,9 +428,9 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                     className={`absolute top-[calc(100%+2px)] right-0 min-w-28 max-h-48 overflow-y-auto p-[5px] rounded-[5px] z-110 shadow-xl border border-current/10 flex flex-col gap-1 transition-all duration-300 ${s.dropdown}`}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {yearOptions.map((yr) => (
+                    {yearOptions.map((yr, idx) => (
                       <button
-                        key={`year-${yr}`}
+                        key={`${yr}-${idx}`}
                         type="button"
                         onClick={() => {
                           setViewYear(yr);
@@ -462,7 +462,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
           {/* Hari dalam seminggu header */}
           <div className="grid grid-cols-7 gap-1 text-center mb-1 text-[11px] font-black uppercase opacity-60">
             {DAY_NAMES_SHORT.map((dayName, idx) => (
-              <div key={dayName} className={`py-1 ${idx === 0 ? 'text-rose-500' : ''}`}>
+              <div key={`${dayName}-${idx}`} className={`py-1 ${idx === 0 ? 'text-rose-500' : ''}`}>
                 {dayName}
               </div>
             ))}

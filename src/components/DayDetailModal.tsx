@@ -172,6 +172,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     return (
         <AnimatePresence>
             <div
+                key="day-detail-modal-root"
                 className="fixed inset-0 sm:top-7 z-[99999] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm select-none"
                 onClick={onClose}
             >

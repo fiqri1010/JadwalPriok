@@ -806,7 +806,7 @@ export const App: React.FC = () => {
                                             const isWeekend = idx === 5 || idx === 6;
                                             return (
                                                 <div
-                                                    key={dayName}
+                                                    key={`weekday-header-${dayName}-${idx}`}
                                                     className={isWeekend ? themeConfig.weekendNameTextClass : themeConfig.weekdayNameTextClass}
                                                 >
                                                     {dayName}

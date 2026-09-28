@@ -32,6 +32,7 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
     const isVista = theme === 'vista';
     const isDark = theme === 'dark';
     const isDarkFluid = theme === 'darkFluid';
+    const isPaperSketch = theme === 'paperSketch';
 
     // Filter Piket matches for the current selected month
     const monthPikets = React.useMemo(() => {
@@ -54,6 +55,9 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
 
     // Theme Container Styles
     const getContainerStyles = () => {
+        if (isPaperSketch) {
+            return 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] rounded-xl shadow-[4px_4px_0px_#2b2b2b]';
+        }
         if (isWinamp) {
             return 'bg-[#191919] border border-[#00FF00] font-mono text-[#00FF00] rounded-none shadow-[2px_2px_0_#000]';
         }
@@ -70,6 +74,9 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
     };
 
     const getJumlahPiketBoxStyles = () => {
+        if (isPaperSketch) {
+            return 'bg-[#f2efeb] border-2 border-[#2b2b2b] text-[#2b2b2b] p-2.5 rounded-xl shadow-[2px_2px_0px_#2b2b2b] font-mono';
+        }
         if (isWinamp) {
             return 'bg-black border border-[#00FF00]/50 text-[#00FF00] font-mono p-2 rounded-none';
         }
@@ -86,6 +93,9 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
     };
 
     const getHeaderStyles = () => {
+        if (isPaperSketch) {
+            return 'border-b-2 border-dashed border-[#2b2b2b] bg-[#f2efeb] text-[#2b2b2b] font-[\'Gochi_Hand\'] tracking-wide';
+        }
         if (isWinamp) {
             return 'border-b border-[#00FF00]/40 bg-black/40 text-[#00FF00]';
         }
@@ -99,6 +109,9 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
     };
 
     const getItemStyles = () => {
+        if (isPaperSketch) {
+            return 'bg-white hover:bg-[#2ec4b6]/15 border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] text-[#2b2b2b] rounded-lg';
+        }
         if (isWinamp) {
             return 'bg-black hover:bg-zinc-900 border border-[#00FF00]/40 shadow-[1px_1px_0_#00FF00] text-[#00FF00] rounded-none';
         }

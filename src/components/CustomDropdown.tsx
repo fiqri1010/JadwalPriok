@@ -183,8 +183,7 @@ export function CustomDropdown<T extends string | number>({
                         : 'opacity-0 top-[-80px] pointer-events-none -translate-y-2 scale-95'
                 } ${menuClassName}`}
                 style={{
-                    backgroundColor: isWinamp ? '#000000' : (isDark || isDarkFluid) ? '#2a2f3b' : '#ffffff',
-                    opacity: 1,
+                    backgroundColor: styles.activeBg,
                     scrollbarWidth: 'thin',
                 }}
             >

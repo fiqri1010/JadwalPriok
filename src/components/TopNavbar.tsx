@@ -6,6 +6,7 @@ import {
     Droplets,
     Sparkles,
     Radio,
+    PenLine,
     Check,
 } from 'lucide-react';
 import { AppLogo } from './AppLogo';
@@ -49,6 +50,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
     const getThemeIcon = (theme: AppTheme) => {
         switch (theme) {
+            case 'paperSketch':
+                return <PenLine className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#ff4747]" />;
             case 'dark':
                 return <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-indigo-400" />;
             case 'darkFluid':
@@ -194,6 +197,24 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                             <span>Vista</span>
                                         </span>
                                         {currentTheme === 'vista' && <Check className="h-3.5 w-3.5" />}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onThemeChange('paperSketch');
+                                            setIsThemeDropdownOpen(false);
+                                        }}
+                                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 cursor-pointer ${
+                                            currentTheme === 'paperSketch'
+                                                ? 'bg-[#ff4747] text-white shadow-[2px_2px_0px_#2b2b2b] border border-[#2b2b2b]'
+                                                : 'hover:bg-[#2ec4b6]/20 text-[#2b2b2b]'
+                                        }`}
+                                    >
+                                        <span className="flex items-center space-x-2">
+                                            <PenLine className="h-4 w-4 text-[#ff4747]" />
+                                            <span className="font-['Gaegu'] text-sm font-bold">Paper Sketch (Var. 5)</span>
+                                        </span>
+                                        {currentTheme === 'paperSketch' && <Check className="h-3.5 w-3.5" />}
                                     </button>
                                     <button
                                         type="button"

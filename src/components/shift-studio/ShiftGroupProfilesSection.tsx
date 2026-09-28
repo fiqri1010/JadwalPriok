@@ -216,6 +216,7 @@ const ShiftPreviewDropdown: React.FC<{
                 <AnimatePresence>
                     {isOpen && (
                         <motion.div
+                            key="shift-group-dropdown-popover"
                             ref={menuRef}
                             initial={{ opacity: 0, y: coords.openUpward ? 6 : -6, scale: 0.96 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -261,14 +262,14 @@ const ShiftPreviewDropdown: React.FC<{
                                     </span>
                                 </div>
                                 <ul className="flex flex-col gap-0.5 px-1 list-none m-0 p-0">
-                                    {regularShifts.map((item) => {
+                                    {regularShifts.map((item, idx) => {
                                         const IconComponent = getShiftIconComponent(item.naming.displayBadge, item.visual?.iconName);
                                         const norm = normalizeShift(item.naming.displayBadge);
                                         const col = SHIFT_COLORS[norm] || SHIFT_COLORS['Graha'];
 
                                         return (
                                             <li
-                                                key={item.id}
+                                                key={`regular-shift-${item.id}-${idx}`}
                                                 className="group flex items-center justify-between px-2 py-1.5 rounded-[6px] transition-all duration-150 text-slate-800 dark:text-slate-100 hover:bg-slate-100/90 dark:hover:bg-white/10"
                                             >
                                                 <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -304,14 +305,14 @@ const ShiftPreviewDropdown: React.FC<{
                                             </span>
                                         </div>
                                         <ul className="flex flex-col gap-0.5 px-1 list-none m-0 p-0">
-                                            {restAndPiketShifts.map((item) => {
+                                            {restAndPiketShifts.map((item, idx) => {
                                                 const IconComponent = getShiftIconComponent(item.naming.displayBadge, item.visual?.iconName);
                                                 const norm = normalizeShift(item.naming.displayBadge);
                                                 const col = SHIFT_COLORS[norm] || SHIFT_COLORS['OFF'];
 
                                                 return (
                                                     <li
-                                                        key={item.id}
+                                                        key={`rest-shift-${item.id}-${idx}`}
                                                         className="group flex items-center justify-between px-2 py-1.5 rounded-[6px] transition-all duration-150 text-slate-800 dark:text-slate-100 hover:bg-slate-100/90 dark:hover:bg-white/10"
                                                     >
                                                         <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -498,7 +499,7 @@ const ActivationDateRangesModal: React.FC<{
                             <tbody className="divide-y divide-slate-200/70 dark:divide-zinc-800">
                                 {ranges.map((range, index) => {
                                     return (
-                                        <tr key={range.id} className="hover:bg-slate-50/70 dark:hover:bg-zinc-800/50 transition-colors">
+                                        <tr key={`date-range-${range.id}-${index}`} className="hover:bg-slate-50/70 dark:hover:bg-zinc-800/50 transition-colors">
                                             <td className="py-2.5 px-3 text-center font-bold text-slate-400 dark:text-zinc-500 text-[11px]">
                                                 {index + 1}
                                             </td>
@@ -694,7 +695,7 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
 
             {/* List Tampilan Profil Shift (Bukan Grid Kartu) */}
             <div className="border border-slate-200/90 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-[#1E1E1E] divide-y divide-slate-200/80 dark:divide-zinc-800 shadow-sm">
-                {groups.map((grp) => {
+                {groups.map((grp, idx) => {
                     const isActive = grp.id === activeGroupId;
                     const rangesCount = grp.dateRanges?.length || 1;
                     const primaryRange = grp.dateRanges && grp.dateRanges[0];
@@ -704,7 +705,7 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
 
                     return (
                         <div
-                            key={grp.id}
+                            key={`shift-group-${grp.id}-${idx}`}
                             className={`p-3 sm:p-3.5 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 ${
                                 isActive
                                     ? 'bg-teal-50/20 dark:bg-teal-950/10'

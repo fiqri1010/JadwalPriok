@@ -39,6 +39,7 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
     const isDarkFluid = themeConfig.theme === 'darkFluid';
     const isDark = themeConfig.theme === 'dark';
     const isVista = themeConfig.theme === 'vista';
+    const isPaperSketch = themeConfig.theme === 'paperSketch';
 
     // 1. De-duplication: Pastikan judul di kiri statis dan bersih (misal "Jadwal Kerja") tanpa mengulang bulan & tahun
     const staticTitle = React.useMemo(() => {
@@ -49,6 +50,16 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
 
     // 2 & 3. Styling Clean & Minimalist: Navigasi Tanpa Bingkai (Frameless) & Tombol Sekarang "Subtle/Ghost"
     const getMinimalistStyles = () => {
+        if (isPaperSketch) {
+            return {
+                wrapper: 'bg-transparent border-b-2 border-dashed border-[#2b2b2b] py-1.5 px-1',
+                title: 'text-[#2b2b2b] font-[\'Gochi_Hand\'] text-lg sm:text-xl font-bold tracking-wide',
+                dot: 'w-2 h-2 rounded-full bg-[#ff4747] shrink-0 border border-[#2b2b2b]',
+                navArrowBtn: 'text-[#2b2b2b] hover:bg-[#2ec4b6] border border-[#2b2b2b] rounded-md p-1.5 transition-colors shadow-[1.5px_1.5px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
+                monthTextBtn: 'text-[#2b2b2b] hover:bg-[#2ec4b6]/20 font-[\'Gochi_Hand\'] text-base sm:text-lg font-bold px-2.5 py-1 transition-colors border border-transparent hover:border-[#2b2b2b] rounded-md',
+                todayBtn: 'bg-[#2ec4b6] text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#26a89c] rounded-md px-2.5 py-1 text-xs font-[\'Gaegu\'] text-sm font-bold shadow-[2px_2px_0px_#2b2b2b] transition-all active:translate-x-0.5 active:translate-y-0.5',
+            };
+        }
         if (isWinamp) {
             return {
                 wrapper: 'bg-[#121212] border-b border-zinc-800 py-1.5 px-2 font-mono',

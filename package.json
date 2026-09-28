@@ -11,6 +11,7 @@
     "lint": "tsc --noEmit",
     "release:patch": "node scripts/bump-version.js patch && git add . && git commit -m \"chore: bump version patch\" && git push",
     "release:minor": "node scripts/bump-version.js minor && git add . && git commit -m \"chore: bump version minor\" && git push",
+    "pull": "git pull --no-edit origin main",
     "sync": "git add . && git commit -m \"sync update\" && git push"
   },
   "dependencies": {
@@ -42,7 +43,6 @@
     "react": "^19.0.1",
     "react-best-gradient-color-picker": "^3.0.14",
     "react-dom": "^19.0.1",
-    "react-spreadsheet": "^0.10.1",
     "recharts": "^3.10.1",
     "tailwind-merge": "^3.7.0",
     "vite": "^6.2.3",

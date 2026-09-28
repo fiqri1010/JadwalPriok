@@ -415,15 +415,18 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
     const isWinamp = currentTheme === 'winamp';
     const isVista = currentTheme === 'vista';
     const isDark = currentTheme === 'dark' || currentTheme === 'darkFluid';
+    const isPaperSketch = currentTheme === 'paperSketch';
 
     const getChoiceBoxStyles = (mode: PeriodMode) => {
         const isActive = periodMode === mode;
         if (isActive) {
+            if (isPaperSketch) return 'border-[#ff4747] bg-[#ff4747]/15 text-[#2b2b2b] font-bold shadow-[2px_2px_0px_#2b2b2b]';
             if (isWinamp) return 'border-[#00FF00] bg-[#00FF00]/10 text-[#00FF00]';
             if (isVista) return 'border-sky-400 bg-sky-500/10 text-sky-900';
             if (isDark) return 'border-teal-500/85 bg-teal-500/15 text-teal-300';
             return 'border-teal-500 bg-teal-500/10 text-teal-800 dark:text-teal-300';
         }
+        if (isPaperSketch) return 'border-[#2b2b2b] hover:bg-[#2ec4b6]/20 text-[#2b2b2b]';
         if (isWinamp) return 'border-[#00FF00]/20 hover:bg-zinc-900/50 text-[#00FF00]/70';
         if (isVista) return 'border-sky-200/50 hover:bg-sky-50/50 text-slate-600';
         if (isDark) return 'border-slate-800 hover:bg-slate-800/20 text-slate-300';
@@ -433,26 +436,29 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
     const getTabClass = (tab: 'date_range' | 'period_range') => {
         const isActive = activeTab === tab;
         if (isActive) {
+            if (isPaperSketch) return 'bg-[#ff4747] text-white font-bold rounded-lg shadow-[2px_2px_0px_#2b2b2b] border border-[#2b2b2b] font-[\'Gaegu\'] text-sm';
             if (isWinamp) return 'bg-[#00FF00] text-black font-black rounded-none';
             if (isVista) return 'bg-sky-600 text-white font-black shadow-xs';
             return 'bg-teal-600 text-white font-black shadow-xs';
         }
-        return 'opacity-70 hover:opacity-100';
+        return isPaperSketch ? 'opacity-80 hover:opacity-100 font-[\'Gaegu\'] text-sm text-[#2b2b2b]' : 'opacity-70 hover:opacity-100';
     };
 
     const getGridBtnClass = (mode: PeriodMode) => {
         const isActive = periodMode === mode;
         if (isActive) {
+            if (isPaperSketch) return 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] font-bold shadow-[2px_2px_0px_#2b2b2b]';
             if (isWinamp) return 'bg-[#00FF00] text-black border-[#00FF00] font-black rounded-none';
             if (isVista) return 'bg-sky-600 text-white border-sky-700 font-black shadow-xs';
             return 'bg-teal-600 text-white border-teal-700 font-black shadow-xs';
         }
+        if (isPaperSketch) return 'border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/20 text-[#2b2b2b] bg-white';
         if (isWinamp) return 'border-[#00FF00]/30 hover:bg-[#00FF00]/10 text-[#00FF00] rounded-none';
         if (isVista) return 'border-sky-200 hover:bg-sky-50 text-sky-850';
         return 'border-current/15 hover:bg-current/10 text-slate-700 dark:text-slate-300';
     };
 
-    const radioAccentClass = isWinamp ? 'accent-[#00FF00]' : isVista ? 'accent-sky-600' : 'accent-teal-600';
+    const radioAccentClass = isPaperSketch ? 'accent-[#ff4747]' : isWinamp ? 'accent-[#00FF00]' : isVista ? 'accent-sky-600' : 'accent-teal-600';
 
     return (
         <div className={`relative inline-block ${isOpen ? 'z-[9999]' : 'z-20'}`} ref={dropdownRef}>
@@ -488,7 +494,9 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
             {isOpen && (
                 <div
                     className={`absolute right-0 mt-2 w-[245px] sm:w-[280px] md:w-[295px] rounded-2xl p-2.5 sm:p-3 shadow-2xl border z-[9999] animate-in fade-in zoom-in-95 duration-100 origin-top-right select-none max-h-[85vh] overflow-y-auto custom-scrollbar ${
-                        isWinamp
+                        isPaperSketch
+                            ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] shadow-[6px_6px_0px_#2b2b2b]'
+                            : isWinamp
                             ? 'bg-black border-2 border-[#00FF00] font-mono text-[#00FF00]'
                             : isVista
                             ? 'bg-white/85 backdrop-blur-2xl border-white/90 text-slate-900 shadow-[0_20px_60px_rgba(14,116,224,0.3)] ring-1 ring-sky-300/40'

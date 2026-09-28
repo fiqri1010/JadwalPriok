@@ -696,7 +696,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                 const deg = i * 6;
                 return (
                   <div
-                    key={`tick-${i}`}
+                    key={i}
                     className="absolute top-0 left-1/2 -translate-x-1/2 origin-bottom pointer-events-none"
                     style={{
                       height: '50%',
@@ -771,7 +771,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                     const isSelected = minute === m;
                     return (
                       <div
-                        key={m}
+                        key={`m-${m}-${idx}`}
                         className={`absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center text-xs font-bold transition-transform rounded-full tp-dial-num ${
                           isSelected ? 'tp-dial-num-active shadow-md scale-110' : ''
                         }`}
@@ -837,12 +837,12 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               {(activeTab === 'absenCeisa'
                 ? ['07:15', '07:30', '07:45', '08:00', '16:00', '16:30', '17:00', '19:30']
                 : PRESET_TIMES
-              ).map((preset) => {
+              ).map((preset, idx) => {
                 const isSelected = `${formatHour}:${formatMinute}` === preset;
 
                 return (
                   <button
-                    key={preset}
+                    key={`preset-${preset}-${idx}`}
                     type="button"
                     onClick={() => handlePreset(preset)}
                     className={`relative py-1.5 text-xs font-mono font-semibold transition-all cursor-pointer tp-preset-btn ${

@@ -155,6 +155,7 @@ export const MonthYearPickerModal: React.FC<MonthYearPickerModalProps> = ({
   return (
     <AnimatePresence>
       <div
+        key="month-year-modal-root"
         className="fixed inset-0 sm:top-7 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs select-none"
         onClick={onClose}
       >

@@ -40,6 +40,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
     const isWinamp = theme === 'winamp';
+    const isPaperSketch = theme === 'paperSketch';
 
     const [activeTab, setActiveTab] = useState<SettingsTab>('import');
     const [pastedJson, setPastedJson] = useState('');
@@ -104,6 +105,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
     // Styling configuration per theme
     const getThemeStyles = () => {
+        if (isPaperSketch) {
+            return {
+                cardOuter: 'bg-white border-2 border-[#2b2b2b] rounded-2xl p-4 shadow-[6px_6px_0px_#2b2b2b]',
+                cardInner: 'bg-white text-[#2b2b2b]',
+                tabActive: 'bg-[#ff4747] text-white font-bold rounded-lg border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-base',
+                tabInactive: 'text-[#2b2b2b] hover:bg-[#2ec4b6]/20 rounded-lg font-[\'Gaegu\'] text-base',
+                accentBtn: 'bg-[#ff4747] hover:bg-[#ff3333] text-white font-bold rounded-lg border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
+                outlineBtn: 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/20 rounded-lg shadow-[2px_2px_0px_#2b2b2b]',
+                insetBox: 'bg-[#f2efeb] border-2 border-[#2b2b2b] rounded-lg text-[#2b2b2b]',
+            };
+        }
         if (isWinamp) {
             return {
                 cardOuter: 'bg-black border-2 border-[#00FF00] rounded-none p-4 shadow-[4px_4px_0_#00FF00] font-mono',

@@ -147,12 +147,12 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                     Pilih Motif Pola (30 Koleksi Grid):
                 </span>
 
-                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 max-h-40 sm:max-h-48 lg:max-h-[210px] lg:h-[195px] overflow-y-auto p-1.5 border border-slate-200/80 dark:border-zinc-800/80 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 custom-scrollbar flex-1">
-                    {BADGE_PATTERNS.map((pattern) => {
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-1.5 max-h-36 sm:max-h-40 lg:max-h-[195px] lg:h-[185px] overflow-y-auto p-1 border border-slate-200/80 dark:border-zinc-800/80 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 custom-scrollbar flex-1">
+                    {BADGE_PATTERNS.map((pattern, idx) => {
                         const isSelected = (visual.patternType || 'none') === pattern.id && !visual.customPatternUrl;
                         return (
                             <button
-                                key={pattern.id}
+                                key={`badge-pattern-${pattern.id}-${idx}`}
                                 type="button"
                                 onClick={() => {
                                     onChange({
@@ -161,7 +161,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                         customPatternUrl: undefined,
                                     });
                                 }}
-                                className={`p-1.5 rounded-lg border flex flex-col items-center justify-between text-center transition-all cursor-pointer relative group min-w-0 h-[58px] sm:h-[64px] shrink-0 ${
+                                className={`p-1 rounded-lg border flex flex-col items-center justify-between text-center transition-all cursor-pointer relative group min-w-0 h-[50px] sm:h-[56px] shrink-0 ${
                                     isSelected
                                         ? 'border-2 border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-extrabold shadow-xs scale-[1.01]'
                                         : 'border-slate-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-800/60 hover:bg-slate-100 dark:hover:bg-zinc-700/80 text-slate-700 dark:text-zinc-300'
@@ -176,12 +176,12 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                 )}
 
                                 {/* Mini Pattern Box */}
-                                <div className="w-full h-6 sm:h-6.5 rounded-md border border-slate-200/40 dark:border-zinc-700/40 bg-[#161616] overflow-hidden shadow-3xs relative shrink-0">
+                                <div className="w-full h-5.5 sm:h-6 rounded-md border border-slate-200/40 dark:border-zinc-700/40 bg-[#161616] overflow-hidden shadow-3xs relative shrink-0">
                                     {renderTilePatternSvg(pattern.id)}
                                 </div>
 
                                 {/* Short Name Label Underneath */}
-                                <span className="text-[9px] sm:text-[9.5px] font-bold truncate w-full mt-0.5 leading-tight text-slate-700 dark:text-zinc-300 px-0.5">
+                                <span className="text-[9px] sm:text-[9.5px] font-bold truncate w-full mt-1 leading-tight text-slate-700 dark:text-zinc-300">
                                     {pattern.shortName || pattern.name}
                                 </span>
                             </button>

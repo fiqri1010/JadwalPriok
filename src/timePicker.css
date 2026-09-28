@@ -440,6 +440,93 @@
   --tp-radius-preset: 8px;
 }
 
+/* --- 6. PAPER SKETCH THEME (Variation 5 - Handmade Ink & Marker Accent) --- */
+[data-theme="paperSketch"] {
+  --tp-modal-bg: #FFFFFF;
+  --tp-modal-border: #2B2B2B;
+  --tp-header-bg: #F2EFEB;
+  --tp-header-text: #2B2B2B;
+  --tp-header-subtext: #FF4747;
+  --tp-header-border: #2B2B2B;
+  --tp-header-close-hover: #2EC4B6;
+
+  --tp-tab-container-bg: #F2EFEB;
+  --tp-tab-container-border: #2B2B2B;
+  --tp-tab-active-bg: #FF4747;
+  --tp-tab-active-text: #FFFFFF;
+  --tp-tab-inactive-text: #2B2B2B;
+  --tp-tab-inactive-hover: #2EC4B6;
+
+  --tp-digital-bg: #FFFFFF;
+  --tp-digital-border: #2B2B2B;
+  --tp-digital-box-bg: #FFFFFF;
+  --tp-digital-box-border: #2B2B2B;
+  --tp-digital-box-text: #2B2B2B;
+  --tp-digital-box-subtext: #2B2B2B;
+  --tp-digital-box-active-bg: #FF4747;
+  --tp-digital-box-active-text: #FFFFFF;
+  --tp-colon-text: #FF4747;
+
+  --tp-stepper-bg: #FFFFFF;
+  --tp-stepper-text: #2B2B2B;
+  --tp-stepper-border: #2B2B2B;
+  --tp-stepper-hover-bg: #2EC4B6;
+  --tp-stepper-hover-text: #2B2B2B;
+  --tp-stepper-accent-text: #FF4747;
+
+  --tp-dial-bg: #F2EFEB;
+  --tp-dial-border: #2B2B2B;
+  --tp-dial-tick-major: #2B2B2B;
+  --tp-dial-tick-minor: rgba(43, 43, 43, 0.25);
+  --tp-dial-text: #2B2B2B;
+  --tp-dial-text-hover: #FF4747;
+  --tp-dial-text-active-bg: #FF4747;
+  --tp-dial-text-active-text: #FFFFFF;
+  --tp-dial-sub-text: #2B2B2B;
+  --tp-dial-sub-active-bg: #2EC4B6;
+  --tp-dial-sub-active-text: #2B2B2B;
+
+  --tp-hand-hour: #2B2B2B;
+  --tp-hand-minute: #FF4747;
+  --tp-hand-shadow: 2px 2px 0px rgba(43, 43, 43, 0.4);
+  --tp-pivot-pin: #FF4747;
+  --tp-pivot-border: #2B2B2B;
+
+  --tp-hint-text: #2B2B2B;
+  --tp-hint-kbd-bg: #FFFFFF;
+  --tp-hint-kbd-border: #2B2B2B;
+  --tp-hint-kbd-text: #2B2B2B;
+
+  --tp-preset-label: #2B2B2B;
+  --tp-preset-active-bg: #FF4747;
+  --tp-preset-active-border: #2B2B2B;
+  --tp-preset-active-text: #FFFFFF;
+  --tp-preset-inactive-bg: #FFFFFF;
+  --tp-preset-inactive-border: #2B2B2B;
+  --tp-preset-inactive-text: #2B2B2B;
+  --tp-preset-inactive-hover: #2EC4B6;
+
+  --tp-footer-bg: #F2EFEB;
+  --tp-footer-border: #2B2B2B;
+  --tp-btn-primary-bg: #FF4747;
+  --tp-btn-primary-hover: #FF3333;
+  --tp-btn-primary-text: #FFFFFF;
+  --tp-btn-primary-border: #2B2B2B;
+  --tp-accent-color: #FF4747;
+  --tp-accent-hover: #FF3333;
+  --tp-accent-text: #FFFFFF;
+  --tp-btn-secondary-bg: #FFFFFF;
+  --tp-btn-secondary-border: #2B2B2B;
+  --tp-btn-secondary-text: #2B2B2B;
+  --tp-btn-secondary-hover-bg: #F2EFEB;
+  --tp-btn-clear-text: #FF4747;
+  --tp-btn-clear-hover-bg: #2EC4B6;
+
+  --tp-radius-box: 6px;
+  --tp-radius-button: 6px;
+  --tp-radius-preset: 6px;
+}
+
 /* =========================================================
    TIME PICKER COMPONENT CLASS RULES
    Every visual property is bound directly to --tp-* variables

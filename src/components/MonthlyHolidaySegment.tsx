@@ -32,6 +32,7 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
     const isVista = theme === 'vista';
     const isDark = theme === 'dark';
     const isDarkFluid = theme === 'darkFluid';
+    const isPaperSketch = theme === 'paperSketch';
 
     // Filter holidays for the selected month and year
     const monthHolidays = React.useMemo(() => {
@@ -80,6 +81,9 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
 
     // Theme Container Styles
     const getContainerStyles = () => {
+        if (isPaperSketch) {
+            return 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] rounded-xl shadow-[4px_4px_0px_#2b2b2b]';
+        }
         if (isWinamp) {
             return 'bg-[#191919] border border-[#00FF00] font-mono text-[#00FF00] rounded-none shadow-[2px_2px_0_#000]';
         }
@@ -96,6 +100,9 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
     };
 
     const getHeaderStyles = () => {
+        if (isPaperSketch) {
+            return 'border-b-2 border-dashed border-[#2b2b2b] bg-[#f2efeb] text-[#2b2b2b] font-[\'Gochi_Hand\'] tracking-wide';
+        }
         if (isWinamp) {
             return 'border-b border-[#00FF00]/40 bg-black/40 text-[#00FF00]';
         }
@@ -109,6 +116,9 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
     };
 
     const getItemStyles = () => {
+        if (isPaperSketch) {
+            return 'hover:bg-[#2ec4b6]/15 border-b border-[#2b2b2b]/15 last:border-b-0 text-[#2b2b2b]';
+        }
         if (isWinamp) {
             return 'hover:bg-zinc-900 border-b border-[#00FF00]/20 last:border-b-0 text-[#00FF00]';
         }
@@ -125,6 +135,9 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
     };
 
     const getDateBoxStyles = (category: HolidayCategory) => {
+        if (isPaperSketch) {
+            return 'bg-[#ff4747] text-white border border-[#2b2b2b] shadow-[1px_1px_0px_#2b2b2b]';
+        }
         if (isWinamp) {
             return 'bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/40';
         }

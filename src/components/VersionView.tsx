@@ -898,6 +898,7 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
     const isDarkFluid = theme === 'darkFluid';
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
+    const isPaperSketch = theme === 'paperSketch';
     const isDefault = theme === 'default';
 
     // Pagination: Start with first 10 items (or latest releases)
@@ -960,7 +961,9 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
             {/* Header Card Halaman Versi - Clean & Minimal Design */}
             <div
                 className={`p-4 sm:p-5 transition-all duration-200 shadow-xs border ${
-                    isWinamp
+                    isPaperSketch
+                        ? 'rounded-xl bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] shadow-[4px_4px_0px_#2b2b2b]'
+                        : isWinamp
                         ? 'rounded-none bg-[#191919] border-2 border-zinc-700 text-[#00FF00] font-mono shadow-[2px_2px_0_#000]'
                         : isDarkFluid
                         ? 'rounded-lg bg-[#1D1B20] border-white/10 text-[#E6E0E9]'
@@ -975,7 +978,9 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                     <div className="flex items-center space-x-3">
                         <div
                             className={`p-2 shrink-0 ${
-                                isWinamp
+                                isPaperSketch
+                                    ? 'rounded-lg bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                    : isWinamp
                                     ? 'rounded-none bg-black border border-[#00FF00] text-[#00FF00]'
                                     : isDarkFluid
                                     ? 'rounded-md bg-white/5 text-[#D0BCFF] border border-white/10'
@@ -994,12 +999,14 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                         </div>
                         <div>
                             <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                                <h2 className="text-base sm:text-lg font-black tracking-tight">
+                                <h2 className={`text-base sm:text-lg font-black tracking-tight ${isPaperSketch ? 'font-[\'Gochi_Hand\'] text-xl' : ''}`}>
                                     Riwayat Perkembangan Versi
                                 </h2>
                                 <span
                                     className={`px-2 py-0.5 text-xs font-mono font-bold ${
-                                        isWinamp
+                                        isPaperSketch
+                                            ? 'rounded-md bg-[#2ec4b6] text-[#2b2b2b] border border-[#2b2b2b] shadow-[1px_1px_0px_#2b2b2b]'
+                                            : isWinamp
                                             ? 'rounded-none bg-[#00FF00] text-black'
                                             : isDarkFluid
                                             ? 'rounded-md bg-white/10 text-[#D0BCFF] border border-white/10'
@@ -1015,7 +1022,9 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                             </div>
                             <p
                                 className={`text-xs mt-0.5 font-medium ${
-                                    isWinamp
+                                    isPaperSketch
+                                        ? 'text-[#2b2b2b]/70 font-mono'
+                                        : isWinamp
                                         ? 'text-[#00FF00]/80 font-mono'
                                         : isDarkFluid
                                         ? 'text-[#CAC4D0]'
@@ -1033,7 +1042,9 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
 
                     <div
                         className={`px-3 py-1.5 text-xs font-semibold border self-start sm:self-auto shrink-0 ${
-                            isWinamp
+                            isPaperSketch
+                                ? 'rounded-lg bg-[#f2efeb] border-2 border-[#2b2b2b] text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                : isWinamp
                                 ? 'rounded-none bg-black border-[#00FF00] text-[#00FF00] font-mono'
                                 : isDarkFluid
                                 ? 'rounded-md bg-[#2B2930] border-white/10 text-[#D0BCFF]'
@@ -1100,7 +1111,9 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                         key={item.version}
                                         id={`version-card-${item.version.replace(/\./g, '-')}`}
                                         className={`border transition-all duration-200 overflow-hidden ${
-                                            isWinamp
+                                            isPaperSketch
+                                                ? 'rounded-xl bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b]'
+                                                : isWinamp
                                                 ? 'rounded-none bg-[#191919] border-2 border-zinc-700 text-[#00FF00] font-mono shadow-[2px_2px_0_#000]'
                                                 : isDarkFluid
                                                 ? 'rounded-lg bg-[#1D1B20] border-white/10 text-[#E6E0E9] shadow-xs hover:border-white/20'
@@ -1116,7 +1129,9 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                             type="button"
                                             onClick={() => toggleVersion(item.version)}
                                             className={`w-full text-left p-3 sm:p-3.5 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
-                                                isWinamp
+                                                isPaperSketch
+                                                    ? 'hover:bg-[#2ec4b6]/20'
+                                                    : isWinamp
                                                     ? 'hover:bg-zinc-900/60'
                                                     : isDarkFluid
                                                     ? 'hover:bg-white/5'
@@ -1132,7 +1147,9 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                                     {/* Subtle Version Badge */}
                                                     <span
                                                         className={`px-2 py-0.5 text-xs font-mono font-bold tracking-tight shrink-0 border ${
-                                                            isWinamp
+                                                            isPaperSketch
+                                                                ? 'rounded-md bg-[#ff4747] text-white border-[#2b2b2b] shadow-[1px_1px_0px_#2b2b2b]'
+                                                                : isWinamp
                                                                 ? 'rounded-none bg-[#00FF00] text-black border-[#00FF00]'
                                                                 : isDarkFluid
                                                                 ? 'rounded-md bg-white/10 text-[#D0BCFF] border-white/15'
@@ -1150,7 +1167,9 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                                     {item.tag && (
                                                         <span
                                                             className={`px-2 py-0.5 text-[10px] font-semibold tracking-wide flex items-center space-x-1 shrink-0 border ${
-                                                                isWinamp
+                                                                isPaperSketch
+                                                                    ? 'rounded-md bg-[#2ec4b6]/30 text-[#2b2b2b] border-[#2b2b2b]'
+                                                                    : isWinamp
                                                                     ? 'rounded-none bg-black text-[#00FF00] border-[#00FF00]'
                                                                     : isDarkFluid
                                                                     ? 'rounded-md bg-white/5 text-[#CAC4D0] border-white/10'
@@ -1201,7 +1220,7 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                         <AnimatePresence initial={false}>
                                             {isOpen && (
                                                 <motion.div
-                                                    key="content"
+                                                    key={`version-content-${item.version}`}
                                                     initial={{ height: 0, opacity: 0 }}
                                                     animate={{ height: 'auto', opacity: 1 }}
                                                     exit={{ height: 0, opacity: 0 }}
