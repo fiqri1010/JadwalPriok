@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { ClipboardPaste, X, Check, AlertCircle, Sparkles, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { SHIFT_OPTIONS, ShiftType, SHIFT_COLORS, DayData, EXCEL_SHIFT_MAPPING, AppTheme, ShiftItemConfig } from '../types';
-import { findClosestShiftByColor } from '../utils/excelColorMatcher';
+import { SHIFT_OPTIONS, ShiftType, SHIFT_COLORS, DayData, EXCEL_SHIFT_MAPPING, AppTheme } from '../types';
 
 interface PasteExcelModalProps {
   isOpen: boolean;
@@ -31,20 +29,11 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
   initialText = '',
   theme = 'default',
 }) => {
-  const [activeTab, setActiveTab] = useState<'schedule' | 'absen' | 'visualGrid'>('schedule');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'absen'>('schedule');
 
   const [inputText, setInputText] = useState(initialText);
   const [inputTextAbsen, setInputTextAbsen] = useState('');
   const [parsedCellItems, setParsedCellItems] = useState<{ text: string; bgColor: string }[]>([]);
-  const [visualGridData, setVisualGridData] = useState<{ day: number; shift: ShiftType | null; raw: string; bgColor: string }[]>(() => {
-    const days = new Date(selectedYear, selectedMonth, 0).getDate();
-    return Array.from({ length: days }, (_, i) => ({
-      day: i + 1,
-      shift: null,
-      raw: '',
-      bgColor: '',
-    }));
-  });
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
@@ -116,84 +105,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
     }
   };
 
-  // --- HTML Clipboard Paste Handler for Visual Grid Tab ---
-  const handleVisualGridPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const htmlData = e.clipboardData.getData('text/html');
-    const textData = e.clipboardData.getData('text/plain');
-
-    let cells: { text: string; bgColor: string }[] = [];
-
-    if (htmlData) {
-      try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlData, 'text/html');
-        const domCells = Array.from(doc.querySelectorAll('td, th'));
-        if (domCells.length > 0) {
-          e.preventDefault();
-          domCells.forEach((cell) => {
-            const text = cell.textContent?.trim() || '';
-            const style = (cell as HTMLElement).getAttribute('style') || '';
-            const bgcolor = (cell as HTMLElement).getAttribute('bgcolor') || '';
-            let bgColor = bgcolor;
-            if (!bgColor && style) {
-              const bgMatch = style.match(/(?:background-color|background)\s*:\s*([^;]+)/i);
-              if (bgMatch) bgColor = bgMatch[1].trim();
-            }
-            cells.push({ text, bgColor });
-          });
-        }
-      } catch (err) {
-        console.error('Visual grid HTML parse error:', err);
-      }
-    }
-
-    if (cells.length === 0 && textData) {
-      e.preventDefault();
-      const lines = textData.replace(/\r/g, '').split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
-      lines.forEach((line) => {
-        let rowCells = line.split('\t');
-        if (rowCells.length <= 1 && line.includes(',')) rowCells = line.split(',');
-        else if (rowCells.length <= 1 && line.includes(';')) rowCells = line.split(';');
-        else if (rowCells.length <= 1 && line.includes(' ')) rowCells = line.split(/\s+/);
-        rowCells.forEach((rc) => {
-          const cleaned = rc.trim().replace(/^["']|["']$/g, '');
-          if (cleaned) cells.push({ text: cleaned, bgColor: '' });
-        });
-      });
-    }
-
-    if (cells.length > 0) {
-      setVisualGridData((prev) => {
-        return prev.map((item, idx) => {
-          const pasted = cells[idx];
-          if (!pasted) return item;
-          const raw = pasted.text.toUpperCase();
-          let matched: ShiftType | null = null;
-
-          if (pasted.bgColor) {
-            const colorMatched = findClosestShiftByColor(pasted.bgColor, defaultAvailableShifts);
-            if (colorMatched) matched = colorMatched.key as ShiftType;
-          }
-          if (!matched && raw) {
-            if (EXCEL_SHIFT_MAPPING[raw]) matched = EXCEL_SHIFT_MAPPING[raw];
-            else {
-              const found = SHIFT_OPTIONS.find((opt) => opt.toUpperCase() === raw);
-              if (found) matched = found;
-            }
-          }
-          return {
-            day: item.day,
-            shift: matched,
-            raw: pasted.text,
-            bgColor: pasted.bgColor,
-          };
-        });
-      });
-      setErrorMsg(null);
-    }
-  };
-
-  // --- PARSER 1: Salin Jadwal (Shift Codes & Cell Colors for both horizontal and vertical Excel layouts) ---
+  // --- PARSER 1: Salin Jadwal (Shift Codes for horizontal/vertical layouts) ---
   const getParsedScheduleItems = (): { text: string; bgColor: string }[] => {
     if (parsedCellItems && parsedCellItems.length > 0) {
       return parsedCellItems;
@@ -203,7 +115,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
     const lines = inputText.replace(/\r/g, '').split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
     const allItems: { text: string; bgColor: string }[] = [];
 
-    // Check if it's a single horizontal row or multiple vertical rows with tabs/commas
     if (lines.length === 1 || (lines.length > 1 && lines[0].includes('\t'))) {
       lines.forEach((line) => {
         let rowCells = line.split('\t');
@@ -222,7 +133,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
         });
       });
     } else {
-      // Vertical column format (each non-empty line is 1 day/cell)
       lines.forEach((line) => {
         const cleaned = line.trim().replace(/^["']|["']$/g, '');
         if (cleaned) {
@@ -238,42 +148,12 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
   const matchedDaysSchedule: { day: number; shift: ShiftType | null; raw: string }[] = [];
   let validCountSchedule = 0;
 
-  const defaultAvailableShifts: ShiftItemConfig[] = SHIFT_OPTIONS.map((s, idx) => ({
-    id: `default-${s}-${idx}`,
-    key: s,
-    naming: { fullName: s, displayBadge: s, copyCode: s, dropdownSublabel: '' },
-    workTime: { jamMasukDasar: '08:00', jamPulangDasar: '17:00', earliestFlexiIn: '', latestFlexiIn: '', earliestFlexiOut: '', latestFlexiOut: '', minLemburMinutes: 0, maxLemburMinutes: 0 },
-    visual: {
-      colorMode: 'solid' as const,
-      solidColor: SHIFT_COLORS[s]?.bg?.replace('bg-[', '').replace(']', '') || '#3b82f6',
-      textColor: '#ffffff',
-      borderColor: '#000000',
-      gradientType: 'linear' as const,
-      gradientAngle: 0,
-      colorStops: [],
-      patternType: 'none' as const,
-      patternOpacity: 1,
-      iconType: 'none' as const,
-    },
-    isPiket: false,
-    isVisibleInDropdown: true,
-  }));
-
   for (let i = 0; i < daysInMonth; i++) {
     const cellItem = scheduleItems[i] || { text: '', bgColor: '' };
     const raw = cellItem.text;
     let matched: ShiftType | null = null;
 
-    // 1. Try color matching if background color exists from pasted HTML table cells
-    if (cellItem.bgColor) {
-      const colorMatched = findClosestShiftByColor(cellItem.bgColor, defaultAvailableShifts);
-      if (colorMatched) {
-        matched = colorMatched.key as ShiftType;
-      }
-    }
-
-    // 2. Fallback to text matching
-    if (!matched && raw) {
+    if (raw) {
       if (EXCEL_SHIFT_MAPPING[raw]) {
         matched = EXCEL_SHIFT_MAPPING[raw];
       } else {
@@ -301,7 +181,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
     const selectedMonthFull = monthFulls[selectedMonth - 1];
 
     const lines = text.split(/\r?\n/);
-
     const dayMap: Record<number, { jamMasuk: string | null; jamPulang: string | null; raw: string }> = {};
     let isMultilineDirtyFormat = false;
 
@@ -309,7 +188,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
       const trimmed = line.trim();
       if (!trimmed) return;
 
-      // Detect date pattern e.g., "01 Sep 2026", "1 Sep", "01/09"
       const dateMatch = trimmed.match(/\b(\d{1,2})\s+([a-zA-Z]{3,9})(?:\s+(\d{4}))?\b/i);
       let dayNum: number | null = null;
 
@@ -322,7 +200,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
           dayNum = d;
         }
       } else {
-        // Numeric date format DD/MM or DD-MM
         const dateNumMatch = trimmed.match(/\b(\d{1,2})[/-](\d{1,2})(?:[/-](\d{2,4}))?\b/);
         if (dateNumMatch) {
           const d = parseInt(dateNumMatch[1], 10);
@@ -336,7 +213,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
       if (dayNum !== null) {
         isMultilineDirtyFormat = true;
 
-        // Extract all time matches like "12.46 WIB", "22.31 WIB", "07:57", "18.43"
         const timeMatches = Array.from(trimmed.matchAll(/\b([0-2]?\d)[.:]([0-5]\d)(?:\s*WIB)?\b/gi));
         const validTimes: string[] = [];
 
@@ -374,7 +250,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
       }
     });
 
-    // Fallback: Horizontal row mode (e.g. 07:15 \t 07:30 \t ...)
     if (!isMultilineDirtyFormat) {
       const firstLine = lines.find((l) => l.trim().length > 0) || '';
       let rawCells = firstLine.split('\t');
@@ -453,23 +328,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
 
       onApply(updates);
       onClose();
-    } else if (activeTab === 'visualGrid') {
-      const validCount = visualGridData.filter((i) => i.shift !== null).length;
-      if (validCount === 0) {
-        setErrorMsg('Belum ada kotak tabel warna Excel yang terisi shift. Silakan tempel (Ctrl+V) tabel Excel Anda di atas.');
-        return;
-      }
-
-      const updates: Record<string, Partial<DayData>> = {};
-      for (const item of visualGridData) {
-        if (item.shift) {
-          const key = `${selectedYear}-${selectedMonth}-${item.day}`;
-          updates[key] = { shift: item.shift };
-        }
-      }
-
-      onApply(updates);
-      onClose();
     } else {
       if (validCountAbsen === 0) {
         setErrorMsg('Tidak ada format jam/laporan absen yang valid ditemukan. Pastikan data memuat tanggal bulan ini dan jam (contoh: 01 Sep 2026 ... 07.57 WIB 18.43 WIB).');
@@ -497,7 +355,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
   ];
 
-  // Theme styling configurations matching theme palettes & card structure
   const getGlowCardStyle = () => {
     if (isWinamp) {
       return {
@@ -518,184 +375,153 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
         btnCancelText: '#00FF00',
         btnApplyBg: '#00FF00',
         btnApplyText: '#000000',
-        previewBorder: 'border-zinc-800',
-        tabContainerBg: '#000000',
-        tabContainerBorder: '1.5px solid #333333',
-        tabIndicatorBg: '#00FF00',
-        tabIndicatorRadius: '0px',
+        tabContainerBg: '#121212',
+        tabContainerBorder: '1px solid #282828',
         tabTextActive: '#000000',
         tabTextInactive: '#00FF00',
-      };
-    }
-    if (isDarkFluid) {
-      return {
-        outerBg: 'linear-gradient(163deg, #D0BCFF 0%, #9A82DB 100%)',
-        outerRadius: '22px',
-        outerShadow: '0px 0px 30px 1px rgba(208, 188, 255, 0.28)',
-        innerBg: '#1D1B20',
-        innerRadius: '20px',
-        headingColor: '#D0BCFF',
-        subtextColor: '#CAC4D0',
-        fieldBg: '#141218',
-        fieldBorder: '1px solid rgba(255, 255, 255, 0.08)',
-        fieldShadow: 'inset 2px 5px 10px rgba(5, 5, 5, 0.8)',
-        accentColor: '#D0BCFF',
-        textColor: '#E6E0E9',
-        btnCancelBg: '#2B2930',
-        btnCancelBorder: 'rgba(255,255,255,0.1)',
-        btnCancelText: '#CAC4D0',
-        btnApplyBg: '#D0BCFF',
-        btnApplyText: '#381E72',
-        previewBorder: 'border-white/10',
-        tabContainerBg: '#141218',
-        tabContainerBorder: '1px solid rgba(255, 255, 255, 0.08)',
-        tabIndicatorBg: '#2B2930',
-        tabIndicatorRadius: '7px',
-        tabIndicatorBorder: '1px solid rgba(255, 255, 255, 0.12)',
-        tabIndicatorShadow: '0 2px 8px rgba(0,0,0,0.5)',
-        tabTextActive: '#D0BCFF',
-        tabTextInactive: '#CAC4D0',
-      };
-    }
-    if (isDark) {
-      return {
-        outerBg: 'linear-gradient(163deg, #64ffda 0%, #00b4d8 100%)',
-        outerRadius: '22px',
-        outerShadow: '0px 0px 32px 1px rgba(100, 255, 218, 0.3)',
-        innerBg: '#171717',
-        innerRadius: '20px',
-        headingColor: '#64ffda',
-        subtextColor: '#8892b0',
-        fieldBg: '#111111',
-        fieldBorder: '1px solid rgba(255, 255, 255, 0.06)',
-        fieldShadow: 'inset 2px 5px 10px rgb(5, 5, 5)',
-        accentColor: '#64ffda',
-        textColor: '#ccd6f6',
-        btnCancelBg: '#232323',
-        btnCancelBorder: '#333333',
-        btnCancelText: '#ccd6f6',
-        btnApplyBg: '#64ffda',
-        btnApplyText: '#000000',
-        previewBorder: 'border-white/10',
-        tabContainerBg: '#111111',
-        tabContainerBorder: '1px solid rgba(255, 255, 255, 0.08)',
-        tabIndicatorBg: '#232323',
-        tabIndicatorRadius: '7px',
-        tabIndicatorBorder: '1px solid rgba(100, 255, 218, 0.3)',
-        tabIndicatorShadow: '0 2px 8px rgba(0,0,0,0.5)',
-        tabTextActive: '#64ffda',
-        tabTextInactive: '#8892b0',
+        tabIndicatorBg: '#00FF00',
+        tabIndicatorRadius: '0px',
       };
     }
     if (isVista) {
       return {
-        outerBg: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(56, 189, 248, 0.7) 45%, rgba(37, 99, 235, 0.8) 100%)',
-        outerRadius: '22px',
-        outerShadow: '0px 20px 45px -5px rgba(14, 116, 224, 0.35)',
-        innerBg: 'rgba(235, 245, 255, 0.75)',
-        innerRadius: '20px',
-        headingColor: '#0f172a',
-        subtextColor: '#334155',
-        fieldBg: 'rgba(255, 255, 255, 0.65)',
-        fieldBorder: '1px solid rgba(255, 255, 255, 0.85)',
-        fieldShadow: 'inset 1px 1px 4px rgba(37, 99, 235, 0.08)',
+        outerBg: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(220,235,255,0.9) 100%)',
+        outerRadius: '20px',
+        outerShadow: '0 25px 50px -12px rgba(37, 99, 235, 0.25)',
+        innerBg: 'rgba(255, 255, 255, 0.85)',
+        innerRadius: '18px',
+        headingColor: '#1e3a8a',
+        subtextColor: '#475569',
+        fieldBg: 'rgba(240, 246, 255, 0.7)',
+        fieldBorder: '1px solid rgba(147, 197, 253, 0.5)',
+        fieldShadow: 'inset 0 2px 4px rgba(0,0,0,0.03)',
         accentColor: '#2563eb',
         textColor: '#0f172a',
-        btnCancelBg: 'rgba(255, 255, 255, 0.6)',
-        btnCancelBorder: 'rgba(255, 255, 255, 0.8)',
-        btnCancelText: '#334155',
-        btnApplyBg: 'linear-gradient(180deg, #38bdf8 0%, #2563eb 100%)',
+        btnCancelBg: 'rgba(255,255,255,0.9)',
+        btnCancelBorder: 'rgba(147, 197, 253, 0.6)',
+        btnCancelText: '#1e3a8a',
+        btnApplyBg: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
         btnApplyText: '#ffffff',
-        previewBorder: 'border-white/60',
-        tabContainerBg: 'rgba(186, 230, 253, 0.45)',
-        tabContainerBorder: '1px solid rgba(255, 255, 255, 0.8)',
-        tabIndicatorBg: 'linear-gradient(180deg, #ffffff 0%, #e0f2fe 100%)',
-        tabIndicatorRadius: '7px',
-        tabIndicatorBorder: '1px solid rgba(255, 255, 255, 0.9)',
-        tabIndicatorShadow: '0 2px 6px rgba(14, 116, 224, 0.25)',
-        tabTextActive: '#0f172a',
+        tabContainerBg: 'rgba(226, 232, 240, 0.7)',
+        tabContainerBorder: '1px solid rgba(147, 197, 253, 0.4)',
+        tabTextActive: '#ffffff',
         tabTextInactive: '#334155',
+        tabIndicatorBg: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+        tabIndicatorRadius: '7px',
+        tabIndicatorShadow: '0 2px 8px rgba(37,99,235,0.3)',
       };
     }
-    // Default light / teal theme (#F6F7F8 / #FFFFFF / #2EC4B6 / #011627)
+    if (isDarkFluid) {
+      return {
+        outerBg: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 100%)',
+        outerRadius: '24px',
+        outerShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+        innerBg: '#1D1B20',
+        innerRadius: '22px',
+        headingColor: '#E6E0E9',
+        subtextColor: '#CAC4D0',
+        fieldBg: '#141218',
+        fieldBorder: '1px solid rgba(255,255,255,0.1)',
+        fieldShadow: 'inset 0 2px 4px rgba(0,0,0,0.4)',
+        accentColor: '#D0BCFF',
+        textColor: '#E6E0E9',
+        btnCancelBg: '#2B2930',
+        btnCancelBorder: 'rgba(255,255,255,0.1)',
+        btnCancelText: '#E6E0E9',
+        btnApplyBg: '#D0BCFF',
+        btnApplyText: '#381E72',
+        tabContainerBg: '#2B2930',
+        tabContainerBorder: '1px solid rgba(255,255,255,0.1)',
+        tabTextActive: '#381E72',
+        tabTextInactive: '#CAC4D0',
+        tabIndicatorBg: '#D0BCFF',
+        tabIndicatorRadius: '8px',
+        tabIndicatorShadow: '0 2px 8px rgba(208,188,255,0.3)',
+      };
+    }
+    if (isDark) {
+      return {
+        outerBg: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.5) 100%)',
+        outerRadius: '20px',
+        outerShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+        innerBg: '#18181b',
+        innerRadius: '18px',
+        headingColor: '#f43f5e',
+        subtextColor: '#a1a1aa',
+        fieldBg: '#09090b',
+        fieldBorder: '1px solid #27272a',
+        fieldShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)',
+        accentColor: '#f43f5e',
+        textColor: '#f4f4f5',
+        btnCancelBg: '#27272a',
+        btnCancelBorder: '#3f3f46',
+        btnCancelText: '#f4f4f5',
+        btnApplyBg: '#f43f5e',
+        btnApplyText: '#ffffff',
+        tabContainerBg: '#27272a',
+        tabContainerBorder: '1px solid #3f3f46',
+        tabTextActive: '#ffffff',
+        tabTextInactive: '#a1a1aa',
+        tabIndicatorBg: '#f43f5e',
+        tabIndicatorRadius: '7px',
+        tabIndicatorShadow: '0 2px 8px rgba(244,63,94,0.3)',
+      };
+    }
+    // Default (Light)
     return {
-      outerBg: 'linear-gradient(163deg, #2EC4B6 0%, #20A4F3 100%)',
-      outerRadius: '22px',
-      outerShadow: '0px 15px 35px -5px rgba(46, 196, 182, 0.35)',
+      outerBg: 'linear-gradient(135deg, rgba(14,124,123,0.3) 0%, rgba(20,184,166,0.1) 100%)',
+      outerRadius: '20px',
+      outerShadow: '0 25px 50px -12px rgba(14, 124, 123, 0.25)',
       innerBg: '#ffffff',
-      innerRadius: '20px',
-      headingColor: '#011627',
-      subtextColor: '#64748B',
-      fieldBg: '#F6F7F8',
-      fieldBorder: '1px solid #E2E8F0',
-      fieldShadow: 'inset 1px 2px 6px rgba(0, 0, 0, 0.06)',
-      accentColor: '#2EC4B6',
-      textColor: '#011627',
-      btnCancelBg: '#F1F5F9',
-      btnCancelBorder: '#CBD5E1',
+      innerRadius: '18px',
+      headingColor: '#0e7c7b',
+      subtextColor: '#64748b',
+      fieldBg: '#f8fafc',
+      fieldBorder: '1px solid #e2e8f0',
+      fieldShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)',
+      accentColor: '#0e7c7b',
+      textColor: '#1e293b',
+      btnCancelBg: '#f1f5f9',
+      btnCancelBorder: '#cbd5e1',
       btnCancelText: '#475569',
-      btnApplyBg: '#2EC4B6',
+      btnApplyBg: '#0e7c7b',
       btnApplyText: '#ffffff',
-      previewBorder: 'border-slate-200',
-      tabContainerBg: '#dadadb',
-      tabContainerBorder: 'none',
-      tabIndicatorBg: '#ffffff',
+      tabContainerBg: '#f1f5f9',
+      tabContainerBorder: '1px solid #cbd5e1',
+      tabTextActive: '#ffffff',
+      tabTextInactive: '#64748b',
+      tabIndicatorBg: '#0e7c7b',
       tabIndicatorRadius: '7px',
-      tabIndicatorBorder: '0.5px solid rgba(0, 0, 0, 0.04)',
-      tabIndicatorShadow: '0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04)',
-      tabTextActive: '#011627',
-      tabTextInactive: '#64748B',
+      tabIndicatorShadow: '0 2px 8px rgba(14,124,123,0.3)',
     };
   };
 
   const currentStyle = getGlowCardStyle();
 
-  const modalContent = (
+  return (
     <AnimatePresence>
-      {/* Backdrop (Latar Belakang Gelap / Buram) */}
-      <div
-        className="fixed inset-0 sm:top-7 z-[99998] bg-black/75 backdrop-blur-sm select-none"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Modal Viewport Layer */}
-      <div
-        className="fixed inset-0 sm:top-7 z-[99999] flex items-center justify-center p-3 sm:p-5 pointer-events-none select-none"
-        data-theme={theme}
-      >
-        {/* .form-card1 Outer Gradient Glowing Shell */}
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          onClick={(e) => e.stopPropagation()}
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
           style={{
-            backgroundImage: currentStyle.outerBg,
-            borderRadius: currentStyle.outerRadius,
+            background: currentStyle.outerBg,
+            borderRadius: isWinamp ? '0px' : '22px',
             boxShadow: currentStyle.outerShadow,
           }}
-          className="p-[2px] w-full max-w-lg transition-all duration-300 max-h-[92vh] flex flex-col pointer-events-auto relative z-[99999]"
+          className="relative w-full max-w-lg sm:max-w-xl p-[2px] shadow-2xl my-auto"
         >
-          {/* .form-card2 Inner Form Container */}
           <div
             style={{
               backgroundColor: currentStyle.innerBg,
-              borderRadius: currentStyle.innerRadius,
-              color: currentStyle.textColor,
-              ...(isVista ? { backdropFilter: 'blur(24px) saturate(200%)', WebkitBackdropFilter: 'blur(24px) saturate(200%)' } : {})
+              borderRadius: isWinamp ? '0px' : '20px',
             }}
-            className={`flex flex-col p-3.5 sm:p-5 overflow-hidden max-h-[calc(92vh-4px)] transition-all duration-200 relative ${
-              isWinamp ? 'font-mono' : ''
-            }`}
+            className="flex flex-col p-4 sm:p-5 max-h-[90vh] overflow-hidden"
           >
-            {isVista && (
-              <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-white/40 to-transparent pointer-events-none rounded-t-[20px]" />
-            )}
-
-            {/* Header / Heading (Pinned at top) */}
-            <div className="flex items-center justify-between relative pb-2 shrink-0 border-b border-current/10">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-current/10 shrink-0">
               <div className="flex items-center space-x-2.5 min-w-0">
                 <div
                   style={{
@@ -769,10 +595,10 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               </div>
             </div>
 
-            {/* SEGMENTED TAB SELECTOR (RADIO BUTTONS WITH INDIKATOR ANIMASI - Pinned at top) */}
-            <div className="flex items-center justify-center pt-1 pb-1 shrink-0">
+            {/* SEGMENTED TAB SELECTOR (RADIO BUTTONS WITH 2 COLUMNS) */}
+            <div className="flex items-center justify-center pt-2 pb-1.5 shrink-0">
               <div
-                className="tab-container relative grid grid-cols-3 p-[2px] select-none w-full max-w-[420px]"
+                className="tab-container relative grid grid-cols-2 p-[2px] select-none w-full max-w-[360px]"
                 style={{
                   backgroundColor: currentStyle.tabContainerBg,
                   border: currentStyle.tabContainerBorder,
@@ -823,46 +649,23 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                   Salin Presensi
                 </label>
 
-                {/* Radio Input 3: Grid Excel Warna */}
-                <label
-                  className="tab_label relative z-30 h-[28px] flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
-                  style={{
-                    color: activeTab === 'visualGrid' ? currentStyle.tabTextActive : currentStyle.tabTextInactive,
-                    fontFamily: isWinamp ? 'monospace' : 'inherit',
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="pasteTabGroup"
-                    id="tab3_visualGrid"
-                    className="sr-only"
-                    checked={activeTab === 'visualGrid'}
-                    onChange={() => {
-                      setActiveTab('visualGrid');
-                      setErrorMsg(null);
-                    }}
-                  />
-                  Grid Excel Warna
-                </label>
-
                 {/* Sliding Indicator Pill */}
                 <div
                   className="indicator absolute top-[2px] z-10 h-[28px] transition-all duration-200 ease-out pointer-events-none"
                   style={{
-                    left: activeTab === 'schedule' ? '2px' : activeTab === 'absen' ? '33.33%' : '66.66%',
-                    width: 'calc(33.33% - 2px)',
+                    left: activeTab === 'schedule' ? '2px' : '50%',
+                    width: 'calc(50% - 2px)',
                     backgroundColor: currentStyle.tabIndicatorBg,
                     borderRadius: currentStyle.tabIndicatorRadius,
-                    border: currentStyle.tabIndicatorBorder || 'none',
                     boxShadow: currentStyle.tabIndicatorShadow || 'none',
                   }}
                 />
               </div>
             </div>
 
-            {/* SCROLLABLE FORM BODY (Allows full viewing of instructions, textarea, and preview on small screens) */}
+            {/* SCROLLABLE FORM BODY */}
             <div className="flex-1 overflow-y-auto min-h-0 space-y-2.5 sm:space-y-3 pr-1 -mr-1">
-              {/* Collapsible / Floating Instructions */}
+              {/* Collapsible Instructions */}
               {showHelp && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -936,14 +739,10 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                 </motion.div>
               )}
 
-              {/* Debossed Inset Area for Paste Input */}
+              {/* Paste Input Area */}
               <div className="space-y-1 flex flex-col shrink-0">
                 <label style={{ color: currentStyle.subtextColor }} className="text-[10px] font-bold uppercase tracking-wider block">
-                  {activeTab === 'schedule'
-                    ? 'Kotak Tempel Teks Shift (Ctrl + V):'
-                    : activeTab === 'visualGrid'
-                    ? 'Kotak Tempel Tabel Excel Warna (Ctrl + V):'
-                    : 'Kotak Tempel Teks Absen / Laporan Kehadiran (Ctrl + V):'}
+                  {activeTab === 'schedule' ? 'Kotak Tempel Teks Shift (Ctrl + V):' : 'Kotak Tempel Teks Absen / Laporan Kehadiran (Ctrl + V):'}
                 </label>
 
                 <div
@@ -967,18 +766,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                       }}
                       onPaste={handlePasteTextarea}
                       placeholder="Klik di sini lalu tekan Ctrl+V (Contoh: G	L	N	OFF	SM	PM	M	CUTI ...)"
-                      className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
-                      style={{
-                        color: currentStyle.textColor,
-                        caretColor: currentStyle.accentColor,
-                      }}
-                    />
-                  ) : activeTab === 'visualGrid' ? (
-                    <textarea
-                      id="excel-visual-grid-area"
-                      rows={3}
-                      onPaste={handleVisualGridPaste}
-                      placeholder="Klik di sini lalu tekan Ctrl+V untuk menempelkan tabel Excel strip berwarna Anda..."
                       className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
                       style={{
                         color: currentStyle.textColor,
@@ -1014,72 +801,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                 </div>
               )}
 
-              {/* Visual Grid Table Boxes View for activeTab === 'visualGrid' */}
-              {activeTab === 'visualGrid' && (
-                <div className="space-y-1.5 flex flex-col min-h-0 shrink-0">
-                  <div className="flex items-center justify-between text-xs font-bold px-0.5">
-                    <span style={{ color: currentStyle.subtextColor }} className="text-[11px]">
-                      Strip Kotak Tabel Warna Excel (Tanggal 1 s.d. {daysInMonth}):
-                    </span>
-                    <span className="text-[11px] font-black text-emerald-600 dark:text-emerald-400">
-                      {visualGridData.filter((i) => i.shift !== null).length} dari {daysInMonth} hari terpetakan
-                    </span>
-                  </div>
-
-                  <div
-                    style={{
-                      backgroundColor: currentStyle.fieldBg,
-                      border: currentStyle.fieldBorder,
-                      boxShadow: currentStyle.fieldShadow,
-                      borderRadius: isWinamp ? '0px' : '10px',
-                    }}
-                    className="grid grid-cols-4 sm:grid-cols-7 md:grid-cols-10 gap-1.5 max-h-52 overflow-y-auto p-2.5"
-                  >
-                    {visualGridData.map((item, idx) => {
-                      const shiftColorInfo = item.shift ? SHIFT_COLORS[item.shift] : null;
-                      const customBgStyle = item.bgColor
-                        ? { backgroundColor: item.bgColor, color: '#000000' }
-                        : {};
-
-                      return (
-                        <div
-                          key={`visual-box-${item.day}-${idx}`}
-                          className={`flex flex-col items-center justify-between p-1.5 rounded-lg border transition-all text-center ${
-                            item.shift
-                              ? 'border-emerald-500/60 shadow-2xs font-bold'
-                              : 'border-current/10 opacity-70'
-                          } ${shiftColorInfo?.bg || ''}`}
-                          style={customBgStyle}
-                        >
-                          <span className="text-[9px] font-black opacity-80 border-b border-current/15 w-full pb-0.5 mb-1">
-                            Tgl {item.day}
-                          </span>
-
-                          <select
-                            value={item.shift || ''}
-                            onChange={(e) => {
-                              const val = e.target.value as ShiftType;
-                              setVisualGridData((prev) =>
-                                prev.map((d) => (d.day === item.day ? { ...d, shift: val || null } : d))
-                              );
-                            }}
-                            className="w-full bg-black/10 dark:bg-white/10 text-[10px] font-black rounded px-1 py-0.5 border border-current/20 outline-none cursor-pointer text-center"
-                          >
-                            <option value="" className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-slate-100">-</option>
-                            {SHIFT_OPTIONS.map((opt) => (
-                              <option key={`opt-v-${item.day}-${opt}`} value={opt} className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-slate-100">
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Live Preview Grid of Parsed Days */}
+              {/* Live Preview Grid for Schedule Text */}
               {activeTab === 'schedule' && inputText.trim().length > 0 && (
                 <div className="space-y-1.5 flex flex-col min-h-0 shrink-0">
                   <div className="flex items-center justify-between text-xs font-bold px-0.5">
@@ -1201,24 +923,23 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                               : 'border-white/5 bg-transparent opacity-30'
                           }`}
                         >
-                          <span style={{ color: currentStyle.subtextColor }} className="text-[9px] font-bold border-b border-current/10 w-full pb-0.5 mb-1">
+                          <span style={{ color: currentStyle.subtextColor }} className="text-[8.5px] font-bold">
                             Tgl {item.day}
                           </span>
-
-                          {isMatched ? (
-                            <div className="flex flex-col items-center gap-0.5 w-full text-[9px] font-mono">
-                              <span className={`px-1 py-0.2 rounded w-full truncate font-black ${item.jamMasuk ? 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300' : 'opacity-40'}`}>
-                                M: {item.jamMasuk || '-'}
-                              </span>
-                              <span className={`px-1 py-0.2 rounded w-full truncate font-black ${item.jamPulang ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300' : 'opacity-40'}`}>
-                                P: {item.jamPulang || '-'}
+                          <div className="my-0.5 space-y-0.5 w-full">
+                            <div className="text-[9px] font-mono font-bold flex items-center justify-between px-1 bg-black/5 dark:bg-white/5 rounded">
+                              <span className="opacity-60 text-[8px]">IN</span>
+                              <span className={item.jamMasuk ? 'text-emerald-600 dark:text-emerald-400 font-black' : 'opacity-30'}>
+                                {item.jamMasuk || '--:--'}
                               </span>
                             </div>
-                          ) : (
-                            <span style={{ color: currentStyle.subtextColor }} className="text-[9.5px] font-mono opacity-50 py-1">
-                              -
-                            </span>
-                          )}
+                            <div className="text-[9px] font-mono font-bold flex items-center justify-between px-1 bg-black/5 dark:bg-white/5 rounded">
+                              <span className="opacity-60 text-[8px]">OUT</span>
+                              <span className={item.jamPulang ? 'text-blue-600 dark:text-blue-400 font-black' : 'opacity-30'}>
+                                {item.jamPulang || '--:--'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
@@ -1227,8 +948,8 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               )}
             </div>
 
-            {/* Action Buttons: Cancel and Apply (Pinned at bottom) */}
-            <div className="flex items-center justify-end gap-2.5 pt-2.5 border-t border-current/10 shrink-0 mt-0.5">
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end space-x-2 pt-3 mt-3 border-t border-current/10 shrink-0">
               <button
                 type="button"
                 onClick={onClose}
@@ -1238,7 +959,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                   color: currentStyle.btnCancelText,
                   borderRadius: isWinamp ? '0px' : '10px',
                 }}
-                className="px-4 py-2 text-xs font-bold border hover:opacity-90 transition-all cursor-pointer shadow-2xs"
+                className="px-3.5 py-2 text-xs font-bold border transition-colors cursor-pointer hover:opacity-90"
               >
                 Batal
               </button>
@@ -1246,29 +967,15 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               <button
                 type="button"
                 onClick={handleApply}
-                disabled={activeTab === 'schedule' ? validCountSchedule === 0 : validCountAbsen === 0}
                 style={{
-                  color: (activeTab === 'schedule' ? validCountSchedule > 0 : validCountAbsen > 0) ? currentStyle.btnApplyText : 'currentColor',
-                  backgroundColor: (activeTab === 'schedule' ? validCountSchedule > 0 : validCountAbsen > 0) ? currentStyle.btnApplyBg : 'transparent',
-                  borderColor: currentStyle.accentColor,
+                  backgroundColor: currentStyle.btnApplyBg,
+                  color: currentStyle.btnApplyText,
                   borderRadius: isWinamp ? '0px' : '10px',
-                  boxShadow:
-                    (activeTab === 'schedule' ? validCountSchedule > 0 : validCountAbsen > 0)
-                      ? isLightMode
-                        ? `0 4px 12px ${currentStyle.accentColor}40`
-                        : `0 0 15px ${currentStyle.accentColor}55`
-                      : 'none',
                 }}
-                className={`flex items-center justify-center space-x-1.5 px-5 py-2 text-xs font-black transition-all duration-300 cursor-pointer border ${
-                  (activeTab === 'schedule' ? validCountSchedule > 0 : validCountAbsen > 0)
-                    ? 'hover:brightness-105 active:scale-[0.98]'
-                    : 'opacity-40 cursor-not-allowed border-current'
-                }`}
+                className="px-4 py-2 text-xs font-black shadow-md transition-all cursor-pointer hover:opacity-95 flex items-center space-x-1.5"
               >
-                <Check className="w-4 h-4" />
-                <span>
-                  Terapkan ({activeTab === 'schedule' ? validCountSchedule : validCountAbsen} Hari)
-                </span>
+                <Check className="w-3.5 h-3.5" />
+                <span>Terapkan Jadwal</span>
               </button>
             </div>
           </div>
@@ -1276,6 +983,4 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
       </div>
     </AnimatePresence>
   );
-
-  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };

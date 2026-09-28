@@ -19,6 +19,7 @@ import {
     Pencil,
     X,
     Check,
+    Save,
 } from 'lucide-react';
 
 interface ShiftListViewProps {
@@ -31,6 +32,7 @@ interface ShiftListViewProps {
     onToggleVisibility: (shiftId: string) => void;
     onAddNewShift: () => void;
     onResetToDefault: () => void;
+    onSaveConfig: () => void;
     onExportJson: () => void;
     onImportJson: () => void;
     onRenameProfile?: (newName: string) => void;
@@ -46,6 +48,7 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
     onToggleVisibility,
     onAddNewShift,
     onResetToDefault,
+    onSaveConfig,
     onExportJson,
     onImportJson,
     onRenameProfile,
@@ -264,10 +267,19 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                         type="button"
                         onClick={onResetToDefault}
                         className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 flex items-center space-x-1.5 cursor-pointer transition-colors"
-                        title="Kembalikan aturan kelompok ini ke konfigurasi bawaan"
+                        title="Kembalikan aturan kelompok ini ke konfigurasi terakhir yang disimpan atau bawaan"
                     >
                         <RotateCcw className="w-3.5 h-3.5" />
                         <span>Kembalikan Default</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onSaveConfig}
+                        className="px-3 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white flex items-center space-x-1.5 cursor-pointer shadow-xs transition-all active:scale-95"
+                        title="Simpan konfigurasi saat ini sebagai default baru"
+                    >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>Simpan</span>
                     </button>
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-zinc-400">

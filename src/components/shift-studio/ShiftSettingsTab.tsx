@@ -144,11 +144,36 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
         setIsEditModalOpen(true);
     };
 
-    // Kembalikan ke default di dalam menu edit
+    // Simpan konfigurasi saat ini sebagai default baru
+    const STORAGE_KEY_BASELINE_PREFIX = 'JADWAL_PRIOK_SAVED_SHIFT_BASELINE_';
+
+    const handleSaveConfig = () => {
+        if (!currentGroupToEdit) return;
+        try {
+            localStorage.setItem(`${STORAGE_KEY_BASELINE_PREFIX}${currentGroupToEdit.id}`, JSON.stringify(currentGroupToEdit.shifts));
+            onShowToast(`Konfigurasi shift untuk "${currentGroupToEdit.name}" berhasil disimpan sebagai default baru.`);
+        } catch (err) {
+            onShowToast('Gagal menyimpan konfigurasi.');
+        }
+    };
+
+    // Kembalikan ke default (konfigurasi terakhir yang disimpan, atau bawaan jika belum pernah disimpan)
     const handleResetGroupToDefault = () => {
         if (!currentGroupToEdit) return;
-        handleUpdateGroupShifts(currentGroupToEdit.id, JSON.parse(JSON.stringify(DEFAULT_SHIFT_GROUP.shifts)));
-        onShowToast(`Daftar shift pada "${currentGroupToEdit.name}" dikembalikan ke standar bawaan.`);
+        try {
+            const savedBaseline = localStorage.getItem(`${STORAGE_KEY_BASELINE_PREFIX}${currentGroupToEdit.id}`);
+            if (savedBaseline) {
+                const parsedShifts = JSON.parse(savedBaseline);
+                handleUpdateGroupShifts(currentGroupToEdit.id, parsedShifts);
+                onShowToast(`Daftar shift dikembalikan ke konfigurasi terakhir yang disimpan.`);
+            } else {
+                handleUpdateGroupShifts(currentGroupToEdit.id, JSON.parse(JSON.stringify(DEFAULT_SHIFT_GROUP.shifts)));
+                onShowToast(`Daftar shift pada "${currentGroupToEdit.name}" dikembalikan ke standar bawaan.`);
+            }
+        } catch (err) {
+            handleUpdateGroupShifts(currentGroupToEdit.id, JSON.parse(JSON.stringify(DEFAULT_SHIFT_GROUP.shifts)));
+            onShowToast(`Daftar shift dikembalikan ke standar bawaan.`);
+        }
     };
 
     // Duplikasi kelompok profil
@@ -281,6 +306,7 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                     onToggleVisibility={handleToggleVisibility}
                     onAddNewShift={handleAddNewShift}
                     onResetToDefault={handleResetGroupToDefault}
+                    onSaveConfig={handleSaveConfig}
                     onExportJson={handleExportJson}
                     onImportJson={handleImportJson}
                     onRenameProfile={(newName) => handleRenameGroup(currentGroupToEdit.id, newName)}

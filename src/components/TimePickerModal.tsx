@@ -696,7 +696,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                 const deg = i * 6;
                 return (
                   <div
-                    key={i}
+                    key={`tick-${i}`}
                     className="absolute top-0 left-1/2 -translate-x-1/2 origin-bottom pointer-events-none"
                     style={{
                       height: '50%',
