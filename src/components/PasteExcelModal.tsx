@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { ClipboardPaste, X, Check, AlertCircle, Sparkles, HelpCircle } from 'lucide-react';
+import { ClipboardPaste, X, Check, AlertCircle, Sparkles, HelpCircle, FileSpreadsheet } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SHIFT_OPTIONS, ShiftType, SHIFT_COLORS, DayData, EXCEL_SHIFT_MAPPING, AppTheme } from '../types';
+import { ExcelSpreadsheet, MatchedDayShift } from './ExcelSpreadsheet';
+
+export type PasteTab = 'excel_grid' | 'schedule' | 'absen';
 
 interface PasteExcelModalProps {
   isOpen: boolean;
@@ -30,7 +33,15 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
   initialText = '',
   theme = 'default',
 }) => {
-  const [activeTab, setActiveTab] = useState<'schedule' | 'absen'>('schedule');
+  const [activeTab, setActiveTab] = useState<PasteTab>('excel_grid');
+
+  const [spreadsheetShifts, setSpreadsheetShifts] = useState<MatchedDayShift[]>([]);
+  const [spreadsheetValidCount, setSpreadsheetValidCount] = useState<number>(0);
+
+  const handleSpreadsheetParsed = useCallback((matched: MatchedDayShift[], count: number) => {
+    setSpreadsheetShifts(matched);
+    setSpreadsheetValidCount(count);
+  }, []);
 
   const [inputText, setInputText] = useState(initialText);
   const [inputTextAbsen, setInputTextAbsen] = useState('');
@@ -45,8 +56,9 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
   const isDark = theme === 'dark';
   const isVista = theme === 'vista';
   const isDefault = theme === 'default';
+  const isPaperSketch = theme === 'paperSketch';
 
-  const isLightMode = isDefault || isVista;
+  const isLightMode = isDefault || isVista || isPaperSketch;
 
   const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
 
@@ -59,7 +71,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
         if (activeTab === 'schedule') {
           textareaRef.current?.focus();
           textareaRef.current?.select();
-        } else {
+        } else if (activeTab === 'absen') {
           textareaAbsenRef.current?.focus();
           textareaAbsenRef.current?.select();
         }
@@ -257,7 +269,23 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
 
   // --- APPLY ACTION ---
   const handleApply = () => {
-    if (activeTab === 'schedule') {
+    if (activeTab === 'excel_grid') {
+      if (spreadsheetValidCount === 0) {
+        setErrorMsg('Belum ada kode shift yang cocok terdeteksi dari tabel Excel. Silakan tempel data Excel (Ctrl + V) terlebih dahulu.');
+        return;
+      }
+
+      const updates: Record<string, Partial<DayData>> = {};
+      for (const item of spreadsheetShifts) {
+        if (item.shift) {
+          const key = `${selectedYear}-${selectedMonth}-${item.day}`;
+          updates[key] = { shift: item.shift };
+        }
+      }
+
+      onApply(updates);
+      onClose();
+    } else if (activeTab === 'schedule') {
       if (validCountSchedule === 0) {
         setErrorMsg('Tidak ada kode shift yang cocok (Graha/G, NPCT/N, TPSL/L, OFF, SM, PM, Malam/M, CUTI/C). Pastikan data yang disalin berisi kode shift.');
         return;
@@ -302,6 +330,36 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
 
   // Theme styling configurations matching theme palettes & card structure
   const getGlowCardStyle = () => {
+    if (isPaperSketch) {
+      return {
+        outerBg: '#ffffff',
+        outerRadius: '16px',
+        outerShadow: '8px 8px 0px #2b2b2b',
+        innerBg: '#ffffff',
+        innerRadius: '14px',
+        headingColor: '#2b2b2b',
+        subtextColor: '#555555',
+        fieldBg: '#f2efeb',
+        fieldBorder: '2px solid #2b2b2b',
+        fieldShadow: 'inset 2px 2px 0px rgba(43,43,43,0.1)',
+        accentColor: '#ff4747',
+        textColor: '#2b2b2b',
+        btnCancelBg: '#ffffff',
+        btnCancelBorder: '2px solid #2b2b2b',
+        btnCancelText: '#2b2b2b',
+        btnApplyBg: '#ff4747',
+        btnApplyText: '#ffffff',
+        previewBorder: 'border-2 border-[#2b2b2b]',
+        tabContainerBg: '#f2efeb',
+        tabContainerBorder: '2px solid #2b2b2b',
+        tabIndicatorBg: '#ff4747',
+        tabIndicatorRadius: '6px',
+        tabIndicatorBorder: '1.5px solid #2b2b2b',
+        tabIndicatorShadow: '1px 1px 0px #2b2b2b',
+        tabTextActive: '#ffffff',
+        tabTextInactive: '#2b2b2b',
+      };
+    }
     if (isWinamp) {
       return {
         outerBg: 'linear-gradient(163deg, #00FF00 0%, #008800 100%)',
@@ -481,7 +539,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
             borderRadius: currentStyle.outerRadius,
             boxShadow: currentStyle.outerShadow,
           }}
-          className="p-[2px] w-full max-w-lg transition-all duration-300 max-h-[92vh] flex flex-col pointer-events-auto relative z-[99999]"
+          className="p-[2px] w-full max-w-xl sm:max-w-2xl transition-all duration-300 max-h-[92vh] flex flex-col pointer-events-auto relative z-[99999]"
         >
           {/* .form-card2 Inner Form Container */}
           <div
@@ -515,23 +573,40 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                   }}
                   className="w-9 h-9 rounded-xl flex items-center justify-center border shrink-0 shadow-2xs"
                 >
-                  <ClipboardPaste
-                    style={{
-                      color: isLightMode
-                        ? isVista
-                          ? '#2563eb'
-                          : '#0e7c7b'
-                        : currentStyle.headingColor,
-                    }}
-                    className="w-5 h-5"
-                  />
+                  {activeTab === 'excel_grid' ? (
+                    <FileSpreadsheet
+                      style={{
+                        color: isLightMode
+                          ? isVista
+                            ? '#2563eb'
+                            : '#0e7c7b'
+                          : currentStyle.headingColor,
+                      }}
+                      className="w-5 h-5"
+                    />
+                  ) : (
+                    <ClipboardPaste
+                      style={{
+                        color: isLightMode
+                          ? isVista
+                            ? '#2563eb'
+                            : '#0e7c7b'
+                          : currentStyle.headingColor,
+                      }}
+                      className="w-5 h-5"
+                    />
+                  )}
                 </div>
                 <div className="min-w-0">
                   <h2
                     style={{ color: currentStyle.headingColor }}
                     className="text-sm sm:text-base font-black tracking-tight leading-tight truncate"
                   >
-                    {activeTab === 'schedule' ? 'Salin Jadwal Shift' : 'Salin Presensi'}
+                    {activeTab === 'excel_grid'
+                      ? 'Paste dari Excel (Spreadsheet)'
+                      : activeTab === 'schedule'
+                      ? 'Salin Jadwal Shift (Teks)'
+                      : 'Salin Presensi (Teks Log)'}
                   </h2>
                   <p
                     style={{ color: currentStyle.subtextColor }}
@@ -574,19 +649,41 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               </div>
             </div>
 
-            {/* SEGMENTED TAB SELECTOR (RADIO BUTTONS WITH INDIKATOR ANIMASI - Pinned at top) */}
+            {/* SEGMENTED 3-TAB SELECTOR (RADIO BUTTONS WITH INDIKATOR ANIMASI - Pinned at top) */}
             <div className="flex items-center justify-center pt-1 pb-1 shrink-0">
               <div
-                className="tab-container relative grid grid-cols-2 p-[2px] select-none w-full max-w-[280px]"
+                className="tab-container relative grid grid-cols-3 p-[2px] select-none w-full max-w-[390px]"
                 style={{
                   backgroundColor: currentStyle.tabContainerBg,
                   border: currentStyle.tabContainerBorder,
                   borderRadius: isWinamp ? '0px' : '9px',
                 }}
               >
-                {/* Radio Input 1: Salin Shift */}
+                {/* Radio Input 1: Paste dari Excel */}
                 <label
-                  className="tab_label relative z-30 h-[28px] flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                  className="tab_label relative z-30 h-[28px] flex items-center justify-center text-[11px] sm:text-xs font-bold transition-colors cursor-pointer text-center px-1"
+                  style={{
+                    color: activeTab === 'excel_grid' ? currentStyle.tabTextActive : currentStyle.tabTextInactive,
+                    fontFamily: isWinamp ? 'monospace' : 'inherit',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="pasteTabGroup"
+                    id="tab0_excel_grid"
+                    className="sr-only"
+                    checked={activeTab === 'excel_grid'}
+                    onChange={() => {
+                      setActiveTab('excel_grid');
+                      setErrorMsg(null);
+                    }}
+                  />
+                  Paste Excel
+                </label>
+
+                {/* Radio Input 2: Salin Shift */}
+                <label
+                  className="tab_label relative z-30 h-[28px] flex items-center justify-center text-[11px] sm:text-xs font-bold transition-colors cursor-pointer text-center px-1"
                   style={{
                     color: activeTab === 'schedule' ? currentStyle.tabTextActive : currentStyle.tabTextInactive,
                     fontFamily: isWinamp ? 'monospace' : 'inherit',
@@ -603,12 +700,12 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                       setErrorMsg(null);
                     }}
                   />
-                  Salin Shift
+                  Teks Shift
                 </label>
 
-                {/* Radio Input 2: Salin Presensi */}
+                {/* Radio Input 3: Salin Presensi */}
                 <label
-                  className="tab_label relative z-30 h-[28px] flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                  className="tab_label relative z-30 h-[28px] flex items-center justify-center text-[11px] sm:text-xs font-bold transition-colors cursor-pointer text-center px-1"
                   style={{
                     color: activeTab === 'absen' ? currentStyle.tabTextActive : currentStyle.tabTextInactive,
                     fontFamily: isWinamp ? 'monospace' : 'inherit',
@@ -625,15 +722,20 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                       setErrorMsg(null);
                     }}
                   />
-                  Salin Presensi
+                  Teks Presensi
                 </label>
 
                 {/* Sliding Indicator Pill */}
                 <div
                   className="indicator absolute top-[2px] z-10 h-[28px] transition-all duration-200 ease-out pointer-events-none"
                   style={{
-                    left: activeTab === 'schedule' ? '2px' : 'calc(50%)',
-                    width: 'calc(50% - 2px)',
+                    left:
+                      activeTab === 'excel_grid'
+                        ? '2px'
+                        : activeTab === 'schedule'
+                        ? 'calc(33.333% + 1px)'
+                        : 'calc(66.666%)',
+                    width: 'calc(33.333% - 2px)',
                     backgroundColor: currentStyle.tabIndicatorBg,
                     borderRadius: currentStyle.tabIndicatorRadius,
                     border: currentStyle.tabIndicatorBorder || 'none',
@@ -675,13 +777,27 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                     >
                       <Sparkles className="w-3.5 h-3.5 shrink-0" />
                       <span className="font-bold">
-                        {activeTab === 'schedule'
-                          ? 'Petunjuk Salin Jadwal Shift dari Excel:'
+                        {activeTab === 'excel_grid'
+                          ? 'Petunjuk Paste dari Excel (Spreadsheet Interaktif):'
+                          : activeTab === 'schedule'
+                          ? 'Petunjuk Salin Jadwal Shift dari Excel (Teks Baris):'
                           : 'Petunjuk Salin Absen Masuk & Pulang (Smart Auto-Detect):'}
                       </span>
                     </div>
 
-                    {activeTab === 'schedule' ? (
+                    {activeTab === 'excel_grid' ? (
+                      <div className="space-y-1.5 leading-relaxed" style={{ color: currentStyle.textColor }}>
+                        <p className="opacity-95">
+                          <strong className="font-bold">1.</strong> Buka file Microsoft Excel atau Google Sheets Anda, lalu sorot area sel jadwal (1 baris atau 1 kolom) dan tekan <kbd className="px-1 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono font-bold">Ctrl + C</kbd>.
+                        </p>
+                        <p className="opacity-95">
+                          <strong className="font-bold">2.</strong> Klik pada area tabel spreadsheet di bawah lalu tekan <kbd className="px-1 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono font-bold">Ctrl + V</kbd>. Warna background, warna teks, dan border dari Excel akan otomatis tersalin.
+                        </p>
+                        <p className="opacity-95">
+                          <strong className="font-bold">3.</strong> Sistem akan <strong>otomatis memindai & mendeteksi kode shift</strong> untuk tanggal 1 s.d. {daysInMonth} pada bulan aktif.
+                        </p>
+                      </div>
+                    ) : activeTab === 'schedule' ? (
                       <div className="space-y-1.5 leading-relaxed" style={{ color: currentStyle.textColor }}>
                         <p className="opacity-95">
                           <strong className="font-bold">1.</strong> Buka file Excel, sorot <strong>1 baris horizontal</strong> berisi kode shift tanggal 1 s.d. {daysInMonth}, lalu tekan <strong>Ctrl + C</strong>.
@@ -719,58 +835,75 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                 </motion.div>
               )}
 
-              {/* Debossed Inset Area for Paste Input */}
-              <div className="space-y-1 flex flex-col shrink-0">
-                <label style={{ color: currentStyle.subtextColor }} className="text-[10px] font-bold uppercase tracking-wider block">
-                  {activeTab === 'schedule' ? 'Kotak Tempel Teks Shift (Ctrl + V):' : 'Kotak Tempel Teks Absen / Laporan Kehadiran (Ctrl + V):'}
-                </label>
-
-                <div
-                  style={{
-                    backgroundColor: currentStyle.fieldBg,
-                    border: currentStyle.fieldBorder,
-                    boxShadow: currentStyle.fieldShadow,
-                    borderRadius: isWinamp ? '0px' : '10px',
-                  }}
-                  className="p-2 sm:p-2.5 flex items-start gap-2 transition-all duration-200"
-                >
-                  {activeTab === 'schedule' ? (
-                    <textarea
-                      id="excel-paste-area"
-                      ref={textareaRef}
-                      rows={3}
-                      value={inputText}
-                      onChange={(e) => {
-                        setInputText(e.target.value);
-                        setErrorMsg(null);
-                      }}
-                      placeholder="Klik di sini lalu tekan Ctrl+V (Contoh: G	L	N	OFF	SM	PM	M	CUTI ...)"
-                      className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
-                      style={{
-                        color: currentStyle.textColor,
-                        caretColor: currentStyle.accentColor,
-                      }}
-                    />
-                  ) : (
-                    <textarea
-                      id="excel-paste-absen-area"
-                      ref={textareaAbsenRef}
-                      rows={3}
-                      value={inputTextAbsen}
-                      onChange={(e) => {
-                        setInputTextAbsen(e.target.value);
-                        setErrorMsg(null);
-                      }}
-                      placeholder="Klik di sini lalu tekan Ctrl+V (Tempelkan data kotor / laporan log jam kerja contoh:&#10;01 Sep 2026  WFO  12.46 WIB  22.31 WIB  TL3&#10;02 Sep 2026  WFO  07.57 WIB  18.43 WIB  Hadir Normal ...)"
-                      className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
-                      style={{
-                        color: currentStyle.textColor,
-                        caretColor: currentStyle.accentColor,
-                      }}
-                    />
-                  )}
+              {/* TAB 1 CONTENT: EXCEL SPREADSHEET (Copy-Paste Format Excel with react-spreadsheet) */}
+              {activeTab === 'excel_grid' && (
+                <div className="w-full">
+                  <ExcelSpreadsheet
+                    selectedYear={selectedYear}
+                    selectedMonth={selectedMonth}
+                    daysInMonth={daysInMonth}
+                    theme={theme}
+                    onParsedShiftsChange={handleSpreadsheetParsed}
+                  />
                 </div>
-              </div>
+              )}
+
+              {/* TAB 2 & 3 CONTENT: Debossed Inset Area for Paste Text Input */}
+              {activeTab !== 'excel_grid' && (
+                <div className="space-y-1 flex flex-col shrink-0">
+                  <label style={{ color: currentStyle.subtextColor }} className="text-[10px] font-bold uppercase tracking-wider block">
+                    {activeTab === 'schedule'
+                      ? 'Kotak Tempel Teks Shift (Ctrl + V):'
+                      : 'Kotak Tempel Teks Absen / Laporan Kehadiran (Ctrl + V):'}
+                  </label>
+
+                  <div
+                    style={{
+                      backgroundColor: currentStyle.fieldBg,
+                      border: currentStyle.fieldBorder,
+                      boxShadow: currentStyle.fieldShadow,
+                      borderRadius: isWinamp ? '0px' : '10px',
+                    }}
+                    className="p-2 sm:p-2.5 flex items-start gap-2 transition-all duration-200"
+                  >
+                    {activeTab === 'schedule' ? (
+                      <textarea
+                        id="excel-paste-area"
+                        ref={textareaRef}
+                        rows={3}
+                        value={inputText}
+                        onChange={(e) => {
+                          setInputText(e.target.value);
+                          setErrorMsg(null);
+                        }}
+                        placeholder="Klik di sini lalu tekan Ctrl+V (Contoh: G	L	N	OFF	SM	PM	M	CUTI ...)"
+                        className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
+                        style={{
+                          color: currentStyle.textColor,
+                          caretColor: currentStyle.accentColor,
+                        }}
+                      />
+                    ) : (
+                      <textarea
+                        id="excel-paste-absen-area"
+                        ref={textareaAbsenRef}
+                        rows={3}
+                        value={inputTextAbsen}
+                        onChange={(e) => {
+                          setInputTextAbsen(e.target.value);
+                          setErrorMsg(null);
+                        }}
+                        placeholder="Klik di sini lalu tekan Ctrl+V (Tempelkan data kotor / laporan log jam kerja contoh:&#10;01 Sep 2026  WFO  12.46 WIB  22.31 WIB  TL3&#10;02 Sep 2026  WFO  07.57 WIB  18.43 WIB  Hadir Normal ...)"
+                        className="w-full bg-transparent border-none outline-none font-mono text-xs leading-relaxed resize-none p-1 placeholder:opacity-50"
+                        style={{
+                          color: currentStyle.textColor,
+                          caretColor: currentStyle.accentColor,
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Error Message */}
               {errorMsg && (
@@ -780,7 +913,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                 </div>
               )}
 
-              {/* Live Preview Grid of Parsed Days */}
+              {/* Live Preview Grid of Parsed Days (Schedule Tab) */}
               {activeTab === 'schedule' && inputText.trim().length > 0 && (
                 <div className="space-y-1.5 flex flex-col min-h-0 shrink-0">
                   <div className="flex items-center justify-between text-xs font-bold px-0.5">
@@ -944,33 +1077,42 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
                 Batal
               </button>
 
-              <button
-                type="button"
-                onClick={handleApply}
-                disabled={activeTab === 'schedule' ? validCountSchedule === 0 : validCountAbsen === 0}
-                style={{
-                  color: (activeTab === 'schedule' ? validCountSchedule > 0 : validCountAbsen > 0) ? currentStyle.btnApplyText : 'currentColor',
-                  backgroundColor: (activeTab === 'schedule' ? validCountSchedule > 0 : validCountAbsen > 0) ? currentStyle.btnApplyBg : 'transparent',
-                  borderColor: currentStyle.accentColor,
-                  borderRadius: isWinamp ? '0px' : '10px',
-                  boxShadow:
-                    (activeTab === 'schedule' ? validCountSchedule > 0 : validCountAbsen > 0)
-                      ? isLightMode
-                        ? `0 4px 12px ${currentStyle.accentColor}40`
-                        : `0 0 15px ${currentStyle.accentColor}55`
-                      : 'none',
-                }}
-                className={`flex items-center justify-center space-x-1.5 px-5 py-2 text-xs font-black transition-all duration-300 cursor-pointer border ${
-                  (activeTab === 'schedule' ? validCountSchedule > 0 : validCountAbsen > 0)
-                    ? 'hover:brightness-105 active:scale-[0.98]'
-                    : 'opacity-40 cursor-not-allowed border-current'
-                }`}
-              >
-                <Check className="w-4 h-4" />
-                <span>
-                  Terapkan ({activeTab === 'schedule' ? validCountSchedule : validCountAbsen} Hari)
-                </span>
-              </button>
+              {(() => {
+                const currentValidCount =
+                  activeTab === 'excel_grid'
+                    ? spreadsheetValidCount
+                    : activeTab === 'schedule'
+                    ? validCountSchedule
+                    : validCountAbsen;
+                const isReady = currentValidCount > 0;
+
+                return (
+                  <button
+                    type="button"
+                    onClick={handleApply}
+                    disabled={!isReady}
+                    style={{
+                      color: isReady ? currentStyle.btnApplyText : 'currentColor',
+                      backgroundColor: isReady ? currentStyle.btnApplyBg : 'transparent',
+                      borderColor: currentStyle.accentColor,
+                      borderRadius: isWinamp ? '0px' : '10px',
+                      boxShadow: isReady
+                        ? isLightMode
+                          ? `0 4px 12px ${currentStyle.accentColor}40`
+                          : `0 0 15px ${currentStyle.accentColor}55`
+                        : 'none',
+                    }}
+                    className={`flex items-center justify-center space-x-1.5 px-5 py-2 text-xs font-black transition-all duration-300 cursor-pointer border ${
+                      isReady
+                        ? 'hover:brightness-105 active:scale-[0.98]'
+                        : 'opacity-40 cursor-not-allowed border-current'
+                    }`}
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Terapkan ({currentValidCount} Hari)</span>
+                  </button>
+                );
+              })()}
             </div>
           </div>
         </motion.div>

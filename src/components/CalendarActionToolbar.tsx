@@ -102,7 +102,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
             <div className="grid grid-cols-4 gap-1 sm:gap-1.5">
                 {/* 1. Tempel / Salin */}
                 <Tooltip
-                    content={<span><strong>Salin Jadwal</strong> dan Presensi</span>}
+                    content={<span><strong>Salin Jadwal</strong> (Paste dari Excel & Presensi)</span>}
                     placement="bottom"
                     containerClassName="w-full"
                 >
