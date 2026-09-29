@@ -1,14 +1,19 @@
 import React, { useRef, useState } from 'react';
-import { ShiftVisualStyle, PresetPatternType } from '../../types';
+import { ShiftVisualStyle, PresetPatternType, AppTheme } from '../../types';
 import { BADGE_PATTERNS, isCustomPatternImage, parseCssPatternToStyle } from './patterns';
 import { Upload, Trash2, Layers, Check, Code2, ExternalLink } from 'lucide-react';
 
 interface ShiftPatternStudioProps {
     visual: ShiftVisualStyle;
     onChange: (visual: ShiftVisualStyle) => void;
+    theme?: AppTheme;
 }
 
-export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, onChange }) => {
+export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, onChange, theme = 'default' }) => {
+    const isIndustrial = theme === 'industrial';
+    const isPaperSketch = theme === 'paperSketch';
+    const isEditorial = theme === 'editorial';
+    const isTechnical = theme === 'technical';
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isCssInputOpen, setIsCssInputOpen] = useState(false);
     const [cssPatternInput, setCssPatternInput] = useState(
@@ -132,11 +137,23 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
     };
 
     return (
-        <div className="p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 space-y-2 font-sans shadow-2xs w-full min-w-0 lg:h-full lg:min-h-[445px] flex flex-col justify-between">
+        <div className={`p-2.5 sm:p-3 space-y-2.5 shadow-2xs w-full min-w-0 lg:h-full lg:min-h-[445px] flex flex-col justify-between border ${
+            isIndustrial
+                ? 'bg-[#0F1115] text-[#E2E8F0] border-[rgba(226,232,240,0.15)] rounded-xl font-[\'JetBrains_Mono\']'
+                : isPaperSketch
+                ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] rounded-2xl font-[\'Gaegu\'] text-base shadow-[4px_4px_0px_#2b2b2b]'
+                : isEditorial
+                ? 'bg-[#FCFBF9] text-[#1a1a1a] border-[#1a1a1a]/25 rounded-xl font-serif shadow-xs'
+                : isTechnical
+                ? 'bg-[#F8F7F4] dark:bg-[#0D1117] text-[#111113] dark:text-[#E6EDF3] border-slate-300 dark:border-slate-800 rounded-lg font-mono'
+                : 'bg-white dark:bg-[#161616] text-slate-800 dark:text-zinc-100 border-slate-200/80 dark:border-zinc-800 rounded-2xl'
+        }`}>
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                    <Layers className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                    <Layers className={`w-4 h-4 shrink-0 ${
+                        isIndustrial ? 'text-[#2DD4BF]' : isPaperSketch ? 'text-[#ff4747]' : 'text-teal-600 dark:text-teal-400'
+                    }`} />
                     <span className="text-xs sm:text-[13px] font-black">Katalog Motif Pola (Hero Patterns by Steve Schoger):</span>
                 </div>
             </div>
@@ -147,7 +164,17 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                     Pilih Motif Pola (30 Koleksi Grid):
                 </span>
 
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-1.5 max-h-36 sm:max-h-40 lg:max-h-[195px] lg:h-[185px] overflow-y-auto p-1 border border-slate-200/80 dark:border-zinc-800/80 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 custom-scrollbar flex-1">
+                <div className={`grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-1.5 max-h-36 sm:max-h-40 lg:max-h-[195px] lg:h-[185px] overflow-y-auto p-1 border rounded-xl custom-scrollbar flex-1 ${
+                    isIndustrial
+                        ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
+                        : isPaperSketch
+                        ? 'bg-[#f2efeb] border-2 border-[#2b2b2b]'
+                        : isEditorial
+                        ? 'bg-[#F2EFE9] border-[#1a1a1a]/20'
+                        : isTechnical
+                        ? 'bg-slate-200/60 dark:bg-[#161B22] border-slate-300 dark:border-slate-800'
+                        : 'bg-slate-50/50 dark:bg-zinc-900/50 border-slate-200/80 dark:border-zinc-800/80'
+                }`}>
                     {BADGE_PATTERNS.map((pattern, idx) => {
                         const isSelected = (visual.patternType || 'none') === pattern.id && !visual.customPatternUrl;
                         return (
@@ -163,14 +190,36 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                 }}
                                 className={`p-1 rounded-lg border flex flex-col items-center justify-between text-center transition-all cursor-pointer relative group min-w-0 h-[50px] sm:h-[56px] shrink-0 ${
                                     isSelected
-                                        ? 'border-2 border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-extrabold shadow-xs scale-[1.01]'
+                                        ? isIndustrial
+                                            ? 'border-2 border-[#2DD4BF] bg-[#2DD4BF]/20 text-[#2DD4BF] font-extrabold'
+                                            : isPaperSketch
+                                            ? 'border-2 border-[#2b2b2b] bg-[#ff4747] text-white font-extrabold shadow-[2px_2px_0px_#2b2b2b]'
+                                            : isEditorial
+                                            ? 'border-2 border-[#2A7373] bg-[#2A7373]/15 text-[#2A7373] font-extrabold'
+                                            : isTechnical
+                                            ? 'border-2 border-[#0D9488] bg-[#0D9488]/15 text-[#0D9488] dark:text-teal-300 font-extrabold'
+                                            : 'border-2 border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-extrabold shadow-xs scale-[1.01]'
+                                        : isIndustrial
+                                        ? 'border-[rgba(226,232,240,0.12)] bg-[#0F1115] hover:bg-[#252B36] text-[#E2E8F0]'
+                                        : isPaperSketch
+                                        ? 'border-2 border-[#2b2b2b] bg-[#fdfcf0] hover:bg-[#2ec4b6]/20 text-[#2b2b2b]'
+                                        : isEditorial
+                                        ? 'border-[#1a1a1a]/20 bg-[#FCFBF9] hover:bg-[#1a1a1a]/5 text-[#1a1a1a]'
+                                        : isTechnical
+                                        ? 'border-slate-300 dark:border-slate-800 bg-[#F8F7F4] dark:bg-[#0D1117] hover:bg-slate-200 dark:hover:bg-slate-800 text-[#111113] dark:text-[#E6EDF3]'
                                         : 'border-slate-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-800/60 hover:bg-slate-100 dark:hover:bg-zinc-700/80 text-slate-700 dark:text-zinc-300'
                                 }`}
                                 title={pattern.name}
                             >
                                 {/* Checkmark indicator on active tile */}
                                 {isSelected && (
-                                    <div className="absolute top-0.5 right-0.5 z-10 w-3.5 h-3.5 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-xs">
+                                    <div className={`absolute top-0.5 right-0.5 z-10 w-3.5 h-3.5 rounded-full flex items-center justify-center shadow-xs ${
+                                        isIndustrial
+                                            ? 'bg-[#2DD4BF] text-[#0F1115]'
+                                            : isPaperSketch
+                                            ? 'bg-[#2b2b2b] text-white'
+                                            : 'bg-teal-500 text-white'
+                                    }`}>
                                         <Check className="w-2 h-2 stroke-[3]" />
                                     </div>
                                 )}
@@ -181,7 +230,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                 </div>
 
                                 {/* Short Name Label Underneath */}
-                                <span className="text-[9px] sm:text-[9.5px] font-bold truncate w-full mt-1 leading-tight text-slate-700 dark:text-zinc-300">
+                                <span className="text-[9px] sm:text-[9.5px] font-bold truncate w-full mt-1 leading-tight text-current">
                                     {pattern.shortName || pattern.name}
                                 </span>
                             </button>
@@ -191,12 +240,18 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
             </div>
 
             {/* Dynamic Sliders Section: Opasitas, Skala/Kepadatan & Ketebalan Motif */}
-            <div className="space-y-2 pt-2 border-t border-slate-200/60 dark:border-zinc-800/80">
+            <div className="space-y-2 pt-2 border-t border-current/15">
                 {/* Row 1: Opasitas & Skala/Kepadatan Sliders */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
                     {/* Slider 1: Opasitas Motif */}
                     <div
-                        className="space-y-1 p-1.5 sm:p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 shadow-3xs"
+                        className={`space-y-1 p-1.5 sm:p-2 rounded-xl border shadow-3xs ${
+                            isIndustrial
+                                ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
+                                : isPaperSketch
+                                ? 'bg-[#f2efeb] border-2 border-[#2b2b2b]'
+                                : 'bg-slate-50 dark:bg-zinc-800/50 border-slate-200/60 dark:border-zinc-800'
+                        }`}
                         title="Hover & Scroll mouse untuk mengubah opasitas motif"
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}

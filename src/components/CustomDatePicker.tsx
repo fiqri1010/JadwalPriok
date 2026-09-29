@@ -144,11 +144,14 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   }, [isOpen, updateCoords]);
 
   const isWinamp = theme === 'winamp';
-  const isDarkFluid = theme === 'darkFluid';
   const isDark = theme === 'dark';
   const isVista = theme === 'vista';
   const isPaperSketch = theme === 'paperSketch';
   const isDefault = theme === 'default';
+  const isIndustrial = theme === 'industrial';
+  const isTechnical = theme === 'technical';
+  const isEditorial = theme === 'editorial';
+  const isDashboard = theme === 'dashboard';
 
   // Format display text
   const formattedDisplay = useMemo(() => {
@@ -233,18 +236,18 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         btnQuick: 'bg-[#1a1e22] text-[#00FF00] border border-[#00FF00]/30 hover:bg-[#00FF00]/20',
       };
     }
-    if (isDarkFluid) {
+    if (isIndustrial) {
       return {
-        inputWrapper: 'bg-[#2B2930] text-[#E6E0E9] border border-white/10 hover:border-[#D0BCFF]/50 focus-within:border-[#D0BCFF] focus-within:ring-2 focus-within:ring-[#D0BCFF]/20',
-        dropdown: 'bg-[#1D1B20] text-[#E6E0E9] border border-white/10 shadow-2xl backdrop-blur-md',
-        header: 'bg-[#2B2930]/80 border-b border-white/10 text-[#E6E0E9]',
-        daySelected: 'bg-[#D0BCFF] text-[#381E72] font-black shadow-md',
-        dayToday: 'border border-[#D0BCFF] text-[#D0BCFF] font-bold',
-        dayNormal: 'text-[#E6E0E9] hover:bg-white/10',
-        dayOther: 'text-white/20 hover:bg-white/5',
-        btnNav: 'hover:bg-white/10 text-white/80 hover:text-white border border-white/10',
-        btnToday: 'bg-[#D0BCFF] text-[#381E72] font-bold hover:bg-[#E8DEF8]',
-        btnQuick: 'bg-white/5 text-[#E6E0E9] border border-white/10 hover:bg-white/10',
+        inputWrapper: 'bg-[#1A1D23] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] hover:border-[#2DD4BF]/50 focus-within:border-[#2DD4BF] focus-within:ring-2 focus-within:ring-[#2DD4BF]/20 font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+        dropdown: 'bg-[#1A1D23] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] shadow-2xl rounded-[6px] font-[\'JetBrains_Mono\']',
+        header: 'bg-[#0F1115] border-b border-[rgba(226,232,240,0.1)] text-[#E2E8F0] font-[\'Syne\']',
+        daySelected: 'bg-[#2DD4BF] text-[#0F1115] font-black shadow-md rounded-[4px]',
+        dayToday: 'border border-[#2DD4BF] text-[#2DD4BF] font-bold rounded-[4px]',
+        dayNormal: 'text-[#E2E8F0] hover:bg-white/10 rounded-[4px]',
+        dayOther: 'text-[#E2E8F0]/30 hover:bg-white/5 rounded-[4px]',
+        btnNav: 'hover:bg-white/10 text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-[4px]',
+        btnToday: 'bg-[#2DD4BF] text-[#0F1115] font-bold hover:bg-[#26b8a8] rounded-[4px]',
+        btnQuick: 'bg-[#0F1115] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] hover:bg-white/10 rounded-[4px]',
       };
     }
     if (isDark) {

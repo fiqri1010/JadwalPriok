@@ -259,25 +259,128 @@ export const DayCell = React.memo<DayCellProps>(({
     const lemburInfo = calculateDayLembur(data, nextDayData, isWeekendOrHoliday);
 
     const isWinamp = theme === 'winamp';
-    const isDarkFluid = theme === 'darkFluid';
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
     const isPaperSketch = theme === 'paperSketch';
+    const isTechnical = theme === 'technical';
+    const isEditorial = theme === 'editorial';
+    const isIndustrial = theme === 'industrial';
+    const isDashboard = theme === 'dashboard';
 
     const normalizedShift = normalizeShift(data?.shift || '');
     const shiftColor = SHIFT_COLORS[normalizedShift] || SHIFT_COLORS[''];
     const ShiftIcon = getShiftIcon(normalizedShift);
 
+    const getTechnicalShiftClass = (shift: string) => {
+        switch (shift.toUpperCase()) {
+            case 'SM':
+            case 'PM':
+            case 'MALAM':
+                return 'bg-[#0D9488] text-white border border-[#111113]';
+            case 'TPSL':
+                return 'bg-[#E29578] text-white border border-[#111113]';
+            case 'OFF':
+                return 'bg-[#BE1A1A] text-white border border-[#111113]';
+            case 'NPCT':
+                return 'bg-[#FFDDD2] text-[#111113] border border-[#111113]';
+            case 'GRAHA':
+                return 'bg-[#EDF6F9] text-[#111113] border border-[#111113]';
+            case 'CUTI':
+                return 'bg-[#111113] text-[#F8F7F4] border border-[#111113]';
+            default:
+                return 'bg-[#F8F7F4] text-[#111113] border border-[#111113]';
+        }
+    };
+
+    const getEditorialShiftClass = (shift: string) => {
+        switch (shift.toUpperCase()) {
+            case 'SM':
+            case 'PM':
+            case 'MALAM':
+                return 'bg-[#2a7373]/10 text-[#2a7373] border border-[#2a7373]/30';
+            case 'TPSL':
+                return 'bg-[#1a1a1a]/[0.05] text-[#1a1a1a] border border-[#1a1a1a]/15';
+            case 'OFF':
+                return 'bg-[#cc3333]/10 text-[#cc3333] border border-[#cc3333]/25';
+            case 'NPCT':
+                return 'bg-[#1a1a1a]/[0.05] text-[#1a1a1a] border border-[#1a1a1a]/15';
+            case 'GRAHA':
+                return 'bg-[#2a7373]/[0.08] text-[#2a7373] border border-[#2a7373]/20';
+            case 'CUTI':
+                return 'bg-[#1a1a1a]/10 text-[#1a1a1a] border border-[#1a1a1a]/25';
+            default:
+                return 'bg-[#1a1a1a]/[0.03] text-[#1a1a1a] border border-[#1a1a1a]/10';
+        }
+    };
+
+    const getIndustrialShiftClass = (shift: string) => {
+        switch (shift.toUpperCase()) {
+            case 'SM':
+                return 'bg-[#83C5BE] text-[#0B0909] border border-[#83C5BE]';
+            case 'PM':
+            case 'MALAM':
+                return 'bg-[#2DD4BF] text-[#0B0909] border border-[#2DD4BF]';
+            case 'TPSL':
+                return 'bg-[#E29578] text-white border border-[#E29578]';
+            case 'OFF':
+                return 'bg-[#BE1A1A] text-white border border-[#BE1A1A]';
+            case 'NPCT':
+                return 'bg-[#FFDDD2] text-[#011627] border border-[#FFDDD2]';
+            case 'GRAHA':
+                return 'bg-[#EDF6F9] text-[#011627] border border-[#EDF6F9]';
+            case 'CUTI':
+                return 'bg-[#1A1D23] text-[#E2E8F0] border border-[rgba(226,232,240,0.2)]';
+            default:
+                return 'bg-[rgba(226,232,240,0.1)] text-[#E2E8F0] border border-[rgba(226,232,240,0.1)]';
+        }
+    };
+
+    const getDashboardShiftClass = (shift: string) => {
+        switch (shift.toUpperCase()) {
+            case 'SM':
+                return 'bg-[#83C5BE] text-[#011627]';
+            case 'PM':
+            case 'MALAM':
+                return 'bg-[#297373] text-white';
+            case 'TPSL':
+                return 'bg-[#E29578] text-white';
+            case 'OFF':
+                return 'bg-[#BE1A1A] text-white';
+            case 'NPCT':
+                return 'bg-[#FFDDD2] text-[#011627]';
+            case 'GRAHA':
+                return 'bg-[#EDF6F9] text-[#011627] border border-[#83C5BE]';
+            case 'CUTI':
+                return 'bg-[#011627] text-white';
+            default:
+                return 'bg-[#F6F7F8] text-[#011627] border border-[rgba(1,22,39,0.08)]';
+        }
+    };
+
     const dateNumberColor = isHoliday || isWeekend
         ? isPaperSketch
             ? 'text-[#ff4747] font-[\'Gochi_Hand\'] font-bold text-base sm:text-lg'
+            : isTechnical
+            ? 'text-[#BE1A1A] font-[\'JetBrains_Mono\'] font-bold'
+            : isEditorial
+            ? 'text-[#cc3333] font-[\'Geist_Mono\'] font-semibold'
+            : isIndustrial
+            ? 'text-[#BE1A1A] font-[\'JetBrains_Mono\'] font-bold'
+            : isDashboard
+            ? 'text-[#FF3366] font-[\'Inter\'] font-bold'
             : 'text-rose-500 font-black'
         : isPaperSketch
         ? 'text-[#2b2b2b] font-[\'Gochi_Hand\'] font-bold text-base sm:text-lg'
+        : isTechnical
+        ? 'text-[#111113] font-[\'JetBrains_Mono\'] font-bold'
+        : isEditorial
+        ? 'text-[#1a1a1a] font-[\'Geist_Mono\'] font-medium'
+        : isIndustrial
+        ? 'text-[#E2E8F0] font-[\'JetBrains_Mono\'] font-bold'
+        : isDashboard
+        ? 'text-[#011627] font-[\'Inter\'] font-bold'
         : isWinamp
         ? 'text-[#00FF00] font-black'
-        : isDarkFluid
-        ? 'text-[#E6E0E9] font-black'
         : isDark
         ? 'text-white font-black'
         : 'text-slate-800 font-black';
@@ -292,39 +395,51 @@ export const DayCell = React.memo<DayCellProps>(({
     const formattedDayLabel = `${INDONESIAN_DAY_NAMES[dayOfWeek]}, ${dayNumber} ${INDONESIAN_MONTH_SHORT[month - 1]}`;
 
     // Helper to render attendance times (jamMasuk / jamPulang / absenCeisa) in Bell Centennial Address font right under shift
-    const renderAttendanceTimeBadge = () => {
+    const renderAttendanceTimeBadge = (customContainerClass?: string) => {
         const hasMasuk = Boolean(data?.jamMasuk);
         const hasPulang = Boolean(data?.jamPulang);
         const hasCeisa = Boolean(data?.absenCeisa);
 
         if (!hasMasuk && !hasPulang && !hasCeisa) return null;
 
-        let timeText = '';
-        if (hasMasuk && hasPulang) {
-            timeText = `${data.jamMasuk}-${data.jamPulang}`;
-        } else if (hasMasuk) {
-            timeText = `M:${data.jamMasuk}`;
-        } else if (hasPulang) {
-            timeText = `P:${data.jamPulang}`;
-        } else if (hasCeisa) {
-            timeText = `C:${data.absenCeisa}`;
-        }
+        const tooltipTitle = hasMasuk && hasPulang
+            ? `Jam Kerja: ${data.jamMasuk} s/d ${data.jamPulang}`
+            : hasMasuk
+            ? `Jam Masuk: ${data.jamMasuk}`
+            : hasPulang
+            ? `Jam Pulang: ${data.jamPulang}`
+            : `Absen CEISA: ${data.absenCeisa}`;
 
         return (
-            <div className="w-full mt-0.5 flex flex-col items-center justify-center pointer-events-none shrink-0">
+            <div className={`w-full mt-0.5 flex flex-col items-center justify-center pointer-events-none shrink-0 ${customContainerClass || ''}`}>
                 <span
-                    className={`inline-flex items-center justify-center font-bell-address font-bold text-[7.2px] sm:text-[7.6px] lg:text-[8px] leading-tight px-1 py-[0.5px] rounded-[3px] border tracking-tight truncate max-w-full ${
+                    className={`inline-flex items-center justify-center font-bell-address font-bold tracking-tight rounded-[3px] sm:rounded-[4px] border leading-tight max-w-full truncate transition-all duration-150 ${
+                        // Autoscale typography: adapts automatically as date card width expands from mobile to desktop
+                        'text-[6.8px] min-[360px]:text-[7.5px] min-[400px]:text-[8px] sm:text-[8.5px] md:text-[9.5px] lg:text-[10px] xl:text-[10.5px] 2xl:text-[11px] px-1 min-[360px]:px-1.5 md:px-2 py-[0.5px] md:py-[1px]'
+                    } ${
                         isWinamp
                             ? 'bg-black text-[#00FF00] border-zinc-800 shadow-[0_0_5px_rgba(0,255,0,0.3)]'
-                            : isDark || isDarkFluid
+                            : isDark
                             ? 'bg-black/75 text-teal-300 border-teal-500/40 shadow-xs'
                             : isVista
                             ? 'bg-white/95 text-sky-950 border-sky-300/90 shadow-2xs'
                             : 'bg-white/95 text-teal-950 border-teal-300/80 shadow-2xs'
                     }`}
-                    title={`Jam Absen: ${timeText}`}
+                    title={tooltipTitle}
                 >
-                    {timeText}
+                    {hasMasuk && hasPulang ? (
+                        <span className="flex items-center justify-center gap-0.5 sm:gap-1">
+                            <span>{data.jamMasuk}</span>
+                            <span className="opacity-50 text-[6.5px] min-[360px]:text-[7px] sm:text-[7.5px] md:text-[8.5px] leading-none">-</span>
+                            <span>{data.jamPulang}</span>
+                        </span>
+                    ) : hasMasuk ? (
+                        <span>M:{data.jamMasuk}</span>
+                    ) : hasPulang ? (
+                        <span>P:{data.jamPulang}</span>
+                    ) : (
+                        <span>C:{data.absenCeisa}</span>
+                    )}
                 </span>
             </div>
         );
@@ -357,66 +472,6 @@ export const DayCell = React.memo<DayCellProps>(({
         };
     }, [isExpandedDesktop, onCloseExpandDesktop]);
 
-    // Standard card styling with theme-based gradients and borders
-    const getCardStyle = (elevated: boolean = false): React.CSSProperties => {
-        if (isPaperSketch) {
-            return {
-                borderRadius: '4px 12px 6px 15px / 12px 4px 15px 6px',
-                backgroundColor: '#ffffff',
-                border: elevated ? '3px solid #ff4747' : isToday ? '2.5px solid #ff4747' : '2.5px solid #2b2b2b',
-                boxShadow: elevated
-                    ? '6px 6px 0px #2b2b2b'
-                    : '3px 3px 0px #2b2b2b',
-            };
-        }
-        if (isWinamp) {
-            return {
-                borderRadius: '0px',
-                background: '#191919',
-                boxShadow: elevated
-                    ? 'inset 2px 2px 0 #2a2a2a, inset -2px -2px 0 #000000, 8px 8px 0px #000000'
-                    : 'inset 3px 3px 0 #000000, inset -2px -2px 0 #2a2a2a',
-                border: elevated ? '2px solid #00FF00' : '1.5px solid #333333',
-            };
-        }
-        if (isDark || isDarkFluid) {
-            return {
-                borderRadius: '8px',
-                backgroundColor: 'rgba(36, 40, 50, 1)',
-                backgroundImage:
-                    'linear-gradient(139deg, rgba(36, 40, 50, 1) 0%, rgba(36, 40, 50, 1) 40%, rgba(37, 28, 40, 1) 100%)',
-                border: elevated ? '1px solid rgba(255, 255, 255, 0.25)' : '1px solid #42434a',
-                boxShadow: elevated
-                    ? '0 25px 50px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08)'
-                    : '0 4px 18px -2px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-            };
-        }
-        if (isVista) {
-            return {
-                borderRadius: '8px',
-                backgroundColor: elevated ? 'rgba(235, 246, 255, 0.94)' : 'rgba(235, 246, 255, 0.78)',
-                backgroundImage: elevated
-                    ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(224, 242, 254, 0.88) 40%, rgba(186, 230, 253, 0.80) 100%)'
-                    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(224, 242, 254, 0.7) 40%, rgba(186, 230, 253, 0.55) 100%)',
-                border: elevated ? '1.5px solid rgba(255, 255, 255, 0.95)' : '1px solid rgba(255, 255, 255, 0.8)',
-                boxShadow: elevated
-                    ? '0 25px 50px -10px rgba(14, 116, 224, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.95)'
-                    : '0 6px 18px -3px rgba(14, 116, 224, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.95), inset 0 0 10px rgba(186, 230, 253, 0.3)',
-                backdropFilter: 'blur(20px) saturate(190%)',
-                WebkitBackdropFilter: 'blur(20px) saturate(190%)',
-            };
-        }
-        // Default light theme: modern flat/clean solid white with clear crisp border & distinctive elevation shadow
-        return {
-            borderRadius: '8px',
-            backgroundColor: '#ffffff',
-            border: elevated ? '1.5px solid #94a3b8' : '1px solid #cbd5e1',
-            boxShadow: elevated
-                ? '0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-                : '0 2px 6px -1px rgba(0, 0, 0, 0.08), 0 1px 4px -1px rgba(0, 0, 0, 0.05)',
-        };
-    };
-
     const isToday = useMemo(() => {
         const now = new Date();
         const curY = now.getFullYear();
@@ -438,11 +493,138 @@ export const DayCell = React.memo<DayCellProps>(({
         return false;
     }, [year, month, dayNumber, dateKey]);
 
+    // Standard card styling with theme-based gradients, borders, and modern layered shadows
+    const getCardStyle = (elevated: boolean = false): React.CSSProperties => {
+        if (isDashboard) {
+            return {
+                borderRadius: '8px',
+                backgroundColor: '#FFFFFF',
+                border: elevated 
+                    ? '1.5px solid #297373' 
+                    : isToday 
+                    ? '1.5px solid #297373' 
+                    : '1px solid rgba(1, 22, 39, 0.08)',
+                boxShadow: elevated
+                    ? '0 10px 25px -5px rgba(41, 115, 115, 0.2)'
+                    : isToday
+                    ? '0 0 10px rgba(41, 115, 115, 0.15)'
+                    : '0 1px 3px rgba(0, 0, 0, 0.02)',
+            };
+        }
+        if (isIndustrial) {
+            return {
+                borderRadius: '6px',
+                backgroundColor: '#0F1115',
+                border: elevated 
+                    ? '1.5px solid #2DD4BF' 
+                    : isToday 
+                    ? '1.5px solid #2DD4BF' 
+                    : '1px solid rgba(226, 232, 240, 0.1)',
+                boxShadow: elevated
+                    ? '0 8px 24px -4px rgba(45, 212, 191, 0.25)'
+                    : isToday
+                    ? '0 0 12px rgba(45, 212, 191, 0.2)'
+                    : 'none',
+            };
+        }
+        if (isEditorial) {
+            return {
+                borderRadius: '0px',
+                backgroundColor: '#fcfbf9',
+                border: elevated 
+                    ? '1.5px solid #2a7373' 
+                    : isToday 
+                    ? '1.5px solid #2a7373' 
+                    : '1px solid rgba(26, 26, 26, 0.08)',
+                boxShadow: elevated
+                    ? '0 10px 25px -5px rgba(42, 115, 115, 0.2)'
+                    : 'none',
+            };
+        }
+        if (isTechnical) {
+            return {
+                borderRadius: '0px',
+                backgroundColor: '#F8F7F4',
+                border: elevated 
+                    ? '2px solid #0D9488' 
+                    : isToday 
+                    ? '2px solid #0D9488' 
+                    : '1px solid #111113',
+                boxShadow: elevated
+                    ? '4px 4px 0px #111113'
+                    : isToday
+                    ? '2px 2px 0px #111113'
+                    : 'none',
+            };
+        }
+        if (isPaperSketch) {
+            return {
+                borderRadius: '3px 8px 4px 10px / 8px 3px 10px 4px',
+                backgroundColor: '#ffffff',
+                border: elevated ? '3px solid #ff4747' : isToday ? '2.5px solid #ff4747' : '2.5px solid #2b2b2b',
+                boxShadow: elevated
+                    ? '6px 6px 0px #2b2b2b'
+                    : '3px 3px 0px #2b2b2b',
+            };
+        }
+        if (isWinamp) {
+            return {
+                borderRadius: '0px',
+                background: '#191919',
+                boxShadow: elevated
+                    ? 'inset 2px 2px 0 #2a2a2a, inset -2px -2px 0 #000000, 8px 8px 0px #000000'
+                    : 'inset 3px 3px 0 #000000, inset -2px -2px 0 #2a2a2a',
+                border: elevated ? '2px solid #00FF00' : '1.5px solid #333333',
+            };
+        }
+        if (isDark) {
+            return {
+                borderRadius: '0.6rem',
+                backgroundColor: 'rgba(36, 40, 50, 1)',
+                backgroundImage: 'linear-gradient(139deg, rgba(36, 40, 50, 1) 0%, rgba(36, 40, 50, 1) 40%, rgba(37, 28, 40, 1) 100%)',
+                border: elevated ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid #42434a',
+                boxShadow: elevated
+                    ? '0 25px 50px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08)'
+                    : 'rgba(0, 0, 0, 0.5) 0px 6px 12px -2px, rgba(0, 0, 0, 0.4) 0px 3px 7px -3px, inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+            };
+        }
+        if (isVista) {
+            return {
+                borderRadius: '0.6rem',
+                backgroundColor: elevated ? 'rgba(235, 246, 255, 0.94)' : 'rgba(235, 246, 255, 0.78)',
+                backgroundImage: elevated
+                    ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(224, 242, 254, 0.88) 40%, rgba(186, 230, 253, 0.80) 100%)'
+                    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(224, 242, 254, 0.7) 40%, rgba(186, 230, 253, 0.55) 100%)',
+                border: elevated ? '1.5px solid rgba(255, 255, 255, 0.95)' : '1px solid rgba(255, 255, 255, 0.85)',
+                boxShadow: elevated
+                    ? '0 25px 50px -10px rgba(14, 116, 224, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.95)'
+                    : 'rgba(14, 116, 224, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.2) 0px 3px 7px -3px, inset 0 1px 1px rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(20px) saturate(190%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(190%)',
+            };
+        }
+        // Default light theme:
+        // - Corner radius reduced 70% (1.5rem -> 0.45rem)
+        // - Subtle shadow on border
+        // - Distinctly visible soft light-gray diagonal gradient (specifically only for default theme)
+        return {
+            borderRadius: '0.45rem',
+            backgroundColor: '#ffffff',
+            backgroundImage: elevated
+                ? 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 40%, #e2e8f0 100%)'
+                : 'linear-gradient(135deg, #ffffff 0%, #f3f4f6 45%, #e5e7eb 100%)',
+            border: elevated ? '1.5px solid #94a3b8' : isToday ? '1.5px solid #6366f1' : '1px solid #cbd5e1',
+            boxShadow: elevated
+                ? '0 0 0 1px rgba(148, 163, 184, 0.35), 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.05), rgba(50, 50, 93, 0.2) 0px 12px 24px -4px'
+                : '0 0 0 1px rgba(148, 163, 184, 0.2), 0 2px 5px -1px rgba(50, 50, 93, 0.12), 0 1px 3px -1px rgba(0, 0, 0, 0.08)',
+        };
+    };
+
     const horizontalPositionClass = isRightEdge ? 'right-0' : 'left-0';
     const verticalPositionClass = isBottomEdge ? 'bottom-0' : 'top-0';
 
-    const beamColorVariant = isWinamp ? 'forest' : isVista ? 'ocean' : (isDark || isDarkFluid) ? 'candy' : 'colorful';
-    const beamTheme = (isDark || isDarkFluid || isWinamp) ? 'dark' : 'light';
+    const beamColorVariant = isWinamp ? 'forest' : isVista ? 'ocean' : isIndustrial ? 'ice' : (isDashboard || isEditorial || isTechnical) ? 'ocean' : isDark ? 'candy' : 'colorful';
+    const beamTheme = (isDark || isWinamp) ? 'dark' : 'light';
 
     const innerCardContent = (
         <div
@@ -472,7 +654,7 @@ export const DayCell = React.memo<DayCellProps>(({
                         ? 'text-[#2b2b2b]'
                         : isWinamp
                         ? 'text-[#00FF00] font-mono'
-                        : isDark || isDarkFluid
+                        : isDark
                         ? 'text-slate-200 hover:border-indigo-400/50'
                         : 'text-slate-900 hover:border-indigo-400/50'
                 }`}
@@ -496,15 +678,15 @@ export const DayCell = React.memo<DayCellProps>(({
                                             className={`inline-flex items-center justify-center shrink-0 ${
                                                 isWinamp
                                                     ? 'text-[#00FF00]'
-                                                    : isDark || isDarkFluid
+                                                    : isDark
                                                     ? 'text-amber-400'
                                                     : isVista
-                                                    ? 'text-sky-700'
-                                                    : 'text-amber-600'
+                                                    ? 'text-amber-400 drop-shadow-xs'
+                                                    : 'text-amber-500 drop-shadow-xs'
                                             }`}
                                             title={lemburInfo.fullText}
                                         >
-                                            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 drop-shadow-xs" />
+                                            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                         </span>
                                     );
                                 }
@@ -557,7 +739,17 @@ export const DayCell = React.memo<DayCellProps>(({
                     <div className="w-full mt-1">
                         {normalizedShift ? (
                             <div
-                                className={`w-full py-0.5 px-0.5 rounded-[4px] text-center font-black border flex items-center justify-center gap-0.5 shadow-2xs overflow-hidden ${shiftColor.bg} ${shiftColor.text} ${shiftColor.border}`}
+                                className={`w-full py-0.5 px-0.5 text-center font-black border flex items-center justify-center gap-0.5 overflow-hidden ${
+                                    isDashboard
+                                        ? `rounded-[4px] font-['JetBrains_Mono'] font-bold ${getDashboardShiftClass(normalizedShift)}`
+                                        : isEditorial
+                                        ? `rounded-none font-['Geist_Mono'] font-medium ${getEditorialShiftClass(normalizedShift)}`
+                                        : isTechnical
+                                        ? `rounded-none font-['JetBrains_Mono'] font-bold ${getTechnicalShiftClass(normalizedShift)}`
+                                        : isIndustrial
+                                        ? `rounded-[4px] font-['JetBrains_Mono'] font-extrabold ${getIndustrialShiftClass(normalizedShift)}`
+                                        : `rounded-[4px] shadow-2xs ${shiftColor.bg} ${shiftColor.text} ${shiftColor.border}`
+                                }`}
                                 title={`Shift: ${normalizedShift}`}
                             >
                                 {ShiftIcon && (
@@ -581,10 +773,14 @@ export const DayCell = React.memo<DayCellProps>(({
                             </div>
                         ) : (
                             <div
-                                className={`w-full py-0.5 text-center text-[11px] sm:text-[12px] font-bold rounded-[4px] border border-dashed flex items-center justify-center ${
-                                    isWinamp
-                                        ? 'border-zinc-700 text-zinc-600 font-mono'
-                                        : 'border-slate-500/30 text-slate-400 dark:text-slate-500'
+                                className={`w-full py-0.5 text-center text-[11px] sm:text-[12px] font-bold border flex items-center justify-center ${
+                                    isEditorial
+                                        ? 'border-[#1a1a1a]/15 text-[#1a1a1a]/30 font-[\'Geist_Mono\'] rounded-none'
+                                        : isTechnical
+                                        ? 'border-[#111113]/30 text-[#111113]/40 font-[\'JetBrains_Mono\'] rounded-none'
+                                        : isWinamp
+                                        ? 'border-zinc-700 text-zinc-600 font-mono rounded-[4px] border-dashed'
+                                        : 'border-slate-500/30 text-slate-400 dark:text-slate-500 rounded-[4px] border-dashed'
                                 }`}
                             >
                                 -
@@ -592,7 +788,8 @@ export const DayCell = React.memo<DayCellProps>(({
                         )}
                     </div>
 
-                    {/* Jam Absen disembunyikan di kartu mobile sesuai permintaan (sudah ada indikator lembur) */}
+                    {/* Jam Masuk Pulang autoscale jika UI kartu tanggal sedikit lebih luas */}
+                    {renderAttendanceTimeBadge('hidden min-[350px]:flex')}
                 </div>
 
                 {/* Bottom area: Catatan disembunyikan pada kartu mobile sesuai permintaan */}
@@ -631,7 +828,7 @@ export const DayCell = React.memo<DayCellProps>(({
                         ? 'text-[#2b2b2b]'
                         : isWinamp
                         ? 'text-[#00FF00] font-mono text-xs'
-                        : isDark || isDarkFluid
+                        : isDark
                         ? 'text-slate-200'
                         : 'text-slate-900'
                 }`}
@@ -647,7 +844,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                     ? 'pb-1.5 border-b-2 border-dashed border-[#2b2b2b]'
                                     : isWinamp
                                     ? 'pb-1.5 border-b border-zinc-800'
-                                    : isDark || isDarkFluid
+                                    : isDark
                                     ? 'pb-1.5 border-b border-white/10'
                                     : isVista
                                     ? 'pb-1.5 border-b border-sky-300/40'
@@ -671,7 +868,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                     className={`text-xs font-bold truncate transition-opacity duration-200 ${
                                         isWinamp
                                             ? 'text-[#00FF00]/80'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'text-slate-300'
                                             : 'text-slate-700'
                                     }`}
@@ -693,7 +890,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                         className={`font-sans text-[9px] lg:text-[10px] font-bold tracking-tight px-1 py-0.5 rounded-[4px] border tabular-nums shrink-0 leading-none cursor-help ${
                                             isWinamp
                                                 ? 'bg-black text-[#00FF00] border-[#00FF00]/80'
-                                                : isDark || isDarkFluid
+                                                : isDark
                                                 ? 'bg-amber-400/10 text-amber-300 border-amber-400/30'
                                                 : isVista
                                                 ? 'bg-sky-100/90 text-sky-950 border-sky-300/80'
@@ -766,7 +963,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                 className={`text-[9px] font-bold uppercase tracking-wider block mb-1 ${
                                     isWinamp
                                         ? 'text-[#00FF00]/70'
-                                        : isDark || isDarkFluid
+                                        : isDark
                                         ? 'text-slate-400'
                                         : isVista
                                     ? 'text-sky-900/80'
@@ -808,7 +1005,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                 className={`w-full py-0.5 border-y text-[8.5px] sm:text-[9.5px] font-semibold transition-colors overflow-hidden ${
                                     isWinamp
                                         ? 'border-zinc-800 text-[#00FF00]/90 font-mono'
-                                        : isDark || isDarkFluid
+                                        : isDark
                                         ? 'border-white/10 text-slate-300'
                                         : isVista
                                         ? 'border-sky-300/50 text-sky-950 font-bold'
@@ -841,7 +1038,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                     <span className={`text-[9px] font-bold uppercase tracking-wider block ${
                                         isWinamp
                                             ? 'text-[#00FF00]/70'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'text-slate-400'
                                             : isVista
                                             ? 'text-sky-900/80'
@@ -856,7 +1053,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                             className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
                                                 isWinamp
                                                     ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
-                                                    : isDark || isDarkFluid
+                                                    : isDark
                                                     ? 'bg-[#2B2930] text-[#E6E0E9] border-white/10 hover:border-indigo-400/50'
                                                     : isVista
                                                     ? 'bg-white/90 text-sky-950 border-sky-300/80 hover:border-sky-400 shadow-2xs'
@@ -874,7 +1071,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                             className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs rounded-[6px] border ${
                                                 isWinamp
                                                     ? 'bg-black border-zinc-700 text-[#00FF00]'
-                                                    : isDark || isDarkFluid
+                                                    : isDark
                                                     ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
                                                     : isVista
                                                     ? 'border-sky-300/80 bg-white/90 text-sky-950 shadow-2xs'
@@ -888,7 +1085,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                     <span className={`text-[9px] font-bold uppercase tracking-wider block ${
                                         isWinamp
                                             ? 'text-[#00FF00]/70'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'text-slate-400'
                                             : isVista
                                             ? 'text-sky-900/80'
@@ -903,7 +1100,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                             className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs font-bold rounded-[6px] border transition-colors cursor-pointer ${
                                                 isWinamp
                                                     ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
-                                                    : isDark || isDarkFluid
+                                                    : isDark
                                                     ? 'bg-[#2B2930] text-[#E6E0E9] border-white/10 hover:border-indigo-400/50'
                                                     : isVista
                                                     ? 'bg-white/90 text-sky-950 border-sky-300/80 hover:border-sky-400 shadow-2xs'
@@ -921,7 +1118,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                             className={`w-full py-1.5 px-1.5 text-center font-bell-address text-xs rounded-[6px] border ${
                                                 isWinamp
                                                     ? 'bg-black border-zinc-700 text-[#00FF00]'
-                                                    : isDark || isDarkFluid
+                                                    : isDark
                                                     ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
                                                     : isVista
                                                     ? 'border-sky-300/80 bg-white/90 text-sky-950 shadow-2xs'
@@ -938,7 +1135,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                     <span className={`text-[9px] font-bold uppercase tracking-wider block ${
                                         isWinamp
                                             ? 'text-[#00FF00]/70'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'text-slate-400'
                                             : isVista
                                             ? 'text-sky-900/80'
@@ -954,14 +1151,14 @@ export const DayCell = React.memo<DayCellProps>(({
                                                 data?.absenCeisa
                                                     ? isWinamp
                                                         ? 'bg-black border-[#00FF00] text-[#00FF00] font-bold'
-                                                        : isDark || isDarkFluid
+                                                        : isDark
                                                         ? 'bg-indigo-600/30 border-indigo-500/40 text-indigo-200 font-bold'
                                                         : isVista
                                                         ? 'bg-sky-400/25 border-sky-400/80 text-sky-950 font-bold shadow-2xs'
                                                         : 'bg-sky-500/20 border-sky-400/50 text-sky-800 font-bold shadow-2xs'
                                                     : isWinamp
                                                     ? 'bg-black text-zinc-500 border-zinc-700 hover:border-[#00FF00]'
-                                                    : isDark || isDarkFluid
+                                                    : isDark
                                                     ? 'bg-[#2B2930] text-slate-300 border-white/10 hover:border-indigo-400/50'
                                                     : isVista
                                                     ? 'bg-white/90 text-sky-800 border-sky-300/80 hover:border-sky-400 shadow-2xs'
@@ -980,7 +1177,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                             className={`w-full py-1 px-1.5 text-center font-mono text-xs rounded-[6px] border ${
                                                 isWinamp
                                                     ? 'bg-black border-zinc-700 text-[#00FF00]'
-                                                    : isDark || isDarkFluid
+                                                    : isDark
                                                     ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
                                                     : isVista
                                                     ? 'border-sky-300/80 bg-white/90 text-sky-950 shadow-2xs'
@@ -994,7 +1191,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                     <span className={`text-[9px] font-bold uppercase tracking-wider block ${
                                         isWinamp
                                             ? 'text-[#00FF00]/70'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'text-slate-400'
                                             : isVista
                                             ? 'text-sky-900/80'
@@ -1010,7 +1207,7 @@ export const DayCell = React.memo<DayCellProps>(({
                                         className={
                                             isWinamp
                                                 ? 'bg-black border-zinc-700 text-[#00FF00] placeholder-zinc-600 focus:border-[#00FF00] font-mono'
-                                                : isDark || isDarkFluid
+                                                : isDark
                                                 ? 'bg-[#2B2930] border-white/10 text-slate-100 placeholder-slate-500 focus:border-indigo-400'
                                                 : isVista
                                                 ? 'bg-white/90 border-sky-300/80 text-sky-950 placeholder-sky-700/50 focus:border-sky-500 shadow-2xs'
@@ -1031,8 +1228,6 @@ export const DayCell = React.memo<DayCellProps>(({
                                     className={`w-full py-1.5 rounded-[6px] text-xs font-black transition-all shadow-xs cursor-pointer flex items-center justify-center space-x-1 ${
                                         isWinamp
                                             ? 'bg-[#00FF00] text-black hover:bg-emerald-400 font-mono'
-                                            : isDarkFluid
-                                            ? 'bg-[#D0BCFF] text-[#381E72] hover:bg-[#E8DEF8]'
                                             : isDark
                                             ? 'bg-indigo-600 text-white hover:bg-indigo-500'
                                             : isVista

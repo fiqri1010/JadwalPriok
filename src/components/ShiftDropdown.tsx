@@ -83,6 +83,10 @@ export const ShiftDropdown: React.FC<ShiftDropdownProps> = ({
     const isDarkFluid = theme === 'darkFluid';
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
+    const isTechnical = theme === 'technical';
+    const isEditorial = theme === 'editorial';
+    const isIndustrial = theme === 'industrial';
+    const isDashboard = theme === 'dashboard';
 
     // Auto calculate position and upward/downward direction based on trigger position in viewport
     const updateCoords = useCallback(() => {
@@ -182,6 +186,44 @@ export const ShiftDropdown: React.FC<ShiftDropdownProps> = ({
 
     // Styling container for dropdown menu card
     const getDropdownCardStyle = (): React.CSSProperties => {
+        if (isDashboard) {
+            return {
+                backgroundColor: '#FFFFFF',
+                borderRadius: '8px',
+                border: '1px solid rgba(1, 22, 39, 0.08)',
+                boxShadow: '0 20px 40px -10px rgba(1, 22, 39, 0.15)',
+                fontFamily: "'Inter', sans-serif",
+                color: '#011627',
+            };
+        }
+        if (isIndustrial) {
+            return {
+                backgroundColor: '#1A1D23',
+                borderRadius: '6px',
+                border: '1.5px solid rgba(226, 232, 240, 0.15)',
+                boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(45, 212, 191, 0.15)',
+                fontFamily: "'JetBrains Mono', monospace",
+                color: '#E2E8F0',
+            };
+        }
+        if (isEditorial) {
+            return {
+                backgroundColor: '#fcfbf9',
+                borderRadius: '0px',
+                border: '1px solid rgba(26, 26, 26, 0.15)',
+                boxShadow: '0 20px 30px -10px rgba(0, 0, 0, 0.12)',
+                fontFamily: "'Geist Mono', monospace",
+            };
+        }
+        if (isTechnical) {
+            return {
+                backgroundColor: '#F8F7F4',
+                borderRadius: '0px',
+                border: '1.5px solid #111113',
+                boxShadow: '4px 4px 0px #111113',
+                fontFamily: "'JetBrains Mono', monospace",
+            };
+        }
         if (isWinamp) {
             return {
                 backgroundColor: '#121212',
@@ -221,6 +263,26 @@ export const ShiftDropdown: React.FC<ShiftDropdownProps> = ({
     };
 
     const getItemWrapperClass = (isSelected: boolean) => {
+        if (isDashboard) {
+            return isSelected
+                ? 'bg-[#297373] text-white font-semibold'
+                : 'text-[#011627] hover:bg-[rgba(41,115,115,0.05)] hover:text-[#297373]';
+        }
+        if (isIndustrial) {
+            return isSelected
+                ? 'bg-[#2DD4BF]/20 text-[#2DD4BF] font-bold border border-[#2DD4BF]/40'
+                : 'text-[#E2E8F0] hover:bg-white/5 border border-transparent';
+        }
+        if (isEditorial) {
+            return isSelected
+                ? 'bg-[#1a1a1a] text-[#fcfbf9] font-medium border border-[#1a1a1a]'
+                : 'text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] border border-transparent';
+        }
+        if (isTechnical) {
+            return isSelected
+                ? 'bg-[#111113] text-[#F8F7F4] font-bold border border-[#111113]'
+                : 'text-[#111113] hover:bg-black/5 border border-transparent';
+        }
         if (isWinamp) {
             return isSelected
                 ? 'bg-[#00FF00] text-black font-bold border border-[#00FF00]'
@@ -268,9 +330,65 @@ export const ShiftDropdown: React.FC<ShiftDropdownProps> = ({
                     compact
                         ? 'py-0.5 px-0.5 sm:px-1 text-[9.5px] min-[400px]:text-[10px] sm:text-[10.5px] lg:text-[11.5px]'
                         : 'py-1.5 px-2.5 text-xs sm:text-sm'
-                } font-extrabold uppercase tracking-tight rounded-[5px] border ${
-                    normalizedValue
+                } font-extrabold uppercase tracking-tight ${isEditorial ? 'rounded-none font-[\'Geist_Mono\'] font-medium border' : isTechnical ? 'rounded-none font-[\'JetBrains_Mono\'] border' : isIndustrial ? 'rounded-[4px] font-[\'JetBrains_Mono\'] border' : 'rounded-[5px] border'} ${
+                    isIndustrial && normalizedValue
+                        ? `${
+                            normalizedValue === 'SM'
+                                ? 'bg-[#83C5BE] text-[#0B0909] border-[#83C5BE]'
+                                : normalizedValue === 'PM' || normalizedValue === 'Malam'
+                                ? 'bg-[#2DD4BF] text-[#0B0909] border-[#2DD4BF]'
+                                : normalizedValue === 'TPSL'
+                                ? 'bg-[#E29578] text-white border-[#E29578]'
+                                : normalizedValue === 'OFF'
+                                ? 'bg-[#BE1A1A] text-white border-[#BE1A1A]'
+                                : normalizedValue === 'NPCT'
+                                ? 'bg-[#FFDDD2] text-[#011627] border-[#FFDDD2]'
+                                : normalizedValue === 'Graha'
+                                ? 'bg-[#EDF6F9] text-[#011627] border-[#EDF6F9]'
+                                : normalizedValue === 'CUTI'
+                                ? 'bg-[#1A1D23] text-[#E2E8F0] border-[rgba(226,232,240,0.2)]'
+                                : 'bg-[rgba(226,232,240,0.1)] text-[#E2E8F0] border-[rgba(226,232,240,0.1)]'
+                        }`
+                        : isEditorial && normalizedValue
+                        ? `${
+                            normalizedValue === 'SM' || normalizedValue === 'PM' || normalizedValue === 'Malam'
+                                ? 'bg-[#2a7373]/10 text-[#2a7373] border-[#2a7373]/30'
+                                : normalizedValue === 'TPSL'
+                                ? 'bg-[#1a1a1a]/[0.05] text-[#1a1a1a] border-[#1a1a1a]/15'
+                                : normalizedValue === 'OFF'
+                                ? 'bg-[#cc3333]/10 text-[#cc3333] border-[#cc3333]/25'
+                                : normalizedValue === 'NPCT'
+                                ? 'bg-[#1a1a1a]/[0.05] text-[#1a1a1a] border-[#1a1a1a]/15'
+                                : normalizedValue === 'Graha'
+                                ? 'bg-[#2a7373]/[0.08] text-[#2a7373] border-[#2a7373]/20'
+                                : normalizedValue === 'CUTI'
+                                ? 'bg-[#1a1a1a]/10 text-[#1a1a1a] border-[#1a1a1a]/25'
+                                : 'bg-[#1a1a1a]/[0.03] text-[#1a1a1a] border-[#1a1a1a]/10'
+                        }`
+                        : isTechnical && normalizedValue
+                        ? `${
+                            normalizedValue === 'SM' || normalizedValue === 'PM' || normalizedValue === 'Malam'
+                                ? 'bg-[#0D9488] text-white border-[#111113]'
+                                : normalizedValue === 'TPSL'
+                                ? 'bg-[#E29578] text-white border-[#111113]'
+                                : normalizedValue === 'OFF'
+                                ? 'bg-[#BE1A1A] text-white border-[#111113]'
+                                : normalizedValue === 'NPCT'
+                                ? 'bg-[#FFDDD2] text-[#111113] border-[#111113]'
+                                : normalizedValue === 'Graha'
+                                ? 'bg-[#EDF6F9] text-[#111113] border-[#111113]'
+                                : normalizedValue === 'CUTI'
+                                ? 'bg-[#111113] text-[#F8F7F4] border-[#111113]'
+                                : 'bg-[#F8F7F4] text-[#111113] border-[#111113]'
+                        }`
+                        : normalizedValue
                         ? `${currentShiftColor.bg} ${currentShiftColor.text} ${currentShiftColor.border} shadow-2xs`
+                        : isIndustrial
+                        ? 'bg-[#1A1D23] text-[#E2E8F0]/40 border-[rgba(226,232,240,0.15)]'
+                        : isEditorial
+                        ? 'bg-[#fcfbf9] text-[#1a1a1a]/40 border-[#1a1a1a]/15'
+                        : isTechnical
+                        ? 'bg-[#F8F7F4] text-[#111113]/50 border-[#111113]/30'
                         : isWinamp
                         ? 'bg-black text-[#00FF00] border-zinc-700 font-mono'
                         : isDarkFluid

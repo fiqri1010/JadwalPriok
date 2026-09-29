@@ -63,11 +63,14 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
   const textareaAbsenRef = useRef<HTMLTextAreaElement>(null);
 
   const isWinamp = theme === 'winamp';
-  const isDarkFluid = theme === 'darkFluid';
   const isDark = theme === 'dark';
   const isVista = theme === 'vista';
   const isDefault = theme === 'default';
   const isPaperSketch = theme === 'paperSketch';
+  const isIndustrial = theme === 'industrial';
+  const isTechnical = theme === 'technical';
+  const isEditorial = theme === 'editorial';
+  const isDashboard = theme === 'dashboard';
 
   const isLightMode = isDefault || isVista || isPaperSketch;
 
@@ -492,34 +495,32 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
         tabTextInactive: '#00FF00',
       };
     }
-    if (isDarkFluid) {
+    if (isIndustrial) {
       return {
-        outerBg: 'linear-gradient(163deg, #D0BCFF 0%, #9A82DB 100%)',
-        outerRadius: '22px',
-        outerShadow: '0px 0px 30px 1px rgba(208, 188, 255, 0.28)',
-        innerBg: '#1D1B20',
-        innerRadius: '20px',
-        headingColor: '#D0BCFF',
-        subtextColor: '#CAC4D0',
-        fieldBg: '#141218',
-        fieldBorder: '1px solid rgba(255, 255, 255, 0.08)',
-        fieldShadow: 'inset 2px 5px 10px rgba(5, 5, 5, 0.8)',
-        accentColor: '#D0BCFF',
-        textColor: '#E6E0E9',
-        btnCancelBg: '#2B2930',
-        btnCancelBorder: 'rgba(255,255,255,0.1)',
-        btnCancelText: '#CAC4D0',
-        btnApplyBg: '#D0BCFF',
-        btnApplyText: '#381E72',
-        previewBorder: 'border-white/10',
-        tabContainerBg: '#141218',
-        tabContainerBorder: '1px solid rgba(255, 255, 255, 0.08)',
-        tabIndicatorBg: '#2B2930',
-        tabIndicatorRadius: '7px',
-        tabIndicatorBorder: '1px solid rgba(255, 255, 255, 0.12)',
-        tabIndicatorShadow: '0 2px 8px rgba(0,0,0,0.5)',
-        tabTextActive: '#D0BCFF',
-        tabTextInactive: '#CAC4D0',
+        outerBg: '#1A1D23',
+        outerRadius: '10px',
+        outerShadow: '0px 0px 32px 1px rgba(45, 212, 191, 0.25)',
+        innerBg: '#1A1D23',
+        innerRadius: '8px',
+        headingColor: '#2DD4BF',
+        subtextColor: 'rgba(226, 232, 240, 0.6)',
+        fieldBg: '#0F1115',
+        fieldBorder: '1px solid rgba(226, 232, 240, 0.15)',
+        fieldShadow: 'inset 2px 3px 6px rgba(0,0,0,0.5)',
+        accentColor: '#2DD4BF',
+        textColor: '#E2E8F0',
+        btnCancelBg: '#0F1115',
+        btnCancelBorder: '1px solid rgba(226, 232, 240, 0.15)',
+        btnCancelText: '#E2E8F0',
+        btnApplyBg: '#2DD4BF',
+        btnApplyText: '#0F1115',
+        previewBorder: 'border-[rgba(226,232,240,0.15)]',
+        tabContainerBg: '#0F1115',
+        tabContainerBorder: '1px solid rgba(226, 232, 240, 0.15)',
+        tabIndicatorBg: '#2DD4BF',
+        tabIndicatorRadius: '4px',
+        tabTextActive: '#0F1115',
+        tabTextInactive: '#E2E8F0',
       };
     }
     if (isDark) {

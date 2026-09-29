@@ -36,10 +36,13 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
     rightContent,
 }) => {
     const isWinamp = themeConfig.theme === 'winamp';
-    const isDarkFluid = themeConfig.theme === 'darkFluid';
     const isDark = themeConfig.theme === 'dark';
     const isVista = themeConfig.theme === 'vista';
     const isPaperSketch = themeConfig.theme === 'paperSketch';
+    const isIndustrial = themeConfig.theme === 'industrial';
+    const isTechnical = themeConfig.theme === 'technical';
+    const isEditorial = themeConfig.theme === 'editorial';
+    const isDashboard = themeConfig.theme === 'dashboard';
 
     // 1. De-duplication: Pastikan judul di kiri statis dan bersih (misal "Jadwal Kerja") tanpa mengulang bulan & tahun
     const staticTitle = React.useMemo(() => {
@@ -50,6 +53,46 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
 
     // 2 & 3. Styling Clean & Minimalist: Navigasi Tanpa Bingkai (Frameless) & Tombol Sekarang "Subtle/Ghost"
     const getMinimalistStyles = () => {
+        if (isIndustrial) {
+            return {
+                wrapper: 'bg-transparent border-b border-[rgba(226,232,240,0.1)] py-1.5 px-1 font-[\'JetBrains_Mono\']',
+                title: 'text-[#E2E8F0] font-bold text-sm sm:text-base font-[\'Syne\'] tracking-tight',
+                dot: 'w-2 h-2 rounded-full bg-[#2DD4BF] shrink-0 shadow-[0_0_8px_rgba(45,212,191,0.6)]',
+                navArrowBtn: 'text-[#E2E8F0]/70 hover:text-[#2DD4BF] hover:bg-white/10 rounded-md p-1.5 transition-colors',
+                monthTextBtn: 'text-[#E2E8F0] hover:text-[#2DD4BF] hover:bg-white/5 rounded-md text-xs sm:text-sm font-bold px-2.5 py-1 font-[\'Syne\'] transition-colors',
+                todayBtn: 'bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30 hover:bg-[#2DD4BF]/25 rounded-md px-2.5 py-1 text-xs font-bold font-[\'JetBrains_Mono\'] uppercase tracking-wider transition-all',
+            };
+        }
+        if (isTechnical) {
+            return {
+                wrapper: 'bg-transparent border-b border-[#111113]/15 py-1.5 px-1 font-[\'JetBrains_Mono\']',
+                title: 'text-[#111113] font-bold text-sm sm:text-base font-[\'JetBrains_Mono\'] tracking-tight',
+                dot: 'w-2 h-2 rounded-full bg-[#0D9488] shrink-0',
+                navArrowBtn: 'text-[#111113]/70 hover:text-[#0D9488] hover:bg-black/5 rounded-md p-1.5 transition-colors',
+                monthTextBtn: 'text-[#111113] hover:text-[#0D9488] hover:bg-black/5 rounded-md text-xs sm:text-sm font-bold px-2.5 py-1 transition-colors',
+                todayBtn: 'bg-[#0D9488]/15 text-[#0D9488] border border-[#0D9488]/30 hover:bg-[#0D9488]/25 rounded-md px-2.5 py-1 text-xs font-bold font-[\'JetBrains_Mono\'] uppercase tracking-wider transition-all',
+            };
+        }
+        if (isEditorial) {
+            return {
+                wrapper: 'bg-transparent border-b border-[#1a1a1a]/15 py-1.5 px-1 font-[\'Geist\']',
+                title: 'text-[#1a1a1a] font-bold text-sm sm:text-base font-[\'Geist\'] tracking-tight',
+                dot: 'w-2 h-2 rounded-full bg-[#2a7373] shrink-0',
+                navArrowBtn: 'text-[#1a1a1a]/70 hover:text-[#2a7373] hover:bg-black/5 rounded-md p-1.5 transition-colors',
+                monthTextBtn: 'text-[#1a1a1a] hover:text-[#2a7373] hover:bg-black/5 rounded-md text-xs sm:text-sm font-bold px-2.5 py-1 transition-colors',
+                todayBtn: 'bg-[#2a7373]/15 text-[#2a7373] border border-[#2a7373]/30 hover:bg-[#2a7373]/25 rounded-md px-2.5 py-1 text-xs font-bold transition-all',
+            };
+        }
+        if (isDashboard) {
+            return {
+                wrapper: 'bg-transparent border-b border-[rgba(1,22,39,0.08)] py-1.5 px-1 font-[\'Inter\']',
+                title: 'text-[#011627] font-bold text-sm sm:text-base font-[\'Inter\'] tracking-tight',
+                dot: 'w-2 h-2 rounded-full bg-[#297373] shrink-0',
+                navArrowBtn: 'text-[#011627]/70 hover:text-[#297373] hover:bg-black/5 rounded-md p-1.5 transition-colors',
+                monthTextBtn: 'text-[#011627] hover:text-[#297373] hover:bg-black/5 rounded-md text-xs sm:text-sm font-bold px-2.5 py-1 transition-colors',
+                todayBtn: 'bg-[#297373]/10 text-[#297373] border border-[#297373]/25 hover:bg-[#297373]/20 rounded-md px-2.5 py-1 text-xs font-bold transition-all',
+            };
+        }
         if (isPaperSketch) {
             return {
                 wrapper: 'bg-transparent border-b-2 border-dashed border-[#2b2b2b] py-1.5 px-1',
@@ -70,16 +113,6 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
                 todayBtn: 'bg-black text-[#00FF00] border border-zinc-800 hover:border-[#00FF00] rounded-none px-2.5 py-1 text-xs font-mono font-bold',
             };
         }
-        if (isDarkFluid) {
-            return {
-                wrapper: 'bg-transparent border-b border-white/10 py-1.5 px-1',
-                title: 'text-[#E6E0E9] font-bold text-sm sm:text-base tracking-tight',
-                dot: 'w-2 h-2 rounded-full bg-[#D0BCFF] shrink-0 shadow-[0_0_8px_#D0BCFF]',
-                navArrowBtn: 'text-[#CAC4D0] hover:text-[#D0BCFF] hover:bg-white/10 rounded-full p-1.5 transition-colors active:scale-95',
-                monthTextBtn: 'text-[#E6E0E9] hover:text-[#D0BCFF] hover:bg-white/5 rounded-md text-xs sm:text-sm font-bold px-2.5 py-1 transition-colors',
-                todayBtn: 'bg-[#D0BCFF]/10 text-[#D0BCFF] border border-[#D0BCFF]/25 hover:bg-[#D0BCFF]/20 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all active:scale-95',
-            };
-        }
         if (isDark) {
             return {
                 wrapper: 'bg-transparent border-b border-slate-800 py-1.5 px-1',
@@ -92,12 +125,12 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
         }
         if (isVista) {
             return {
-                wrapper: 'bg-transparent border-b border-sky-200/80 py-1.5 px-1',
-                title: 'text-sky-950 font-bold text-sm sm:text-base tracking-tight',
-                dot: 'w-2 h-2 rounded-full bg-sky-500 shrink-0 shadow-[0_0_6px_rgba(14,165,233,0.5)]',
-                navArrowBtn: 'text-sky-800 hover:text-sky-950 hover:bg-sky-100/70 rounded-full p-1.5 transition-colors active:scale-95',
-                monthTextBtn: 'text-sky-950 hover:text-sky-700 hover:bg-sky-50/70 rounded-md text-xs sm:text-sm font-bold px-2.5 py-1 transition-colors',
-                todayBtn: 'bg-sky-500/10 text-sky-800 border border-sky-300/60 hover:bg-sky-500/20 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all active:scale-95',
+                wrapper: 'bg-transparent border-b border-white/20 py-1.5 px-1',
+                title: 'text-white font-extrabold text-sm sm:text-base tracking-tight drop-shadow-sm',
+                dot: 'w-2 h-2 rounded-full bg-sky-400 shrink-0 shadow-[0_0_8px_rgba(56,189,248,0.8)]',
+                navArrowBtn: 'bg-white/20 hover:bg-white/35 text-white border border-white/40 rounded-lg p-1.5 transition-all active:scale-95 shadow-xs backdrop-blur-md',
+                monthTextBtn: 'bg-white/20 hover:bg-white/35 text-white border border-white/40 rounded-lg text-xs sm:text-sm font-extrabold px-3 py-1 transition-all shadow-xs backdrop-blur-md',
+                todayBtn: 'bg-sky-500/30 text-white border border-sky-300/80 hover:bg-sky-500/50 rounded-lg px-2.5 py-1 text-xs font-extrabold transition-all active:scale-95 shadow-sm backdrop-blur-md',
             };
         }
         // Default Clean Light Mode
@@ -117,7 +150,7 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
         <div className={`w-full min-w-0 select-none flex flex-col md:flex-row items-center justify-center md:justify-between text-center md:text-left gap-2 sm:gap-2.5 ${styles.wrapper}`}>
             {/* 1. Judul Statis: Rata Tengah di Mobile, Rata Kiri di Desktop (Tanpa Dot) */}
             <div className="flex items-center justify-center md:justify-start space-x-2 min-w-0">
-                <CalendarCheck2 className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-teal-600 dark:text-teal-400 shrink-0" />
+                <CalendarCheck2 className={`h-4.5 w-4.5 sm:h-5 sm:w-5 shrink-0 ${isVista ? 'text-sky-300 drop-shadow-xs' : 'text-teal-600 dark:text-teal-400'}`} />
                 <h2 className={`${styles.title} text-sm sm:text-base md:text-md lg:text-lg font-bold tracking-tight`}>
                     {staticTitle}
                 </h2>

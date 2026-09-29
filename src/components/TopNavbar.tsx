@@ -7,6 +7,10 @@ import {
     Sparkles,
     Radio,
     PenLine,
+    Terminal,
+    BookOpen,
+    Cpu,
+    LayoutDashboard,
     Check,
 } from 'lucide-react';
 import { AppLogo } from './AppLogo';
@@ -26,6 +30,7 @@ interface TopNavbarProps {
     themeConfig: ThemeConfig;
     onOpenMobileMenu?: () => void;
     exportAction?: React.ReactNode;
+    pageTab?: 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin';
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
@@ -39,6 +44,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     themeConfig,
     onOpenMobileMenu,
     exportAction,
+    pageTab = 'calendar',
 }) => {
     const handleToggle = () => {
         if (isMobile && onOpenMobileMenu) {
@@ -48,47 +54,69 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         }
     };
 
-    const getThemeIcon = (theme: AppTheme) => {
+    const getThemeDisplayName = (theme: AppTheme) => {
         switch (theme) {
-            case 'paperSketch':
-                return <PenLine className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#ff4747]" />;
-            case 'dark':
-                return <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-indigo-400" />;
-            case 'darkFluid':
-                return <Droplets className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#D0BCFF]" />;
-            case 'vista':
-                return <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-sky-400" />;
-            case 'winamp':
-                return <Radio className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#00FF00]" />;
-            case 'default':
-            default:
-                return <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500" />;
+            case 'default': return 'Terang';
+            case 'dark': return 'Gelap';
+            case 'vista': return 'Old Windows';
+            case 'paperSketch': return 'PaperSketch';
+            case 'winamp': return 'Winamp';
+            case 'dashboard': return 'Terang Minimalis';
+            case 'editorial': return 'Editorial';
+            case 'industrial': return 'Industrial';
+            case 'technical': return 'Technical';
+            default: return theme;
         }
     };
 
     return (
-        <header className={themeConfig.navbarClass}>
-            <div className="flex items-center justify-between py-1.5 sm:py-2 px-2.5 sm:px-4 md:px-6 w-full">
-                <div className="flex items-center space-x-2.5 sm:space-x-3.5 min-w-0">
-                    {/* Hamburger Menu Button (Uiverse Cevorob & Winamp Switch) - Hidden on mobile view */}
+        <header className={`${themeConfig.navbarClass} min-h-[48px] sm:min-h-[52px] flex items-center`}>
+            <div className="flex items-center justify-between py-1.5 sm:py-2 px-2.5 sm:px-4 md:px-5 w-full">
+                <div className="flex items-center min-w-0">
+                    {/* Tombol Hamburger di Header (Desktop) - Selalu ada di Header dan bertransisi menjadi X saat Sidebar Terbuka */}
                     {!isMobile && (
                         <HamburgerMenuButton
+                            id="top-navbar-toggle-btn"
                             isOpen={isDesktopSidebarOpen}
                             onToggle={handleToggle}
                             theme={currentTheme}
-                            className="hidden md:flex shrink-0 mr-3.5 sm:mr-4 self-center"
+                            className="hidden md:flex shrink-0 self-center mr-4"
                             title={isDesktopSidebarOpen ? 'Sembunyikan Menu Samping' : 'Tampilkan Menu Samping'}
                         />
                     )}
-                    <div className={`${themeConfig.logoContainerClass} shrink-0 self-center`}>
-                        <AppLogo className="h-5 w-5 sm:h-6 sm:w-6" />
-                    </div>
-                    <div className="min-w-0 flex flex-col justify-center">
-                        <h1 className={`${themeConfig.titleClass} leading-tight`}>JadwalPriok</h1>
-                        <p className={`${themeConfig.subtitleClass} hidden sm:block leading-normal`}>
-                            Kalender Kerja & Jadwal Shift
-                        </p>
-                    </div>
+
+                    {/* Logo & App Title: Tampil di Navbar pada mode Mobile atau saat Desktop Sidebar tertutup dengan jarak tepat 16px dari hamburger */}
+                    {(isMobile || !isDesktopSidebarOpen) && (
+                        <div className="flex items-center space-x-2.5 min-w-0 transition-opacity duration-200 animate-in fade-in">
+                            <div className={`${themeConfig.logoContainerClass} shrink-0 self-center`}>
+                                <AppLogo className="h-6 w-6 sm:h-7 sm:w-7" />
+                            </div>
+                            <div className="min-w-0 flex flex-col justify-center">
+                                <h1 className={`${themeConfig.titleClass} ${themeConfig.isIndustrial ? '' : 'text-sm sm:text-base lg:text-lg'} font-black leading-tight truncate`}>
+                                    JadwalPriok
+                                </h1>
+                                <p className={`${themeConfig.subtitleClass} hidden sm:block text-[11px] lg:text-[12px] leading-normal truncate`}>
+                                    Kalender Kerja & Jadwal Shift
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Ketika Desktop Sidebar Terbuka: Tampilkan nama halaman / breadcrumb aktif di samping tombol X */}
+                    {!isMobile && isDesktopSidebarOpen && (
+                        <div className="flex items-center space-x-2 text-xs lg:text-[13px] font-bold select-none truncate transition-opacity duration-200 animate-in fade-in">
+                            <span className="opacity-45 hidden lg:inline">Workspace</span>
+                            <span className="opacity-30 hidden lg:inline">/</span>
+                            <span className="opacity-90 font-extrabold tracking-tight truncate">
+                                {pageTab === 'calendar' && 'Kalender Kerja & Shift'}
+                                {pageTab === 'holiday' && 'Daftar Libur Nasional & Cuti'}
+                                {pageTab === 'settings' && 'Pengaturan Aplikasi'}
+                                {pageTab === 'version' && 'Catatan Riwayat Versi'}
+                                {pageTab === 'roadmap' && 'Rencana Fitur & Roadmap'}
+                                {pageTab === 'admin' && 'Dashboard Administrator Posko'}
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Top Actions: Export Button (to the left of Theme Selector) & Theme Selector */}
@@ -111,7 +139,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                 aria-label="Pilih Tema Tampilan"
                             >
                                 <Palette className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-current opacity-90" />
-                                <span className="hidden sm:inline text-xs font-bold capitalize">{currentTheme}</span>
+                                <span className="hidden sm:inline text-xs font-bold">{getThemeDisplayName(currentTheme)}</span>
                             </button>
                         </Tooltip>
 
@@ -123,9 +151,12 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                     onClick={() => setIsThemeDropdownOpen(false)}
                                 />
                                 <div className={themeConfig.themeDropdownMenuClass}>
-                                    <div className="px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider opacity-60">
-                                        Pilihan Tema Tampilan
+                                    {/* 1. Kelompok Tema Final Release */}
+                                    <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-wider opacity-60 border-b border-current/10 mb-1">
+                                        Tema Final Release
                                     </div>
+
+                                    {/* Terang */}
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -135,15 +166,19 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                         className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[5px] text-xs font-bold transition-all duration-300 cursor-pointer ${
                                             currentTheme === 'default'
                                                 ? 'bg-[#2EC4B6]/20 text-[#2EC4B6]'
-                                                : 'hover:bg-black/5 dark:hover:bg-white/10'
+                                                : currentTheme === 'industrial' || currentTheme === 'dark' || currentTheme === 'winamp'
+                                                ? 'text-slate-100 hover:bg-white/10'
+                                                : 'text-slate-800 hover:bg-black/5'
                                         }`}
                                     >
                                         <span className="flex items-center space-x-2">
                                             <Sun className="h-4 w-4 text-amber-500" />
-                                            <span>Default</span>
+                                            <span>Terang</span>
                                         </span>
                                         {currentTheme === 'default' && <Check className="h-3.5 w-3.5" />}
                                     </button>
+
+                                    {/* Gelap */}
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -153,33 +188,19 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                         className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[5px] text-xs font-bold transition-all duration-300 cursor-pointer ${
                                             currentTheme === 'dark'
                                                 ? 'bg-slate-700 text-white'
-                                                : 'hover:bg-black/5 dark:hover:bg-white/10'
+                                                : currentTheme === 'industrial' || currentTheme === 'winamp'
+                                                ? 'text-slate-100 hover:bg-white/10'
+                                                : 'text-slate-800 hover:bg-black/5'
                                         }`}
                                     >
                                         <span className="flex items-center space-x-2">
                                             <Moon className="h-4 w-4 text-indigo-400" />
-                                            <span>Dark Mode</span>
+                                            <span>Gelap</span>
                                         </span>
                                         {currentTheme === 'dark' && <Check className="h-3.5 w-3.5" />}
                                     </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            onThemeChange('darkFluid');
-                                            setIsThemeDropdownOpen(false);
-                                        }}
-                                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[5px] text-xs font-bold transition-all duration-300 ease-in-out cursor-pointer ${
-                                            currentTheme === 'darkFluid'
-                                                ? 'bg-[#D0BCFF]/20 text-[#D0BCFF]'
-                                                : 'hover:bg-black/5 dark:hover:bg-white/10'
-                                        }`}
-                                    >
-                                        <span className="flex items-center space-x-2">
-                                            <Droplets className="h-4 w-4 text-[#D0BCFF]" />
-                                            <span>Dark Fluid</span>
-                                        </span>
-                                        {currentTheme === 'darkFluid' && <Check className="h-3.5 w-3.5" />}
-                                    </button>
+
+                                    {/* Old Windows */}
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -188,16 +209,20 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                         }}
                                         className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[5px] text-xs font-bold transition-all duration-300 cursor-pointer ${
                                             currentTheme === 'vista'
-                                                ? 'bg-sky-100 text-sky-800'
-                                                : 'hover:bg-black/5 dark:hover:bg-white/10'
+                                                ? 'bg-sky-100 text-sky-900 font-extrabold border border-sky-300'
+                                                : currentTheme === 'industrial' || currentTheme === 'dark' || currentTheme === 'winamp'
+                                                ? 'text-slate-100 hover:bg-white/10'
+                                                : 'text-slate-800 hover:bg-black/5'
                                         }`}
                                     >
                                         <span className="flex items-center space-x-2">
                                             <Sparkles className="h-4 w-4 text-sky-500" />
-                                            <span>Vista</span>
+                                            <span>Old Windows</span>
                                         </span>
                                         {currentTheme === 'vista' && <Check className="h-3.5 w-3.5" />}
                                     </button>
+
+                                    {/* PaperSketch */}
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -207,15 +232,19 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                         className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 cursor-pointer ${
                                             currentTheme === 'paperSketch'
                                                 ? 'bg-[#ff4747] text-white shadow-[2px_2px_0px_#2b2b2b] border border-[#2b2b2b]'
-                                                : 'hover:bg-[#2ec4b6]/20 text-[#2b2b2b]'
+                                                : currentTheme === 'industrial' || currentTheme === 'dark' || currentTheme === 'winamp'
+                                                ? 'text-slate-100 hover:bg-white/10'
+                                                : 'text-slate-800 hover:bg-[#2ec4b6]/20'
                                         }`}
                                     >
                                         <span className="flex items-center space-x-2">
                                             <PenLine className="h-4 w-4 text-[#ff4747]" />
-                                            <span className="font-['Gaegu'] text-sm font-bold">Paper Sketch (Var. 5)</span>
+                                            <span className="font-['Gaegu'] text-sm font-bold">PaperSketch</span>
                                         </span>
                                         {currentTheme === 'paperSketch' && <Check className="h-3.5 w-3.5" />}
                                     </button>
+
+                                    {/* Winamp */}
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -225,7 +254,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                         className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-none text-xs font-bold font-mono transition-all duration-300 cursor-pointer ${
                                             currentTheme === 'winamp'
                                                 ? 'bg-[#000000] text-[#00FF00] border border-[#00FF00]'
-                                                : 'hover:bg-[#00FF00]/10 text-[#00FF00]'
+                                                : currentTheme === 'industrial' || currentTheme === 'dark'
+                                                ? 'text-slate-100 hover:bg-white/10'
+                                                : 'hover:bg-[#00FF00]/10 text-slate-800 dark:text-slate-100'
                                         }`}
                                     >
                                         <span className="flex items-center space-x-2">
@@ -233,6 +264,100 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                             <span>Winamp</span>
                                         </span>
                                         {currentTheme === 'winamp' && <Check className="h-3.5 w-3.5" />}
+                                    </button>
+
+                                    {/* 2. Kelompok Tema dalam Pengembangan */}
+                                    <div className="px-2.5 pt-2 pb-1 text-[10px] font-black uppercase tracking-wider opacity-60 border-t border-b border-current/10 mt-2 mb-1 flex items-center justify-between">
+                                        <span>Tema dalam Pengembangan</span>
+                                        <span className="text-[9px] bg-amber-500/20 text-amber-500 px-1.5 py-0.2 rounded font-bold">BETA</span>
+                                    </div>
+
+                                    {/* Dashboard */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onThemeChange('dashboard');
+                                            setIsThemeDropdownOpen(false);
+                                        }}
+                                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[6px] text-xs font-bold font-['Inter'] transition-all duration-150 cursor-pointer ${
+                                            currentTheme === 'dashboard'
+                                                ? 'bg-[#297373] text-white'
+                                                : currentTheme === 'industrial' || currentTheme === 'dark' || currentTheme === 'winamp'
+                                                ? 'text-slate-100 hover:bg-white/10'
+                                                : 'text-[#011627] hover:bg-black/5'
+                                        }`}
+                                    >
+                                        <span className="flex items-center space-x-2">
+                                            <LayoutDashboard className="h-4 w-4 text-[#297373] group-hover:text-inherit" />
+                                            <span>Terang Minimalis</span>
+                                        </span>
+                                        {currentTheme === 'dashboard' && <Check className="h-3.5 w-3.5" />}
+                                    </button>
+
+                                    {/* Editorial */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onThemeChange('editorial');
+                                            setIsThemeDropdownOpen(false);
+                                        }}
+                                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[4px] text-xs font-medium font-['Geist_Mono'] uppercase tracking-wider transition-all duration-150 cursor-pointer ${
+                                            currentTheme === 'editorial'
+                                                ? 'bg-[#2a7373] text-white'
+                                                : currentTheme === 'industrial' || currentTheme === 'dark' || currentTheme === 'winamp'
+                                                ? 'text-slate-100 hover:bg-white/10'
+                                                : 'text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05]'
+                                        }`}
+                                    >
+                                        <span className="flex items-center space-x-2">
+                                            <BookOpen className="h-4 w-4 text-[#2a7373]" />
+                                            <span className="font-['Cormorant_Garamond'] italic capitalize text-sm font-semibold">Editorial</span>
+                                        </span>
+                                        {currentTheme === 'editorial' && <Check className="h-3.5 w-3.5" />}
+                                    </button>
+
+                                    {/* Industrial */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onThemeChange('industrial');
+                                            setIsThemeDropdownOpen(false);
+                                        }}
+                                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[4px] text-xs font-bold font-['JetBrains_Mono'] uppercase tracking-wider transition-all duration-150 cursor-pointer ${
+                                            currentTheme === 'industrial'
+                                                ? 'bg-[#1A1D23] text-[#2DD4BF] border border-[#2DD4BF]/40'
+                                                : currentTheme === 'dark' || currentTheme === 'winamp'
+                                                ? 'text-slate-100 hover:bg-white/10'
+                                                : 'text-slate-800 hover:bg-black/5'
+                                        }`}
+                                    >
+                                        <span className="flex items-center space-x-2">
+                                            <Cpu className="h-4 w-4 text-[#2DD4BF]" />
+                                            <span className="font-['Syne'] font-extrabold normal-case">Industrial</span>
+                                        </span>
+                                        {currentTheme === 'industrial' && <Check className="h-3.5 w-3.5 text-[#2DD4BF]" />}
+                                    </button>
+
+                                    {/* Technical */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onThemeChange('technical');
+                                            setIsThemeDropdownOpen(false);
+                                        }}
+                                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[4px] text-xs font-bold font-['JetBrains_Mono'] uppercase tracking-wider transition-all duration-150 cursor-pointer ${
+                                            currentTheme === 'technical'
+                                                ? 'bg-[#0D9488] text-white'
+                                                : currentTheme === 'industrial' || currentTheme === 'dark' || currentTheme === 'winamp'
+                                                ? 'text-slate-100 hover:bg-white/10'
+                                                : 'text-[#111113] hover:bg-black/5'
+                                        }`}
+                                    >
+                                        <span className="flex items-center space-x-2">
+                                            <Terminal className="h-4 w-4 text-[#0D9488]" />
+                                            <span>Technical</span>
+                                        </span>
+                                        {currentTheme === 'technical' && <Check className="h-3.5 w-3.5" />}
                                     </button>
                                 </div>
                             </>

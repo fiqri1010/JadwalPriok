@@ -28,7 +28,7 @@ export interface ThemePalette {
     penugasanColors: PenugasanColors;
 }
 
-export const themes: Record<'light' | 'dark' | 'darkFluid' | 'paperSketch', ThemePalette> = {
+export const themes: Record<'light' | 'dark' | 'paperSketch' | 'technical' | 'editorial' | 'industrial' | 'dashboard', ThemePalette> = {
     light: {
         name: 'Default Light',
         background: '#F6F7F8',
@@ -67,25 +67,6 @@ export const themes: Record<'light' | 'dark' | 'darkFluid' | 'paperSketch', Them
             ST_LAINNYA: '#14B8A6',                    // Teal
         },
     },
-    darkFluid: {
-        name: 'Dark Fluid (Pre-Alpha)',
-        background: '#141218',
-        surface: '#1D1B20',
-        text: '#E6E0E9',
-        textSecondary: '#CAC4D0',
-        primary: '#D0BCFF',
-        status: {
-            piket: '#AEC6FF',
-            off: '#82D9A3',
-            cuti: '#FFB4AB',
-            penugasan: '#FFB951',
-        },
-        penugasanColors: {
-            ST_PERIKSA_FISIK_LUAR_KAWASAN: '#AEC6FF',
-            ST_ATA_CARNET: '#FFB951',
-            ST_LAINNYA: '#82D9A3',
-        },
-    },
     paperSketch: {
         name: 'Paper Sketch',
         background: '#f2efeb',
@@ -105,6 +86,82 @@ export const themes: Record<'light' | 'dark' | 'darkFluid' | 'paperSketch', Them
             ST_LAINNYA: '#2ec4b6',
         },
     },
+    technical: {
+        name: 'Systematic Technical',
+        background: '#F8F7F4',
+        surface: '#FFFFFF',
+        text: '#111113',
+        textSecondary: 'rgba(17, 17, 19, 0.6)',
+        primary: '#0D9488',
+        status: {
+            piket: '#0D9488',
+            off: '#BE1A1A',
+            cuti: '#111113',
+            penugasan: '#E29578',
+        },
+        penugasanColors: {
+            ST_PERIKSA_FISIK_LUAR_KAWASAN: '#0D9488',
+            ST_ATA_CARNET: '#E29578',
+            ST_LAINNYA: '#111113',
+        },
+    },
+    editorial: {
+        name: 'Editorial Clarity',
+        background: '#fcfbf9',
+        surface: '#ffffff',
+        text: '#1a1a1a',
+        textSecondary: 'rgba(26, 26, 26, 0.6)',
+        primary: '#2a7373',
+        status: {
+            piket: '#2a7373',
+            off: '#cc3333',
+            cuti: '#1a1a1a',
+            penugasan: '#b87333',
+        },
+        penugasanColors: {
+            ST_PERIKSA_FISIK_LUAR_KAWASAN: '#2a7373',
+            ST_ATA_CARNET: '#b87333',
+            ST_LAINNYA: '#555555',
+        },
+    },
+    industrial: {
+        name: 'Industrial Systematic',
+        background: '#0F1115',
+        surface: '#1A1D23',
+        text: '#E2E8F0',
+        textSecondary: 'rgba(226, 232, 240, 0.6)',
+        primary: '#2DD4BF',
+        status: {
+            piket: '#2DD4BF',
+            off: '#BE1A1A',
+            cuti: '#1A1D23',
+            penugasan: '#F59E0B',
+        },
+        penugasanColors: {
+            ST_PERIKSA_FISIK_LUAR_KAWASAN: '#2DD4BF',
+            ST_ATA_CARNET: '#F59E0B',
+            ST_LAINNYA: '#83C5BE',
+        },
+    },
+    dashboard: {
+        name: 'Clean SaaS Dashboard',
+        background: '#F6F7F8',
+        surface: '#FFFFFF',
+        text: '#011627',
+        textSecondary: 'rgba(1, 22, 39, 0.6)',
+        primary: '#297373',
+        status: {
+            piket: '#297373',
+            off: '#BE1A1A',
+            cuti: '#011627',
+            penugasan: '#E29578',
+        },
+        penugasanColors: {
+            ST_PERIKSA_FISIK_LUAR_KAWASAN: '#297373',
+            ST_ATA_CARNET: '#E29578',
+            ST_LAINNYA: '#83C5BE',
+        },
+    },
 };
 
 export interface ThemeConfig {
@@ -113,8 +170,11 @@ export interface ThemeConfig {
     isDark: boolean;
     isVista: boolean;
     isWinamp: boolean;
-    isDarkFluid: boolean;
     isPaperSketch: boolean;
+    isTechnical: boolean;
+    isEditorial: boolean;
+    isIndustrial: boolean;
+    isDashboard: boolean;
 
     // Palet warna & warna penugasan
     palette?: ThemePalette;
@@ -198,8 +258,367 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
     const isWinamp = theme === 'winamp';
-    const isDarkFluid = theme === 'darkFluid';
     const isPaperSketch = theme === 'paperSketch';
+    const isTechnical = theme === 'technical';
+    const isEditorial = theme === 'editorial';
+    const isIndustrial = theme === 'industrial';
+    const isDashboard = theme === 'dashboard';
+
+    if (isDashboard) {
+        return {
+            theme,
+            isDefault: false,
+            isDark: false,
+            isVista: false,
+            isWinamp: false,
+            isPaperSketch: false,
+            isTechnical: false,
+            isEditorial: false,
+            isIndustrial: false,
+            isDashboard: true,
+            palette: themes.dashboard,
+            penugasanColors: themes.dashboard.penugasanColors,
+
+            // 1. Kanvas Utama (Clean SaaS Dashboard: #F6F7F8 bg, #011627 ink, Inter font)
+            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#F6F7F8] text-[#011627] flex flex-col font-[\'Inter\'] relative selection:bg-[#297373] selection:text-white md:h-screen md:max-h-screen md:overflow-hidden',
+
+            // 2. Top Header / Navbar (Clean white 64px, subtle border)
+            navbarClass: 'sticky top-0 z-50 bg-[#FFFFFF] text-[#011627] border-b border-[rgba(1,22,39,0.08)] shadow-none shrink-0 font-[\'Inter\']',
+            logoContainerClass: 'flex h-8 w-8 items-center justify-center bg-[#297373] text-white rounded-[8px] shrink-0 shadow-2xs',
+            titleClass: 'text-xs sm:text-[13px] lg:text-[14px] font-extrabold tracking-tight truncate text-[#011627] font-[\'Inter\']',
+            versionBadgeClass: 'bg-[#F1F5F9] text-[#011627]/70 border border-[rgba(1,22,39,0.08)] text-[9px] sm:text-[10px] px-2 py-0.5 rounded-[6px] font-[\'JetBrains_Mono\'] font-medium uppercase tracking-wider',
+            subtitleClass: 'hidden sm:block text-[11px] text-[#011627]/60 font-[\'JetBrains_Mono\'] tracking-wider uppercase',
+            supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#FFFFFF] px-2.5 py-1 text-xs border border-[rgba(1,22,39,0.08)] text-[#011627] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[6px]',
+            holidayBtnClass: 'flex items-center space-x-1.5 bg-[#BE1A1A] hover:bg-[#a51515] px-3 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border border-[#BE1A1A]/30 font-[\'Inter\'] rounded-[6px]',
+            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] px-3 text-xs font-bold text-[#011627] transition-all duration-150 cursor-pointer border border-[rgba(1,22,39,0.08)] select-none font-[\'Inter\'] rounded-[6px] shadow-none',
+            themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-64 bg-[#FFFFFF] p-2 flex flex-col gap-1 text-[#011627] border border-[rgba(1,22,39,0.08)] shadow-xl animate-in fade-in zoom-in-95 duration-150 font-[\'Inter\'] rounded-[8px]',
+            settingsBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] px-2.5 py-1.5 text-xs font-bold text-[#011627] transition-all cursor-pointer border border-[rgba(1,22,39,0.08)] font-[\'Inter\'] rounded-[6px]',
+            syncBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] px-2.5 py-1.5 text-xs font-bold text-[#011627] transition-all cursor-pointer border border-[rgba(1,22,39,0.08)] font-[\'Inter\'] rounded-[6px]',
+            saveBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#297373] hover:bg-[#236060] text-white px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer border border-[#297373] font-[\'Inter\'] rounded-[6px]',
+
+            // 3. View Switcher & Navigasi Bulan
+            viewSwitcherCardClass: 'flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2 bg-[#FFFFFF] p-2 border border-[rgba(1,22,39,0.08)] font-[\'Inter\'] rounded-[8px]',
+            viewSwitcherPillsWrapperClass: 'flex flex-row flex-nowrap items-center overflow-x-auto no-scrollbar scroll-smooth p-1 gap-1 bg-[#F6F7F8] border border-[rgba(1,22,39,0.08)] max-w-full min-w-0 shrink flex-1 rounded-[6px]',
+            tabActiveClass: 'bg-[#297373] text-white font-bold border border-[#297373] font-[\'Inter\'] text-xs rounded-[6px] shadow-2xs',
+            tabInactiveClass: 'text-[#011627]/60 hover:text-[#011627] hover:bg-black/5 transition-colors duration-150 font-[\'Inter\'] text-xs rounded-[6px]',
+            monthNavBtnClass: 'border border-[rgba(1,22,39,0.08)] bg-[#F1F5F9] p-1.5 sm:p-2 text-[#011627] hover:bg-[#E2E8F0] transition-colors cursor-pointer shrink-0 rounded-[6px]',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border border-[rgba(1,22,39,0.08)] bg-[#FFFFFF] hover:bg-[#F6F7F8] px-3 py-1 text-sm sm:text-base font-extrabold text-[#011627] transition-all cursor-pointer w-[150px] sm:w-[176px] shrink-0 font-[\'Inter\'] tracking-tight rounded-[6px]',
+            todayBtnClass: 'flex items-center space-x-1 border border-[#297373]/30 bg-[#297373]/10 hover:bg-[#297373]/20 text-[#297373] px-2.5 py-1 text-xs font-bold transition-all cursor-pointer shrink-0 font-[\'Inter\'] rounded-[6px]',
+
+            // 4. Sub-toolbar Aksi Kalender
+            subToolbarCardClass: 'flex items-center justify-between bg-[#FFFFFF] p-2 border border-[rgba(1,22,39,0.08)] gap-2 font-[\'Inter\'] rounded-[8px]',
+            subToolbarTitleClass: 'text-sm font-bold text-[#011627] truncate font-[\'Inter\'] tracking-tight',
+            subToolbarDotClass: 'flex h-2 w-2 rounded-full bg-[#297373] shrink-0',
+            pasteBtnClass: 'flex items-center space-x-1.5 border border-[rgba(1,22,39,0.08)] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#011627] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-[6px]',
+            undoBtnClass: 'flex items-center space-x-1.5 border border-[rgba(1,22,39,0.08)] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#011627] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-[6px]',
+            resetBtnClass: 'flex items-center space-x-1.5 border border-[#BE1A1A]/30 bg-[#F1F5F9] hover:bg-[#BE1A1A] hover:text-white text-[#BE1A1A] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-[6px]',
+            lockBtnClass: 'flex items-center space-x-1.5 border border-[rgba(1,22,39,0.08)] bg-[#F1F5F9] text-[#011627] hover:bg-[#297373] hover:text-white px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-[6px]',
+            expandBtnClass: 'flex items-center space-x-1.5 border border-[rgba(1,22,39,0.08)] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#011627] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-[6px]',
+
+            // 5. Area Grid Kalender
+            calendarContainerCardClass: 'bg-[#FFFFFF] p-2 border border-[rgba(1,22,39,0.08)] rounded-[12px]',
+            dayNamesHeaderClass: 'grid grid-cols-7 gap-0 py-2 text-center text-[11px] font-[\'JetBrains_Mono\'] font-bold uppercase tracking-[0.1em] text-[#011627]/60 border-b border-[rgba(1,22,39,0.08)] bg-[#F6F7F8] rounded-t-[8px]',
+            weekdayNameTextClass: 'text-[#011627]/70',
+            weekendNameTextClass: 'text-[#BE1A1A]',
+            emptyCellClass: 'bg-[#F6F7F8]/70 border border-dashed border-[rgba(1,22,39,0.06)] p-1 rounded-[6px]',
+
+            // 6. Summary Cards Panel
+            summaryPanelCardClass: 'bg-[#F6F7F8] p-3.5 border border-[rgba(1,22,39,0.08)] font-[\'Inter\'] rounded-[12px]',
+            summaryTitleClass: 'text-sm font-bold text-[#011627] flex items-center font-[\'Inter\'] tracking-tight',
+            summaryHeaderBorderClass: 'border-b border-[rgba(1,22,39,0.08)] pb-2',
+            summarySubtextClass: 'text-xs text-[#011627]/60 font-[\'JetBrains_Mono\'] tracking-widest uppercase',
+
+            // 7. Modal & Pop-up
+            modalCardClass: 'bg-[#FFFFFF] border border-[rgba(1,22,39,0.12)] shadow-2xl text-[#011627] font-[\'Inter\'] rounded-[12px]',
+            modalHeaderClass: 'border-b border-[rgba(1,22,39,0.08)] bg-[#F6F7F8] px-4 py-3 font-[\'Inter\'] rounded-t-[12px]',
+            modalTitleClass: 'text-base sm:text-lg font-bold text-[#011627] font-[\'Inter\'] tracking-tight',
+            modalBodyClass: 'bg-[#FFFFFF] text-[#011627]',
+
+            // 8. Mobile Drawer & FAB
+            mobileFabClass: 'flex h-13 w-13 items-center justify-center bg-[#297373] text-white shadow-lg border border-[#297373] active:scale-95 transition-all cursor-pointer rounded-[10px]',
+            mobileDrawerClass: 'relative z-10 w-full max-w-lg bg-[#FFFFFF] p-5 shadow-2xl animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto border-t border-[rgba(1,22,39,0.15)] text-[#011627] font-[\'Inter\'] rounded-t-[16px]',
+            mobileDrawerHeaderClass: 'border-b border-[rgba(1,22,39,0.08)] pb-3 bg-[#F6F7F8]',
+            mobileDrawerTitleClass: 'text-base font-bold text-[#011627] font-[\'Inter\'] tracking-tight',
+            mobileDrawerSubtextClass: 'text-xs text-[#011627]/60 font-[\'JetBrains_Mono\']',
+            mobileDrawerNavBtnActive: 'bg-[#297373] text-white font-bold border border-[#297373] font-[\'Inter\'] text-xs rounded-[6px]',
+            mobileDrawerNavBtnInactive: 'text-[#011627] hover:bg-black/5 font-[\'Inter\'] text-xs rounded-[6px]',
+            mobileNavItemActiveClass: 'bg-[#297373] text-white border border-[#297373] font-[\'Inter\'] rounded-[6px]',
+            mobileNavItemInactiveClass: 'text-[#011627] hover:bg-black/5 font-[\'Inter\'] rounded-[6px]',
+
+            // 9. Desktop Left Side Menu
+            sidebarClass: 'border-r border-[rgba(1,22,39,0.08)] bg-[#FFFFFF] text-[#011627] font-[\'Inter\']',
+            sidebarItemActiveClass: 'bg-[#297373] text-white font-semibold shadow-xs font-[\'Inter\'] text-xs rounded-[8px]',
+            sidebarItemInactiveClass: 'text-[#011627]/70 hover:text-[#297373] hover:bg-[rgba(41,115,115,0.05)] border border-transparent transition-all font-[\'Inter\'] text-xs rounded-[8px]',
+            sidebarDividerClass: 'border-b border-[rgba(1,22,39,0.08)]',
+        };
+    }
+
+    if (isIndustrial) {
+        return {
+            theme,
+            isDefault: false,
+            isDark: false,
+            isVista: false,
+            isWinamp: false,
+            isPaperSketch: false,
+            isTechnical: false,
+            isEditorial: false,
+            isIndustrial: true,
+            isDashboard: false,
+            palette: themes.industrial,
+            penugasanColors: themes.industrial.penugasanColors,
+
+            // 1. Kanvas Utama (#0F1115 bg, #E2E8F0 ink, Inter & Syne typography)
+            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#0F1115] text-[#E2E8F0] flex flex-col font-[\'Inter\'] relative selection:bg-[#2DD4BF] selection:text-[#0F1115] md:h-screen md:max-h-screen md:overflow-hidden',
+
+            // 2. Top Header / Navbar
+            navbarClass: 'sticky top-0 z-50 bg-[#0F1115]/90 backdrop-blur-md text-[#E2E8F0] border-b-[1.5px] border-[rgba(226,232,240,0.1)] shrink-0 font-[\'Inter\']',
+            logoContainerClass: 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center bg-[#1A1D23] text-[#2DD4BF] border border-[rgba(226,232,240,0.15)] shrink-0 rounded-none',
+            titleClass: 'text-[8px] sm:text-[9.5px] lg:text-[11px] font-extrabold uppercase tracking-tight text-[#E2E8F0] font-[\'Syne\']',
+            versionBadgeClass: 'bg-[#1A1D23] text-[#E2E8F0]/70 border border-[rgba(226,232,240,0.15)] text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-[4px] font-[\'JetBrains_Mono\'] tracking-widest uppercase',
+            subtitleClass: 'hidden sm:block text-[10.5px] text-[#E2E8F0]/60 font-[\'JetBrains_Mono\'] tracking-wider uppercase',
+            supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#1A1D23] px-2.5 py-1 text-xs border border-[rgba(226,232,240,0.1)] text-[#E2E8F0] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+            holidayBtnClass: 'flex items-center space-x-1.5 bg-[#BE1A1A] hover:bg-[#a51515] px-3 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border border-[#BE1A1A]/40 font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 bg-[#1A1D23] hover:bg-[#252932] px-3 text-xs font-bold text-[#E2E8F0] transition-all duration-150 cursor-pointer border border-[rgba(226,232,240,0.15)] select-none font-[\'JetBrains_Mono\'] uppercase tracking-wider shadow-none rounded-[4px]',
+            themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-64 bg-[#1A1D23] p-2 flex flex-col gap-1 text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] shadow-2xl animate-in fade-in zoom-in-95 duration-150 font-[\'JetBrains_Mono\'] rounded-[4px]',
+            settingsBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#1A1D23] hover:bg-[#252932] px-2.5 py-1.5 text-xs font-semibold text-[#E2E8F0] transition-all cursor-pointer border border-[rgba(226,232,240,0.15)] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+            syncBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#1A1D23] hover:bg-[#252932] px-2.5 py-1.5 text-xs font-semibold text-[#E2E8F0] transition-all cursor-pointer border border-[rgba(226,232,240,0.15)] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+            saveBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#2DD4BF]/10 hover:bg-[#2DD4BF]/20 text-[#2DD4BF] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer border border-[#2DD4BF]/30 font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+
+            // 3. View Switcher & Navigasi Bulan
+            viewSwitcherCardClass: 'flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2 bg-[#1A1D23] p-2 border border-[rgba(226,232,240,0.1)] font-[\'JetBrains_Mono\'] rounded-[6px]',
+            viewSwitcherPillsWrapperClass: 'flex flex-row flex-nowrap items-center overflow-x-auto no-scrollbar scroll-smooth p-1 gap-1 bg-[#0F1115] border border-[rgba(226,232,240,0.1)] max-w-full min-w-0 shrink flex-1 rounded-[4px]',
+            tabActiveClass: 'bg-[#2DD4BF]/15 text-[#2DD4BF] font-bold border border-[#2DD4BF]/30 font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase rounded-[4px]',
+            tabInactiveClass: 'text-[#E2E8F0]/60 hover:text-[#E2E8F0] hover:bg-white/5 transition-colors duration-150 font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase rounded-[4px]',
+            monthNavBtnClass: 'border border-[rgba(226,232,240,0.15)] bg-[#1A1D23] p-1.5 sm:p-2 text-[#E2E8F0] hover:bg-white/5 transition-colors cursor-pointer shrink-0 rounded-[4px]',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border border-[rgba(226,232,240,0.15)] bg-[#0F1115] hover:bg-[#1A1D23] px-3 py-1 text-sm sm:text-base font-extrabold text-[#E2E8F0] transition-all cursor-pointer w-[150px] sm:w-[176px] shrink-0 font-[\'Syne\'] tracking-tight rounded-[4px]',
+            todayBtnClass: 'flex items-center space-x-1 border border-[#2DD4BF]/30 bg-[#2DD4BF]/20 hover:bg-[#2DD4BF]/30 text-[#2DD4BF] px-2.5 py-1 text-xs font-bold transition-all cursor-pointer shrink-0 font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+
+            // 4. Sub-toolbar Aksi Kalender
+            subToolbarCardClass: 'flex items-center justify-between bg-[#1A1D23] p-2 border border-[rgba(226,232,240,0.1)] gap-2 font-[\'JetBrains_Mono\'] rounded-[6px]',
+            subToolbarTitleClass: 'text-sm font-bold text-[#E2E8F0] truncate font-[\'Syne\'] tracking-tight',
+            subToolbarDotClass: 'flex h-2 w-2 rounded-full bg-[#2DD4BF] shrink-0',
+            pasteBtnClass: 'flex items-center space-x-1.5 border border-[rgba(226,232,240,0.15)] bg-[#0F1115] hover:bg-white/5 text-[#E2E8F0] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+            undoBtnClass: 'flex items-center space-x-1.5 border border-[rgba(226,232,240,0.15)] bg-[#0F1115] hover:bg-white/5 text-[#E2E8F0] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+            resetBtnClass: 'flex items-center space-x-1.5 border border-[#BE1A1A]/40 bg-[#0F1115] hover:bg-[#BE1A1A] hover:text-white text-[#BE1A1A] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+            lockBtnClass: 'flex items-center space-x-1.5 border border-[rgba(226,232,240,0.15)] bg-[#0F1115] text-[#E2E8F0] hover:bg-[#2DD4BF] hover:text-[#0F1115] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+            expandBtnClass: 'flex items-center space-x-1.5 border border-[rgba(226,232,240,0.15)] bg-[#0F1115] hover:bg-white/5 text-[#E2E8F0] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
+
+            // 5. Area Grid Kalender
+            calendarContainerCardClass: 'bg-[#1A1D23] p-2 border border-[rgba(226,232,240,0.1)] rounded-[8px]',
+            dayNamesHeaderClass: 'grid grid-cols-7 gap-0 py-1.5 text-center text-[10.5px] font-[\'JetBrains_Mono\'] font-bold uppercase tracking-[0.1em] text-[#E2E8F0]/60 border-b border-[rgba(226,232,240,0.1)] bg-white/[0.03]',
+            weekdayNameTextClass: 'text-[#E2E8F0]/70',
+            weekendNameTextClass: 'text-[#BE1A1A]',
+            emptyCellClass: 'bg-[#0F1115]/50 border border-dashed border-[rgba(226,232,240,0.06)] p-1',
+
+            // 6. Summary Cards Panel
+            summaryPanelCardClass: 'bg-[#1A1D23] p-3.5 border border-[rgba(226,232,240,0.1)] font-[\'Inter\'] rounded-[8px]',
+            summaryTitleClass: 'text-sm font-bold text-[#E2E8F0] flex items-center font-[\'Syne\'] tracking-tight',
+            summaryHeaderBorderClass: 'border-b border-[rgba(226,232,240,0.1)] pb-2',
+            summarySubtextClass: 'text-xs text-[#E2E8F0]/60 font-[\'JetBrains_Mono\'] tracking-widest uppercase',
+
+            // 7. Modal & Pop-up
+            modalCardClass: 'bg-[#1A1D23] border border-[rgba(226,232,240,0.15)] shadow-2xl text-[#E2E8F0] font-[\'Inter\'] rounded-[8px]',
+            modalHeaderClass: 'border-b border-[rgba(226,232,240,0.1)] bg-[#0F1115] px-4 py-3 font-[\'JetBrains_Mono\']',
+            modalTitleClass: 'text-base sm:text-lg font-bold text-[#E2E8F0] font-[\'Syne\'] tracking-tight',
+            modalBodyClass: 'bg-[#1A1D23] text-[#E2E8F0]',
+
+            // 8. Mobile Drawer & FAB
+            mobileFabClass: 'flex h-13 w-13 items-center justify-center bg-[#2DD4BF] text-[#0F1115] shadow-lg border border-[#2DD4BF] active:scale-95 transition-all cursor-pointer rounded-[6px]',
+            mobileDrawerClass: 'relative z-10 w-full max-w-lg bg-[#1A1D23] p-5 shadow-2xl animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto border-t border-[rgba(226,232,240,0.2)] text-[#E2E8F0] font-[\'Inter\'] rounded-t-[12px]',
+            mobileDrawerHeaderClass: 'border-b border-[rgba(226,232,240,0.1)] pb-3 bg-[#0F1115]',
+            mobileDrawerTitleClass: 'text-base font-bold text-[#E2E8F0] font-[\'Syne\'] tracking-tight',
+            mobileDrawerSubtextClass: 'text-xs text-[#E2E8F0]/60 font-[\'JetBrains_Mono\']',
+            mobileDrawerNavBtnActive: 'bg-[#2DD4BF]/15 text-[#2DD4BF] font-bold border border-[#2DD4BF]/30 font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase rounded-[4px]',
+            mobileDrawerNavBtnInactive: 'text-[#E2E8F0] hover:bg-white/5 font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase rounded-[4px]',
+            mobileNavItemActiveClass: 'bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30 font-[\'JetBrains_Mono\'] rounded-[4px]',
+            mobileNavItemInactiveClass: 'text-[#E2E8F0] hover:bg-white/5 font-[\'JetBrains_Mono\'] rounded-[4px]',
+
+            // 9. Desktop Left Side Menu
+            sidebarClass: 'border-r-[1.5px] border-[rgba(226,232,240,0.1)] bg-[#14171C]/80 text-[#E2E8F0] font-[\'Inter\']',
+            sidebarItemActiveClass: 'bg-[#2DD4BF]/10 text-[#2DD4BF] font-bold border border-[#2DD4BF]/20 font-[\'JetBrains_Mono\'] text-xs uppercase tracking-wider rounded-[6px]',
+            sidebarItemInactiveClass: 'text-[#E2E8F0]/70 hover:text-[#E2E8F0] hover:bg-white/5 border border-transparent hover:border-[rgba(226,232,240,0.1)] transition-all font-[\'JetBrains_Mono\'] text-xs uppercase tracking-wider rounded-[6px]',
+            sidebarDividerClass: 'border-b border-[rgba(226,232,240,0.1)]',
+        };
+    }
+
+    if (isEditorial) {
+        return {
+            theme,
+            isDefault: false,
+            isDark: false,
+            isVista: false,
+            isWinamp: false,
+            isPaperSketch: false,
+            isTechnical: false,
+            isEditorial: true,
+            isIndustrial: false,
+            isDashboard: false,
+            palette: themes.editorial,
+            penugasanColors: themes.editorial.penugasanColors,
+
+            // 1. Kanvas Utama (Warm cream #fcfbf9, ink #1a1a1a, Geist font)
+            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#fcfbf9] text-[#1a1a1a] flex flex-col font-[\'Geist\'] relative selection:bg-[#2a7373] selection:text-white md:h-screen md:max-h-screen md:overflow-hidden',
+
+            // 2. Top Header / Navbar
+            navbarClass: 'sticky top-0 z-50 bg-[#fcfbf9]/95 backdrop-blur-md text-[#1a1a1a] border-b border-[#1a1a1a]/10 shrink-0 font-[\'Geist\']',
+            logoContainerClass: 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center bg-transparent text-[#2a7373] border border-[#1a1a1a]/15 shrink-0',
+            titleClass: 'text-base sm:text-lg md:text-2xl font-semibold italic tracking-tight truncate text-[#1a1a1a] font-[\'Cormorant_Garamond\']',
+            versionBadgeClass: 'bg-[#1a1a1a]/[0.06] text-[#1a1a1a] border border-[#1a1a1a]/15 text-[9px] sm:text-[10px] px-2 py-0.5 font-[\'Geist_Mono\'] font-medium uppercase tracking-widest',
+            subtitleClass: 'hidden sm:block text-[10.5px] text-[#1a1a1a]/60 font-[\'Geist_Mono\'] tracking-widest uppercase',
+            supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#ffffff] px-2.5 py-1 text-xs border border-[#1a1a1a]/10 text-[#1a1a1a] font-[\'Geist_Mono\'] uppercase tracking-wider',
+            holidayBtnClass: 'flex items-center space-x-1.5 bg-[#cc3333] hover:bg-[#b02a2a] px-3 py-1.5 text-xs font-semibold text-white transition-all cursor-pointer border border-[#cc3333]/30 font-[\'Geist_Mono\'] uppercase tracking-wider',
+            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 bg-[#ffffff] hover:bg-[#fcfbf9] px-3 text-xs font-medium text-[#1a1a1a] transition-all duration-150 cursor-pointer border border-[#1a1a1a]/15 select-none font-[\'Geist_Mono\'] uppercase tracking-wider shadow-none',
+            themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-64 bg-[#fcfbf9] p-2 flex flex-col gap-1 text-[#1a1a1a] border border-[#1a1a1a]/15 shadow-xl animate-in fade-in zoom-in-95 duration-150 font-[\'Geist_Mono\']',
+            settingsBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#ffffff] hover:bg-[#1a1a1a]/[0.05] px-2.5 py-1.5 text-xs font-medium text-[#1a1a1a] transition-all cursor-pointer border border-[#1a1a1a]/15 font-[\'Geist_Mono\'] uppercase tracking-wider',
+            syncBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#ffffff] hover:bg-[#1a1a1a]/[0.05] px-2.5 py-1.5 text-xs font-medium text-[#1a1a1a] transition-all cursor-pointer border border-[#1a1a1a]/15 font-[\'Geist_Mono\'] uppercase tracking-wider',
+            saveBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#ffffff] hover:bg-[#1a1a1a]/[0.05] px-2.5 py-1.5 text-xs font-medium text-[#1a1a1a] transition-all cursor-pointer border border-[#1a1a1a]/15 font-[\'Geist_Mono\'] uppercase tracking-wider',
+
+            // 3. View Switcher & Navigasi Bulan
+            viewSwitcherCardClass: 'flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2 bg-[#ffffff] p-2 border border-[#1a1a1a]/10 font-[\'Geist_Mono\']',
+            viewSwitcherPillsWrapperClass: 'flex flex-row flex-nowrap items-center overflow-x-auto no-scrollbar scroll-smooth p-1 gap-1 bg-[#fcfbf9] border border-[#1a1a1a]/10 max-w-full min-w-0 shrink flex-1',
+            tabActiveClass: 'bg-[#1a1a1a] text-[#fcfbf9] font-medium border border-[#1a1a1a] font-[\'Geist_Mono\'] text-xs tracking-wider uppercase',
+            tabInactiveClass: 'text-[#1a1a1a]/60 hover:text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] transition-colors duration-150 font-[\'Geist_Mono\'] text-xs tracking-wider uppercase',
+            monthNavBtnClass: 'border border-[#1a1a1a]/15 bg-[#ffffff] p-1.5 sm:p-2 text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] transition-colors cursor-pointer shrink-0',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border border-[#1a1a1a]/15 bg-[#ffffff] hover:bg-[#fcfbf9] px-3 py-1 text-sm sm:text-base font-semibold italic text-[#1a1a1a] transition-all cursor-pointer w-[150px] sm:w-[176px] shrink-0 font-[\'Cormorant_Garamond\'] tracking-tight',
+            todayBtnClass: 'flex items-center space-x-1 border border-[#2a7373]/30 bg-[#2a7373] hover:bg-[#236060] text-white px-2.5 py-1 text-xs font-medium transition-all cursor-pointer shrink-0 font-[\'Geist_Mono\'] uppercase tracking-wider',
+
+            // 4. Sub-toolbar Aksi Kalender
+            subToolbarCardClass: 'flex items-center justify-between bg-[#ffffff] p-2 border border-[#1a1a1a]/10 gap-2 font-[\'Geist_Mono\']',
+            subToolbarTitleClass: 'text-sm font-semibold italic text-[#1a1a1a] truncate font-[\'Cormorant_Garamond\'] tracking-tight',
+            subToolbarDotClass: 'flex h-2 w-2 rounded-full bg-[#2a7373] shrink-0',
+            pasteBtnClass: 'flex items-center space-x-1.5 border border-[#1a1a1a]/15 bg-[#ffffff] hover:bg-[#1a1a1a]/[0.05] text-[#1a1a1a] px-2.5 py-1.5 text-xs font-medium transition-all cursor-pointer font-[\'Geist_Mono\'] uppercase tracking-wider',
+            undoBtnClass: 'flex items-center space-x-1.5 border border-[#1a1a1a]/15 bg-[#ffffff] hover:bg-[#1a1a1a]/[0.05] text-[#1a1a1a] px-2.5 py-1.5 text-xs font-medium transition-all cursor-pointer font-[\'Geist_Mono\'] uppercase tracking-wider',
+            resetBtnClass: 'flex items-center space-x-1.5 border border-[#1a1a1a]/15 bg-[#ffffff] hover:bg-[#cc3333] hover:text-white text-[#1a1a1a] px-2.5 py-1.5 text-xs font-medium transition-all cursor-pointer font-[\'Geist_Mono\'] uppercase tracking-wider',
+            lockBtnClass: 'flex items-center space-x-1.5 border border-[#1a1a1a]/15 bg-[#ffffff] text-[#1a1a1a] hover:bg-[#2a7373] hover:text-white px-2.5 py-1.5 text-xs font-medium transition-all cursor-pointer font-[\'Geist_Mono\'] uppercase tracking-wider',
+            expandBtnClass: 'flex items-center space-x-1.5 border border-[#1a1a1a]/15 bg-[#ffffff] hover:bg-[#1a1a1a]/[0.05] text-[#1a1a1a] px-2.5 py-1.5 text-xs font-medium transition-all cursor-pointer font-[\'Geist_Mono\'] uppercase tracking-wider',
+
+            // 5. Area Grid Kalender
+            calendarContainerCardClass: 'bg-[#ffffff] p-2 border-t border-[#1a1a1a] border-b border-x border-[#1a1a1a]/10',
+            dayNamesHeaderClass: 'grid grid-cols-7 gap-0 py-1.5 text-center text-[10.5px] font-[\'Geist_Mono\'] font-medium uppercase tracking-[0.1em] text-[#1a1a1a]/60 border-b border-[#1a1a1a]/10 bg-[#fcfbf9]',
+            weekdayNameTextClass: 'text-[#1a1a1a]/70',
+            weekendNameTextClass: 'text-[#cc3333]',
+            emptyCellClass: 'bg-[#1a1a1a]/[0.02] border border-dashed border-[#1a1a1a]/10 p-1',
+
+            // 6. Summary Cards Panel
+            summaryPanelCardClass: 'bg-[#ffffff] p-3.5 border border-[#1a1a1a]/10 font-[\'Geist\']',
+            summaryTitleClass: 'text-sm font-semibold italic text-[#1a1a1a] flex items-center font-[\'Cormorant_Garamond\'] tracking-tight',
+            summaryHeaderBorderClass: 'border-b border-[#1a1a1a]/10 pb-2',
+            summarySubtextClass: 'text-xs text-[#1a1a1a]/60 font-[\'Geist_Mono\'] tracking-widest uppercase',
+
+            // 7. Modal & Pop-up
+            modalCardClass: 'bg-[#ffffff] border border-[#1a1a1a]/15 shadow-2xl text-[#1a1a1a] font-[\'Geist\']',
+            modalHeaderClass: 'border-b border-[#1a1a1a]/10 bg-[#fcfbf9] px-4 py-3 font-[\'Geist_Mono\']',
+            modalTitleClass: 'text-base sm:text-lg font-semibold italic text-[#1a1a1a] font-[\'Cormorant_Garamond\'] tracking-tight',
+            modalBodyClass: 'bg-[#ffffff] text-[#1a1a1a]',
+
+            // 8. Mobile Drawer & FAB
+            mobileFabClass: 'flex h-13 w-13 items-center justify-center bg-[#2a7373] text-white shadow-lg border border-[#2a7373] active:scale-95 transition-all cursor-pointer',
+            mobileDrawerClass: 'relative z-10 w-full max-w-lg bg-[#ffffff] p-5 shadow-2xl animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto border-t border-[#1a1a1a]/20 text-[#1a1a1a] font-[\'Geist\']',
+            mobileDrawerHeaderClass: 'border-b border-[#1a1a1a]/10 pb-3 bg-[#fcfbf9]',
+            mobileDrawerTitleClass: 'text-base font-semibold italic text-[#1a1a1a] font-[\'Cormorant_Garamond\'] tracking-tight',
+            mobileDrawerSubtextClass: 'text-xs text-[#1a1a1a]/60 font-[\'Geist_Mono\']',
+            mobileDrawerNavBtnActive: 'bg-[#1a1a1a] text-[#fcfbf9] font-medium border border-[#1a1a1a] font-[\'Geist_Mono\'] text-xs tracking-wider uppercase',
+            mobileDrawerNavBtnInactive: 'text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] font-[\'Geist_Mono\'] text-xs tracking-wider uppercase',
+            mobileNavItemActiveClass: 'bg-[#1a1a1a] text-[#fcfbf9] border border-[#1a1a1a] font-[\'Geist_Mono\']',
+            mobileNavItemInactiveClass: 'text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] font-[\'Geist_Mono\']',
+
+            // 9. Desktop Left Side Menu
+            sidebarClass: 'border-r border-[#1a1a1a]/10 bg-[#fcfbf9] text-[#1a1a1a] font-[\'Geist\']',
+            sidebarItemActiveClass: 'bg-[#1a1a1a] text-[#fcfbf9] font-medium border border-[#1a1a1a] font-[\'Geist_Mono\'] text-xs uppercase tracking-wider',
+            sidebarItemInactiveClass: 'text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] border border-transparent hover:border-[#1a1a1a]/10 transition-all font-[\'Geist_Mono\'] text-xs uppercase tracking-wider',
+            sidebarDividerClass: 'border-b border-[#1a1a1a]/10',
+        };
+    }
+
+    if (isTechnical) {
+        return {
+            theme,
+            isDefault: false,
+            isDark: false,
+            isVista: false,
+            isWinamp: false,
+            isPaperSketch: false,
+            isTechnical: true,
+            isEditorial: false,
+            isIndustrial: false,
+            isDashboard: false,
+            palette: themes.technical,
+            penugasanColors: themes.technical.penugasanColors,
+
+            // 1. Kanvas Utama (Systematic Technical #F8F7F4, Ink #111113, Inter font)
+            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#F8F7F4] text-[#111113] flex flex-col font-[\'Inter\'] relative selection:bg-[#0D9488] selection:text-white md:h-screen md:max-h-screen md:overflow-hidden',
+
+            // 2. Top Header / Navbar
+            navbarClass: 'sticky top-0 z-50 bg-[#F8F7F4] text-[#111113] border-b-[1.5px] border-[#111113] shrink-0 font-[\'Inter\']',
+            logoContainerClass: 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center bg-[#111113] text-[#F8F7F4] border-[1.5px] border-[#111113] shrink-0',
+            titleClass: 'text-base sm:text-lg md:text-xl font-extrabold tracking-tight truncate text-[#111113] font-[\'Syne\']',
+            versionBadgeClass: 'bg-[#111113] text-[#F8F7F4] border border-[#111113] text-[9px] sm:text-[10px] px-2 py-0.5 font-[\'JetBrains_Mono\'] font-bold tracking-widest uppercase',
+            subtitleClass: 'hidden sm:block text-[11px] text-[#111113]/60 font-[\'JetBrains_Mono\'] tracking-wider uppercase',
+            supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#FFFFFF] px-2.5 py-1 text-xs border-[1.5px] border-[#111113] text-[#111113] font-[\'JetBrains_Mono\'] font-bold uppercase tracking-wider',
+            holidayBtnClass: 'flex items-center space-x-1.5 bg-[#BE1A1A] hover:bg-[#a01515] px-3 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border-[1.5px] border-[#111113] font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] px-3 text-xs font-bold text-[#111113] transition-all duration-150 cursor-pointer border-[1.5px] border-[#111113] select-none font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-64 bg-[#F8F7F4] p-2 flex flex-col gap-1 text-[#111113] border-[1.5px] border-[#111113] shadow-[4px_4px_0px_#111113] animate-in fade-in zoom-in-95 duration-150 font-[\'JetBrains_Mono\']',
+            settingsBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] px-2.5 py-1.5 text-xs font-bold text-[#111113] transition-all cursor-pointer border-[1.5px] border-[#111113] font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            syncBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] px-2.5 py-1.5 text-xs font-bold text-[#111113] transition-all cursor-pointer border-[1.5px] border-[#111113] font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            saveBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] px-2.5 py-1.5 text-xs font-bold text-[#111113] transition-all cursor-pointer border-[1.5px] border-[#111113] font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+
+            // 3. View Switcher & Navigasi Bulan
+            viewSwitcherCardClass: 'flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2 bg-[#FFFFFF] p-2 border-[1.5px] border-[#111113] font-[\'JetBrains_Mono\']',
+            viewSwitcherPillsWrapperClass: 'flex flex-row flex-nowrap items-center overflow-x-auto no-scrollbar scroll-smooth p-1 gap-1 bg-[#F8F7F4] border-[1.5px] border-[#111113] max-w-full min-w-0 shrink flex-1',
+            tabActiveClass: 'bg-[#111113] text-[#F8F7F4] font-bold border border-[#111113] font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase',
+            tabInactiveClass: 'text-[#111113]/70 hover:text-[#111113] hover:bg-black/5 transition-colors duration-150 font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase',
+            monthNavBtnClass: 'border-[1.5px] border-[#111113] bg-[#FFFFFF] p-1.5 sm:p-2 text-[#111113] hover:bg-[#111113] hover:text-[#F8F7F4] transition-colors cursor-pointer shrink-0',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border-[1.5px] border-[#111113] bg-[#FFFFFF] hover:bg-[#F8F7F4] px-3 py-1 text-sm sm:text-base font-bold text-[#111113] transition-all cursor-pointer w-[150px] sm:w-[176px] shrink-0 font-[\'JetBrains_Mono\'] tracking-tight uppercase',
+            todayBtnClass: 'flex items-center space-x-1 border-[1.5px] border-[#111113] bg-[#0D9488] hover:bg-[#0b7a70] text-white px-2.5 py-1 text-xs font-bold transition-all cursor-pointer shrink-0 font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+
+            // 4. Sub-toolbar Aksi Kalender
+            subToolbarCardClass: 'flex items-center justify-between bg-[#FFFFFF] p-2 border-[1.5px] border-[#111113] gap-2 font-[\'JetBrains_Mono\']',
+            subToolbarTitleClass: 'text-sm font-bold text-[#111113] truncate font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            subToolbarDotClass: 'flex h-2.5 w-2.5 bg-[#0D9488] border border-[#111113] shrink-0',
+            pasteBtnClass: 'flex items-center space-x-1.5 border-[1.5px] border-[#111113] bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] text-[#111113] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            undoBtnClass: 'flex items-center space-x-1.5 border-[1.5px] border-[#111113] bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] text-[#111113] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            resetBtnClass: 'flex items-center space-x-1.5 border-[1.5px] border-[#111113] bg-[#FFFFFF] hover:bg-[#BE1A1A] hover:text-white text-[#111113] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            lockBtnClass: 'flex items-center space-x-1.5 border-[1.5px] border-[#111113] bg-[#FFFFFF] text-[#111113] hover:bg-[#0D9488] hover:text-white px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            expandBtnClass: 'flex items-center space-x-1.5 border-[1.5px] border-[#111113] bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] text-[#111113] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+
+            // 5. Area Grid Kalender
+            calendarContainerCardClass: 'bg-[#FFFFFF] p-2 border-[1.5px] border-[#111113]',
+            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 mb-1.5 bg-[#F8F7F4] py-1.5 text-center text-xs font-[\'JetBrains_Mono\'] font-bold border-b-[1.5px] border-[#111113] tracking-widest uppercase',
+            weekdayNameTextClass: 'text-[#111113]',
+            weekendNameTextClass: 'text-[#BE1A1A]',
+            emptyCellClass: 'bg-[#111113]/5 border border-dashed border-[#111113]/20 p-1',
+
+            // 6. Summary Cards Panel
+            summaryPanelCardClass: 'bg-[#FFFFFF] p-3.5 border-[1.5px] border-[#111113] font-[\'Inter\']',
+            summaryTitleClass: 'text-sm font-bold text-[#111113] flex items-center font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            summaryHeaderBorderClass: 'border-b-[1.5px] border-[#111113] pb-2',
+            summarySubtextClass: 'text-xs text-[#111113]/60 font-[\'JetBrains_Mono\'] tracking-wider',
+
+            // 7. Modal & Pop-up
+            modalCardClass: 'bg-[#FFFFFF] border-[2px] border-[#111113] shadow-[8px_8px_0px_#111113] text-[#111113] font-[\'Inter\']',
+            modalHeaderClass: 'border-b-[1.5px] border-[#111113] bg-[#F8F7F4] px-4 py-3 font-[\'JetBrains_Mono\']',
+            modalTitleClass: 'text-base font-bold text-[#111113] font-[\'Syne\'] tracking-tight',
+            modalBodyClass: 'bg-[#FFFFFF] text-[#111113]',
+
+            // 8. Mobile Drawer & FAB
+            mobileFabClass: 'flex h-13 w-13 items-center justify-center bg-[#0D9488] text-white shadow-[3px_3px_0px_#111113] border-[1.5px] border-[#111113] active:scale-95 transition-all cursor-pointer',
+            mobileDrawerClass: 'relative z-10 w-full max-w-lg bg-[#FFFFFF] p-5 shadow-2xl animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto border-t-[2px] border-[#111113] text-[#111113] font-[\'Inter\']',
+            mobileDrawerHeaderClass: 'border-b-[1.5px] border-[#111113] pb-3 bg-[#F8F7F4]',
+            mobileDrawerTitleClass: 'text-base font-bold text-[#111113] font-[\'Syne\'] tracking-tight',
+            mobileDrawerSubtextClass: 'text-xs text-[#111113]/70 font-[\'JetBrains_Mono\']',
+            mobileDrawerNavBtnActive: 'bg-[#111113] text-[#F8F7F4] font-bold border border-[#111113] font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase',
+            mobileDrawerNavBtnInactive: 'text-[#111113] hover:bg-[#111113]/5 font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase',
+            mobileNavItemActiveClass: 'bg-[#111113] text-[#F8F7F4] border border-[#111113] font-[\'JetBrains_Mono\']',
+            mobileNavItemInactiveClass: 'text-[#111113] hover:bg-[#111113]/5 font-[\'JetBrains_Mono\']',
+
+            // 9. Desktop Left Side Menu
+            sidebarClass: 'border-r-[1.5px] border-[#111113] bg-[#F8F7F4] text-[#111113] font-[\'Inter\']',
+            sidebarItemActiveClass: 'bg-[#111113] text-[#F8F7F4] font-bold border-[1.5px] border-[#111113] font-[\'JetBrains_Mono\'] text-xs uppercase tracking-wider',
+            sidebarItemInactiveClass: 'text-[#111113] hover:bg-[#111113]/5 border-[1.5px] border-transparent hover:border-[#111113]/20 transition-all font-[\'JetBrains_Mono\'] text-xs uppercase tracking-wider',
+            sidebarDividerClass: 'border-b-[1.5px] border-[#111113]',
+        };
+    }
 
     if (isPaperSketch) {
         return {
@@ -208,13 +627,16 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             isDark: false,
             isVista: false,
             isWinamp: false,
-            isDarkFluid: false,
             isPaperSketch: true,
+            isTechnical: false,
+            isEditorial: false,
+            isIndustrial: false,
+            isDashboard: false,
             palette: themes.paperSketch,
             penugasanColors,
 
             // 1. Kanvas Utama (Paper sketch grid background, ink text)
-            wrapperClass: 'h-[100dvh] max-h-[100dvh] w-full bg-[#f2efeb] text-[#2b2b2b] flex flex-col font-[\'Gaegu\'] font-bold relative selection:bg-[#2ec4b6] selection:text-[#2b2b2b] overflow-hidden',
+            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#f2efeb] text-[#2b2b2b] flex flex-col font-[\'Gaegu\'] font-bold relative selection:bg-[#2ec4b6] selection:text-[#2b2b2b] md:h-screen md:max-h-screen md:overflow-hidden',
 
             // 2. Top Header / Navbar: paper background, ink borders, Gochi Hand title & Space Mono build badge
             navbarClass: 'sticky top-0 z-50 bg-[#ffffff] text-[#2b2b2b] border-b-[3px] border-[#2b2b2b] shadow-[0_4px_0px_#2b2b2b] shrink-0 font-[\'Gaegu\']',
@@ -281,8 +703,8 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
 
             // 9. Desktop Left Side Menu
             sidebarClass: 'border-r-[2.5px] border-[#2b2b2b] shadow-[4px_0_0px_#2b2b2b] text-[#2b2b2b] relative overflow-hidden font-[\'Gaegu\']',
-            sidebarItemActiveClass: 'bg-[#ff4747] text-white font-bold rounded-lg border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-sm tracking-wide',
-            sidebarItemInactiveClass: 'text-[#2b2b2b] hover:bg-[#2ec4b6] rounded-lg border-2 border-transparent hover:border-[#2b2b2b] hover:shadow-[1px_1px_0px_#2b2b2b] transition-all font-[\'Gaegu\'] text-sm tracking-wide',
+            sidebarItemActiveClass: 'bg-[#ff4747] text-white font-bold rounded-[5px] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-xs min-[1400px]:text-sm tracking-wide',
+            sidebarItemInactiveClass: 'text-[#2b2b2b] hover:bg-[#2ec4b6] rounded-[5px] border-2 border-transparent hover:border-[#2b2b2b] hover:shadow-[1px_1px_0px_#2b2b2b] transition-all font-[\'Gaegu\'] text-xs min-[1400px]:text-sm tracking-wide',
             sidebarDividerClass: 'border-b-2 border-dashed border-[#2b2b2b]',
         };
     }
@@ -294,13 +716,16 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             isDark: true,
             isVista: false,
             isWinamp: false,
-            isDarkFluid: false,
             isPaperSketch: false,
+            isTechnical: false,
+            isEditorial: false,
+            isIndustrial: false,
+            isDashboard: false,
             palette: themes.dark,
             penugasanColors,
 
             // 1. Kanvas Utama: #121212 bg, #E0E0E0 text
-            wrapperClass: 'h-[100dvh] max-h-[100dvh] w-full bg-[#121212] text-[#E0E0E0] flex flex-col font-sans relative selection:bg-slate-700 selection:text-white overflow-hidden',
+            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#121212] text-[#E0E0E0] flex flex-col font-sans relative selection:bg-slate-700 selection:text-white md:h-screen md:max-h-screen md:overflow-hidden',
 
             // 2. Top Header / Navbar: #1A1A1A, border #333333
             navbarClass: 'sticky top-0 z-50 bg-[#1A1A1A] text-[#E0E0E0] border-b border-[#333333] shadow-[0_4px_20px_rgba(0,0,0,0.8)] shrink-0',
@@ -367,8 +792,8 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
 
             // 9. Desktop Left Side Menu
             sidebarClass: 'bg-[#161618]/95 backdrop-blur-md border-r border-zinc-800/80 shadow-2xl z-20',
-            sidebarItemActiveClass: 'bg-[#121214] text-emerald-400 font-extrabold border border-emerald-500/40 shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] translate-y-0.5 rounded-xl',
-            sidebarItemInactiveClass: 'bg-[#222224] text-zinc-300 hover:text-white hover:bg-[#2A2A2E] shadow-md shadow-black/50 border border-[#333338] hover:-translate-y-0.5 rounded-xl font-semibold transition-all duration-150',
+            sidebarItemActiveClass: 'bg-[#121214] text-emerald-400 font-extrabold border border-emerald-500/40 shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] translate-y-0.5 rounded-[7px]',
+            sidebarItemInactiveClass: 'bg-[#222224] text-zinc-300 hover:text-white hover:bg-[#2A2A2E] shadow-md shadow-black/50 border border-[#333338] hover:-translate-y-0.5 rounded-[7px] font-semibold transition-all duration-150',
             sidebarDividerClass: 'border-t border-zinc-800/80',
         };
     }
@@ -380,12 +805,15 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             isDark: false,
             isVista: true,
             isWinamp: false,
-            isDarkFluid: false,
             isPaperSketch: false,
+            isTechnical: false,
+            isEditorial: false,
+            isIndustrial: false,
+            isDashboard: false,
             penugasanColors,
 
             // 1. Kanvas Utama: Radial gradient aero glass
-            wrapperClass: 'h-[100dvh] max-h-[100dvh] w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-100 via-blue-200 to-indigo-100 text-[#0F172A] flex flex-col font-sans relative selection:bg-sky-200 selection:text-sky-900 overflow-hidden',
+            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-100 via-blue-200 to-indigo-100 text-[#0F172A] flex flex-col font-sans relative selection:bg-sky-200 selection:text-sky-900 md:h-screen md:max-h-screen md:overflow-hidden',
 
             // 2. Top Header / Navbar: Translucent Aero Glass
             navbarClass: 'sticky top-0 z-50 bg-sky-950/45 backdrop-blur-xl text-white border-b border-white/25 shadow-lg shrink-0',
@@ -406,19 +834,19 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             viewSwitcherPillsWrapperClass: 'flex flex-row flex-nowrap items-center overflow-x-auto no-scrollbar scroll-smooth p-1 gap-0.5 sm:gap-1 lg:gap-1.5 rounded-xl bg-white/30 backdrop-blur-xs border border-white/40 max-w-full min-w-0 shrink flex-1',
             tabActiveClass: 'bg-white/95 border border-white text-sky-950 shadow-2xs font-extrabold rounded-lg',
             tabInactiveClass: 'text-slate-800 hover:bg-white/50 rounded-lg transition-colors duration-150 font-semibold',
-            monthNavBtnClass: 'rounded-lg sm:rounded-xl border border-white/70 bg-white/50 backdrop-blur-xs p-1.5 sm:p-2 text-[#0F172A] hover:bg-white/80 transition-colors cursor-pointer shrink-0 shadow-2xs',
-            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 rounded-lg sm:rounded-xl border border-white/80 bg-white/60 hover:bg-white/85 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-extrabold text-[#0F172A] shadow-xs backdrop-blur-xs transition-all cursor-pointer w-[132px] min-[380px]:w-[142px] sm:w-[168px] shrink-0',
-            todayBtnClass: 'flex items-center space-x-1 rounded-lg sm:rounded-xl border border-white/70 bg-white/50 hover:bg-white/80 text-[#0F172A] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold backdrop-blur-xs transition-all cursor-pointer shrink-0 shadow-2xs',
+            monthNavBtnClass: 'rounded-lg sm:rounded-xl border border-white/80 bg-white/85 text-slate-900 hover:bg-white transition-all cursor-pointer shrink-0 shadow-sm backdrop-blur-md',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 rounded-lg sm:rounded-xl border border-white/90 bg-white/90 hover:bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-extrabold text-sky-950 shadow-md backdrop-blur-md transition-all cursor-pointer w-[132px] min-[380px]:w-[142px] sm:w-[168px] shrink-0',
+            todayBtnClass: 'flex items-center space-x-1 rounded-lg sm:rounded-xl border border-white/80 bg-white/85 hover:bg-white text-sky-950 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold backdrop-blur-md transition-all cursor-pointer shrink-0 shadow-sm',
 
             // 4. Sub-toolbar Aksi Kalender
             subToolbarCardClass: 'flex items-center justify-between rounded-xl sm:rounded-2xl bg-white/45 backdrop-blur-xl p-1.5 sm:p-2.5 lg:px-3.5 shadow-xs border border-white/70 gap-2',
-            subToolbarTitleClass: 'text-xs sm:text-sm font-extrabold text-[#0F172A] truncate drop-shadow-xs',
-            subToolbarDotClass: 'flex h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-sky-600 shrink-0',
-            pasteBtnClass: 'flex items-center space-x-1.5 rounded-lg sm:rounded-xl border border-white/70 bg-white/50 backdrop-blur-xs hover:bg-white/80 text-[#0F172A] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-xs',
-            undoBtnClass: 'flex items-center space-x-1.5 rounded-lg sm:rounded-xl border border-white/70 bg-white/50 backdrop-blur-xs hover:bg-white/80 text-[#0F172A] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-xs',
-            resetBtnClass: 'flex items-center space-x-1.5 rounded-lg sm:rounded-xl border border-white/70 bg-white/50 backdrop-blur-xs hover:bg-white/80 text-[#0F172A] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all shadow-xs cursor-pointer',
-            lockBtnClass: 'flex items-center space-x-1.5 rounded-lg sm:rounded-xl border border-white/70 bg-white/50 backdrop-blur-xs text-[#0F172A] hover:bg-white/80 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-xs',
-            expandBtnClass: 'flex items-center space-x-1.5 rounded-lg sm:rounded-xl border border-white/70 bg-white/50 backdrop-blur-xs hover:bg-white/80 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold text-[#0F172A] transition-all cursor-pointer shadow-xs',
+            subToolbarTitleClass: 'text-xs sm:text-sm font-extrabold text-white truncate drop-shadow-md',
+            subToolbarDotClass: 'flex h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-sky-400 shrink-0 shadow-[0_0_8px_rgba(56,189,248,0.8)]',
+            pasteBtnClass: 'flex items-center space-x-1.5 rounded-lg sm:rounded-xl border border-white/80 bg-white/80 hover:bg-white text-slate-900 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm backdrop-blur-md',
+            undoBtnClass: 'flex items-center space-x-1.5 rounded-lg sm:rounded-xl border border-white/80 bg-white/80 hover:bg-white text-slate-900 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm backdrop-blur-md',
+            resetBtnClass: 'flex items-center space-x-1.5 rounded-lg sm:rounded-xl border border-white/80 bg-white/80 hover:bg-white text-slate-900 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all shadow-sm cursor-pointer backdrop-blur-md',
+            lockBtnClass: 'flex items-center space-x-1.5 rounded-lg sm:rounded-xl border border-white/80 bg-white/80 text-slate-900 hover:bg-white px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm backdrop-blur-md',
+            expandBtnClass: 'flex items-center space-x-1.5 rounded-lg sm:rounded-xl border border-white/80 bg-white/80 hover:bg-white text-slate-900 px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm backdrop-blur-md',
 
             // 5. Area Grid Kalender
             calendarContainerCardClass: 'rounded-xl sm:rounded-2xl bg-white/45 backdrop-blur-xl p-1 sm:p-2 lg:p-2.5 shadow-[0_8px_30px_rgba(14,116,224,0.12)] border border-white/70',
@@ -452,8 +880,8 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
 
             // 9. Desktop Left Side Menu
             sidebarClass: 'bg-white/60 backdrop-blur-2xl border-r border-white/70 shadow-[8px_0_30px_rgba(14,116,224,0.12)] z-20',
-            sidebarItemActiveClass: 'bg-gradient-to-r from-sky-400/30 to-blue-500/20 text-sky-950 font-extrabold border border-white/80 shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),0_4px_12px_rgba(14,116,224,0.15)] rounded-xl',
-            sidebarItemInactiveClass: 'bg-white/40 backdrop-blur-md text-slate-700 hover:text-slate-950 hover:bg-white/70 shadow-xs border border-white/60 hover:-translate-y-0.5 rounded-xl font-semibold transition-all duration-150',
+            sidebarItemActiveClass: 'bg-gradient-to-r from-sky-400/30 to-blue-500/20 text-sky-950 font-extrabold border border-white/80 shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),0_4px_12px_rgba(14,116,224,0.15)] rounded-[7px]',
+            sidebarItemInactiveClass: 'bg-white/40 backdrop-blur-md text-slate-700 hover:text-slate-950 hover:bg-white/70 shadow-xs border border-white/60 hover:-translate-y-0.5 rounded-[7px] font-semibold transition-all duration-150',
             sidebarDividerClass: 'border-t border-white/50',
         };
     }
@@ -465,12 +893,15 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             isDark: false,
             isVista: false,
             isWinamp: true,
-            isDarkFluid: false,
             isPaperSketch: false,
+            isTechnical: false,
+            isEditorial: false,
+            isIndustrial: false,
+            isDashboard: false,
             penugasanColors,
 
             // 1. Kanvas Utama: #2C2E3B, text #00FF00, font-mono, rounded-none!
-            wrapperClass: 'h-[100dvh] max-h-[100dvh] w-full bg-[#2C2E3B] text-[#00FF00] flex flex-col font-mono relative rounded-none selection:bg-[#00FF00] selection:text-black overflow-hidden',
+            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#2C2E3B] text-[#00FF00] flex flex-col font-mono relative rounded-none selection:bg-[#00FF00] selection:text-black md:h-screen md:max-h-screen md:overflow-hidden',
 
             // 2. Top Header / Navbar: Gradient #4A4D64 -> #2D2E40, border #000000
             navbarClass: 'sticky top-0 z-50 bg-gradient-to-b from-[#4A4D64] to-[#2D2E40] text-[#FACC15] border-b-2 border-[#000000] font-mono shadow-none shrink-0',
@@ -543,93 +974,6 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
         };
     }
 
-    // Material Design 3 (Material Web - Dark Fluid Pre-Alpha)
-    if (isDarkFluid) {
-        return {
-            theme,
-            isDefault: false,
-            isDark: false,
-            isVista: false,
-            isWinamp: false,
-            isDarkFluid: true,
-            isPaperSketch: false,
-            palette: themes.darkFluid,
-            penugasanColors,
-
-            // 1. Kanvas Utama: Background (#141218), On-Surface (#E6E0E9)
-            wrapperClass: 'h-[100dvh] max-h-[100dvh] w-full bg-[#141218] text-[#E6E0E9] flex flex-col font-sans relative selection:bg-[#D0BCFF]/30 selection:text-[#E6E0E9] overflow-hidden',
-
-            // 2. Top Header / Navbar: Surface Container (#1D1B20), soft border-white/5, Primary (#D0BCFF)
-            navbarClass: 'sticky top-0 z-50 bg-[#1D1B20] text-[#E6E0E9] border-b border-white/5 shadow-[0_4px_24px_rgba(0,0,0,0.4)] shrink-0 transition-all duration-300 ease-in-out',
-            logoContainerClass: 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-2xl bg-[#D0BCFF]/15 text-[#D0BCFF] shadow-sm ring-1 ring-[#D0BCFF]/30 shrink-0 transition-all duration-300 ease-in-out',
-            titleClass: 'text-xs sm:text-sm md:text-base font-extrabold tracking-tight truncate text-[#E6E0E9]',
-            versionBadgeClass: 'bg-[#2B2930] text-[#D0BCFF] border border-white/5 text-[9px] sm:text-[10px] px-2.5 py-0.5 rounded-full font-bold transition-all duration-300 ease-in-out',
-            subtitleClass: 'hidden sm:block text-[10.5px] text-[#CAC4D0] font-medium line-clamp-1',
-            supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 rounded-full bg-[#2B2930] px-3 py-1 text-xs border border-white/5 text-[#E6E0E9] transition-all duration-300 ease-in-out',
-            holidayBtnClass: 'flex items-center space-x-1.5 rounded-full bg-[#FFB4AB] hover:bg-[#FFDAD6] px-3 py-1.5 text-xs font-bold text-[#690005] transition-all duration-200 ease-in-out cursor-pointer shadow-sm active:scale-95',
-            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 rounded-lg bg-[#2B2930] hover:bg-[#36343B] px-3 text-xs font-bold text-[#E6E0E9] transition-all duration-200 cursor-pointer border border-white/10 shadow-sm select-none active:scale-98',
-            themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-60 rounded-[5px] bg-[#1D1B20] p-[5px] flex flex-col gap-1 text-[#E6E0E9] shadow-2xl ring-1 ring-white/10 border border-white/5 animate-in fade-in zoom-in-95 duration-200',
-            settingsBtnClass: 'flex items-center justify-center space-x-1.5 rounded-full bg-[#2B2930] hover:bg-[#36343B] px-3 py-1.5 text-xs font-bold text-[#E6E0E9] transition-all duration-200 ease-in-out cursor-pointer border border-white/10 shadow-sm active:scale-95',
-            syncBtnClass: 'flex items-center justify-center space-x-1.5 rounded-full bg-[#2B2930] hover:bg-[#36343B] px-3 py-1.5 text-xs font-bold text-[#E6E0E9] transition-all duration-200 ease-in-out cursor-pointer border border-white/10 shadow-sm active:scale-95',
-            saveBtnClass: 'flex items-center justify-center space-x-1.5 rounded-full bg-[#2B2930] hover:bg-[#36343B] px-3 py-1.5 text-xs font-bold text-[#E6E0E9] transition-all duration-200 ease-in-out cursor-pointer border border-white/10 shadow-sm active:scale-95',
-
-            // 3. View Switcher & Navigasi Bulan: Surface Container (#1D1B20) card, rounded-3xl
-            viewSwitcherCardClass: 'flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2 bg-[#1D1B20] p-1 sm:p-1.5 lg:p-1.5 rounded-3xl border border-white/5 shadow-md transition-all duration-300 ease-in-out',
-            viewSwitcherPillsWrapperClass: 'flex flex-row flex-nowrap items-center overflow-x-auto no-scrollbar scroll-smooth p-1 gap-0.5 sm:gap-1 lg:gap-1.5 rounded-full bg-[#2B2930] border border-white/5 max-w-full min-w-0 shrink flex-1',
-            tabActiveClass: 'bg-[#D0BCFF] text-[#381E72] shadow-2xs font-extrabold rounded-full transition-all duration-300 ease-in-out',
-            tabInactiveClass: 'text-[#CAC4D0] hover:text-[#E6E0E9] hover:bg-white/5 rounded-full transition-all duration-300 ease-in-out',
-            monthNavBtnClass: 'rounded-full border border-white/5 bg-[#2B2930] p-2 text-[#E6E0E9] hover:bg-[#36343B] hover:text-[#D0BCFF] transition-all duration-300 ease-in-out cursor-pointer shrink-0 shadow-sm active:scale-95',
-            monthDisplayBtnClass: 'flex items-center justify-center space-x-2 rounded-full border border-[#D0BCFF]/30 bg-[#2B2930] hover:bg-[#36343B] px-3.5 py-1.5 text-xs sm:text-sm font-extrabold text-[#D0BCFF] shadow-sm transition-all duration-300 ease-in-out cursor-pointer active:scale-95 w-[132px] min-[380px]:w-[142px] sm:w-[168px] shrink-0',
-            todayBtnClass: 'flex items-center space-x-1 rounded-full border border-[#D0BCFF]/30 bg-[#D0BCFF]/15 hover:bg-[#D0BCFF]/25 text-[#D0BCFF] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer shrink-0 shadow-sm active:scale-95',
-
-            // 4. Sub-toolbar Aksi Kalender: rounded-3xl, Surface Container (#1D1B20), pill buttons rounded-full
-            subToolbarCardClass: 'flex items-center justify-between rounded-3xl bg-[#1D1B20] p-2 sm:p-2.5 lg:px-4 shadow-sm border border-white/5 gap-2 transition-all duration-300 ease-in-out',
-            subToolbarTitleClass: 'text-xs sm:text-sm font-extrabold text-[#E6E0E9] truncate',
-            subToolbarDotClass: 'flex h-2.5 w-2.5 rounded-full bg-[#D0BCFF] shrink-0',
-            pasteBtnClass: 'flex items-center space-x-1.5 rounded-full border border-white/5 bg-[#2B2930] hover:bg-[#36343B] text-[#E6E0E9] px-3 py-1.5 text-xs font-bold transition-all duration-300 ease-in-out cursor-pointer shadow-sm active:scale-95',
-            undoBtnClass: 'flex items-center space-x-1.5 rounded-full border border-white/5 bg-[#2B2930] hover:bg-[#36343B] text-[#E6E0E9] px-3 py-1.5 text-xs font-bold transition-all duration-300 ease-in-out cursor-pointer shadow-sm active:scale-95',
-            resetBtnClass: 'flex items-center space-x-1.5 rounded-full border border-white/5 bg-[#2B2930] hover:bg-[#36343B] text-[#E6E0E9] px-3 py-1.5 text-xs font-bold transition-all duration-300 ease-in-out shadow-sm cursor-pointer active:scale-95',
-            lockBtnClass: 'flex items-center space-x-1.5 rounded-full border border-white/5 bg-[#2B2930] text-[#E6E0E9] hover:bg-[#36343B] px-3 py-1.5 text-xs font-bold transition-all duration-300 ease-in-out cursor-pointer shadow-sm active:scale-95',
-            expandBtnClass: 'flex items-center space-x-1.5 rounded-full border border-white/5 bg-[#2B2930] hover:bg-[#36343B] px-3 py-1.5 text-xs font-bold text-[#E6E0E9] transition-all duration-300 ease-in-out cursor-pointer active:scale-95',
-
-            // 5. Area Grid Kalender: rounded-3xl, Surface Container (#1D1B20)
-            calendarContainerCardClass: 'rounded-3xl bg-[#1D1B20] p-1.5 sm:p-2.5 lg:p-3 shadow-lg border border-white/5 transition-all duration-300 ease-in-out',
-            dayNamesHeaderClass: 'grid grid-cols-7 gap-1 sm:gap-1.5 mb-1.5 rounded-2xl bg-[#2B2930] py-1 sm:py-1 text-center text-[10.5px] min-[380px]:text-[11.5px] sm:text-xs lg:text-sm font-black border border-white/5',
-            weekdayNameTextClass: 'text-[#CAC4D0]',
-            weekendNameTextClass: 'text-[#FFB4AB]',
-            emptyCellClass: 'rounded-2xl bg-[#141218]/60 p-1 border border-white/5',
-
-            // 6. Summary Cards Panel: rounded-3xl
-            summaryPanelCardClass: 'rounded-3xl bg-[#1D1B20] p-3 sm:p-4 lg:p-4.5 shadow-lg border border-white/5 transition-all duration-300 ease-in-out',
-            summaryTitleClass: 'text-xs sm:text-sm font-extrabold text-[#E6E0E9] flex items-center',
-            summaryHeaderBorderClass: 'border-b border-white/5 pb-2',
-            summarySubtextClass: 'text-[10px] sm:text-xs text-[#CAC4D0] font-medium',
-
-            // 7. Modal & Pop-up: rounded-3xl, Surface Container (#1D1B20), soft elevation
-            modalCardClass: 'bg-[#1D1B20] border border-white/5 text-[#E6E0E9] shadow-2xl rounded-3xl',
-            modalHeaderClass: 'border-b border-white/5',
-            modalTitleClass: 'text-sm sm:text-base font-extrabold text-[#E6E0E9]',
-            modalBodyClass: 'text-[#E6E0E9]',
-
-            // 8. Mobile Drawer & FAB: rounded-full FAB with Primary (#D0BCFF)
-            mobileFabClass: 'flex h-14 w-14 items-center justify-center rounded-full bg-[#D0BCFF] text-[#381E72] shadow-2xl hover:bg-[#E8DEF8] active:scale-95 transition-all duration-300 ease-in-out border-2 border-white/10 cursor-pointer',
-            mobileDrawerClass: 'relative z-10 w-full max-w-lg rounded-t-3xl bg-[#1D1B20] p-5 shadow-2xl animate-in slide-in-from-bottom duration-300 ease-out max-h-[90vh] overflow-y-auto border-t border-white/5 text-[#E6E0E9]',
-            mobileDrawerHeaderClass: 'border-b border-white/5 pb-3',
-            mobileDrawerTitleClass: 'text-sm font-extrabold text-[#E6E0E9]',
-            mobileDrawerSubtextClass: 'text-[11px] text-[#CAC4D0] font-medium',
-            mobileDrawerNavBtnActive: 'bg-[#141218] text-[#D0BCFF] font-extrabold border border-[#D0BCFF]/50 shadow-[inset_0_3px_6px_rgba(0,0,0,0.6)] translate-y-0.5 rounded-2xl',
-            mobileDrawerNavBtnInactive: 'bg-[#2B2930] text-[#CAC4D0] hover:text-[#E6E0E9] hover:bg-[#36343B] shadow-md shadow-black/40 border border-white/5 hover:-translate-y-0.5 active:translate-y-0.5 rounded-2xl font-semibold transition-all duration-200',
-            mobileNavItemActiveClass: 'bg-[#141218] text-[#D0BCFF] font-extrabold border border-[#D0BCFF]/50 shadow-[inset_0_3px_6px_rgba(0,0,0,0.6)] translate-y-0.5 rounded-2xl',
-            mobileNavItemInactiveClass: 'bg-[#2B2930] text-[#CAC4D0] hover:text-[#E6E0E9] hover:bg-[#36343B] shadow-md shadow-black/40 border border-white/5 hover:-translate-y-0.5 active:translate-y-0.5 rounded-2xl font-semibold transition-all duration-200',
-
-            // 9. Desktop Left Side Menu
-            sidebarClass: 'bg-[#1D1B20]/95 backdrop-blur-md border-r border-white/10 shadow-2xl z-20',
-            sidebarItemActiveClass: 'bg-[#141218] text-[#D0BCFF] font-extrabold border border-[#D0BCFF]/50 shadow-[inset_0_3px_6px_rgba(0,0,0,0.6)] translate-y-0.5 rounded-2xl',
-            sidebarItemInactiveClass: 'bg-[#2B2930] text-[#CAC4D0] hover:text-[#E6E0E9] hover:bg-[#36343B] shadow-md shadow-black/40 border border-white/5 hover:-translate-y-0.5 rounded-2xl font-semibold transition-all duration-200',
-            sidebarDividerClass: 'border-t border-white/10',
-        };
-    }
-
     // 0. TEMA DEFAULT (BRAND BARU)
     return {
         theme: 'default',
@@ -637,13 +981,16 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
         isDark: false,
         isVista: false,
         isWinamp: false,
-        isDarkFluid: false,
         isPaperSketch: false,
+        isTechnical: false,
+        isEditorial: false,
+        isIndustrial: false,
+        isDashboard: false,
         palette: themes.light,
         penugasanColors,
 
         // 1. Kanvas Utama: #F6F7F8 bg, #011627 text
-        wrapperClass: 'h-[100dvh] max-h-[100dvh] w-full bg-[#F6F7F8] text-[#011627] flex flex-col font-sans relative selection:bg-[#2EC4B6]/30 selection:text-[#011627] overflow-hidden',
+        wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#F6F7F8] text-[#011627] flex flex-col font-sans relative selection:bg-[#2EC4B6]/30 selection:text-[#011627] md:h-screen md:max-h-screen md:overflow-hidden',
 
         // 2. Top Header / Navbar: Light clean #FFFFFF, soft elevated drop shadow without static bottom border
         navbarClass: 'sticky top-0 z-50 bg-white/95 backdrop-blur-md text-[#011627] shadow-[0_1px_4px_rgba(0,0,0,0.08)] shrink-0',
@@ -710,8 +1057,8 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
 
         // 9. Desktop Left Side Menu
         sidebarClass: 'bg-white/95 backdrop-blur-md border-r border-slate-200/90 shadow-2xl z-20',
-        sidebarItemActiveClass: 'bg-slate-100 text-[#0E7C7B] font-extrabold border border-[#2EC4B6]/50 shadow-[inset_0_3px_6px_rgba(0,0,0,0.12)] translate-y-0.5 rounded-lg',
-        sidebarItemInactiveClass: 'bg-white/90 text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-md shadow-slate-200/80 border border-slate-200/80 hover:-translate-y-0.5 rounded-lg font-semibold transition-all duration-150',
+        sidebarItemActiveClass: 'bg-slate-100 text-[#0E7C7B] font-extrabold border border-[#2EC4B6]/50 shadow-[inset_0_3px_6px_rgba(0,0,0,0.12)] translate-y-0.5 rounded-[5px]',
+        sidebarItemInactiveClass: 'bg-white/90 text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-md shadow-slate-200/80 border border-slate-200/80 hover:-translate-y-0.5 rounded-[5px] font-semibold transition-all duration-150',
         sidebarDividerClass: 'border-t border-slate-200/80',
     };
 }

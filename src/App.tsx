@@ -7,6 +7,7 @@ import { TimePickerModal } from './components/TimePickerModal';
 import { MonthYearPickerModal } from './components/MonthYearPickerModal';
 import { HolidayManagerModal } from './components/HolidayManagerModal';
 import { VersionView } from './components/VersionView';
+import { RoadmapView } from './components/RoadmapView';
 import { DesktopSidebar } from './components/DesktopSidebar';
 import { PasteExcelModal } from './components/PasteExcelModal';
 import { WindowTitleBar } from './components/WindowTitleBar';
@@ -21,6 +22,9 @@ import { ToastNotification } from './components/ToastNotification';
 import { SettingsModal } from './components/SettingsModal';
 import { MonthlyHolidaySegment } from './components/MonthlyHolidaySegment';
 import { MonthlyPiketSummarySegment } from './components/MonthlyPiketSummarySegment';
+import { AdminDashboardView } from './components/admin/AdminDashboardView';
+import { getCurrentUserRole, setCurrentUserRole } from './utils/adminStorage';
+import { UserRole } from './types/admin';
 import { calculatePiketMatches } from './utils/piket';
 import { FULL_APP_TITLE, APP_VERSION } from './version';
 import { DEFAULT_HOLIDAYS } from './data/holidays';
@@ -52,13 +56,48 @@ export const App: React.FC = () => {
     const [selectedYear, setSelectedYear] = useState<number>(() => today.getFullYear());
     const [selectedMonth, setSelectedMonth] = useState<number>(() => today.getMonth() + 1);
 
-    // Active page tab
-    const [pageTab, setPageTab] = useState<'calendar' | 'holiday' | 'settings' | 'version'>('calendar');
+    // Active page tab (Layar utama: Kalender Kerja)
+    const [pageTab, setPageTab] = useState<'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin'>('calendar');
+
+    // User & Admin Role State
+    const [currentRole, setCurrentRole] = useState<UserRole>(() => getCurrentUserRole());
+    const [userName, setUserName] = useState<string>(() => localStorage.getItem('jadwalpriok_user_name') || 'Ahmad Fiqri');
+    const [userNip, setUserNip] = useState<string>(() => localStorage.getItem('jadwalpriok_user_nip') || '199510102015121002');
+
+    // Migrasi sesi admin lama "Afiqri" ke "Ahmad Fiqri"
+    useEffect(() => {
+        const savedNip = localStorage.getItem('jadwalpriok_user_nip');
+        if (savedNip === '199208152015021002' || !savedNip) {
+            localStorage.setItem('jadwalpriok_user_name', 'Ahmad Fiqri');
+            localStorage.setItem('jadwalpriok_user_nip', '199510102015121002');
+            localStorage.setItem('jadwalpriok_current_user_role', 'admin');
+            // Force state refresh
+            setUserName('Ahmad Fiqri');
+            setUserNip('199510102015121002');
+            setCurrentRole('admin');
+        }
+    }, []);
+
+    // Sync user data & role when changed in localStorage
+    useEffect(() => {
+        const handleSyncUser = () => {
+            setUserName(localStorage.getItem('jadwalpriok_user_name') || 'Ahmad Fiqri');
+            setUserNip(localStorage.getItem('jadwalpriok_user_nip') || '199510102015121002');
+            setCurrentRole(getCurrentUserRole());
+        };
+
+        window.addEventListener('storage', handleSyncUser);
+        const interval = setInterval(handleSyncUser, 2000);
+        return () => {
+            window.removeEventListener('storage', handleSyncUser);
+            clearInterval(interval);
+        };
+    }, []);
 
     // Theme state
     const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => {
         const saved = localStorage.getItem(LOCAL_STORAGE_THEME_KEY);
-        return (saved as AppTheme) || 'default';
+        return (saved as AppTheme) || 'industrial';
     });
     const themeConfig = useMemo(() => getThemeConfig(currentTheme), [currentTheme]);
     const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
@@ -224,8 +263,17 @@ export const App: React.FC = () => {
         };
     }, []);
 
-    // Toast state
-    const [toastMessage, setToastMessage] = useState<string | null>(null);
+    // Toast state (Dukungan Notifikasi Bertingkat / Stacked Toasts)
+    const [toasts, setToasts] = useState<Array<{ id: string; message: string; description?: string; showUndo?: boolean }>>([]);
+
+    const showToast = useCallback((msg: string, description?: string, showUndo: boolean = false) => {
+        const id = `toast_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        setToasts((prev) => [...prev, { id, message: msg, description, showUndo }]);
+    }, []);
+
+    const handleCloseToast = useCallback((id: string) => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, []);
 
     // Modals
     const [activeModalDay, setActiveModalDay] = useState<number | null>(null);
@@ -329,16 +377,6 @@ export const App: React.FC = () => {
         data: Record<string, DayData>;
     } | null>(null);
 
-    // Auto dismiss toast
-    useEffect(() => {
-        if (toastMessage) {
-            const timer = setTimeout(() => {
-                setToastMessage(null);
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [toastMessage]);
-
     // Persist Days State
     useEffect(() => {
         try {
@@ -353,7 +391,7 @@ export const App: React.FC = () => {
         try {
             localStorage.setItem(LOCAL_STORAGE_THEME_KEY, currentTheme);
             document.documentElement.setAttribute('data-theme', currentTheme);
-            if (currentTheme === 'dark' || currentTheme === 'darkFluid' || currentTheme === 'winamp') {
+            if (currentTheme === 'dark' || currentTheme === 'winamp') {
                 document.documentElement.classList.add('dark');
             } else {
                 document.documentElement.classList.remove('dark');
@@ -371,10 +409,6 @@ export const App: React.FC = () => {
             console.error('Failed to persist holidays:', e);
         }
     }, [daftarLibur]);
-
-    const showToast = useCallback((msg: string) => {
-        setToastMessage(msg);
-    }, []);
 
     // Touch swipe gesture for switching months on mobile/touch devices
     const touchStartXRef = useRef<number | null>(null);
@@ -853,7 +887,7 @@ export const App: React.FC = () => {
     return (
         <div
             data-theme={currentTheme}
-            className={`min-h-screen flex flex-col ${themeConfig.wrapperClass} ${
+            className={`min-h-screen min-h-[100dvh] w-full flex flex-col ${themeConfig.wrapperClass} ${
                 currentTheme === 'paperSketch' ? "font-['Gaegu']" : 'font-sans'
             } selection:bg-teal-500 selection:text-white`}
         >
@@ -866,42 +900,50 @@ export const App: React.FC = () => {
                 />
             </div>
 
-            {/* Top Navbar */}
-            <TopNavbar
-                isMobile={isMobile}
-                isDesktopSidebarOpen={isSidebarOpen}
-                onToggleDesktopSidebar={() => setIsSidebarOpen((prev) => !prev)}
-                currentTheme={currentTheme}
-                onThemeChange={setCurrentTheme}
-                isThemeDropdownOpen={isThemeDropdownOpen}
-                setIsThemeDropdownOpen={setIsThemeDropdownOpen}
-                themeConfig={themeConfig}
-                onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
-                exportAction={
-                    <ExportDropdown
-                        daysState={daysState}
-                        selectedYear={selectedYear}
-                        selectedMonth={selectedMonth}
-                        daftarLibur={daftarLibur}
-                        currentTheme={currentTheme}
-                        onShowToast={showToast}
-                        buttonClass={themeConfig.themeDropdownBtnClass}
-                    />
-                }
-            />
-
-            {/* Main Workspace Layout */}
-            <div className="flex-1 flex min-h-0 overflow-visible relative">
-                {/* Desktop Sidebar */}
+            {/* Main Workspace Layout with Sidebar reaching the top boundary of header */}
+            <div className="flex-1 flex min-h-0 overflow-hidden relative">
+                {/* Desktop Sidebar (Tampil sampai ke batas atas header di sebelah kiri) */}
                 <DesktopSidebar
                     isOpen={isSidebarOpen}
                     pageTab={pageTab}
                     setPageTab={setPageTab}
                     themeConfig={themeConfig}
+                    currentTheme={currentTheme}
+                    isAdmin={currentRole === 'admin'}
+                    userName={userName}
+                    userNip={userNip}
+                    userRole={currentRole}
                 />
 
-                {/* Main Content Area */}
-                <main className="flex-1 flex flex-col overflow-y-auto min-w-0 pb-14 md:pb-2">
+                {/* Right Container: Header (lebar menyesuaikan ruang konten di sebelah sidebar) & Main Content Area */}
+                <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
+                    {/* Top Navbar */}
+                    <TopNavbar
+                        isMobile={isMobile}
+                        isDesktopSidebarOpen={isSidebarOpen}
+                        onToggleDesktopSidebar={() => setIsSidebarOpen((prev) => !prev)}
+                        currentTheme={currentTheme}
+                        onThemeChange={setCurrentTheme}
+                        isThemeDropdownOpen={isThemeDropdownOpen}
+                        setIsThemeDropdownOpen={setIsThemeDropdownOpen}
+                        themeConfig={themeConfig}
+                        onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+                        pageTab={pageTab}
+                        exportAction={
+                            <ExportDropdown
+                                daysState={daysState}
+                                selectedYear={selectedYear}
+                                selectedMonth={selectedMonth}
+                                daftarLibur={daftarLibur}
+                                currentTheme={currentTheme}
+                                onShowToast={showToast}
+                                buttonClass={themeConfig.themeDropdownBtnClass}
+                            />
+                        }
+                    />
+
+                    {/* Main Content Area */}
+                    <main id="app-main-content" className="flex-1 flex flex-col overflow-y-auto min-w-0 pb-14 md:pb-2">
                     {pageTab === 'calendar' && (
                         <div
                             className="p-2 sm:p-2.5 lg:p-2.5 max-w-[1490px] w-full mx-auto touch-pan-y"
@@ -1090,6 +1132,7 @@ export const App: React.FC = () => {
                                             selectedYear={selectedYear}
                                             piketCalculation={piketCalculation}
                                             theme={currentTheme}
+                                            layout="wide"
                                             onSelectDate={(dayNum) => {
                                                 if (isMobile) {
                                                     setActiveModalDay(dayNum);
@@ -1102,7 +1145,7 @@ export const App: React.FC = () => {
                                 </div>
 
                                 {/* Desktop View: Right Sidebar with Controls at Very Top & Holiday List */}
-                                <aside className="hidden lg:block w-64 xl:w-72 shrink-0 sticky top-2 space-y-3 relative z-20">
+                                <aside className="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-2 space-y-3 relative z-20">
                                     <CalendarActionToolbar
                                         selectedMonth={selectedMonth}
                                         selectedYear={selectedYear}
@@ -1121,6 +1164,7 @@ export const App: React.FC = () => {
                                         selectedYear={selectedYear}
                                         piketCalculation={piketCalculation}
                                         theme={currentTheme}
+                                        layout="sidebar"
                                         onSelectDate={(dayNum) => {
                                             if (isMobile) {
                                                 setActiveModalDay(dayNum);
@@ -1190,7 +1234,29 @@ export const App: React.FC = () => {
                             <VersionView theme={currentTheme} />
                         </div>
                     )}
+
+                    {pageTab === 'roadmap' && (
+                        <div className="p-2 sm:p-3 lg:p-3 max-w-[1490px] w-full mx-auto">
+                            <RoadmapView theme={currentTheme} />
+                        </div>
+                    )}
+
+                    {pageTab === 'admin' && (
+                        <div className="p-2 sm:p-3 lg:p-3 max-w-[1490px] w-full mx-auto">
+                            <AdminDashboardView
+                                theme={currentTheme}
+                                daysState={daysState}
+                                onShowToast={showToast}
+                                currentRole={currentRole}
+                                onRoleChange={(r) => {
+                                    setCurrentRole(r);
+                                    setCurrentUserRole(r);
+                                }}
+                            />
+                        </div>
+                    )}
                 </main>
+                </div>
             </div>
 
             {/* Mobile Bottom Navigation */}
@@ -1210,6 +1276,10 @@ export const App: React.FC = () => {
                 onSelectTab={setPageTab}
                 currentTheme={currentTheme}
                 appVersion={APP_VERSION}
+                isAdmin={currentRole === 'admin'}
+                userName={userName}
+                userNip={userNip}
+                userRole={currentRole}
             />
 
             {/* Month-Year Picker Modal */}
@@ -1323,12 +1393,14 @@ export const App: React.FC = () => {
                 })()
             )}
 
-            {/* Toast Notification */}
+            {/* Toast Notification (Dukungan Notifikasi Bertingkat) */}
             <ToastNotification
-                message={toastMessage}
+                toasts={toasts}
                 lastResetBackupState={undoBackup ? { year: undoBackup.year, month: undoBackup.month } : null}
                 areAllLocked={isMonthFullyLocked}
                 onUndoReset={handleUndoReset}
+                onCloseToast={handleCloseToast}
+                theme={currentTheme}
             />
         </div>
     );

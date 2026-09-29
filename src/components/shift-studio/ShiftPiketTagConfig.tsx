@@ -1,5 +1,7 @@
 import React from 'react';
 import { Briefcase, CalendarCheck, ShieldCheck, Info } from 'lucide-react';
+import { AppTheme } from '../../types';
+import { Checkbox } from '../ui/Checkbox';
 
 export interface ShiftPiketUpdates {
     isPiket: boolean;
@@ -15,6 +17,7 @@ interface ShiftPiketTagConfigProps {
     piketHariKerjaDenganOff?: boolean;
     onChange: (updates: ShiftPiketUpdates) => void;
     shiftKey?: string;
+    theme?: AppTheme;
 }
 
 export const ShiftPiketTagConfig: React.FC<ShiftPiketTagConfigProps> = ({
@@ -23,6 +26,7 @@ export const ShiftPiketTagConfig: React.FC<ShiftPiketTagConfigProps> = ({
     piketHariLibur = true,
     piketHariKerjaDenganOff = false,
     onChange,
+    theme = 'default',
 }) => {
     // Current effective values with fallbacks
     const effectivePiketHariKerja = piketHariKerja ?? isPiket;
@@ -61,15 +65,12 @@ export const ShiftPiketTagConfig: React.FC<ShiftPiketTagConfigProps> = ({
             {/* Switch 1: Piket hari kerja */}
             <div className="p-2 rounded-xl bg-white/80 dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 shadow-2xs transition-colors">
                 <div className="flex items-start sm:items-center">
-                    <label className="relative inline-flex items-center cursor-pointer shrink-0 mr-2 mt-0.5 sm:mt-0">
-                        <input
-                            type="checkbox"
-                            checked={effectivePiketHariKerja}
-                            onChange={(e) => handleToggleHariKerja(e.target.checked)}
-                            className="sr-only peer"
-                        />
-                        <div className="w-9 h-5 bg-slate-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-                    </label>
+                    <Checkbox
+                        checked={effectivePiketHariKerja}
+                        onChange={(e) => handleToggleHariKerja(e.target.checked)}
+                        theme={theme}
+                        containerClassName="mr-2.5 shrink-0 mt-0.5 sm:mt-0"
+                    />
                     <div className="space-y-0.5 min-w-0 flex-1">
                         <div className="flex items-center space-x-1.5">
                             <Briefcase className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
@@ -89,16 +90,13 @@ export const ShiftPiketTagConfig: React.FC<ShiftPiketTagConfigProps> = ({
                 !effectivePiketHariKerja ? 'opacity-50' : 'opacity-100'
             }`}>
                 <div className="flex items-start sm:items-center">
-                    <label className="relative inline-flex items-center cursor-pointer shrink-0 mr-2 mt-0.5 sm:mt-0">
-                        <input
-                            type="checkbox"
-                            disabled={!effectivePiketHariKerja}
-                            checked={effectivePiketHariKerjaDenganOff && effectivePiketHariKerja}
-                            onChange={(e) => handleToggleHariKerjaDenganOff(e.target.checked)}
-                            className="sr-only peer disabled:cursor-not-allowed"
-                        />
-                        <div className="w-9 h-5 bg-slate-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600 peer-disabled:opacity-40"></div>
-                    </label>
+                    <Checkbox
+                        disabled={!effectivePiketHariKerja}
+                        checked={effectivePiketHariKerjaDenganOff && effectivePiketHariKerja}
+                        onChange={(e) => handleToggleHariKerjaDenganOff(e.target.checked)}
+                        theme={theme}
+                        containerClassName="mr-2.5 shrink-0 mt-0.5 sm:mt-0"
+                    />
                     <div className="space-y-0.5 min-w-0 flex-1">
                         <div className="flex items-center space-x-1.5">
                             <ShieldCheck className="w-3.5 h-3.5 text-amber-500 shrink-0" />
@@ -116,15 +114,12 @@ export const ShiftPiketTagConfig: React.FC<ShiftPiketTagConfigProps> = ({
             {/* Switch 2: Piket Hari Libur / Tanggal Merah */}
             <div className="p-2 rounded-xl bg-white/80 dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 shadow-2xs transition-colors">
                 <div className="flex items-start sm:items-center">
-                    <label className="relative inline-flex items-center cursor-pointer shrink-0 mr-2 mt-0.5 sm:mt-0">
-                        <input
-                            type="checkbox"
-                            checked={effectivePiketHariLibur}
-                            onChange={(e) => handleToggleHariLibur(e.target.checked)}
-                            className="sr-only peer"
-                        />
-                        <div className="w-9 h-5 bg-slate-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
-                    </label>
+                    <Checkbox
+                        checked={effectivePiketHariLibur}
+                        onChange={(e) => handleToggleHariLibur(e.target.checked)}
+                        theme={theme}
+                        containerClassName="mr-2.5 shrink-0 mt-0.5 sm:mt-0"
+                    />
                     <div className="space-y-0.5 min-w-0 flex-1">
                         <div className="flex items-center space-x-1.5">
                             <CalendarCheck className="w-3.5 h-3.5 text-indigo-500 shrink-0" />

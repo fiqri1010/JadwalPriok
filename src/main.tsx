@@ -3,13 +3,21 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-// Suppress benign ResizeObserver loop errors during CSS transitions
+// Suppress benign ResizeObserver loop errors and unhandled websocket disconnects during CSS transitions
 window.addEventListener('error', (e) => {
   if (
     e.message === 'ResizeObserver loop completed with undelivered notifications.' ||
-    e.message === 'ResizeObserver loop limit exceeded'
+    e.message === 'ResizeObserver loop limit exceeded' ||
+    e.message?.includes('ResizeObserver')
   ) {
     e.stopImmediatePropagation();
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+  if (e.reason?.message?.includes('ResizeObserver') || e.reason?.message?.includes('WebSocket')) {
+    e.preventDefault();
   }
 });
 
@@ -41,6 +49,14 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
     window.location.reload();
   };
 
+  handleResetAndReload = () => {
+    try {
+      localStorage.removeItem('jadwalpriok_ui_zoom_level');
+    } catch {}
+    this.setState({ hasError: false, error: null });
+    window.location.reload();
+  };
+
   render() {
     if (this.state.hasError) {
       return (
@@ -51,15 +67,24 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
             </div>
             <h2 className="text-lg font-bold text-slate-100">Aplikasi Memerlukan Muat Ulang</h2>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Terjadi penyegaran tampilan dev server. Klik tombol di bawah untuk memuat ulang aplikasi secara instan.
+              {this.state.error?.message || 'Terjadi penyegaran tampilan dev server. Klik tombol di bawah untuk memuat ulang aplikasi.'}
             </p>
-            <button
-              type="button"
-              onClick={this.handleReload}
-              className="w-full py-2.5 px-4 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm transition-all duration-150 cursor-pointer shadow-lg shadow-teal-500/20"
-            >
-              Muat Ulang Aplikasi (Reload)
-            </button>
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                type="button"
+                onClick={this.handleReload}
+                className="w-full py-2.5 px-4 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm transition-all duration-150 cursor-pointer shadow-lg shadow-teal-500/20"
+              >
+                Muat Ulang Aplikasi (Reload)
+              </button>
+              <button
+                type="button"
+                onClick={this.handleResetAndReload}
+                className="w-full py-2 px-4 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold transition-all duration-150 cursor-pointer"
+              >
+                Pulihkan Tampilan Default
+              </button>
+            </div>
           </div>
         </div>
       );

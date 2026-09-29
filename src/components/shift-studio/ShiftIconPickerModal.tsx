@@ -272,7 +272,7 @@ import {
     Redo2,
     Save,
 } from 'lucide-react';
-import { ShiftVisualStyle, ShiftNamingConfig } from '../../types';
+import { ShiftVisualStyle, ShiftNamingConfig, AppTheme } from '../../types';
 import { BADGE_PATTERNS, isCustomPatternImage, parseCssPatternToStyle } from './patterns';
 
 interface ShiftIconPickerModalProps {
@@ -281,6 +281,7 @@ interface ShiftIconPickerModalProps {
     visual: ShiftVisualStyle;
     naming?: ShiftNamingConfig;
     onChange: (visual: ShiftVisualStyle) => void;
+    theme?: AppTheme;
 }
 
 export interface CatalogIconItem {
@@ -625,7 +626,10 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
     visual,
     naming,
     onChange,
+    theme,
 }) => {
+    const isIndustrial = theme === 'industrial';
+    const isPaperSketch = theme === 'paperSketch';
     const [draftVisual, setDraftVisual] = useState<ShiftVisualStyle>(visual);
     const [history, setHistory] = useState<ShiftVisualStyle[]>([JSON.parse(JSON.stringify(visual))]);
     const [historyIndex, setHistoryIndex] = useState<number>(0);
@@ -832,9 +836,21 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
     return (
         <div className="fixed inset-0 sm:top-7 z-160 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
             <div className="fixed inset-0 sm:top-7" onClick={onClose} />
-            <div className="relative z-10 w-full max-w-3xl max-h-[88vh] flex flex-col rounded-3xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className={`relative z-10 w-full max-w-3xl max-h-[88vh] flex flex-col shadow-2xl overflow-hidden ${
+                isIndustrial
+                    ? 'bg-[#1A1D23] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-xl font-[\'JetBrains_Mono\']'
+                    : isPaperSketch
+                    ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[6px_6px_0px_#2b2b2b] rounded-2xl font-[\'Gaegu\'] text-base'
+                    : 'rounded-3xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700'
+            }`}>
                 {/* Fixed Top Controls Header (Non-scrolling solid area) */}
-                <div className="shrink-0 bg-white dark:bg-[#1E1E1E] z-20 border-b border-current/10 p-3.5 sm:p-4 space-y-2.5">
+                <div className={`shrink-0 z-20 border-b p-3.5 sm:p-4 space-y-2.5 ${
+                    isIndustrial
+                        ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
+                        : isPaperSketch
+                        ? 'bg-[#f2efeb] border-[#2b2b2b] border-b-2'
+                        : 'bg-white dark:bg-[#1E1E1E] border-current/10'
+                }`}>
                     {/* Header with Title + Simple Desktop Badge Preview */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2.5 sm:space-x-4 min-w-0">
@@ -873,12 +889,24 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                     </div>
 
                     {/* Main Tabs */}
-                    <div className="flex p-1 gap-1 rounded-xl bg-current/5 border border-current/10 text-xs">
+                    <div className={`flex p-1 gap-1 text-xs border ${
+                        isIndustrial
+                            ? 'bg-[#0F1115] border-[rgba(226,232,240,0.15)] rounded-[6px]'
+                            : isPaperSketch
+                            ? 'bg-[#f2efeb] border-2 border-[#2b2b2b] rounded-xl'
+                            : 'rounded-xl bg-current/5 border-current/10'
+                    }`}>
                         <button
                             type="button"
                             onClick={() => setActiveTab('svg')}
                             className={`flex-1 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                                activeTab === 'svg' ? 'bg-indigo-600 text-white shadow-xs' : 'opacity-70 hover:opacity-100'
+                                activeTab === 'svg'
+                                    ? isIndustrial
+                                        ? 'bg-[#2DD4BF] text-[#0F1115]'
+                                        : isPaperSketch
+                                        ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                        : 'bg-indigo-600 text-white shadow-xs'
+                                    : 'opacity-70 hover:opacity-100'
                             }`}
                         >
                             260+ Ikon
@@ -887,7 +915,13 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                             type="button"
                             onClick={() => setActiveTab('emoji')}
                             className={`flex-1 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                                activeTab === 'emoji' ? 'bg-indigo-600 text-white shadow-xs' : 'opacity-70 hover:opacity-100'
+                                activeTab === 'emoji'
+                                    ? isIndustrial
+                                        ? 'bg-[#2DD4BF] text-[#0F1115]'
+                                        : isPaperSketch
+                                        ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                        : 'bg-indigo-600 text-white shadow-xs'
+                                    : 'opacity-70 hover:opacity-100'
                             }`}
                         >
                             300+ Koleksi Emoji
@@ -904,7 +938,13 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                     placeholder="Cari ikon (misal: kopi, santai, sofa, tidur, gym, kapal, dokter, laptop, lembur, teh, renang)..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-current/20 bg-current/5 outline-none focus:border-indigo-500"
+                                    className={`w-full pl-9 pr-3 py-2 text-xs outline-none ${
+                                        isIndustrial
+                                            ? 'bg-[#0F1115] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-[6px] focus:border-[#2DD4BF]'
+                                            : isPaperSketch
+                                            ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] rounded-xl focus:border-[#ff4747]'
+                                            : 'rounded-xl border border-current/20 bg-current/5 focus:border-indigo-500'
+                                    }`}
                                 />
                             </div>
 
@@ -916,7 +956,15 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                         onClick={() => setSelectedCategory(cat)}
                                         className={`px-2.5 py-1.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
                                             selectedCategory === cat
-                                                ? 'bg-indigo-600 text-white shadow-xs'
+                                                ? isIndustrial
+                                                    ? 'bg-[#2DD4BF] text-[#0F1115] font-bold rounded-[4px]'
+                                                    : isPaperSketch
+                                                    ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold'
+                                                    : 'bg-indigo-600 text-white shadow-xs'
+                                                : isIndustrial
+                                                ? 'bg-[#0F1115] text-[#E2E8F0]/70 border border-[rgba(226,232,240,0.15)] hover:text-[#E2E8F0] hover:bg-white/5 rounded-[4px]'
+                                                : isPaperSketch
+                                                ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/20 font-bold'
                                                 : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100 hover:bg-current/10'
                                         }`}
                                     >
@@ -935,7 +983,15 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                 onClick={() => setSelectedEmojiCategory('Semua')}
                                 className={`px-2.5 py-1.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
                                     selectedEmojiCategory === 'Semua'
-                                        ? 'bg-indigo-600 text-white shadow-xs'
+                                        ? isIndustrial
+                                            ? 'bg-[#2DD4BF] text-[#0F1115] font-bold rounded-[4px]'
+                                            : isPaperSketch
+                                            ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold'
+                                            : 'bg-indigo-600 text-white shadow-xs'
+                                        : isIndustrial
+                                        ? 'bg-[#0F1115] text-[#E2E8F0]/70 border border-[rgba(226,232,240,0.15)] hover:text-[#E2E8F0] hover:bg-white/5 rounded-[4px]'
+                                        : isPaperSketch
+                                        ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/20 font-bold'
                                         : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100 hover:bg-current/10'
                                 }`}
                             >
@@ -948,7 +1004,15 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                     onClick={() => setSelectedEmojiCategory(catName)}
                                     className={`px-2.5 py-1.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
                                         selectedEmojiCategory === catName
-                                            ? 'bg-indigo-600 text-white shadow-xs'
+                                            ? isIndustrial
+                                                ? 'bg-[#2DD4BF] text-[#0F1115] font-bold rounded-[4px]'
+                                                : isPaperSketch
+                                                ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold'
+                                                : 'bg-indigo-600 text-white shadow-xs'
+                                            : isIndustrial
+                                            ? 'bg-[#0F1115] text-[#E2E8F0]/70 border border-[rgba(226,232,240,0.15)] hover:text-[#E2E8F0] hover:bg-white/5 rounded-[4px]'
+                                            : isPaperSketch
+                                            ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/20 font-bold'
                                             : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100 hover:bg-current/10'
                                     }`}
                                 >
@@ -976,7 +1040,15 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                             onClick={() => handleSelectSvg(item.name)}
                                             className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all text-center group cursor-pointer ${
                                                 isSelected
-                                                    ? 'bg-indigo-600/15 border-indigo-500 text-indigo-500 scale-105 shadow-xs font-bold'
+                                                    ? isIndustrial
+                                                        ? 'bg-[#2DD4BF]/20 border-[#2DD4BF] text-[#2DD4BF] font-black'
+                                                        : isPaperSketch
+                                                        ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                                        : 'bg-indigo-600/15 border-indigo-500 text-indigo-500 scale-105 shadow-xs font-bold'
+                                                    : isIndustrial
+                                                    ? 'bg-[#0F1115] border-[rgba(226,232,240,0.1)] text-[#E2E8F0] hover:border-[#2DD4BF]/50 hover:bg-white/5'
+                                                    : isPaperSketch
+                                                    ? 'bg-[#fdfcf0] border-2 border-[#2b2b2b] text-[#2b2b2b] hover:bg-[#2ec4b6]/20'
                                                     : 'border-current/10 hover:border-current/30 hover:bg-current/5'
                                             }`}
                                             title={`${item.name} (${item.category})`}

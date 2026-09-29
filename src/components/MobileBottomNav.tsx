@@ -8,7 +8,7 @@ import {
 import { AppTheme } from '../types';
 import { ThemeConfig } from '../themeConfig';
 
-type PageTabType = 'calendar' | 'holiday' | 'settings' | 'version';
+type PageTabType = 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin';
 
 interface MobileBottomNavProps {
     pageTab: PageTabType;
@@ -35,8 +35,6 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                     ? 'bg-[#18181B]/95 border-t border-[#333333] backdrop-blur-md text-[#E0E0E0] shadow-[0_-4px_20px_rgba(0,0,0,0.1)]'
                     : theme === 'vista'
                     ? 'bg-white/75 border-t border-white/70 backdrop-blur-xl text-[#0F172A] shadow-[0_-4px_25px_rgba(14,116,224,0.15)]'
-                    : theme === 'darkFluid'
-                    ? 'bg-[#1D1B20]/95 border-t border-white/5 backdrop-blur-md text-[#E6E0E9] shadow-[0_-4px_20px_rgba(0,0,0,0.1)]'
                     : 'bg-white/95 border-t border-slate-200 backdrop-blur-md text-[#011627] shadow-[0_-4px_20px_rgba(0,0,0,0.1)]'
             }`}
         >

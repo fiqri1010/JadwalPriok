@@ -8,17 +8,21 @@ interface ShiftColorStudioProps {
     theme?: string;
 }
 
-export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onChange }) => {
+export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onChange, theme }) => {
     // Selected target mode: 'bg' | 'text' | 'border' | 'motif'
     const [targetMode, setTargetMode] = useState<'bg' | 'text' | 'border' | 'motif'>('bg');
     const colorPickerWrapperRef = useRef<HTMLDivElement>(null);
 
     // Dynamic theme state detection
     const [activeTheme, setActiveTheme] = useState<string>(() => {
-        return document.documentElement.getAttribute('data-theme') || 'default';
+        return theme || document.documentElement.getAttribute('data-theme') || 'default';
     });
 
     useEffect(() => {
+        if (theme) {
+            setActiveTheme(theme);
+            return;
+        }
         const observer = new MutationObserver(() => {
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'default';
             setActiveTheme(currentTheme);
@@ -28,11 +32,57 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
             attributeFilter: ['data-theme'],
         });
         return () => observer.disconnect();
-    }, []);
+    }, [theme]);
 
     // Theme style mapping for container and tabs
     const getThemeClasses = () => {
-        switch (activeTheme) {
+        const effective = theme || activeTheme;
+        switch (effective) {
+            case 'industrial':
+                return {
+                    container: "bg-[#0F1115] border border-[rgba(226,232,240,0.15)] text-[#E2E8F0] font-['JetBrains_Mono'] rounded-xl shadow-md",
+                    labelSpan: 'text-[#2DD4BF] font-extrabold',
+                    tabHeader: 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]',
+                    tabActive: 'bg-[#2DD4BF]/20 text-[#2DD4BF] font-extrabold border-[#2DD4BF]/50 rounded-[4px]',
+                    tabInactive: 'text-[#E2E8F0]/70 hover:bg-white/5 border-transparent',
+                    pickerWrapper: 'bg-[#1A1D23] border border-[rgba(226,232,240,0.15)] rounded-xl'
+                };
+            case 'paperSketch':
+                return {
+                    container: "bg-[#fdfcf0] border-2 border-[#2b2b2b] text-[#2b2b2b] font-['Gaegu'] text-base rounded-2xl shadow-[4px_4px_0px_#2b2b2b]",
+                    labelSpan: 'text-[#ff4747] font-extrabold',
+                    tabHeader: 'bg-[#f2efeb] border-2 border-[#2b2b2b]',
+                    tabActive: 'bg-[#ff4747] text-white font-extrabold border-2 border-[#2b2b2b] rounded-lg shadow-[2px_2px_0px_#2b2b2b]',
+                    tabInactive: 'text-[#2b2b2b] hover:bg-[#2ec4b6]/20 border-transparent font-bold',
+                    pickerWrapper: 'bg-[#fdfcf0] border-2 border-[#2b2b2b] rounded-xl'
+                };
+            case 'editorial':
+                return {
+                    container: 'bg-[#FCFBF9] border border-[#1a1a1a]/25 text-[#1a1a1a] font-serif rounded-xl shadow-xs',
+                    labelSpan: 'text-[#2A7373] font-extrabold',
+                    tabHeader: 'bg-[#F2EFE9] border-[#1a1a1a]/20',
+                    tabActive: 'bg-white text-[#2A7373] font-extrabold border border-[#1a1a1a]/30 rounded-md',
+                    tabInactive: 'text-[#1a1a1a]/70 hover:bg-[#1a1a1a]/5 border-transparent',
+                    pickerWrapper: 'bg-[#FCFBF9] border border-[#1a1a1a]/25 rounded-xl'
+                };
+            case 'technical':
+                return {
+                    container: 'bg-[#F8F7F4] dark:bg-[#0D1117] border border-slate-300 dark:border-slate-800 text-[#111113] dark:text-[#E6EDF3] font-mono rounded-lg',
+                    labelSpan: 'text-[#0D9488] dark:text-teal-400 font-extrabold',
+                    tabHeader: 'bg-slate-200/80 dark:bg-[#161B22] border-slate-300 dark:border-slate-800',
+                    tabActive: 'bg-white dark:bg-[#21262D] text-[#0D9488] dark:text-teal-300 font-extrabold border border-slate-300 dark:border-slate-700 rounded-sm',
+                    tabInactive: 'text-slate-600 dark:text-slate-400 hover:bg-slate-300/40 dark:hover:bg-slate-800 border-transparent',
+                    pickerWrapper: 'bg-[#F8F7F4] dark:bg-[#0D1117] border border-slate-300 dark:border-slate-800 rounded-lg'
+                };
+            case 'dashboard':
+                return {
+                    container: 'bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-2xl shadow-xs',
+                    labelSpan: 'text-slate-600 dark:text-slate-400 font-extrabold',
+                    tabHeader: 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700',
+                    tabActive: 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-300 font-extrabold shadow-2xs border-slate-300 dark:border-slate-600',
+                    tabInactive: 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 border-transparent',
+                    pickerWrapper: 'bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl'
+                };
             case 'winamp':
                 return {
                     container: 'bg-black border-[#00FF00] text-[#00FF00] font-mono rounded-none',

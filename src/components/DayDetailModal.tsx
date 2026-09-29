@@ -54,10 +54,13 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     const isPiket = isPiketShift(data?.shift, isWeekendOrHoliday);
 
     const isWinamp = theme === 'winamp';
-    const isDarkFluid = theme === 'darkFluid';
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
     const isPaperSketch = theme === 'paperSketch';
+    const isIndustrial = theme === 'industrial';
+    const isTechnical = theme === 'technical';
+    const isEditorial = theme === 'editorial';
+    const isDashboard = theme === 'dashboard';
 
     const normalizedShift = normalizeShift(data?.shift || '');
 
@@ -76,8 +79,6 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
         ? 'text-[#2b2b2b] font-[\'Gochi_Hand\']'
         : isWinamp
         ? 'text-[#00FF00] font-black'
-        : isDarkFluid
-        ? 'text-[#E6E0E9] font-black'
         : isDark
         ? 'text-white font-black'
         : 'text-slate-900 font-black';
@@ -103,16 +104,24 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 border: '2px solid #00FF00',
             };
         }
-        if (isDark || isDarkFluid) {
+        if (isIndustrial) {
+            return {
+                borderRadius: '8px',
+                backgroundColor: '#1A1D23',
+                border: '1px solid rgba(226, 232, 240, 0.15)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+                color: '#E2E8F0',
+                fontFamily: "'JetBrains Mono', monospace",
+            };
+        }
+        if (isDark) {
             return {
                 borderRadius: '12px',
-                backgroundColor: isDarkFluid ? '#1D1B20' : '#1E1E24',
-                backgroundImage: isDarkFluid
-                    ? 'linear-gradient(139deg, #25232A 0%, #1D1B20 100%)'
-                    : 'linear-gradient(139deg, #262732 0%, #1A1A20 100%)',
+                backgroundColor: '#1E1E24',
+                backgroundImage: 'linear-gradient(139deg, #262732 0%, #1A1A20 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.12)',
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-                color: isDarkFluid ? '#E6E0E9' : '#F1F5F9',
+                color: '#F1F5F9',
             };
         }
         if (isVista) {
@@ -209,7 +218,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                     className={`w-[92vw] max-w-[325px] sm:max-w-[345px] p-4 sm:p-5 flex flex-col justify-between space-y-3 relative overflow-visible transform-gpu cursor-grab active:cursor-grabbing ${
                         isWinamp
                             ? 'text-[#00FF00] font-mono'
-                            : isDark || isDarkFluid
+                            : isDark
                             ? 'text-[#E6E0E9]'
                             : isVista
                             ? 'text-sky-950'
@@ -228,7 +237,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                     <div className={`flex items-start justify-between pb-2 border-b relative z-10 ${
                         isWinamp
                             ? 'border-zinc-800'
-                            : isDark || isDarkFluid
+                            : isDark
                             ? 'border-white/10'
                             : isVista
                             ? 'border-sky-300/40'
@@ -245,7 +254,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                         ? 'opacity-25 cursor-not-allowed border-transparent'
                                         : isWinamp
                                         ? 'border-zinc-700 bg-black text-[#00FF00] hover:border-[#00FF00]'
-                                        : isDark || isDarkFluid
+                                        : isDark
                                         ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white'
                                         : isVista
                                         ? 'border-sky-300/80 bg-white/80 hover:bg-white text-sky-900 shadow-xs'
@@ -305,7 +314,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                         ? 'opacity-25 cursor-not-allowed border-transparent'
                                         : isWinamp
                                         ? 'border-zinc-700 bg-black text-[#00FF00] hover:border-[#00FF00]'
-                                        : isDark || isDarkFluid
+                                        : isDark
                                         ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white'
                                         : isVista
                                         ? 'border-sky-300/80 bg-white/80 hover:bg-white text-sky-900 shadow-xs'
@@ -342,7 +351,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                 ? 'text-[#2b2b2b] bg-[#f2efeb] border-2 border-[#2b2b2b] font-[\'Gaegu\'] text-xs font-bold'
                                 : isWinamp
                                 ? 'text-[#00FF00]/70 bg-black border border-zinc-800'
-                            : isDark || isDarkFluid
+                            : isDark
                                 ? 'text-slate-300 bg-white/5 border border-white/10'
                             : isVista
                                 ? 'text-sky-900 bg-sky-500/15 border border-sky-300/40'
@@ -357,7 +366,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                         <label className={`text-[9.5px] font-bold uppercase tracking-wider block ${
                             isWinamp
                                 ? 'text-[#00FF00]/70'
-                                : isDark || isDarkFluid
+                                : isDark
                                 ? 'text-slate-400'
                                 : isVista
                                 ? 'text-sky-900/80'
@@ -379,7 +388,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                         className={`border-t my-0.5 relative z-10 ${
                             isWinamp
                                 ? 'border-zinc-800'
-                                : isDark || isDarkFluid
+                                : isDark
                                 ? 'border-white/10'
                                 : isVista
                                 ? 'border-sky-200/80'
@@ -393,7 +402,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                             <span className={`text-[9.5px] font-bold uppercase tracking-wider block ${
                                 isWinamp
                                     ? 'text-[#00FF00]/70'
-                                    : isDark || isDarkFluid
+                                    : isDark
                                     ? 'text-slate-400'
                                     : isVista
                                     ? 'text-sky-900/80'
@@ -410,7 +419,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                             ? 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] hover:bg-[#2ec4b6]/25 font-mono'
                                             : isWinamp
                                             ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'bg-[#2B2930] text-[#E6E0E9] border-white/10 hover:border-indigo-400/50'
                                             : isVista
                                             ? 'bg-white/90 text-sky-950 border-sky-300/80 hover:border-sky-400 shadow-xs'
@@ -430,7 +439,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                             ? 'border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
                                             : isWinamp
                                             ? 'bg-black border-zinc-700 text-[#00FF00]'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
                                             : isVista
                                             ? 'border-sky-300/80 bg-white/90 text-sky-950 shadow-xs'
@@ -444,7 +453,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                             <span className={`text-[9.5px] font-bold uppercase tracking-wider block ${
                                 isWinamp
                                     ? 'text-[#00FF00]/70'
-                                    : isDark || isDarkFluid
+                                    : isDark
                                     ? 'text-slate-400'
                                     : isVista
                                     ? 'text-sky-900/80'
@@ -461,7 +470,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                             ? 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] hover:bg-[#2ec4b6]/25 font-mono'
                                             : isWinamp
                                             ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'bg-[#2B2930] text-[#E6E0E9] border-white/10 hover:border-indigo-400/50'
                                             : isVista
                                             ? 'bg-white/90 text-sky-950 border-sky-300/80 hover:border-sky-400 shadow-xs'
@@ -481,7 +490,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                             ? 'border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
                                             : isWinamp
                                             ? 'bg-black border-zinc-700 text-[#00FF00]'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
                                             : isVista
                                             ? 'border-sky-300/80 bg-white/90 text-sky-950 shadow-xs'
@@ -498,7 +507,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                             <span className={`text-[9.5px] font-bold uppercase tracking-wider ${
                                 isWinamp
                                     ? 'text-[#00FF00]/70'
-                                    : isDark || isDarkFluid
+                                    : isDark
                                     ? 'text-slate-400'
                                     : isVista
                                     ? 'text-sky-900/80'
@@ -510,7 +519,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                 <span className={`text-[9px] font-black ${
                                     isWinamp
                                         ? 'text-[#00FF00]'
-                                        : isDark || isDarkFluid
+                                        : isDark
                                         ? 'text-indigo-300'
                                         : isVista
                                         ? 'text-blue-700'
@@ -530,7 +539,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                             ? 'bg-[#2ec4b6]/25 border-2 border-[#2b2b2b] text-[#2b2b2b] font-bold shadow-[2px_2px_0px_#2b2b2b]'
                                             : isWinamp
                                             ? 'bg-black border-[#00FF00] text-[#00FF00] font-bold'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'bg-indigo-600/30 border-indigo-500/40 text-indigo-200 font-bold'
                                             : isVista
                                             ? 'bg-sky-400/25 border-sky-400/80 text-sky-950 font-bold shadow-xs'
@@ -539,7 +548,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                         ? 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/25 shadow-[2px_2px_0px_#2b2b2b]'
                                         : isWinamp
                                         ? 'bg-black text-zinc-500 border-zinc-700 hover:border-[#00FF00]'
-                                        : isDark || isDarkFluid
+                                        : isDark
                                         ? 'bg-[#2B2930] text-slate-300 border-white/10 hover:border-indigo-400/50'
                                         : isVista
                                         ? 'bg-white/90 text-sky-800 border-sky-300/80 hover:border-sky-400 shadow-xs'
@@ -560,7 +569,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                         ? 'border-2 border-[#2b2b2b] bg-white text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
                                         : isWinamp
                                         ? 'bg-black border-zinc-700 text-[#00FF00]'
-                                        : isDark || isDarkFluid
+                                        : isDark
                                         ? 'bg-[#2B2930] border-white/10 text-[#E6E0E9]'
                                         : isVista
                                         ? 'border-sky-300/80 bg-white/90 text-sky-950 shadow-xs'
@@ -575,7 +584,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                         <span className={`text-[9.5px] font-bold uppercase tracking-wider block ${
                             isWinamp
                                 ? 'text-[#00FF00]/70'
-                                : isDark || isDarkFluid
+                                : isDark
                                 ? 'text-slate-400'
                                 : isVista
                                 ? 'text-sky-900/80'
@@ -593,7 +602,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                     ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] placeholder-slate-400 focus:border-[#ff4747] shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-base'
                                     : isWinamp
                                     ? 'bg-black border-zinc-700 text-[#00FF00] placeholder-zinc-600 focus:border-[#00FF00] font-mono'
-                                    : isDark || isDarkFluid
+                                    : isDark
                                     ? 'bg-[#2B2930] border-white/10 text-slate-100 placeholder-slate-500 focus:border-indigo-400'
                                     : isVista
                                     ? 'bg-white/90 border-sky-300/80 text-sky-950 placeholder-sky-700/50 focus:border-sky-500 shadow-2xs'
@@ -618,7 +627,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                             ? 'bg-[#2ec4b6]/20 border-2 border-[#2b2b2b] text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
                                             : isWinamp
                                             ? 'bg-black border-[#00FF00] text-[#00FF00] font-mono'
-                                            : isDark || isDarkFluid
+                                            : isDark
                                             ? 'bg-amber-500/15 border-amber-500/30 text-amber-200'
                                             : isVista
                                             ? 'bg-sky-100/90 border-sky-300 text-sky-950 shadow-xs'
@@ -644,8 +653,6 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                     ? 'bg-[#ff4747] text-white hover:bg-[#ff3333] border-2 border-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b] font-[\'Gaegu\'] text-base font-bold active:translate-x-0.5 active:translate-y-0.5'
                                     : isWinamp
                                     ? 'bg-[#00FF00] text-black hover:bg-emerald-400 font-mono'
-                                    : isDarkFluid
-                                    ? 'bg-[#D0BCFF] text-[#381E72] hover:bg-[#E8DEF8]'
                                     : isDark
                                     ? 'bg-indigo-600 text-white hover:bg-indigo-500'
                                     : isVista

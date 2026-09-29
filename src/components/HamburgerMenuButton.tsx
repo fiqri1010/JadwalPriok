@@ -8,6 +8,7 @@ interface HamburgerMenuButtonProps {
     theme: AppTheme;
     className?: string;
     title?: string;
+    id?: string;
 }
 
 export const HamburgerMenuButton: React.FC<HamburgerMenuButtonProps> = ({
@@ -16,9 +17,11 @@ export const HamburgerMenuButton: React.FC<HamburgerMenuButtonProps> = ({
     theme,
     className = '',
     title,
+    id,
 }) => {
     const isWinamp = theme === 'winamp';
     const tooltipText = title || (isOpen ? 'Sembunyikan Menu Samping' : 'Tampilkan Menu Samping');
+    const inputId = id || 'burger-nav-checkbox';
 
     if (isWinamp) {
         return (
@@ -54,27 +57,38 @@ export const HamburgerMenuButton: React.FC<HamburgerMenuButtonProps> = ({
             placement="bottom"
             containerClassName={`flex items-center justify-center ${className}`}
         >
-            <label
-                className={`burger p-2 -m-2 rounded-full transition-colors duration-200 hover:bg-black/5 dark:hover:bg-white/10 ${
-                    theme === 'vista'
-                        ? 'burger-vista'
-                        : theme === 'dark' || theme === 'darkFluid'
-                        ? 'burger-dark'
-                        : 'burger-default'
+            <button
+                type="button"
+                id={inputId}
+                onClick={onToggle}
+                className={`p-2 rounded-lg transition-colors duration-200 cursor-pointer select-none focus:outline-none hover:bg-black/5 dark:hover:bg-white/10 ${
+                    theme === 'technical'
+                        ? 'border border-[#111113] rounded-none bg-[#FFFFFF]'
+                        : theme === 'paperSketch'
+                        ? 'border border-[#2b2b2b]/40 shadow-[1px_1px_0px_#2b2b2b] bg-white'
+                        : ''
                 }`}
-                htmlFor="burger-nav-checkbox"
-                aria-label="Toggle Menu Samping"
+                aria-label={tooltipText}
+                aria-expanded={isOpen}
             >
-                <input
-                    type="checkbox"
-                    id="burger-nav-checkbox"
-                    checked={isOpen}
-                    onChange={onToggle}
-                />
-                <span />
-                <span />
-                <span />
-            </label>
+                <div
+                    className={`burger ${isOpen ? 'is-active' : ''} ${
+                        theme === 'technical'
+                            ? 'burger-technical'
+                            : theme === 'vista'
+                            ? 'burger-vista'
+                            : theme === 'dark'
+                            ? 'burger-dark'
+                            : theme === 'paperSketch'
+                            ? 'burger-sketch'
+                            : 'burger-default'
+                    }`}
+                >
+                    <span />
+                    <span />
+                    <span />
+                </div>
+            </button>
         </Tooltip>
     );
 };

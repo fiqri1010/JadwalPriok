@@ -1,6 +1,6 @@
 export const SHIFT_OPTIONS = ['Graha', 'NPCT', 'TPSL', 'OFF', 'SM', 'PM', 'Malam', 'CUTI'] as const;
 export type ShiftType = typeof SHIFT_OPTIONS[number] | '';
-export type AppTheme = 'default' | 'dark' | 'vista' | 'winamp' | 'darkFluid' | 'paperSketch';
+export type AppTheme = 'default' | 'dark' | 'vista' | 'winamp' | 'paperSketch' | 'technical' | 'editorial' | 'industrial' | 'dashboard';
 
 // --- Visual Studio & Shift Configuration Models ---
 export type VisualColorMode = 'solid' | 'linear' | 'radial' | 'customCss';
@@ -294,5 +294,16 @@ export function isDayDataFilled(data: DayData | null | undefined): boolean {
     if (typeof data.note === 'string' && data.note.trim() !== '') return true;
     if (data.isManualHoliday === true) return true;
     return false;
+}
+
+export interface CalendarToolsProps {
+    canUndo: boolean;
+    canRedo: boolean;
+    canReset: boolean;
+    historyCount?: number;
+    redoCount?: number;
+    onUndo: () => void;
+    onRedo: () => void;
+    onResetCalendar: () => void;
 }
 

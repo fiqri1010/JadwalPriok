@@ -38,10 +38,13 @@ export const MonthYearPickerModal: React.FC<MonthYearPickerModalProps> = ({
   const [tempYear, setTempYear] = useState<number>(selectedYear);
 
   const isWinamp = theme === 'winamp';
-  const isDarkFluid = theme === 'darkFluid';
   const isDark = theme === 'dark';
   const isVista = theme === 'vista';
   const isDefault = theme === 'default';
+  const isIndustrial = theme === 'industrial';
+  const isTechnical = theme === 'technical';
+  const isEditorial = theme === 'editorial';
+  const isDashboard = theme === 'dashboard';
 
   // Sync state whenever modal opens or props change
   useEffect(() => {
@@ -90,18 +93,18 @@ export const MonthYearPickerModal: React.FC<MonthYearPickerModalProps> = ({
       };
     }
 
-    if (isDarkFluid) {
+    if (isIndustrial) {
       return {
-        cardBg: 'bg-[#1D1B20] text-[#E6E0E9] border border-white/10 rounded-2xl shadow-2xl',
-        headerIconBg: 'bg-[#D0BCFF]/15 text-[#D0BCFF] border border-[#D0BCFF]/30',
-        titleColor: 'text-[#E6E0E9]',
-        subtitleColor: 'text-[#CAC4D0]',
-        stepperBg: 'bg-[#141218] border border-white/10 text-[#E6E0E9]',
-        stepperBtn: 'hover:bg-white/10 text-[#E6E0E9]',
-        monthGhost: 'text-[#E6E0E9] hover:bg-white/10 active:bg-white/15 rounded-xl',
-        monthActive: 'bg-[#D0BCFF] text-[#381E72] font-black rounded-xl shadow-md',
-        footerBtnCancel: 'bg-[#2B2930] text-[#CAC4D0] border border-white/10 hover:bg-[#36343B] rounded-xl',
-        todayBtnText: 'text-[#D0BCFF] hover:text-[#E8DEF8]',
+        cardBg: 'bg-[#1A1D23] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-[8px] shadow-2xl font-[\'JetBrains_Mono\']',
+        headerIconBg: 'bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30',
+        titleColor: 'text-[#E2E8F0] font-[\'Syne\']',
+        subtitleColor: 'text-[#E2E8F0]/60',
+        stepperBg: 'bg-[#0F1115] border border-[rgba(226,232,240,0.15)] text-[#E2E8F0]',
+        stepperBtn: 'hover:bg-white/10 text-[#2DD4BF]',
+        monthGhost: 'text-[#E2E8F0] hover:bg-white/10 hover:text-[#2DD4BF] rounded-[4px]',
+        monthActive: 'bg-[#2DD4BF] text-[#0F1115] font-extrabold rounded-[4px] uppercase',
+        footerBtnCancel: 'bg-[#0F1115] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] hover:bg-white/10 rounded-[4px]',
+        todayBtnText: 'text-[#2DD4BF] hover:underline',
       };
     }
 

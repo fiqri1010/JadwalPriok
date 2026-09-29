@@ -107,14 +107,35 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
         initialShift && JSON.stringify(draftShift) !== JSON.stringify(initialShift)
     );
 
+    const isIndustrial = theme === 'industrial';
+    const isPaperSketch = theme === 'paperSketch';
+
     return createPortal(
         <div className="fixed inset-0 sm:top-7 z-[10000] overflow-y-auto p-2 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 flex justify-center items-start sm:items-center">
             <div className="fixed inset-0 sm:top-7" onClick={onClose} />
-            <div className="relative z-10 w-full max-w-5xl my-auto h-[90vh] md:h-[85vh] md:max-h-[660px] md:min-h-[580px] flex flex-col rounded-2xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200/90 dark:border-slate-700 overflow-hidden">
+            <div className={`relative z-10 w-full max-w-5xl my-auto h-[90vh] md:h-[85vh] md:max-h-[660px] md:min-h-[580px] flex flex-col overflow-hidden shadow-2xl ${
+                isIndustrial
+                    ? 'bg-[#1A1D23] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-lg font-[\'JetBrains_Mono\']'
+                    : isPaperSketch
+                    ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[6px_6px_0px_#2b2b2b] rounded-2xl font-[\'Gaegu\'] text-base'
+                    : 'rounded-2xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 border border-slate-200/90 dark:border-slate-700'
+            }`}>
                 {/* Header */}
-                <div className="flex items-center justify-between p-3.5 border-b border-slate-200/80 dark:border-zinc-800 shrink-0 bg-white dark:bg-[#1E1E1E]">
+                <div className={`flex items-center justify-between p-3.5 border-b shrink-0 ${
+                    isIndustrial
+                        ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
+                        : isPaperSketch
+                        ? 'bg-[#f2efeb] border-[#2b2b2b] border-b-2'
+                        : 'bg-white dark:bg-[#1E1E1E] border-slate-200/80 dark:border-zinc-800'
+                }`}>
                     <div className="flex items-center space-x-2.5">
-                        <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold text-xs shrink-0 font-mono uppercase">
+                        <div className={`p-1.5 rounded-lg font-bold text-xs shrink-0 font-mono uppercase ${
+                            isIndustrial
+                                ? 'bg-[#2DD4BF]/20 text-[#2DD4BF] border border-[#2DD4BF]/40'
+                                : isPaperSketch
+                                ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b]'
+                                : 'bg-teal-500/10 text-teal-600 dark:text-teal-400'
+                        }`}>
                             {(draftShift.naming.displayBadge || 'SHIFT').toUpperCase()}
                         </div>
                         <div>
@@ -122,7 +143,13 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                 <h3 className="text-xs sm:text-sm font-bold">
                                     {draftShift.isSystemDefault ? 'Konfigurasi Shift' : 'Edit Aturan Shift'}
                                 </h3>
-                                <span className="font-mono text-[9.5px] px-1.5 py-0.2 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-semibold border border-slate-200 dark:border-zinc-700">
+                                <span className={`font-mono text-[9.5px] px-1.5 py-0.2 rounded font-semibold border ${
+                                    isIndustrial
+                                        ? 'bg-[#0F1115] text-[#2DD4BF] border-[rgba(226,232,240,0.15)]'
+                                        : isPaperSketch
+                                        ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b]'
+                                        : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-700'
+                                }`}>
                                     ID: {draftShift.id}
                                 </span>
                             </div>
@@ -143,15 +170,27 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                 </div>
 
                 {/* Side-by-Side Flex Layout Body */}
-                <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden min-h-0 bg-slate-50/20 dark:bg-zinc-900/10">
+                <div className={`flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden min-h-0 ${
+                    isIndustrial
+                        ? 'bg-[#0F1115]'
+                        : isPaperSketch
+                        ? 'bg-[#fdfcf0]'
+                        : 'bg-slate-50/20 dark:bg-zinc-900/10'
+                }`}>
                     
                     {/* Left Sidebar: Preview badge, Vertical Tabs menu, and Undo/Redo/Reset at the bottom */}
-                    <div className="w-full md:w-[200px] lg:w-[215px] shrink-0 border-b md:border-b-0 md:border-r border-slate-200/80 dark:border-zinc-800 bg-slate-50/60 dark:bg-black/20 flex flex-col justify-between p-3 py-3.5 gap-3 overflow-visible md:overflow-hidden">
+                    <div className={`w-full md:w-[200px] lg:w-[215px] shrink-0 border-b md:border-b-0 md:border-r flex flex-col justify-between p-3 py-3.5 gap-3 overflow-visible md:overflow-hidden ${
+                        isIndustrial
+                            ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
+                            : isPaperSketch
+                            ? 'bg-[#f2efeb] border-[#2b2b2b] md:border-r-2'
+                            : 'bg-slate-50/60 dark:bg-black/20 border-slate-200/80 dark:border-zinc-800'
+                    }`}>
                         
                         <div className="space-y-4">
                             {/* Kotak Pratinjau Badge - Kompak menyamai lebar tab menu */}
                             <div className="space-y-1.5">
-                                <span className="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-wider block">
+                                <span className="text-[10px] font-black opacity-60 uppercase tracking-wider block">
                                     Pratinjau Badge (Live)
                                 </span>
                                 <div className="w-full">
@@ -165,7 +204,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
 
                             {/* Vertical Tab Menu */}
                             <div className="space-y-1.5">
-                                <span className="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-wider block">
+                                <span className="text-[10px] font-black opacity-60 uppercase tracking-wider block">
                                     Sub Menu Konfigurasi
                                 </span>
                                 <ul className="w-full flex flex-row md:flex-col gap-1.5 md:gap-2 overflow-x-auto md:overflow-visible no-scrollbar pb-1 md:pb-0">
@@ -176,7 +215,15 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                             onClick={() => setActiveTab('latar')}
                                             className={`w-full text-xs font-bold flex items-center justify-center md:justify-start gap-2.5 px-2.5 md:px-3.5 py-2.5 md:py-3 group rounded-xl transition-all duration-150 select-none cursor-pointer border ${
                                                 activeTab === 'latar'
-                                                    ? 'bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 border-teal-500/80 dark:border-teal-400 shadow-xs ring-1 ring-teal-500/10 font-extrabold'
+                                                    ? isIndustrial
+                                                        ? 'bg-[#1A1D23] text-[#2DD4BF] border-[#2DD4BF]/50 shadow-xs font-extrabold rounded-[4px]'
+                                                        : isPaperSketch
+                                                        ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold rounded-lg'
+                                                        : 'bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 border-teal-500/80 dark:border-teal-400 shadow-xs ring-1 ring-teal-500/10 font-extrabold'
+                                                    : isIndustrial
+                                                    ? 'bg-transparent text-[#E2E8F0]/70 hover:text-[#E2E8F0] hover:bg-white/5 border-transparent'
+                                                    : isPaperSketch
+                                                    ? 'bg-transparent text-[#2b2b2b] hover:bg-[#2ec4b6]/20 border-2 border-transparent font-bold'
                                                     : 'bg-transparent text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/40 hover:text-slate-900 dark:hover:text-slate-100 border-transparent'
                                             }`}
                                         >
@@ -192,7 +239,15 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                             onClick={() => setActiveTab('icon_nama')}
                                             className={`w-full text-xs font-bold flex items-center justify-center md:justify-start gap-2.5 px-2.5 md:px-3.5 py-2.5 md:py-3 group rounded-xl transition-all duration-150 select-none cursor-pointer border ${
                                                 activeTab === 'icon_nama'
-                                                    ? 'bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 border-teal-500/80 dark:border-teal-400 shadow-xs ring-1 ring-teal-500/10 font-extrabold'
+                                                    ? isIndustrial
+                                                        ? 'bg-[#1A1D23] text-[#2DD4BF] border-[#2DD4BF]/50 shadow-xs font-extrabold rounded-[4px]'
+                                                        : isPaperSketch
+                                                        ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold rounded-lg'
+                                                        : 'bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 border-teal-500/80 dark:border-teal-400 shadow-xs ring-1 ring-teal-500/10 font-extrabold'
+                                                    : isIndustrial
+                                                    ? 'bg-transparent text-[#E2E8F0]/70 hover:text-[#E2E8F0] hover:bg-white/5 border-transparent'
+                                                    : isPaperSketch
+                                                    ? 'bg-transparent text-[#2b2b2b] hover:bg-[#2ec4b6]/20 border-2 border-transparent font-bold'
                                                     : 'bg-transparent text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/40 hover:text-slate-900 dark:hover:text-slate-100 border-transparent'
                                             }`}
                                         >
@@ -208,7 +263,15 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                             onClick={() => setActiveTab('ruleset')}
                                             className={`w-full text-xs font-bold flex items-center justify-center md:justify-start gap-2.5 px-2.5 md:px-3.5 py-2.5 md:py-3 group rounded-xl transition-all duration-150 select-none cursor-pointer border ${
                                                 activeTab === 'ruleset'
-                                                    ? 'bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 border-teal-500/80 dark:border-teal-400 shadow-xs ring-1 ring-teal-500/10 font-extrabold'
+                                                    ? isIndustrial
+                                                        ? 'bg-[#1A1D23] text-[#2DD4BF] border-[#2DD4BF]/50 shadow-xs font-extrabold rounded-[4px]'
+                                                        : isPaperSketch
+                                                        ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold rounded-lg'
+                                                        : 'bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 border-teal-500/80 dark:border-teal-400 shadow-xs ring-1 ring-teal-500/10 font-extrabold'
+                                                    : isIndustrial
+                                                    ? 'bg-transparent text-[#E2E8F0]/70 hover:text-[#E2E8F0] hover:bg-white/5 border-transparent'
+                                                    : isPaperSketch
+                                                    ? 'bg-transparent text-[#2b2b2b] hover:bg-[#2ec4b6]/20 border-2 border-transparent font-bold'
                                                     : 'bg-transparent text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/40 hover:text-slate-900 dark:hover:text-slate-100 border-transparent'
                                             }`}
                                         >
@@ -261,7 +324,13 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                     </div>
 
                     {/* Right Content Area: Active Sub Menu Details and Action Buttons at bottom right */}
-                    <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-[#1E1E1E]">
+                    <div className={`flex-1 flex flex-col min-w-0 ${
+                        isIndustrial
+                            ? 'bg-[#0F1115] text-[#E2E8F0]'
+                            : isPaperSketch
+                            ? 'bg-[#fdfcf0] text-[#2b2b2b]'
+                            : 'bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100'
+                    }`}>
                         
                         {/* Scrollable Content Container */}
                         <div className="flex-1 overflow-y-visible md:overflow-y-auto p-4 sm:p-5 custom-scrollbar min-h-0 font-sans">
@@ -274,6 +343,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                         <ShiftColorStudio
                                             visual={draftShift.visual}
                                             onChange={(visual) => updateDraftShift({ ...draftShift, visual })}
+                                            theme={theme}
                                         />
                                     </div>
                                     
@@ -282,6 +352,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                         <ShiftPatternStudio
                                             visual={draftShift.visual}
                                             onChange={(visual) => updateDraftShift({ ...draftShift, visual })}
+                                            theme={theme}
                                         />
                                     </div>
                                 </div>
@@ -387,6 +458,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                         <ShiftWorkTimeConfigComponent
                                             workTime={draftShift.workTime}
                                             onChange={(workTime) => updateDraftShift({ ...draftShift, workTime })}
+                                            theme={theme}
                                         />
                                     </div>
 
@@ -411,6 +483,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                                 })
                                             }
                                             shiftKey={draftShift.key}
+                                            theme={theme}
                                         />
                                     </div>
                                 </div>

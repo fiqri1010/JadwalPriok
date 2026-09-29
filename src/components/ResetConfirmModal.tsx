@@ -36,6 +36,8 @@ export const ResetConfirmModal: React.FC<ResetConfirmModalProps> = ({
                 className={`relative w-full max-w-md p-6 shadow-2xl border animate-in zoom-in-95 duration-200 ${
                     theme === 'winamp'
                         ? 'rounded-none bg-[#2C2E3B] border-2 border-[#00FF00] text-[#00FF00] font-mono'
+                        : theme === 'industrial'
+                        ? 'rounded-[8px] bg-[#1A1D23] border-[rgba(226,232,240,0.15)] text-[#E2E8F0] font-[\'JetBrains_Mono\']'
                         : theme === 'vista'
                         ? 'rounded-2xl bg-white/75 backdrop-blur-2xl border-white/80 text-slate-900 shadow-[0_25px_60px_rgba(14,116,224,0.3)] ring-1 ring-sky-300/30'
                         : theme === 'dark'

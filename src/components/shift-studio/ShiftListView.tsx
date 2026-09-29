@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ShiftItemConfig, ShiftVisualStyle } from '../../types';
+import { ShiftItemConfig, ShiftVisualStyle, AppTheme } from '../../types';
 import { ICON_CATALOG } from './ShiftIconPickerModal';
 import { BADGE_PATTERNS, isCustomPatternImage, parseCssPatternToStyle } from './patterns';
 import {
@@ -34,6 +34,7 @@ interface ShiftListViewProps {
     onExportJson: () => void;
     onImportJson: () => void;
     onRenameProfile?: (newName: string) => void;
+    theme?: AppTheme;
 }
 
 export const ShiftListView: React.FC<ShiftListViewProps> = ({
@@ -49,7 +50,10 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
     onExportJson,
     onImportJson,
     onRenameProfile,
+    theme = 'default',
 }) => {
+    const isIndustrial = theme === 'industrial';
+    const isDark = theme === 'dark' || isIndustrial;
     const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
     const [nameInput, setNameInput] = useState(groupName);
     const [nameError, setNameError] = useState('');
@@ -230,7 +234,11 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                     <button
                         type="button"
                         onClick={onExportJson}
-                        className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 flex items-center space-x-1 cursor-pointer transition-colors"
+                        className={`px-2.5 py-1 text-xs font-medium border flex items-center space-x-1 cursor-pointer transition-colors ${
+                            isIndustrial
+                                ? 'bg-[#1A1D23] hover:bg-white/10 text-[#E2E8F0] border-[rgba(226,232,240,0.15)] rounded-[4px]'
+                                : 'bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-700 rounded-lg'
+                        }`}
                         title="Ekspor JSON Shift"
                     >
                         <Download className="w-3.5 h-3.5" />
@@ -239,7 +247,11 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                     <button
                         type="button"
                         onClick={onImportJson}
-                        className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 flex items-center space-x-1 cursor-pointer transition-colors"
+                        className={`px-2.5 py-1 text-xs font-medium border flex items-center space-x-1 cursor-pointer transition-colors ${
+                            isIndustrial
+                                ? 'bg-[#1A1D23] hover:bg-white/10 text-[#E2E8F0] border-[rgba(226,232,240,0.15)] rounded-[4px]'
+                                : 'bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-700 rounded-lg'
+                        }`}
                         title="Impor JSON Shift"
                     >
                         <Upload className="w-3.5 h-3.5" />
@@ -248,13 +260,17 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                 </div>
             </div>
 
-            {/* Actions inside edit menu: Add Shift + Reset to Default */}
+            {/* Actions inside edit menu: Add Shift + Reset to Default + Tools Menu */}
             <div className="flex flex-wrap items-center justify-between gap-2 p-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <button
                         type="button"
                         onClick={onAddNewShift}
-                        className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white flex items-center space-x-1.5 cursor-pointer shadow-xs transition-all active:scale-95"
+                        className={`px-3.5 py-1.5 text-xs font-bold flex items-center space-x-1.5 cursor-pointer shadow-xs transition-all active:scale-95 ${
+                            isIndustrial
+                                ? 'bg-[#2DD4BF] hover:bg-[#26b8a8] text-[#0F1115] rounded-[4px]'
+                                : 'bg-teal-600 hover:bg-teal-700 text-white rounded-lg'
+                        }`}
                     >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Tambah Shift Baru</span>
@@ -263,7 +279,11 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                     <button
                         type="button"
                         onClick={onResetToDefault}
-                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 flex items-center space-x-1.5 cursor-pointer transition-colors"
+                        className={`px-3 py-1.5 text-xs font-medium border flex items-center space-x-1.5 cursor-pointer transition-colors ${
+                            isIndustrial
+                                ? 'bg-[#1A1D23] hover:bg-white/10 text-[#E2E8F0] border-[rgba(226,232,240,0.15)] rounded-[4px]'
+                                : 'bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-700 rounded-lg'
+                        }`}
                         title="Kembalikan aturan kelompok ini ke konfigurasi bawaan"
                     >
                         <RotateCcw className="w-3.5 h-3.5" />
@@ -276,7 +296,11 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
             </div>
 
             {/* Form list baris (bukan grid kotak) */}
-            <div className="border border-slate-200/90 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-[#1E1E1E] divide-y divide-slate-200/80 dark:divide-zinc-800">
+            <div className={`border overflow-hidden divide-y ${
+                isIndustrial
+                    ? 'border-[rgba(226,232,240,0.15)] bg-[#1A1D23] divide-[rgba(226,232,240,0.1)] rounded-[6px]'
+                    : 'border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-[#1E1E1E] divide-slate-200/80 dark:divide-zinc-800 rounded-lg'
+            }`}>
                 {shifts.map((s, idx) => {
                     const isOffOrCuti = s.key === 'OFF' || s.key === 'CUTI';
                     return (

@@ -34,7 +34,12 @@ export function getInitialZoom(): number {
 export function applyUiZoom(zoomLevel: number) {
     if (typeof document === 'undefined') return;
     try {
-        (document.documentElement.style as any).zoom = `${zoomLevel}%`;
+        const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
+        if (isMobileScreen || zoomLevel === 100) {
+            document.documentElement.style.removeProperty('zoom');
+        } else {
+            (document.documentElement.style as any).zoom = `${zoomLevel}%`;
+        }
         localStorage.setItem(LOCAL_STORAGE_UI_ZOOM_KEY, String(zoomLevel));
     } catch (e) {
         console.warn('Gagal mengubah zoom UI:', e);
@@ -62,6 +67,14 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
     // Apply zoom and keep in sync
     useEffect(() => {
         applyUiZoom(zoomLevel);
+
+        const handleResize = () => {
+            applyUiZoom(zoomLevel);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
     }, [zoomLevel]);
 
     useEffect(() => {
@@ -427,81 +440,6 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                             className="h-4 w-4 bg-[#323b42] hover:bg-rose-700 hover:text-white border-t border-l border-[#6a7d8d] border-b border-r border-[#0a0d0f] text-slate-200 flex items-center justify-center text-[9px] cursor-pointer"
                         >
                             ✕
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // Dark Fluid Material Title Bar
-    if (theme === 'darkFluid') {
-        return (
-            <div
-                data-tauri-drag-region="true"
-                onMouseDown={handleStartDragging}
-                className="hidden sm:block w-full shrink-0 select-none font-sans text-xs bg-[#141218] border-b border-white/5 cursor-default relative z-[999999]"
-            >
-                <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#E6E0E9] bg-[#1D1B20]">
-                    <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
-                        <AppLogo className="h-4 w-4 rounded-xs shrink-0" />
-                        <span data-tauri-drag-region="true" className="font-semibold text-[#E6E0E9] text-[11px] truncate">
-                            {title}
-                        </span>
-                    </div>
-
-                    <div className="flex items-center space-x-0.5 shrink-0">
-                        {/* Zoom Controls: "-", "%", "+" (6px jarak ke tombol minimize) */}
-                        <div className="flex items-center space-x-0.5 mr-[6px]">
-                            <button
-                                type="button"
-                                onClick={handleZoomOut}
-                                className="h-5 w-5 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                                title="Perkecil Ukuran Tampilan UI (-)"
-                            >
-                                <Minus className="h-2.5 w-2.5" />
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleResetZoom}
-                                className="h-5 px-1.5 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-white/10 text-[10px] font-mono font-bold transition-colors cursor-pointer"
-                                title="Reset Ukuran UI ke 100%"
-                            >
-                                {zoomLevel}%
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleZoomIn}
-                                className="h-5 w-5 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                                title="Perbesar Ukuran Tampilan UI (+)"
-                            >
-                                <Plus className="h-2.5 w-2.5" />
-                            </button>
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={handleMinimize}
-                            className="h-5 w-6 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                            title="Minimize"
-                        >
-                            <Minus className="h-3 w-3" />
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleToggleMaximize}
-                            className="h-5 w-6 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                            title={isFullscreen ? 'Restore' : 'Maximize'}
-                        >
-                            {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleClose}
-                            className="h-5 w-6 rounded flex items-center justify-center text-[#CAC4D0] hover:text-white hover:bg-[#B3261E] transition-colors cursor-pointer"
-                            title="Tutup Jendela"
-                        >
-                            <X className="h-3 w-3" />
                         </button>
                     </div>
                 </div>

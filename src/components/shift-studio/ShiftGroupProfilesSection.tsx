@@ -85,9 +85,13 @@ const ShiftPreviewDropdown: React.FC<{
     const menuRef = useRef<HTMLDivElement>(null);
 
     const isWinamp = theme === 'winamp';
-    const isDarkFluid = theme === 'darkFluid';
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
+    const isIndustrial = theme === 'industrial';
+    const isPaperSketch = theme === 'paperSketch';
+    const isEditorial = theme === 'editorial';
+    const isTechnical = theme === 'technical';
+    const isDashboard = theme === 'dashboard';
 
     const updateCoords = useCallback(() => {
         if (!triggerRef.current || typeof window === 'undefined') return;
@@ -165,6 +169,46 @@ const ShiftPreviewDropdown: React.FC<{
     }, [isOpen, updateCoords, onClose, triggerRef]);
 
     const getDropdownCardStyle = (): React.CSSProperties => {
+        if (isIndustrial) {
+            return {
+                backgroundColor: '#1A1D23',
+                color: '#E2E8F0',
+                borderRadius: '8px',
+                border: '1px solid rgba(226, 232, 240, 0.2)',
+                boxShadow: '0 20px 45px rgba(0,0,0,0.8)',
+                fontFamily: 'JetBrains Mono, monospace',
+            };
+        }
+        if (isPaperSketch) {
+            return {
+                backgroundColor: '#fdfcf0',
+                color: '#2b2b2b',
+                borderRadius: '16px',
+                border: '2px solid #2b2b2b',
+                boxShadow: '4px 4px 0px #2b2b2b',
+                fontFamily: 'Gaegu, sans-serif',
+            };
+        }
+        if (isEditorial) {
+            return {
+                backgroundColor: '#FCFBF9',
+                color: '#1a1a1a',
+                borderRadius: '10px',
+                border: '1px solid rgba(26,26,26,0.25)',
+                boxShadow: '0 15px 35px rgba(0,0,0,0.12)',
+                fontFamily: 'Georgia, serif',
+            };
+        }
+        if (isTechnical) {
+            return {
+                backgroundColor: '#F8F7F4',
+                color: '#111113',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                fontFamily: 'Courier New, monospace',
+            };
+        }
         if (isWinamp) {
             return {
                 backgroundColor: '#121212',
@@ -173,12 +217,10 @@ const ShiftPreviewDropdown: React.FC<{
                 boxShadow: '4px 4px 0px #000000',
             };
         }
-        if (isDark || isDarkFluid) {
+        if (isDark) {
             return {
-                backgroundColor: isDarkFluid ? '#1E1B24' : '#1E1E24',
-                backgroundImage: isDarkFluid
-                    ? 'linear-gradient(139deg, #25232E 0%, #1E1B24 100%)'
-                    : 'linear-gradient(139deg, #262730 0%, #1E1E24 100%)',
+                backgroundColor: '#1E1E24',
+                backgroundImage: 'linear-gradient(139deg, #262730 0%, #1E1E24 100%)',
                 borderRadius: '10px',
                 border: '1px solid rgba(255, 255, 255, 0.16)',
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.08)',
@@ -609,6 +651,12 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
     onUpdateGroupDateRanges,
     onRenameGroup,
 }) => {
+    const isIndustrial = theme === 'industrial';
+    const isPaperSketch = theme === 'paperSketch';
+    const isEditorial = theme === 'editorial';
+    const isTechnical = theme === 'technical';
+    const isDashboard = theme === 'dashboard';
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<'create' | 'copy' | 'edit'>('create');
     const [targetGroup, setTargetGroup] = useState<ShiftGroupProfile | null>(null);
@@ -693,8 +741,8 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
                 </button>
             </div>
 
-            {/* List Tampilan Profil Shift (Bukan Grid Kartu) */}
-            <div className="border border-slate-200/90 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-[#1E1E1E] divide-y divide-slate-200/80 dark:divide-zinc-800 shadow-sm">
+            {/* List Tampilan Kartu Profil Shift */}
+            <div className="space-y-3">
                 {groups.map((grp, idx) => {
                     const isActive = grp.id === activeGroupId;
                     const rangesCount = grp.dateRanges?.length || 1;
@@ -706,134 +754,214 @@ export const ShiftGroupProfilesSection: React.FC<ShiftGroupProfilesSectionProps>
                     return (
                         <div
                             key={`shift-group-${grp.id}-${idx}`}
-                            className={`p-3 sm:p-3.5 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 ${
-                                isActive
-                                    ? 'bg-teal-50/20 dark:bg-teal-950/10'
-                                    : 'hover:bg-slate-50/60 dark:hover:bg-zinc-800/40'
+                            className={`p-3.5 sm:p-4 transition-all duration-200 flex flex-col gap-3 ${
+                                isIndustrial
+                                    ? `bg-[#1A1D23] text-[#E2E8F0] font-['JetBrains_Mono'] rounded-xl border ${
+                                          isActive
+                                              ? 'border-[#2DD4BF] ring-2 ring-[#2DD4BF]/20 shadow-md'
+                                              : 'border-[rgba(226,232,240,0.18)] hover:border-[rgba(226,232,240,0.3)]'
+                                      }`
+                                    : isPaperSketch
+                                    ? `bg-[#fdfcf0] text-[#2b2b2b] font-['Gaegu'] text-base rounded-2xl border-2 border-[#2b2b2b] ${
+                                          isActive
+                                              ? 'shadow-[6px_6px_0px_#2b2b2b] bg-[#f2efeb]'
+                                              : 'shadow-[4px_4px_0px_#2b2b2b] hover:shadow-[6px_6px_0px_#2b2b2b]'
+                                      }`
+                                    : isEditorial
+                                    ? `bg-[#FCFBF9] text-[#1a1a1a] font-serif rounded-xl border ${
+                                          isActive
+                                              ? 'border-[#2A7373] ring-1 ring-[#2A7373]/30 shadow-sm'
+                                              : 'border-[#1a1a1a]/20 hover:border-[#1a1a1a]/40'
+                                      }`
+                                    : isTechnical
+                                    ? `bg-[#F8F7F4] dark:bg-[#0D1117] text-[#111113] dark:text-[#E6EDF3] font-mono rounded-lg border ${
+                                          isActive
+                                              ? 'border-[#0D9488] ring-1 ring-[#0D9488]/30'
+                                              : 'border-slate-300 dark:border-slate-800'
+                                      }`
+                                    : `bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 rounded-2xl border ${
+                                          isActive
+                                              ? 'border-teal-500 ring-2 ring-teal-500/20 shadow-md'
+                                              : 'border-slate-200/90 dark:border-zinc-800 shadow-xs hover:shadow-md'
+                                      }`
                             }`}
                         >
-                            {/* Sisi Kiri: Identitas & Info Profil */}
-                            <div className="flex-1 min-w-0 space-y-1">
-                                <div className="flex items-center flex-wrap gap-2">
-                                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+                            {/* Baris Atas: Header Identitas Profil + Tombol Aksi */}
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                                {/* Identitas Profil */}
+                                <div className="flex items-center flex-wrap gap-2 min-w-0">
+                                    <div className={`p-1.5 rounded-lg shrink-0 ${
+                                        isIndustrial
+                                            ? 'bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30'
+                                            : isPaperSketch
+                                            ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b]'
+                                            : 'bg-teal-500/10 text-teal-600 dark:text-teal-400'
+                                    }`}>
+                                        <Layers className="w-4 h-4" />
+                                    </div>
+                                    <h4 className="text-sm sm:text-base font-extrabold truncate">
                                         {grp.name}
                                     </h4>
                                     {onRenameGroup && (
                                         <button
                                             type="button"
                                             onClick={() => handleOpenEditName(grp)}
-                                            className="p-1 rounded text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                                            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer text-current/60 hover:text-current"
                                             title={`Ubah nama profil "${grp.name}"`}
                                         >
-                                            <Pencil className="w-3 h-3" />
+                                            <Pencil className="w-3.5 h-3.5" />
                                         </button>
                                     )}
-                                    {isActive ? (
-                                        <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-teal-500/15 text-teal-700 dark:text-teal-400 border border-teal-500/30 flex items-center space-x-0.5 shrink-0">
-                                            <Check className="w-2.5 h-2.5" />
-                                            <span>Aktif</span>
+                                    {isActive && (
+                                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold flex items-center space-x-1 shrink-0 ${
+                                            isIndustrial
+                                                ? 'bg-[#2DD4BF]/20 text-[#2DD4BF] border border-[#2DD4BF]/40'
+                                                : isPaperSketch
+                                                ? 'bg-[#2ec4b6] text-white border-2 border-[#2b2b2b]'
+                                                : 'bg-teal-500/15 text-teal-700 dark:text-teal-400 border border-teal-500/30'
+                                        }`}>
+                                            <Check className="w-3 h-3 stroke-[3]" />
+                                            <span>Profil Aktif</span>
                                         </span>
-                                    ) : null}
-                                    <span className="font-mono text-[9.5px] px-1 py-0.2 rounded bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 border border-slate-200/80 dark:border-zinc-700/60">
+                                    )}
+                                    <span className={`font-mono text-[9.5px] px-1.5 py-0.5 rounded font-semibold border shrink-0 ${
+                                        isIndustrial
+                                            ? 'bg-[#0F1115] text-[#2DD4BF] border-[rgba(226,232,240,0.15)]'
+                                            : isPaperSketch
+                                            ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b]'
+                                            : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border-slate-200/80 dark:border-zinc-700/60'
+                                    }`}>
                                         ID: {grp.id.slice(-8)}
                                     </span>
                                 </div>
 
-                                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-500 dark:text-zinc-400">
-                                    <span className="flex items-center space-x-1">
-                                        <Calendar className="w-3 h-3 opacity-60 shrink-0" />
-                                        <span>Periode: <strong>{rangeLabel}</strong></span>
+                                {/* Barisan Tombol Aksi Lengkap */}
+                                <div className="flex items-center flex-wrap gap-1.5 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-current/10">
+                                    {/* Tombol "Lihat Shift" */}
+                                    <div className="relative">
+                                        <button
+                                            ref={(el) => {
+                                                previewTriggerRefs.current[grp.id] = el;
+                                            }}
+                                            type="button"
+                                            onClick={() => handleTogglePreviewDropdown(grp.id)}
+                                            className={`px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 cursor-pointer transition-all active:scale-95 border ${
+                                                isIndustrial
+                                                    ? 'bg-[#0F1115] hover:bg-[#252B36] text-[#E2E8F0] border-[rgba(226,232,240,0.2)]'
+                                                    : isPaperSketch
+                                                    ? 'bg-[#fdfcf0] hover:bg-[#2ec4b6]/20 text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                                    : 'bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-700'
+                                            }`}
+                                            title="Buka dropdown daftar shift profil ini"
+                                        >
+                                            <Eye className="w-3.5 h-3.5" />
+                                            <span>Lihat Shift</span>
+                                            <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform duration-150 ${previewGroupId === grp.id ? 'rotate-180' : ''}`} />
+                                        </button>
+                                    </div>
+
+                                    {/* Tombol "Aktivasi" */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setActivationTargetGroup(grp)}
+                                        className={`px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 cursor-pointer transition-all active:scale-95 border ${
+                                            isActive
+                                                ? isIndustrial
+                                                    ? 'bg-[#2DD4BF] text-[#0F1115] border-[#2DD4BF] font-extrabold'
+                                                    : isPaperSketch
+                                                    ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                                    : 'bg-teal-600 hover:bg-teal-700 text-white border-teal-600 shadow-xs'
+                                                : isIndustrial
+                                                ? 'bg-[#0F1115] hover:bg-[#252B36] text-[#E2E8F0] border-[rgba(226,232,240,0.2)]'
+                                                : isPaperSketch
+                                                ? 'bg-[#fdfcf0] hover:bg-[#2ec4b6]/20 text-[#2b2b2b] border-2 border-[#2b2b2b]'
+                                                : 'bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-700'
+                                        }`}
+                                        title="Atur rentang tanggal aktivasi profil ini"
+                                    >
+                                        <CalendarRange className="w-3.5 h-3.5" />
+                                        <span>Aktivasi</span>
+                                    </button>
+
+                                    {/* Tombol "Edit Shift" */}
+                                    <button
+                                        type="button"
+                                        onClick={() => onEditGroup(grp)}
+                                        className={`px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 cursor-pointer transition-all active:scale-95 border ${
+                                            isIndustrial
+                                                ? 'bg-[#2DD4BF]/15 hover:bg-[#2DD4BF]/25 text-[#2DD4BF] border-[#2DD4BF]/40'
+                                                : isPaperSketch
+                                                ? 'bg-[#f2efeb] hover:bg-[#2ec4b6]/20 text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                                : 'bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/50 border-teal-200/80 dark:border-teal-700/50'
+                                        }`}
+                                        title="Edit rincian dan jam kerja shift di profil ini"
+                                    >
+                                        <Edit3 className="w-3.5 h-3.5" />
+                                        <span>Edit Shift</span>
+                                    </button>
+
+                                    {/* Tombol "Salin" */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleOpenCopy(grp)}
+                                        className={`px-2 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1 cursor-pointer transition-all active:scale-95 border ${
+                                            isIndustrial
+                                                ? 'bg-transparent hover:bg-white/10 text-[#E2E8F0]/80 border-[rgba(226,232,240,0.15)]'
+                                                : isPaperSketch
+                                                ? 'bg-transparent hover:bg-[#2ec4b6]/10 text-[#2b2b2b] border-2 border-transparent hover:border-[#2b2b2b]'
+                                                : 'text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 border-transparent hover:border-slate-200 dark:hover:border-zinc-700'
+                                        }`}
+                                        title="Salin konfigurasi profil ini"
+                                    >
+                                        <Copy className="w-3.5 h-3.5 opacity-70" />
+                                        <span>Salin</span>
+                                    </button>
+
+                                    {/* Tombol "Hapus" Profil */}
+                                    <button
+                                        type="button"
+                                        disabled={isActive || groups.length <= 1}
+                                        onClick={() => {
+                                            if (!isActive && groups.length > 1) {
+                                                setGroupToDeleteConfirm(grp);
+                                            }
+                                        }}
+                                        className={`p-1.5 rounded-lg flex items-center justify-center transition-all ${
+                                            isActive || groups.length <= 1
+                                                ? 'opacity-25 cursor-not-allowed border border-transparent'
+                                                : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/40 cursor-pointer active:scale-95'
+                                        }`}
+                                        title={
+                                            isActive
+                                                ? 'Profil aturan shift yang sedang aktif tidak dapat dihapus.'
+                                                : groups.length <= 1
+                                                ? 'Satu-satunya profil aturan shift tidak dapat dihapus.'
+                                                : `Hapus profil aturan shift "${grp.name}"`
+                                        }
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Baris Bawah: Informasi Meta Linimasa & Ringkasan Shift */}
+                            <div className="pt-2.5 border-t border-current/10 flex flex-wrap items-center justify-between gap-2 text-xs opacity-90">
+                                <div className="flex items-center flex-wrap gap-x-4 gap-y-1">
+                                    <span className="flex items-center space-x-1.5 font-medium">
+                                        <Calendar className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                                        <span>Periode: <strong className="font-mono font-bold">{rangeLabel}</strong></span>
                                         {rangesCount > 1 && (
-                                            <span className="text-[9.5px] px-1 py-0.2 rounded bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-400 font-bold border border-teal-200/60 dark:border-teal-800/50">
+                                            <span className="text-[9.5px] px-1.5 py-0.2 rounded font-bold bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400 border border-teal-200/80 dark:border-teal-800/60">
                                                 +{rangesCount - 1} rentang
                                             </span>
                                         )}
                                     </span>
-                                    <span className="text-slate-300 dark:text-zinc-700">•</span>
-                                    <span>{grp.shifts.length} shift terkonfigurasi</span>
                                 </div>
-                            </div>
-
-                            {/* Sisi Kanan: Barisan Tombol Aksi Lengkap */}
-                            <div className="flex items-center flex-wrap gap-1 sm:gap-1.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-zinc-800/80">
-                                {/* Tombol "Lihat Shift" (Dropdown persis dengan dropdown kartu kalender) */}
-                                <div className="relative">
-                                    <button
-                                        ref={(el) => {
-                                            previewTriggerRefs.current[grp.id] = el;
-                                        }}
-                                        type="button"
-                                        onClick={() => handleTogglePreviewDropdown(grp.id)}
-                                        className="px-2 py-1 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 flex items-center space-x-1 cursor-pointer transition-colors shadow-2xs"
-                                        title="Buka dropdown daftar shift profil ini"
-                                    >
-                                        <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
-                                        <span className="hidden sm:inline">Lihat Shift</span>
-                                        <ChevronDown className={`w-3 h-3 opacity-70 transition-transform duration-150 ${previewGroupId === grp.id ? 'rotate-180' : ''}`} />
-                                    </button>
+                                <div className="flex items-center space-x-2">
+                                    <span className="font-bold text-[11px]">
+                                        <strong>{grp.shifts.length}</strong> shift terkonfigurasi
+                                    </span>
                                 </div>
-
-                                {/* Tombol "Aktivasi" (Tabel Rentang Tanggal Aktif Fleksibel) */}
-                                <button
-                                    type="button"
-                                    onClick={() => setActivationTargetGroup(grp)}
-                                    className={`px-2 py-1 rounded-md text-[10px] sm:text-[11px] font-bold flex items-center space-x-1 cursor-pointer transition-colors shadow-2xs ${
-                                        isActive
-                                            ? 'bg-teal-600 hover:bg-teal-700 text-white'
-                                            : 'bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700'
-                                    }`}
-                                    title="Atur rentang tanggal aktivasi profil ini"
-                                >
-                                    <CalendarRange className="w-3.5 h-3.5" />
-                                    <span className="hidden sm:inline">Aktivasi</span>
-                                </button>
-
-                                {/* Tombol "Edit Shift" */}
-                                <button
-                                    type="button"
-                                    onClick={() => onEditGroup(grp)}
-                                    className="px-2 py-1 rounded-md text-[10px] sm:text-[11px] font-bold bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/50 border border-teal-200/60 dark:border-teal-700/50 flex items-center space-x-1 cursor-pointer transition-colors shadow-2xs"
-                                    title="Edit rincian dan jam kerja shift di profil ini"
-                                >
-                                    <Edit3 className="w-3.5 h-3.5" />
-                                    <span className="hidden sm:inline">Edit Shift</span>
-                                </button>
-
-                                {/* Tombol "Salin" */}
-                                <button
-                                    type="button"
-                                    onClick={() => handleOpenCopy(grp)}
-                                    className="p-1 sm:px-2 sm:py-1 rounded-md text-[10px] sm:text-[11px] font-medium text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 border border-transparent hover:border-slate-200 dark:hover:border-zinc-700 flex items-center space-x-1 cursor-pointer transition-colors"
-                                    title="Salin konfigurasi profil ini"
-                                >
-                                    <Copy className="w-3.5 h-3.5 opacity-70" />
-                                    <span className="hidden sm:inline">Salin</span>
-                                </button>
-
-                                {/* Tombol "Hapus" Profil */}
-                                <button
-                                    type="button"
-                                    disabled={isActive || groups.length <= 1}
-                                    onClick={() => {
-                                        if (!isActive && groups.length > 1) {
-                                            setGroupToDeleteConfirm(grp);
-                                        }
-                                    }}
-                                    className={`p-1 sm:p-1.5 rounded-md flex items-center justify-center transition-all ${
-                                        isActive || groups.length <= 1
-                                            ? 'opacity-30 cursor-not-allowed text-slate-400 dark:text-zinc-600 border border-transparent'
-                                            : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/40 cursor-pointer shadow-2xs active:scale-95'
-                                    }`}
-                                    title={
-                                        isActive
-                                            ? 'Profil aturan shift yang sedang aktif tidak dapat dihapus.'
-                                            : groups.length <= 1
-                                            ? 'Satu-satunya profil aturan shift tidak dapat dihapus.'
-                                            : `Hapus profil aturan shift "${grp.name}"`
-                                    }
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </button>
                             </div>
                         </div>
                     );

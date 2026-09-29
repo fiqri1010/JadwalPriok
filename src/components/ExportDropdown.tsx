@@ -416,6 +416,10 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
     const isVista = currentTheme === 'vista';
     const isDark = currentTheme === 'dark' || currentTheme === 'darkFluid';
     const isPaperSketch = currentTheme === 'paperSketch';
+    const isIndustrial = currentTheme === 'industrial';
+    const isTechnical = currentTheme === 'technical';
+    const isEditorial = currentTheme === 'editorial';
+    const isDashboard = currentTheme === 'dashboard';
 
     const getChoiceBoxStyles = (mode: PeriodMode) => {
         const isActive = periodMode === mode;
@@ -423,12 +427,14 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
             if (isPaperSketch) return 'border-[#ff4747] bg-[#ff4747]/15 text-[#2b2b2b] font-bold shadow-[2px_2px_0px_#2b2b2b]';
             if (isWinamp) return 'border-[#00FF00] bg-[#00FF00]/10 text-[#00FF00]';
             if (isVista) return 'border-sky-400 bg-sky-500/10 text-sky-900';
+            if (isIndustrial) return 'border-[#2DD4BF] bg-[#2DD4BF]/15 text-[#2DD4BF] font-bold';
             if (isDark) return 'border-teal-500/85 bg-teal-500/15 text-teal-300';
             return 'border-teal-500 bg-teal-500/10 text-teal-800 dark:text-teal-300';
         }
         if (isPaperSketch) return 'border-[#2b2b2b] hover:bg-[#2ec4b6]/20 text-[#2b2b2b]';
         if (isWinamp) return 'border-[#00FF00]/20 hover:bg-zinc-900/50 text-[#00FF00]/70';
         if (isVista) return 'border-sky-200/50 hover:bg-sky-50/50 text-slate-600';
+        if (isIndustrial) return 'border-[rgba(226,232,240,0.15)] hover:bg-white/5 text-[#E2E8F0]/80';
         if (isDark) return 'border-slate-800 hover:bg-slate-800/20 text-slate-300';
         return 'border-slate-200 hover:bg-slate-50 text-slate-600';
     };
@@ -439,6 +445,7 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
             if (isPaperSketch) return 'bg-[#ff4747] text-white font-bold rounded-lg shadow-[2px_2px_0px_#2b2b2b] border border-[#2b2b2b] font-[\'Gaegu\'] text-sm';
             if (isWinamp) return 'bg-[#00FF00] text-black font-black rounded-none';
             if (isVista) return 'bg-sky-600 text-white font-black shadow-xs';
+            if (isIndustrial) return 'bg-[#2DD4BF] text-[#0F1115] font-extrabold uppercase tracking-wider rounded-[4px]';
             return 'bg-teal-600 text-white font-black shadow-xs';
         }
         return isPaperSketch ? 'opacity-80 hover:opacity-100 font-[\'Gaegu\'] text-sm text-[#2b2b2b]' : 'opacity-70 hover:opacity-100';
@@ -450,11 +457,13 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
             if (isPaperSketch) return 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] font-bold shadow-[2px_2px_0px_#2b2b2b]';
             if (isWinamp) return 'bg-[#00FF00] text-black border-[#00FF00] font-black rounded-none';
             if (isVista) return 'bg-sky-600 text-white border-sky-700 font-black shadow-xs';
+            if (isIndustrial) return 'bg-[#2DD4BF] text-[#0F1115] border-[#2DD4BF] font-extrabold rounded-[4px]';
             return 'bg-teal-600 text-white border-teal-700 font-black shadow-xs';
         }
         if (isPaperSketch) return 'border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/20 text-[#2b2b2b] bg-white';
         if (isWinamp) return 'border-[#00FF00]/30 hover:bg-[#00FF00]/10 text-[#00FF00] rounded-none';
         if (isVista) return 'border-sky-200 hover:bg-sky-50 text-sky-850';
+        if (isIndustrial) return 'border-[rgba(226,232,240,0.15)] hover:bg-white/5 text-[#E2E8F0] rounded-[4px]';
         return 'border-current/15 hover:bg-current/10 text-slate-700 dark:text-slate-300';
     };
 
@@ -500,6 +509,8 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                             ? 'bg-black border-2 border-[#00FF00] font-mono text-[#00FF00]'
                             : isVista
                             ? 'bg-white/85 backdrop-blur-2xl border-white/90 text-slate-900 shadow-[0_20px_60px_rgba(14,116,224,0.3)] ring-1 ring-sky-300/40'
+                            : isIndustrial
+                            ? 'bg-[#1A1D23] border border-[rgba(226,232,240,0.15)] text-[#E2E8F0] font-[\'JetBrains_Mono\']'
                             : isDark
                             ? 'bg-slate-900 border-slate-700 text-slate-100'
                             : 'bg-white border-slate-200 text-slate-900'
@@ -845,20 +856,28 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                             Pilih Format Ekspor:
                         </label>
 
-                        {/* Kotak 1: Ekspor ke PDF */}
+                        {/* Kotak 1: Ekspor ke PDF (.pdf) */}
                         <button
                             type="button"
                             disabled={exportLoading !== null}
                             onClick={handleExportPDF}
                             className={`w-full flex items-center justify-between p-1 sm:p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 text-left min-w-0 border ${
-                                isWinamp
+                                isPaperSketch
+                                    ? 'bg-[#fdfcf0] hover:bg-rose-100/80 text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-["Gaegu"] text-sm'
+                                    : isIndustrial
+                                    ? 'bg-[#0F1115] hover:bg-rose-500/20 text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-[4px]'
+                                    : isWinamp
                                     ? 'bg-black hover:bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00] rounded-none'
                                     : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-500/20'
                             }`}
                         >
                             <div className="flex items-center space-x-2 min-w-0 flex-1 pr-1">
                                 <div className={`p-1 rounded-md shrink-0 ${
-                                    isWinamp ? 'bg-transparent text-[#00FF00]' : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
+                                    isPaperSketch
+                                        ? 'bg-[#2b2b2b] text-white'
+                                        : isWinamp
+                                        ? 'bg-transparent text-[#00FF00]'
+                                        : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
                                 }`}>
                                     <FileText className="h-3 w-3" />
                                 </div>
@@ -886,14 +905,22 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                             disabled={exportLoading !== null}
                             onClick={handleExportPNG}
                             className={`w-full flex items-center justify-between p-1 sm:p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 text-left min-w-0 border ${
-                                isWinamp
+                                isPaperSketch
+                                    ? 'bg-[#fdfcf0] hover:bg-sky-100/80 text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-["Gaegu"] text-sm'
+                                    : isIndustrial
+                                    ? 'bg-[#0F1115] hover:bg-sky-500/20 text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-[4px]'
+                                    : isWinamp
                                     ? 'bg-black hover:bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00] rounded-none'
                                     : 'bg-sky-500/10 hover:bg-sky-500/20 text-sky-800 dark:text-sky-300 border-sky-500/20'
                             }`}
                         >
                             <div className="flex items-center space-x-2 min-w-0 flex-1 pr-1">
                                 <div className={`p-1 rounded-md shrink-0 ${
-                                    isWinamp ? 'bg-transparent text-[#00FF00]' : 'bg-sky-500/20 text-sky-600 dark:text-sky-400'
+                                    isPaperSketch
+                                        ? 'bg-[#2b2b2b] text-white'
+                                        : isWinamp
+                                        ? 'bg-transparent text-[#00FF00]'
+                                        : 'bg-sky-500/20 text-sky-600 dark:text-sky-400'
                                 }`}>
                                     <ImageIcon className="h-3 w-3" />
                                 </div>
@@ -921,14 +948,22 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                             disabled={exportLoading !== null}
                             onClick={handleExportExcel}
                             className={`w-full flex items-center justify-between p-1 sm:p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 text-left min-w-0 border ${
-                                isWinamp
+                                isPaperSketch
+                                    ? 'bg-[#fdfcf0] hover:bg-emerald-100/80 text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-["Gaegu"] text-sm'
+                                    : isIndustrial
+                                    ? 'bg-[#0F1115] hover:bg-emerald-500/20 text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-[4px]'
+                                    : isWinamp
                                     ? 'bg-black hover:bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00] rounded-none'
                                     : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-500/20'
                             }`}
                         >
                             <div className="flex items-center space-x-2 min-w-0 flex-1 pr-1">
                                 <div className={`p-1 rounded-md shrink-0 ${
-                                    isWinamp ? 'bg-transparent text-[#00FF00]' : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                    isPaperSketch
+                                        ? 'bg-[#2b2b2b] text-white'
+                                        : isWinamp
+                                        ? 'bg-transparent text-[#00FF00]'
+                                        : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
                                 }`}>
                                     <FileSpreadsheet className="h-3 w-3" />
                                 </div>
@@ -956,14 +991,22 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                             disabled={exportLoading !== null}
                             onClick={handleExportJSON}
                             className={`w-full flex items-center justify-between p-1 sm:p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 text-left min-w-0 border ${
-                                isWinamp
+                                isPaperSketch
+                                    ? 'bg-[#fdfcf0] hover:bg-indigo-100/80 text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-["Gaegu"] text-sm'
+                                    : isIndustrial
+                                    ? 'bg-[#0F1115] hover:bg-indigo-500/20 text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-[4px]'
+                                    : isWinamp
                                     ? 'bg-black hover:bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00] rounded-none'
                                     : 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border-indigo-500/20'
                             }`}
                         >
                             <div className="flex items-center space-x-2 min-w-0 flex-1 pr-1">
                                 <div className={`p-1 rounded-md shrink-0 ${
-                                    isWinamp ? 'bg-transparent text-[#00FF00]' : 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400'
+                                    isPaperSketch
+                                        ? 'bg-[#2b2b2b] text-white'
+                                        : isWinamp
+                                        ? 'bg-transparent text-[#00FF00]'
+                                        : 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400'
                                 }`}>
                                     <Code className="h-3 w-3" />
                                 </div>

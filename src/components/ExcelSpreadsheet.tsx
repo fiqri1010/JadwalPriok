@@ -6,8 +6,12 @@ import {
   Palette,
   CornerDownLeft,
   ClipboardPaste,
+  Save,
+  Check,
 } from 'lucide-react';
 import { SHIFT_OPTIONS, ShiftType, SHIFT_COLORS, EXCEL_SHIFT_MAPPING, AppTheme, DayData } from '../types';
+import { SYSTEM_DEFAULT_EXCEL_MAP } from '../data/excelMappings';
+import { CustomDatePicker } from './CustomDatePicker';
 
 export const COLOR_TRANSPARENT_KEY = '__NO_COLOR__';
 export const LOCAL_STORAGE_EXCEL_COLOR_MAP_KEY = 'jadwalpriok_excel_colormap_v1';
@@ -19,20 +23,26 @@ export interface ExcelSpreadsheetRef {
   resetColorMap: () => void;
 }
 
+/**
+ * Memuat pemetaan warna & kode Excel:
+ * Selalu memuat kamus bawaan sistem (SYSTEM_DEFAULT_EXCEL_MAP) yang tertanam di aplikasi
+ * dan menggabungkannya dengan penyesuaian pengguna.
+ */
 export function loadSavedExcelColorMap(): Record<string, ShiftType | ''> {
-  if (typeof window === 'undefined') return {};
+  const baseMap: Record<string, ShiftType | ''> = { ...SYSTEM_DEFAULT_EXCEL_MAP };
+  if (typeof window === 'undefined') return baseMap;
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_EXCEL_COLOR_MAP_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
-        return parsed;
+        return { ...baseMap, ...parsed };
       }
     }
   } catch (err) {
-    console.error('Gagal membaca saved Excel color map:', err);
+    console.warn('Gagal membaca saved Excel color map:', err);
   }
-  return {};
+  return baseMap;
 }
 
 export function saveExcelColorMap(map: Record<string, ShiftType | ''>) {
@@ -40,7 +50,7 @@ export function saveExcelColorMap(map: Record<string, ShiftType | ''>) {
   try {
     localStorage.setItem(LOCAL_STORAGE_EXCEL_COLOR_MAP_KEY, JSON.stringify(map));
   } catch (err) {
-    console.error('Gagal menyimpan Excel color map:', err);
+    console.warn('Gagal menyimpan Excel color map:', err);
   }
 }
 
@@ -468,11 +478,10 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
   onParsedShiftsChange,
 }, ref) => {
   const isWinamp = theme === 'winamp';
-  const isDarkFluid = theme === 'darkFluid';
   const isDark = theme === 'dark';
   const isVista = theme === 'vista';
   const isPaperSketch = theme === 'paperSketch';
-  const isLightMode = !isDark && !isDarkFluid && !isWinamp;
+  const isLightMode = !isDark && !isWinamp;
 
   // Inisialisasi grid tepat 35 sel murni: 5 baris x 7 kolom
   const createDefaultGrid = useCallback((): ExcelCellData[][] => {
@@ -495,6 +504,30 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
   // Aturan 3: Pemilihan tanggal awal dimana data pertama akan ditempel (1 s.d. daysInMonth)
   const [startDay, setStartDay] = useState<number>(1);
 
+  const padNumber = useCallback((n: number) => String(n).padStart(2, '0'), []);
+  const datepickerValue = useMemo(() => {
+    return `${selectedYear}-${padNumber(selectedMonth)}-${padNumber(startDay)}`;
+  }, [selectedYear, selectedMonth, startDay, padNumber]);
+
+  const datepickerMin = useMemo(() => {
+    return `${selectedYear}-${padNumber(selectedMonth)}-01`;
+  }, [selectedYear, selectedMonth, padNumber]);
+
+  const datepickerMax = useMemo(() => {
+    return `${selectedYear}-${padNumber(selectedMonth)}-${padNumber(daysInMonth)}`;
+  }, [selectedYear, selectedMonth, daysInMonth, padNumber]);
+
+  const handleDatepickerChange = useCallback((newVal: string) => {
+    if (!newVal) return;
+    const parts = newVal.split('-');
+    if (parts.length === 3) {
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(day)) {
+        setStartDay(day);
+      }
+    }
+  }, []);
+
   // State Interaktif: Sel yang dipilih & Sel yang sedang diedit
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>({ row: 0, col: 0 });
   const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
@@ -502,6 +535,7 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
 
   // State Pemetaan Warna & Kode Teks Kustom (dimuat dari sistem/localStorage agar otomatis digunakan kembali)
   const [customColorMap, setCustomColorMap] = useState<Record<string, ShiftType | ''>>(() => loadSavedExcelColorMap());
+  const [isSaveSuccess, setIsSaveSuccess] = useState<boolean>(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
@@ -1086,8 +1120,24 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
   };
 
   const handleClearSavedColorRules = () => {
-    setCustomColorMap({});
-    saveExcelColorMap({});
+    const defaultMap = { ...SYSTEM_DEFAULT_EXCEL_MAP };
+    setCustomColorMap(defaultMap);
+    saveExcelColorMap(defaultMap);
+  };
+
+  const handleManualSaveRules = () => {
+    const newMap = { ...customColorMap };
+    detectedColorsList.forEach((item) => {
+      if (item.assignedShift !== undefined) {
+        newMap[item.color] = item.assignedShift;
+      }
+    });
+    setCustomColorMap(newMap);
+    saveExcelColorMap(newMap);
+    setIsSaveSuccess(true);
+    setTimeout(() => {
+      setIsSaveSuccess(false);
+    }, 2200);
   };
 
   const handleDirectPasteFromClipboard = useCallback(async () => {
@@ -1228,7 +1278,6 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
   const getCellBorderClass = () => {
     if (isPaperSketch) return 'border-[1.5px] border-[#2b2b2b]';
     if (isWinamp) return 'border border-[#00FF00]/45';
-    if (isDarkFluid) return 'border border-white/25';
     if (isDark) return 'border border-slate-700';
     if (isVista) return 'border border-sky-300/90';
     return 'border border-slate-300 dark:border-slate-600';
@@ -1299,8 +1348,6 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
             ? 'bg-white border-2 border-[#2b2b2b] shadow-[4px_4px_0px_#2b2b2b] focus:ring-[#ff4747]'
             : isWinamp
             ? 'bg-[#0a0a0a] border-2 border-zinc-700 font-mono text-[#00FF00] focus:ring-[#00FF00]'
-            : isDarkFluid
-            ? 'bg-[#141218] border border-white/20 text-[#E6E0E9] focus:ring-[#D0BCFF]'
             : isDark
             ? 'bg-[#121212] border border-slate-700 text-slate-100 focus:ring-teal-500'
             : isVista
@@ -1417,24 +1464,16 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
             <span className="font-bold">Data pertama ditempel mulai tanggal:</span>
           </div>
 
-          <div className="flex items-center space-x-1.5">
-            <select
-              value={startDay}
-              onChange={(e) => setStartDay(parseInt(e.target.value, 10))}
-              className={`text-xs font-bold py-1.5 px-3 rounded-lg border cursor-pointer outline-none shadow-2xs ${
-                isPaperSketch
-                  ? 'bg-[#f2efeb] border-2 border-[#2b2b2b] text-[#2b2b2b]'
-                  : isWinamp
-                  ? 'bg-zinc-900 border-zinc-700 text-[#00FF00]'
-                  : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-300 dark:border-slate-600 focus:border-teal-500'
-              }`}
-            >
-              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => (
-                <option key={`start-day-opt-${d}`} value={d}>
-                  Tanggal {d} ({MONTH_NAMES_ID[selectedMonth - 1]} {selectedYear})
-                </option>
-              ))}
-            </select>
+          <div className="w-52 sm:w-60">
+            <CustomDatePicker
+              value={datepickerValue}
+              onChange={handleDatepickerChange}
+              min={datepickerMin}
+              max={datepickerMax}
+              allowClear={false}
+              theme={theme}
+              align="right"
+            />
           </div>
         </div>
       )}
@@ -1462,16 +1501,42 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
                 <span className="sm:hidden">Tersimpan</span>
               </span>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-[10px] font-normal opacity-75">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <span className="text-[10px] font-normal opacity-75 hidden xs:inline">
                 {detectedColorsList.length} Kategori
               </span>
+              <button
+                type="button"
+                onClick={handleManualSaveRules}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold transition-all cursor-pointer border ${
+                  isSaveSuccess
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                    : isPaperSketch
+                    ? 'bg-[#2ec4b6] text-white border border-[#2b2b2b] shadow-[1px_1px_0px_#2b2b2b] hover:bg-[#25a99d]'
+                    : isWinamp
+                    ? 'bg-black text-[#00FF00] border border-[#00FF00] hover:bg-[#00FF00]/20'
+                    : 'bg-teal-600 hover:bg-teal-700 text-white border-teal-700 shadow-2xs'
+                }`}
+                title="Simpan pemetaan aturan warna & kode shift saat ini ke sistem aplikasi"
+              >
+                {isSaveSuccess ? (
+                  <>
+                    <Check className="w-3 h-3 shrink-0" />
+                    <span>Tersimpan!</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-3 h-3 shrink-0" />
+                    <span>Simpan Aturan</span>
+                  </>
+                )}
+              </button>
               {Object.keys(customColorMap).length > 0 && (
                 <button
                   type="button"
                   onClick={handleClearSavedColorRules}
-                  className="text-[10px] text-rose-500 hover:text-rose-600 underline cursor-pointer"
-                  title="Hapus aturan warna tersimpan di sistem"
+                  className="text-[10px] text-rose-500 hover:text-rose-600 underline cursor-pointer px-1 py-0.5"
+                  title="Hapus aturan kustom dan pulihkan ke pemetaan bawaan sistem"
                 >
                   Reset Aturan
                 </button>
@@ -1612,8 +1677,6 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
                 ? 'bg-white border-2 border-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b]'
                 : isWinamp
                 ? 'bg-black border border-zinc-800'
-                : isDarkFluid
-                ? 'bg-[#141218] border-white/10'
                 : isDark
                 ? 'bg-[#111111] border-white/10'
                 : 'bg-[#F6F7F8] border-slate-200'

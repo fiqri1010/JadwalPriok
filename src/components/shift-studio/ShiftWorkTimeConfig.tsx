@@ -1,11 +1,13 @@
 import React from 'react';
-import { ShiftWorkTimeConfig } from '../../types';
+import { ShiftWorkTimeConfig, AppTheme } from '../../types';
 import { Clock, Moon, CheckCircle2, AlertTriangle, Layers, Timer } from 'lucide-react';
+import { Checkbox } from '../ui/Checkbox';
 
 interface ShiftWorkTimeConfigProps {
     workTime: ShiftWorkTimeConfig;
     onChange: (workTime: ShiftWorkTimeConfig) => void;
     isSplitShiftAllowed?: boolean;
+    theme?: AppTheme;
 }
 
 // Helper to calculate total hours between two HH:mm times
@@ -27,6 +29,7 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
     workTime,
     onChange,
     isSplitShiftAllowed = true,
+    theme = 'default',
 }) => {
     const isOffOrCuti = workTime.jamMasukDasar === '-' || workTime.jamPulangDasar === '-';
 
@@ -222,24 +225,25 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                 Multi-Sesi / Shift PM (Pagi - Malam):
                             </span>
                         </div>
-                        <label className="flex items-center space-x-1.5 text-[11px] font-bold cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={Boolean(workTime.isSplitShift)}
-                                onChange={(e) => onChange({ ...workTime, isSplitShift: e.target.checked })}
-                                className="rounded text-teal-600 cursor-pointer w-3.5 h-3.5"
-                            />
-                            <span>Aktifkan Sesi Ganda</span>
-                        </label>
+                        <Checkbox
+                            checked={Boolean(workTime.isSplitShift)}
+                            onChange={(e) => onChange({ ...workTime, isSplitShift: e.target.checked })}
+                            theme={theme}
+                            size="1.25em"
+                            label={<span className="text-[11px] font-bold">Aktifkan Sesi Ganda</span>}
+                        />
                     </div>
 
                     {workTime.isSplitShift && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-zinc-800/80">
-                            <div className="p-3 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1.5">
-                                <span className="text-[10px] font-black text-amber-500 block">Sesi 1 (Pagi):</span>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Masuk:</span>
+                            {/* Sesi 1 */}
+                            <div className="p-2 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-2">
+                                <span className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wide text-amber-500 block pb-0.5 border-b border-slate-200/40 dark:border-zinc-700/40">
+                                    Sesi 1 (Pagi):
+                                </span>
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-[10px] font-bold text-slate-600 dark:text-zinc-400">Masuk:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession1?.masuk || '07:30'}
@@ -252,11 +256,11 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
+                                            className="w-28 h-8 px-2 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center focus:border-teal-500 outline-none shadow-3xs"
                                         />
                                     </div>
-                                    <div>
-                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Pulang:</span>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-[10px] font-bold text-slate-600 dark:text-zinc-400">Pulang:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession1?.pulang || '17:00'}
@@ -269,17 +273,20 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
+                                            className="w-28 h-8 px-2 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center focus:border-teal-500 outline-none shadow-3xs"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="p-3 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-1.5">
-                                <span className="text-[10px] font-black text-indigo-400 block">Sesi 2 (Malam - Subuh):</span>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Masuk:</span>
+                            {/* Sesi 2 */}
+                            <div className="p-2 rounded-lg bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-200/70 dark:border-zinc-800 space-y-2">
+                                <span className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wide text-indigo-400 block pb-0.5 border-b border-slate-200/40 dark:border-zinc-700/40">
+                                    Sesi 2 (Malam - Subuh):
+                                </span>
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-[10px] font-bold text-slate-600 dark:text-zinc-400">Masuk:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession2?.masuk || '20:00'}
@@ -292,11 +299,11 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
+                                            className="w-28 h-8 px-2 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center focus:border-teal-500 outline-none shadow-3xs"
                                         />
                                     </div>
-                                    <div>
-                                        <span className="text-[9.5px] font-bold opacity-60 block mb-0.5">Pulang:</span>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-[10px] font-bold text-slate-600 dark:text-zinc-400">Pulang:</span>
                                         <input
                                             type="time"
                                             value={workTime.splitSession2?.pulang || '04:30'}
@@ -309,7 +316,7 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
                                                     },
                                                 })
                                             }
-                                            className="w-full h-8 px-1 py-0.5 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center tracking-tight"
+                                            className="w-28 h-8 px-2 text-xs font-mono rounded-md border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center focus:border-teal-500 outline-none shadow-3xs"
                                         />
                                     </div>
                                 </div>

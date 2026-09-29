@@ -24,7 +24,8 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
     const [activeGroupId, setActiveGroupId] = useState<string>(() => groups[0]?.id || DEFAULT_SHIFT_GROUP.id);
 
     // Level Navigasi: 'profiles' (Level 1: Profil Aturan Shift) | 'edit-profile' (Level 2: Edit List Shift Profil)
-    const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+    // Diatur default membuka langsung daftar shift di dalam profil shift aktif
+    const [editingGroupId, setEditingGroupId] = useState<string | null>(() => groups[0]?.id || DEFAULT_SHIFT_GROUP.id);
 
     // Modals untuk shift individual
     const [editingShift, setEditingShift] = useState<ShiftItemConfig | null>(null);
@@ -261,6 +262,11 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
         input.click();
     };
 
+    const isIndustrial = theme === 'industrial';
+    const isPaperSketch = theme === 'paperSketch';
+    const isEditorial = theme === 'editorial';
+    const isTechnical = theme === 'technical';
+
     return (
         <div className="space-y-4">
             {/* Tampilan Level 1: Profil Aturan Shift ATAU Level 2: Edit List Shift */}
@@ -284,6 +290,7 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                     onExportJson={handleExportJson}
                     onImportJson={handleImportJson}
                     onRenameProfile={(newName) => handleRenameGroup(currentGroupToEdit.id, newName)}
+                    theme={theme}
                 />
             ) : (
                 <ShiftGroupProfilesSection
@@ -306,18 +313,34 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
             )}
 
             {/* Petunjuk Absensi Collapsible / Folded Section */}
-            <div className="rounded-xl border border-teal-200/70 dark:border-zinc-700/60 overflow-hidden bg-teal-50/40 dark:bg-zinc-800/40 transition-all">
+            <div className={`overflow-hidden transition-all border ${
+                isIndustrial
+                    ? 'bg-[#1A1D23] text-[#E2E8F0] border-[rgba(226,232,240,0.18)] font-[\'JetBrains_Mono\'] rounded-xl'
+                    : isPaperSketch
+                    ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] font-[\'Gaegu\'] text-base rounded-2xl shadow-[4px_4px_0px_#2b2b2b]'
+                    : isEditorial
+                    ? 'bg-[#FCFBF9] text-[#1a1a1a] border border-[#1a1a1a]/25 font-serif rounded-xl shadow-xs'
+                    : isTechnical
+                    ? 'bg-[#F8F7F4] dark:bg-[#0D1117] text-[#111113] dark:text-[#E6EDF3] border border-slate-300 dark:border-slate-800 font-mono rounded-lg'
+                    : 'rounded-xl border border-teal-200/80 dark:border-zinc-800 overflow-hidden bg-teal-50/40 dark:bg-zinc-800/40'
+            }`}>
                 <div
                     onClick={() => setIsPetunjukExpanded((prev) => !prev)}
-                    className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-teal-50/80 dark:hover:bg-zinc-800/80 transition-colors select-none"
+                    className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors select-none"
                 >
                     <div className="flex items-center space-x-2.5">
-                        <div className="p-2 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                        <div className={`p-2 rounded-lg ${
+                            isIndustrial
+                                ? 'bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30'
+                                : isPaperSketch
+                                ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b]'
+                                : 'bg-teal-500/10 text-teal-600 dark:text-teal-400'
+                        }`}>
                             <HelpCircle className="w-4 h-4" />
                         </div>
                         <div className="text-xs">
-                            <span className="font-bold block text-slate-900 dark:text-slate-100">Petunjuk Absensi Kantor</span>
-                            <span className="block text-[10.5px] opacity-65">Panduan bagaimana sistem membaca jam masuk & pulang serta dinas malam</span>
+                            <span className="font-extrabold block">Petunjuk Absensi Kantor</span>
+                            <span className="block text-[10.5px] opacity-75">Panduan bagaimana sistem membaca jam masuk & pulang serta dinas malam</span>
                         </div>
                     </div>
                     <button
@@ -326,7 +349,13 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                             e.stopPropagation();
                             setIsPetunjukExpanded((prev) => !prev);
                         }}
-                        className="flex items-center space-x-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white cursor-pointer shadow-xs transition-all active:scale-95"
+                        className={`flex items-center space-x-1 px-3 py-1.5 text-xs font-bold cursor-pointer shadow-xs transition-all active:scale-95 border ${
+                            isIndustrial
+                                ? 'bg-[#2DD4BF] text-[#0F1115] border-[#2DD4BF] rounded-[4px] font-extrabold'
+                                : isPaperSketch
+                                ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] rounded-lg shadow-[2px_2px_0px_#2b2b2b]'
+                                : 'bg-teal-600 hover:bg-teal-700 text-white rounded-lg border-teal-600'
+                        }`}
                     >
                         <span>{isPetunjukExpanded ? 'Tutup Petunjuk' : 'Buka Petunjuk'}</span>
                         <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isPetunjukExpanded ? 'rotate-180' : ''}`} />
@@ -432,6 +461,7 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                 shift={editingShift}
                 existingShifts={currentGroupToEdit.shifts}
                 onSaveShift={handleSaveShift}
+                theme={theme}
             />
 
             <ShiftDeleteConfirmModal

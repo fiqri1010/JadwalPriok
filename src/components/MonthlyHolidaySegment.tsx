@@ -31,8 +31,11 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
     const isWinamp = theme === 'winamp';
     const isVista = theme === 'vista';
     const isDark = theme === 'dark';
-    const isDarkFluid = theme === 'darkFluid';
     const isPaperSketch = theme === 'paperSketch';
+    const isIndustrial = theme === 'industrial';
+    const isTechnical = theme === 'technical';
+    const isEditorial = theme === 'editorial';
+    const isDashboard = theme === 'dashboard';
 
     // Filter holidays for the selected month and year
     const monthHolidays = React.useMemo(() => {
@@ -90,11 +93,11 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
         if (isVista) {
             return 'bg-white/70 backdrop-blur-xl border border-white/80 text-slate-900 rounded-xl shadow-[0_8px_20px_rgba(14,116,224,0.12)] ring-1 ring-sky-300/20';
         }
+        if (isIndustrial) {
+            return 'bg-[#1A1D23] border border-[rgba(226,232,240,0.1)] text-[#E2E8F0] rounded-[6px] font-[\'JetBrains_Mono\']';
+        }
         if (isDark) {
             return 'bg-[#1E1E1E] border border-slate-800 text-slate-100 rounded-xl shadow-xs';
-        }
-        if (isDarkFluid) {
-            return 'bg-[#1D1B20] border border-white/10 text-[#E6E0E9] rounded-xl shadow-xs';
         }
         return 'bg-white border border-slate-200 text-slate-900 rounded-xl shadow-2xs';
     };
@@ -109,7 +112,10 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
         if (isVista) {
             return 'border-b border-white/60 bg-gradient-to-r from-sky-50/70 to-blue-50/70 text-slate-900';
         }
-        if (isDark || isDarkFluid) {
+        if (isIndustrial) {
+            return 'border-b border-[rgba(226,232,240,0.1)] bg-[#0F1115] text-[#E2E8F0] font-[\'Syne\']';
+        }
+        if (isDark) {
             return 'border-b border-white/10 bg-white/5 text-slate-200';
         }
         return 'border-b border-slate-100 bg-slate-50/80 text-slate-800';
@@ -125,11 +131,11 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
         if (isVista) {
             return 'hover:bg-white/60 border-b border-slate-100/80 last:border-b-0 text-slate-800';
         }
+        if (isIndustrial) {
+            return 'hover:bg-white/5 border-b border-[rgba(226,232,240,0.1)] last:border-b-0 text-[#E2E8F0]';
+        }
         if (isDark) {
             return 'hover:bg-slate-800/60 border-b border-slate-800 last:border-b-0 text-slate-200';
-        }
-        if (isDarkFluid) {
-            return 'hover:bg-white/5 border-b border-white/5 last:border-b-0 text-[#E6E0E9]';
         }
         return 'hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-slate-800';
     };
@@ -143,17 +149,17 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
         }
         if (category === 'cuti_bersama') {
             if (isVista) return 'bg-amber-50 text-amber-700 border border-amber-200/70';
-            if (isDark || isDarkFluid) return 'bg-amber-500/15 text-amber-400 border border-amber-500/20';
+            if (isDark) return 'bg-amber-500/15 text-amber-400 border border-amber-500/20';
             return 'bg-amber-50 text-amber-700 border border-amber-100';
         }
         if (category === 'lainnya') {
             if (isVista) return 'bg-indigo-50 text-indigo-700 border border-indigo-200/70';
-            if (isDark || isDarkFluid) return 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20';
+            if (isDark) return 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20';
             return 'bg-indigo-50 text-indigo-700 border border-indigo-100';
         }
         // Libur Nasional
         if (isVista) return 'bg-rose-50 text-rose-600 border border-rose-200/60';
-        if (isDark || isDarkFluid) return 'bg-rose-500/15 text-rose-400 border border-rose-500/20';
+        if (isDark) return 'bg-rose-500/15 text-rose-400 border border-rose-500/20';
         return 'bg-rose-50 text-rose-600 border border-rose-100';
     };
 
@@ -190,7 +196,7 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
                             ? 'bg-[#00FF00] text-black'
                             : isVista
                             ? 'bg-rose-100 text-rose-700'
-                            : isDark || isDarkFluid
+                            : isDark
                             ? 'bg-white/10 text-slate-300'
                             : 'bg-slate-100 text-slate-600'
                     }`}

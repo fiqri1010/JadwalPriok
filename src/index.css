@@ -84,12 +84,29 @@
 /* =========================================================
    CURSOR FIX FOR EXE / DESKTOP WEBVIEW / COMPILATION
    Ensures text cursors never disappear over inputs/textareas
+   and enforces robust 100% viewport min-height for root/body
    ========================================================= */
 html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
     cursor: default;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+}
+
+#root {
+    width: 100%;
+    min-height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
 }
 
 /* GPU hardware acceleration for smooth 60fps animations & tooltips */
@@ -153,6 +170,115 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 [data-theme="paperSketch"] ::selection {
     background-color: #2ec4b6;
     color: #2b2b2b;
+}
+
+/* =========================================================
+   DATE CARD COMPONENT STYLES (Modern Layered Depth & Elevation)
+   User requested:
+   - Default: background rgb(255,255,255), border-radius 1rem, box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px
+   - Hover: background-color #fdfdfd, box-shadow: rgba(0, 0, 0, 0.09) 0px 2px 1px, rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px, rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px
+   - Transition: all ease-in-out 0.3s
+   ========================================================= */
+
+.app-date-card {
+    border-radius: 0.45rem;
+    transition: background-color 0.3s ease-in-out, background 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Default / Light Theme Date Card */
+.app-date-card-default {
+    border-radius: 0.45rem;
+    background-color: rgb(255, 255, 255);
+    border: 1px solid #cbd5e1;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+.app-date-card-default:hover {
+    background-color: #fdfdfd;
+    border-color: #94a3b8;
+    box-shadow: rgba(0, 0, 0, 0.09) 0px 2px 1px, rgba(0, 0, 0, 0.09) 0px 4px 2px,
+      rgba(0, 0, 0, 0.09) 0px 8px 4px, rgba(0, 0, 0, 0.09) 0px 16px 8px,
+      rgba(0, 0, 0, 0.09) 0px 32px 16px;
+}
+.app-date-card-default.is-elevated {
+    background-color: #ffffff;
+    border-color: #94a3b8;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.06), rgba(50, 50, 93, 0.25) 0px 12px 24px -4px;
+}
+
+/* Dark Theme Date Card */
+.app-date-card-dark {
+    background-color: rgba(36, 40, 50, 1);
+    background-image: linear-gradient(139deg, rgba(36, 40, 50, 1) 0%, rgba(36, 40, 50, 1) 40%, rgba(37, 28, 40, 1) 100%);
+    border: 1px solid #42434a;
+    box-shadow: rgba(0, 0, 0, 0.5) 0px 6px 12px -2px, rgba(0, 0, 0, 0.4) 0px 3px 7px -3px, inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.app-date-card-dark:hover {
+    background-color: rgba(44, 49, 62, 1);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 2px 1px, rgba(0, 0, 0, 0.35) 0px 4px 2px,
+      rgba(0, 0, 0, 0.35) 0px 8px 4px, rgba(0, 0, 0, 0.3) 0px 16px 8px,
+      rgba(0, 0, 0, 0.4) 0px 32px 16px, inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.app-date-card-dark.is-elevated {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Windows Vista Aero Theme Date Card */
+.app-date-card-vista {
+    background-color: rgba(235, 246, 255, 0.78);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(224, 242, 254, 0.7) 40%, rgba(186, 230, 253, 0.55) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: rgba(14, 116, 224, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.2) 0px 3px 7px -3px, inset 0 1px 1px rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(190%);
+    -webkit-backdrop-filter: blur(20px) saturate(190%);
+}
+.app-date-card-vista:hover {
+    background-color: rgba(235, 246, 255, 0.92);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(224, 242, 254, 0.85) 40%, rgba(186, 230, 253, 0.72) 100%);
+    border-color: rgba(255, 255, 255, 0.98);
+    box-shadow: rgba(14, 116, 224, 0.1) 0px 2px 1px, rgba(14, 116, 224, 0.1) 0px 4px 2px,
+      rgba(14, 116, 224, 0.1) 0px 8px 4px, rgba(14, 116, 224, 0.15) 0px 16px 8px,
+      rgba(14, 116, 224, 0.22) 0px 32px 16px, inset 0 1px 1px rgba(255, 255, 255, 1);
+}
+.app-date-card-vista.is-elevated {
+    background-color: rgba(235, 246, 255, 0.94);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(224, 242, 254, 0.88) 40%, rgba(186, 230, 253, 0.80) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 25px 50px -10px rgba(14, 116, 224, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+}
+
+/* Winamp Theme Date Card */
+.app-date-card-winamp {
+    border-radius: 0px !important;
+    background: #191919;
+    border: 1.5px solid #333333;
+    box-shadow: inset 3px 3px 0 #000000, inset -2px -2px 0 #2a2a2a;
+}
+.app-date-card-winamp:hover {
+    background: #202020;
+    border-color: #00FF00;
+    box-shadow: inset 2px 2px 0 #003300, inset -2px -2px 0 #000000, 0 0 10px rgba(0, 255, 0, 0.3);
+}
+.app-date-card-winamp.is-elevated {
+    border: 2px solid #00FF00;
+    box-shadow: inset 2px 2px 0 #2a2a2a, inset -2px -2px 0 #000000, 8px 8px 0px #000000;
+}
+
+/* Paper Sketch Theme Date Card */
+.app-date-card-paperSketch {
+    border-radius: 4px 14px 6px 16px / 14px 4px 16px 6px !important;
+    background-color: #ffffff;
+    border: 2.5px solid #2b2b2b;
+    box-shadow: 3px 3px 0px #2b2b2b;
+}
+.app-date-card-paperSketch:hover {
+    background-color: #fdfdfd;
+    box-shadow: 5px 5px 0px #2b2b2b;
+}
+.app-date-card-paperSketch.is-elevated {
+    border: 3px solid #ff4747;
+    box-shadow: 6px 6px 0px #2b2b2b;
 }
 
 /* =========================================================
@@ -386,22 +512,8 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
     }
 
     /* =========================================================
-   THEME 4: DARK FLUID (Material Design 3 / AMOLED Fluid)
-   ========================================================= */
-[data-theme="darkFluid"] {
-    --bg-app: #141218;
-    --bg-card: #1D1B20;
-    --bg-card-subtle: #141218;
-    --text-main: #E6E0E9;
-    --text-muted: #CAC4D0;
-    --border-color: rgba(255, 255, 255, 0.1);
-    --header-bg: #1D1B20;
-    color-scheme: dark;
-}
-
-/* =========================================================
    THEME 5: PAPER SKETCH EDITION (Variation 5)
-   Clean Sketched Paper, Ink, Marker Red & Teal Accents
+   Handmade Paper, Hand-Drawn Ink, Marker Red & Teal Accents
    ========================================================= */
 [data-theme="paperSketch"] {
     --bg: #f2efeb;
@@ -411,7 +523,7 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
     --marker-teal: #2ec4b6;
     --bg-app: #f2efeb;
     --bg-card: #ffffff;
-    --bg-card-subtle: #faf8f5;
+    --bg-card-subtle: #fbfaf8;
     --text-main: #2b2b2b;
     --text-muted: #555555;
     --border-color: #2b2b2b;
@@ -419,38 +531,19 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
     color-scheme: light;
 }
 
-    /* Core Hand-drawn Typography & Clean Sketched Paper Background for Paper Sketch */
+    /* Core Hand-drawn Typography for Paper Sketch */
     [data-theme="paperSketch"],
     [data-theme="paperSketch"] body,
     [data-theme="paperSketch"] #root {
         background-color: #f2efeb !important;
-        background-image: none !important;
+        background-image: 
+            linear-gradient(rgba(43, 43, 43, 0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(43, 43, 43, 0.08) 1px, transparent 1px) !important;
+        background-size: 30px 30px !important;
         color: #2b2b2b !important;
         font-family: 'Gaegu', 'Gochi Hand', cursive, sans-serif !important;
         font-weight: 700;
         letter-spacing: 0.015em;
-    }
-
-    /* Crumpled Old Paper Component Class */
-    .crumpled-old-paper {
-        width: 100%;
-        box-sizing: border-box;
-        background-color: #eadaa6;
-        background-image: 
-            radial-gradient(circle, transparent 30%, rgba(139, 115, 85, 0.25) 90%),
-            linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px);
-        background-size: 100% 100%, 4px 4px;
-        filter: url(#paper-features);
-        border-radius: 4px;
-        box-shadow: 
-            inset 0 0 30px rgba(90, 68, 41, 0.2), 
-            0 10px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .crumpled-old-paper h1,
-    .crumpled-old-paper p {
-        color: #3d2f1d;
-        font-family: 'Georgia', 'Gaegu', serif;
     }
 
     /* Global element typography in Paper Sketch (excludes digital monospace clocks/numbers) */
@@ -798,8 +891,22 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 }
 
 /* Utility to hide scrollbars while allowing smooth scrolling */
+@utility no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        background: transparent !important;
+    }
+}
+
 .no-scrollbar::-webkit-scrollbar {
-    display: none;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
 }
 .no-scrollbar {
     -ms-overflow-style: none;  /* IE and Edge */
@@ -1229,11 +1336,6 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 }
 
 [data-theme="dark"] .date-card-expandable,
-[data-theme="darkFluid"] .date-card-expandable {
-  border-color: rgba(255, 255, 255, 0.12);
-  background-color: #1e1e24;
-  color: #f1f5f9;
-}
 
 [data-theme="vista"] .date-card-expandable {
   border: 1px solid rgba(255, 255, 255, 0.9);
@@ -1352,10 +1454,6 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 }
 
 [data-theme="dark"] .date-card-article,
-[data-theme="darkFluid"] .date-card-article {
-  border-color: rgba(255, 255, 255, 0.1);
-  background-color: rgba(255, 255, 255, 0.04);
-}
 
 [data-theme="vista"] .date-card-article {
   border: 1px solid rgba(255, 255, 255, 0.7);
@@ -1368,15 +1466,18 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 }
 
 /* =========================================================
-   Custom Header Hamburger Menu Button (Uiverse Cevorob)
+   Custom Header Hamburger Menu Button (Glitch-Free 60fps)
    ========================================================= */
 .burger {
   position: relative;
-  width: 22px;
-  height: 16px;
+  width: 18px;
+  height: 14px;
   background: transparent;
   cursor: pointer;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
   user-select: none;
 }
 
@@ -1386,61 +1487,84 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 
 .burger span {
   display: block;
-  position: absolute;
-  height: 3.2px;
+  height: 2px;
   width: 100%;
   background: #0f172a;
   border-radius: 9999px;
-  opacity: 1;
-  left: 0;
-  transform: rotate(0deg);
-  transition: 0.25s ease-in-out;
+  transform-origin: center;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s ease-in-out;
+  will-change: transform, opacity;
 }
 
 .burger.burger-dark span,
 [data-theme="dark"] .burger span,
-[data-theme="darkFluid"] .burger span {
-  background: #f8fafc;
-}
-
 .burger.burger-vista span,
 [data-theme="vista"] .burger span {
   background: #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-.burger span:nth-of-type(1) {
-  top: 0px;
-  transform-origin: left center;
+.burger.burger-sketch span,
+[data-theme="paperSketch"] .burger span {
+  background: #2b2b2b;
+  height: 2.5px;
+  border-radius: 1px;
 }
 
-.burger span:nth-of-type(2) {
-  top: 50%;
-  transform: translateY(-50%);
-  transform-origin: left center;
+.burger.burger-technical span,
+[data-theme="technical"] .burger span {
+  background: #111113;
+  height: 2px;
+  border-radius: 0px;
 }
 
-.burger span:nth-of-type(3) {
-  top: 100%;
-  transform-origin: left center;
-  transform: translateY(-100%);
+[data-theme="technical"] ::selection {
+  background: #0D9488;
+  color: #ffffff;
 }
 
+[data-theme="technical"] {
+  --bg: #F8F7F4;
+  --ink: #111113;
+  --accent: #0D9488;
+  --ink-faint: rgba(17, 17, 19, 0.08);
+  --ink-muted: rgba(17, 17, 19, 0.6);
+}
+
+/* Transisi Halus Membentuk Simbol X (Close) Saat Sidebar Terbuka */
+.burger.is-active span:nth-of-type(1),
 .burger input:checked ~ span:nth-of-type(1) {
-  transform: rotate(45deg);
-  top: 0.5px;
-  left: 3px;
+  transform: translateY(6px) rotate(45deg);
 }
 
+.burger.is-active span:nth-of-type(2),
 .burger input:checked ~ span:nth-of-type(2) {
-  width: 0%;
   opacity: 0;
+  transform: scaleX(0);
 }
 
+.burger.is-active span:nth-of-type(3),
 .burger input:checked ~ span:nth-of-type(3) {
-  transform: rotate(-45deg);
-  top: 15.5px;
-  left: 3px;
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* =========================================================
+   Desktop Sidebar Smooth Transition (60fps Butter Smooth)
+   ========================================================= */
+.sidebar-transition {
+  transition: width 280ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 240ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 240ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width, opacity;
+  contain: layout style;
+}
+
+.sidebar-inner-content {
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
 }
 
 /* =========================================================
@@ -1568,18 +1692,8 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 }
 
 [data-theme="dark"] .card-day-cell,
-[data-theme="darkFluid"] .card-day-cell {
-  background: #1E1E24;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
 
 [data-theme="dark"] .card-day-cell:hover,
-[data-theme="darkFluid"] .card-day-cell:hover {
-  background: #25252E;
-  border-color: rgba(255, 255, 255, 0.24);
-  box-shadow: 0 8px 25px -4px rgba(0, 0, 0, 0.7);
-}
 
 [data-theme="winamp"] .card-day-cell {
   background: #191919;
@@ -1739,9 +1853,6 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 }
 
 [data-theme="dark"] .tooltip.tooltip-right::after,
-[data-theme="darkFluid"] .tooltip.tooltip-right::after {
-  border-color: transparent #0f172a transparent transparent !important;
-}
 
 [data-theme="winamp"] .tooltip.tooltip-right::after {
   border-color: transparent #00FF00 transparent transparent !important;
@@ -1779,9 +1890,6 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 }
 
 [data-theme="dark"] .tooltip.tooltip-left::after,
-[data-theme="darkFluid"] .tooltip.tooltip-left::after {
-  border-color: transparent transparent transparent #0f172a !important;
-}
 
 [data-theme="winamp"] .tooltip.tooltip-left::after {
   border-color: transparent transparent transparent #00FF00 !important;
@@ -1870,22 +1978,10 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 
 /* Theme compatibility for tooltips */
 [data-theme="dark"] .tooltip,
-[data-theme="darkFluid"] .tooltip {
-  background: linear-gradient(135deg, #1e293b, #0f172a) !important;
-  color: #f8fafc !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
-}
 
 [data-theme="dark"] .tooltip::after,
-[data-theme="darkFluid"] .tooltip::after {
-  border-color: #0f172a transparent transparent transparent !important;
-}
 
 [data-theme="dark"] .tooltip.tooltip-bottom::after,
-[data-theme="darkFluid"] .tooltip.tooltip-bottom::after {
-  border-color: transparent transparent #0f172a transparent !important;
-}
 
 /* Winamp Theme Custom Hint / Retro Tooltip Styles */
 [data-theme="winamp"] .tooltip-container {
@@ -2002,11 +2098,6 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
   [data-theme="dark"] .tooltip::after,
   [data-theme="dark"] .tooltip.tooltip-bottom::after,
   [data-theme="dark"] .tooltip.tooltip-right::after,
-  [data-theme="darkFluid"] .tooltip::after,
-  [data-theme="darkFluid"] .tooltip.tooltip-bottom::after,
-  [data-theme="darkFluid"] .tooltip.tooltip-right::after {
-    border-color: #0f172a transparent transparent transparent !important;
-  }
 
   [data-theme="winamp"] .tooltip::after,
   [data-theme="winamp"] .tooltip.tooltip-bottom::after,
@@ -2195,26 +2286,6 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 }
 
 /* Dark Fluid theme style overrides */
-[data-theme="darkFluid"] .rbgcp-wrapper {
-    background-color: #1c1b1f !important;
-    border: 1px solid #36343b !important;
-    color: #e6e1e5 !important;
-}
-[data-theme="darkFluid"] .rbgcp-wrapper > div {
-    background-color: #1c1b1f !important;
-    color: #e6e1e5 !important;
-}
-[data-theme="darkFluid"] .rbgcp-wrapper input {
-    background-color: #2d2a31 !important;
-    color: #ffffff !important;
-    border: 1px solid #49454f !important;
-    border-radius: 8px !important;
-}
-[data-theme="darkFluid"] .rbgcp-wrapper button,
-[data-theme="darkFluid"] .rbgcp-wrapper span,
-[data-theme="darkFluid"] .rbgcp-wrapper label {
-    color: #e6e1e5 !important;
-}
 
 /* Vista theme style overrides */
 [data-theme="vista"] .rbgcp-wrapper {

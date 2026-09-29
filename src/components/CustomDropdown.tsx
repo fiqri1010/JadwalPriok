@@ -49,8 +49,11 @@ export function CustomDropdown<T extends string | number>({
     const isWinamp = theme === 'winamp';
     const isVista = theme === 'vista';
     const isDark = theme === 'dark';
-    const isDarkFluid = theme === 'darkFluid';
     const isPaperSketch = theme === 'paperSketch';
+    const isIndustrial = theme === 'industrial';
+    const isTechnical = theme === 'technical';
+    const isEditorial = theme === 'editorial';
+    const isDashboard = theme === 'dashboard';
 
     // Dismiss saat klik di luar dropdown
     useEffect(() => {
@@ -103,7 +106,47 @@ export function CustomDropdown<T extends string | number>({
                 activeBg: '#ffffff',
             };
         }
-        if (isDark || isDarkFluid) {
+        if (isIndustrial) {
+            return {
+                triggerBg: 'bg-[#1A1D23] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] shadow-md font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+                optionsBg: 'bg-[#1A1D23] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] shadow-2xl font-[\'JetBrains_Mono\'] rounded-[4px]',
+                optionHover: 'hover:bg-white/10 hover:text-[#2DD4BF]',
+                optionSelected: 'bg-[#2DD4BF]/20 text-[#2DD4BF] font-black border border-[#2DD4BF]/40',
+                arrowFill: '#2DD4BF',
+                activeBg: '#1A1D23',
+            };
+        }
+        if (isTechnical) {
+            return {
+                triggerBg: 'bg-[#FFFFFF] text-[#111113] border border-[#111113]/20 shadow-xs font-[\'JetBrains_Mono\']',
+                optionsBg: 'bg-[#FFFFFF] text-[#111113] border border-[#111113]/20 shadow-xl font-[\'JetBrains_Mono\'] rounded-[4px]',
+                optionHover: 'hover:bg-[#0D9488]/10 hover:text-[#0D9488]',
+                optionSelected: 'bg-[#0D9488]/15 text-[#0D9488] font-bold border border-[#0D9488]/30',
+                arrowFill: '#0D9488',
+                activeBg: '#FFFFFF',
+            };
+        }
+        if (isEditorial) {
+            return {
+                triggerBg: 'bg-[#ffffff] text-[#1a1a1a] border border-[#1a1a1a]/20 shadow-xs font-[\'Geist_Mono\']',
+                optionsBg: 'bg-[#ffffff] text-[#1a1a1a] border border-[#1a1a1a]/20 shadow-xl font-[\'Geist_Mono\'] rounded-[4px]',
+                optionHover: 'hover:bg-[#2a7373]/10 hover:text-[#2a7373]',
+                optionSelected: 'bg-[#2a7373]/15 text-[#2a7373] font-bold border border-[#2a7373]/30',
+                arrowFill: '#2a7373',
+                activeBg: '#ffffff',
+            };
+        }
+        if (isDashboard) {
+            return {
+                triggerBg: 'bg-white text-[#011627] border border-[rgba(1,22,39,0.12)] shadow-2xs font-[\'Inter\']',
+                optionsBg: 'bg-white text-[#011627] border border-[rgba(1,22,39,0.12)] shadow-xl font-[\'Inter\'] rounded-[8px]',
+                optionHover: 'hover:bg-[#F6F7F8] hover:text-[#297373]',
+                optionSelected: 'bg-[#297373]/10 text-[#297373] font-extrabold border border-[#297373]/20',
+                arrowFill: '#297373',
+                activeBg: '#ffffff',
+            };
+        }
+        if (isDark) {
             return {
                 triggerBg: 'bg-[#2a2f3b] text-white border border-[#3e4452] shadow-md',
                 optionsBg: 'bg-[#2a2f3b] text-white border border-[#3e4452] shadow-2xl ring-1 ring-white/10',

@@ -13,6 +13,7 @@ interface MonthlyPiketSummarySegmentProps {
     theme: AppTheme;
     onSelectDate?: (dayNumber: number) => void;
     className?: string;
+    layout?: 'auto' | 'sidebar' | 'wide';
 }
 
 const INDONESIAN_MONTH_NAMES = [
@@ -27,12 +28,15 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
     theme,
     onSelectDate,
     className = '',
+    layout = 'auto',
 }) => {
     const isWinamp = theme === 'winamp';
     const isVista = theme === 'vista';
     const isDark = theme === 'dark';
-    const isDarkFluid = theme === 'darkFluid';
     const isPaperSketch = theme === 'paperSketch';
+    const isTechnical = theme === 'technical';
+    const isEditorial = theme === 'editorial';
+    const isIndustrial = theme === 'industrial';
 
     // Filter Piket matches for the current selected month
     const monthPikets = React.useMemo(() => {
@@ -55,6 +59,15 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
 
     // Theme Container Styles
     const getContainerStyles = () => {
+        if (isIndustrial) {
+            return 'bg-[#1A1D23] border border-[rgba(226,232,240,0.1)] text-[#E2E8F0] rounded-[6px]';
+        }
+        if (isEditorial) {
+            return 'bg-[#ffffff] border border-[#1a1a1a]/10 text-[#1a1a1a] rounded-none';
+        }
+        if (isTechnical) {
+            return 'bg-[#FFFFFF] border-[1.5px] border-[#111113] text-[#111113] rounded-none';
+        }
         if (isPaperSketch) {
             return 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] rounded-xl shadow-[4px_4px_0px_#2b2b2b]';
         }
@@ -67,13 +80,19 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
         if (isDark) {
             return 'bg-[#1E1E1E] border border-slate-800 text-slate-100 rounded-xl shadow-xs';
         }
-        if (isDarkFluid) {
-            return 'bg-[#1D1B20] border border-white/10 text-[#E6E0E9] rounded-xl shadow-xs';
-        }
         return 'bg-white text-slate-900 rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-black/[0.04]';
     };
 
     const getJumlahPiketBoxStyles = () => {
+        if (isIndustrial) {
+            return 'bg-[#0F1115] border border-[rgba(226,232,240,0.1)] text-[#E2E8F0] p-2.5 rounded-[4px] font-[\'JetBrains_Mono\']';
+        }
+        if (isEditorial) {
+            return 'bg-[#fcfbf9] border border-[#1a1a1a]/10 text-[#1a1a1a] p-2.5 rounded-none font-[\'Geist_Mono\']';
+        }
+        if (isTechnical) {
+            return 'bg-[#F8F7F4] border-[1.5px] border-[#111113] text-[#111113] p-2.5 rounded-none font-[\'JetBrains_Mono\']';
+        }
         if (isPaperSketch) {
             return 'bg-[#f2efeb] border-2 border-[#2b2b2b] text-[#2b2b2b] p-2.5 rounded-xl shadow-[2px_2px_0px_#2b2b2b] font-mono';
         }
@@ -86,13 +105,19 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
         if (isDark) {
             return 'bg-slate-800/60 border border-slate-700/80 text-slate-100 p-2.5 rounded-xl shadow-2xs';
         }
-        if (isDarkFluid) {
-            return 'bg-white/5 border border-white/10 text-[#E6E0E9] p-2.5 rounded-xl shadow-2xs';
-        }
         return 'bg-slate-50 border border-slate-200/60 text-slate-900 p-2.5 rounded-lg shadow-2xs';
     };
 
     const getHeaderStyles = () => {
+        if (isIndustrial) {
+            return 'border-b border-[rgba(226,232,240,0.1)] bg-[#0F1115] text-[#E2E8F0] font-[\'Syne\'] uppercase tracking-wider';
+        }
+        if (isEditorial) {
+            return 'border-b border-[#1a1a1a]/10 bg-[#fcfbf9] text-[#1a1a1a] font-[\'Cormorant_Garamond\'] italic text-sm font-semibold';
+        }
+        if (isTechnical) {
+            return 'border-b-[1.5px] border-[#111113] bg-[#F8F7F4] text-[#111113] font-[\'JetBrains_Mono\'] uppercase tracking-wider';
+        }
         if (isPaperSketch) {
             return 'border-b-2 border-dashed border-[#2b2b2b] bg-[#f2efeb] text-[#2b2b2b] font-[\'Gochi_Hand\'] tracking-wide';
         }
@@ -102,13 +127,22 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
         if (isVista) {
             return 'border-b border-white/60 bg-gradient-to-r from-amber-50/80 to-amber-100/60 text-slate-900';
         }
-        if (isDark || isDarkFluid) {
+        if (isDark) {
             return 'border-b border-white/10 bg-white/5 text-slate-200';
         }
         return 'border-b border-slate-100 bg-amber-50/60 text-slate-800';
     };
 
     const getItemStyles = () => {
+        if (isIndustrial) {
+            return 'bg-[#0F1115] hover:bg-white/5 border border-[rgba(226,232,240,0.1)] text-[#E2E8F0] rounded-[4px] font-[\'JetBrains_Mono\']';
+        }
+        if (isEditorial) {
+            return 'bg-[#ffffff] hover:bg-[#1a1a1a]/[0.03] border border-[#1a1a1a]/10 text-[#1a1a1a] rounded-none font-[\'Geist_Mono\']';
+        }
+        if (isTechnical) {
+            return 'bg-[#FFFFFF] hover:bg-[#111113]/5 border-[1.5px] border-[#111113] text-[#111113] rounded-none font-[\'JetBrains_Mono\']';
+        }
         if (isPaperSketch) {
             return 'bg-white hover:bg-[#2ec4b6]/15 border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] text-[#2b2b2b] rounded-lg';
         }
@@ -120,9 +154,6 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
         }
         if (isDark) {
             return 'bg-[#242424] hover:bg-[#2d2d2d] border border-slate-800 shadow-[0_1.5px_4px_rgba(0,0,0,0.45)] text-slate-200';
-        }
-        if (isDarkFluid) {
-            return 'bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 shadow-[0_1.5px_4px_rgba(0,0,0,0.35)] text-[#E6E0E9]';
         }
         return 'bg-white hover:bg-slate-50/90 border border-slate-200/85 shadow-2xs text-slate-800';
     };
@@ -144,18 +175,24 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
 
             {/* Content: Stat Badges + List */}
             <div className="p-2 space-y-1.5">
-                {/* Unified Adaptive Grid: 2x2 pada mobile view, 4x1 (mendatar) di layar lebar, dan 2x2 di sidebar desktop */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-1 text-center">
+                {/* Unified Adaptive Grid: 2x2 pada mobile view / sidebar, dan 1x4 (4 kolom mendatar) pada layar lebar */}
+                <div
+                    className={`grid ${
+                        layout === 'sidebar'
+                            ? 'grid-cols-2'
+                            : 'grid-cols-2 sm:grid-cols-4'
+                    } gap-1.5 text-center`}
+                >
                     {/* Box 1: Piket-Off */}
                     <Tooltip content="Piket dengan libur pengganti." containerClassName="w-full">
                         <div
-                            className="py-1 px-1.5 rounded-md border bg-indigo-500/10 border-indigo-500/15 text-indigo-700 dark:text-indigo-400 flex flex-col items-center justify-center min-h-[34px] min-w-0 hover:bg-indigo-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className="py-1.5 px-2 rounded-md border bg-indigo-500/10 border-indigo-500/15 text-indigo-700 dark:text-indigo-400 flex flex-col items-center justify-center min-h-[42px] min-w-0 hover:bg-indigo-500/15 cursor-help transition-all shadow-3xs w-full"
                         >
-                            <div className="text-[7.5px] min-[380px]:text-[8px] sm:text-[8.5px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
-                                <span className="w-1 h-1 rounded-full bg-indigo-500 shrink-0 animate-pulse" />
-                                <span className="truncate">Piket-Off</span>
+                            <div className="text-[9px] lg:text-[10px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
+                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0 animate-pulse" />
+                                <span className="truncate font-sans font-extrabold">Piket-Off</span>
                             </div>
-                            <div className="text-[9.5px] min-[380px]:text-[10px] sm:text-[10.5px] font-black text-indigo-600 dark:text-indigo-300 w-full truncate mt-0.5 leading-none">
+                            <div className="text-[11px] lg:text-xs font-black text-indigo-600 dark:text-indigo-300 w-full truncate mt-1 leading-none">
                                 {piketWithOffCount} Hari
                             </div>
                         </div>
@@ -164,13 +201,13 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     {/* Box 2: Piket-no OFF */}
                     <Tooltip content="Piket tanpa libur pengganti." containerClassName="w-full">
                         <div
-                            className="py-1 px-1.5 rounded-md border bg-slate-500/10 border-slate-500/15 text-slate-700 dark:text-slate-400 flex flex-col items-center justify-center min-h-[34px] min-w-0 hover:bg-slate-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className="py-1.5 px-2 rounded-md border bg-slate-500/10 border-slate-500/15 text-slate-700 dark:text-slate-400 flex flex-col items-center justify-center min-h-[42px] min-w-0 hover:bg-slate-500/15 cursor-help transition-all shadow-3xs w-full"
                         >
-                            <div className="text-[7.5px] min-[380px]:text-[8px] sm:text-[8.5px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
-                                <span className="w-1 h-1 rounded-full bg-slate-400 shrink-0" />
-                                <span className="truncate">Piket-no OFF</span>
+                            <div className="text-[9px] lg:text-[10px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                                <span className="truncate font-sans font-extrabold">Piket-no OFF</span>
                             </div>
-                            <div className="text-[9.5px] min-[380px]:text-[10px] sm:text-[10.5px] font-black text-slate-600 dark:text-slate-300 w-full truncate mt-0.5 leading-none">
+                            <div className="text-[11px] lg:text-xs font-black text-slate-600 dark:text-slate-300 w-full truncate mt-1 leading-none">
                                 {piketWithoutOffCount} Hari
                             </div>
                         </div>
@@ -179,13 +216,13 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     {/* Box 3: Off Ready */}
                     <Tooltip content="Jatah libur pengganti yang sudah terjadwal di kalender." containerClassName="w-full">
                         <div
-                            className="py-1 px-1.5 rounded-md border bg-emerald-500/10 border-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex flex-col items-center justify-center min-h-[34px] min-w-0 hover:bg-emerald-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className="py-1.5 px-2 rounded-md border bg-emerald-500/10 border-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex flex-col items-center justify-center min-h-[42px] min-w-0 hover:bg-emerald-500/15 cursor-help transition-all shadow-3xs w-full"
                         >
-                            <div className="text-[7.5px] min-[380px]:text-[8px] sm:text-[8.5px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
-                                <CheckCircle2 className="w-2 h-2 shrink-0 text-emerald-500" />
-                                <span className="truncate">Off Ready</span>
+                            <div className="text-[9px] lg:text-[10px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
+                                <CheckCircle2 className="w-2.5 h-2.5 shrink-0 text-emerald-500" />
+                                <span className="truncate font-sans font-extrabold">Off Ready</span>
                             </div>
-                            <div className="text-[9.5px] min-[380px]:text-[10px] sm:text-[10.5px] font-black text-emerald-600 dark:text-emerald-300 w-full truncate mt-0.5 leading-none">
+                            <div className="text-[11px] lg:text-xs font-black text-emerald-600 dark:text-emerald-300 w-full truncate mt-1 leading-none">
                                 {matchedPiketCount} Hari
                             </div>
                         </div>
@@ -194,13 +231,13 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     {/* Box 4: Off Delay */}
                     <Tooltip content="Jatah libur pengganti yang belum dijadwalkan." containerClassName="w-full">
                         <div
-                            className="py-1 px-1.5 rounded-md border bg-amber-500/10 border-amber-500/15 text-amber-700 dark:text-amber-400 flex flex-col items-center justify-center min-h-[34px] min-w-0 hover:bg-amber-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className="py-1.5 px-2 rounded-md border bg-amber-500/10 border-amber-500/15 text-amber-700 dark:text-amber-400 flex flex-col items-center justify-center min-h-[42px] min-w-0 hover:bg-amber-500/15 cursor-help transition-all shadow-3xs w-full"
                         >
-                            <div className="text-[7.5px] min-[380px]:text-[8px] sm:text-[8.5px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
-                                <Clock className="w-2 h-2 shrink-0 text-amber-500" />
-                                <span className="truncate">Off Delay</span>
+                            <div className="text-[9px] lg:text-[10px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
+                                <Clock className="w-2.5 h-2.5 shrink-0 text-amber-500" />
+                                <span className="truncate font-sans font-extrabold">Off Delay</span>
                             </div>
-                            <div className="text-[9.5px] min-[380px]:text-[10px] sm:text-[10.5px] font-black text-amber-600 dark:text-amber-300 w-full truncate mt-0.5 leading-none">
+                            <div className="text-[11px] lg:text-xs font-black text-amber-600 dark:text-amber-300 w-full truncate mt-1 leading-none">
                                 {pendingPiketCount} Hari
                             </div>
                         </div>

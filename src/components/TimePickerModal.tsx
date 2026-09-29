@@ -49,7 +49,6 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
   const isWinamp = theme === 'winamp';
   const isVista = theme === 'vista';
   const isDark = theme === 'dark';
-  const isDarkFluid = theme === 'darkFluid';
 
   // Active target field being edited on clock face: 'jamMasuk' | 'jamPulang' | 'absenCeisa'
   const [activeTab, setActiveTab] = useState<'jamMasuk' | 'jamPulang' | 'absenCeisa'>(() => {

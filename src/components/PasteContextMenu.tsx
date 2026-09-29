@@ -42,10 +42,13 @@ export const PasteContextMenu: React.FC<PasteContextMenuProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isWinamp = theme === 'winamp';
-  const isDarkFluid = theme === 'darkFluid';
   const isDark = theme === 'dark';
   const isVista = theme === 'vista';
   const isPaperSketch = theme === 'paperSketch';
+  const isIndustrial = theme === 'industrial';
+  const isTechnical = theme === 'technical';
+  const isEditorial = theme === 'editorial';
+  const isDashboard = theme === 'dashboard';
 
   useEffect(() => {
     if (!isOpen) return;
@@ -132,7 +135,25 @@ export const PasteContextMenu: React.FC<PasteContextMenuProps> = ({
         shortcutColor: 'opacity-60',
       };
     }
-    if (isDark || isDarkFluid) {
+    if (isIndustrial) {
+      return {
+        cardStyle: {
+          backgroundColor: '#1A1D23',
+          borderRadius: '6px',
+          border: '1px solid rgba(226, 232, 240, 0.15)',
+          boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.8)',
+          fontFamily: "'JetBrains Mono', monospace",
+        },
+        separatorStyle: {
+          borderTop: '1px solid rgba(226, 232, 240, 0.1)',
+        },
+        itemClass: 'text-[#E2E8F0] hover:bg-white/10 hover:text-[#2DD4BF]',
+        deleteItemClass: 'text-[#BE1A1A] hover:bg-[#BE1A1A] hover:text-white',
+        iconColor: '#2DD4BF',
+        shortcutColor: 'text-[#E2E8F0]/60',
+      };
+    }
+    if (isDark) {
       return {
         cardStyle: {
           backgroundColor: 'rgba(36, 40, 50, 1)',
