@@ -220,7 +220,7 @@ export const Checkbox: React.FC<CheckboxProps> = React.memo(({
                 $disabled={disabled}
                 className={containerClassName}
             >
-                <label className="container" htmlFor={id}>
+                <label className="container">
                     <input
                         type="checkbox"
                         id={id}
@@ -246,7 +246,7 @@ export const Checkbox: React.FC<CheckboxProps> = React.memo(({
                 $disabled={disabled}
                 className={containerClassName}
             >
-                <label className="container" htmlFor={id}>
+                <label className="container">
                     <input
                         type="checkbox"
                         id={id}

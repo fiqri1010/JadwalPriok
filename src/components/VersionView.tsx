@@ -26,10 +26,113 @@ export interface VersionItem {
 
 export const VERSION_HISTORY: VersionItem[] = [
     {
+        version: '0.4.0',
+        releaseDate: '29 September 2026',
+        title: 'Pembaruan Struktur Penomoran Versi (0.4.0)',
+        isLatest: true,
+        isMajor: true,
+        tag: 'Versioning Restructuring',
+        changes: [
+            'Pembaruan struktur penomoran versi menjadi 0.4.0 setelah 0.3.99, memastikan kesinambungan versi yang logis dan bersih untuk ke depannya.'
+        ]
+    },
+    {
+        version: '0.3.100',
+        releaseDate: '29 September 2026',
+        title: 'Sinkronisasi Real-Time Nama Role Pengguna',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Dynamic Role Name Synchronization & Real-time Profile Hooking',
+        changes: [
+            'Sinkronisasi Real-Time Nama Peran/Otoritas Pengguna: Mengubah indikator peran di bawah nama lengkap pada tabel daftar pengguna agar selalu tersinkronisasi secara dinamis dengan nama peran terbaru di tab Role Otoritas. Kini, setiap perubahan nama peran akan langsung ter-update otomatis pada semua pengguna yang memegangnya tanpa lag.'
+        ]
+    },
+    {
+        version: '0.4.22-beta',
+        releaseDate: '29 September 2026',
+        title: 'Integrasi "Non User" ke Form Tambah & Edit Peran Otoritas',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Non-User Role Type Integration & Permissions Disabling',
+        changes: [
+            'Integrasi Tingkat Peran "Non User" Baru: Memindahkan pilihan tingkat peran "3. Non User" ke dalam formulir Tambah Peran dan Edit Peran di tab Role Otoritas.',
+            'Disabling Konfigurasi Hak Akses (Permissions Checklist): Jika jenis peran "Non User" dipilih dalam formulir, seluruh pilihan hak izin (permissions checklist) di bawahnya secara dinamis langsung dinonaktifkan (disabled), di-grayscale, diturunkan opasitasnya (opacity-40), serta diatur tidak memiliki hak akses apa pun (unchecked) secara otomatis.'
+        ]
+    },
+    {
+        version: '0.4.21-beta',
+        releaseDate: '29 September 2026',
+        title: 'Perlindungan Menonaktifkan Super Admin & Penambahan Mode Otoritas "Non User"',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Super Admin Disabling Protection & "Non User" Testing Mode with Greyed Out Submenus',
+        changes: [
+            'Perlindungan Akun Utama Super Admin: Membatasi akun Utama Super Admin agar tidak dapat dinonaktifkan (checkbox dinonaktifkan baik di tabel maupun modal edit) untuk mencegah penguncian sistem admin secara tidak sengaja.',
+            'Penambahan Mode Otoritas "3. Non User": Menyediakan tombol opsi pengujian peran baru "3. Non User" pada Panel Atas Dashboard Admin.',
+            'Efek Menonaktifkan Seluruh Submenu & Konten (Greyed Out): Ketika mode "Non User" diaktifkan, seluruh navigasi sub-menu admin dan panel konten di bawahnya langsung mengalami grayscale filter, opasitas rendah (opacity-30), dinonaktifkan dari klik, serta tidak dapat diinteraksi sama sekali.'
+        ]
+    },
+    {
+        version: '0.4.20-beta',
+        releaseDate: '29 September 2026',
+        title: 'Penyelarasan Terminologi Filter Peran menjadi "Role"',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Role Filter Label Terminology Swapping',
+        changes: [
+            'Pembaruan Terminologi Filter "Otoritas": Mengubah teks filter "Otoritas:" di atas tabel manajemen pengguna menjadi "Role:" guna menyelaraskan dengan terminologi Peran Pengguna secara konsisten.'
+        ]
+    },
+    {
+        version: '0.4.19-beta',
+        releaseDate: '29 September 2026',
+        title: 'Perbaikan Fungsionalitas Checkbox, Penyelarasan Posisi Role, Dropdown Posko Standard & Filter Posko Baru',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Checkbox State Fix, Role Badge Alignment, Posko Filter & Standardized Dropdown',
+        changes: [
+            'Perbaikan Checkbox "Aktif" di Daftar Pengguna: Mengatasi bug double-firing click pada komponen Checkbox dengan menghapus redundansi atribut "htmlFor" pada label bersarang, mengembalikan responsivitas toggle akun secara instan.',
+            'Penyelarasan Posisi "Role User": Memindahkan lencana indikator role/otoritas agar tampil tepat di bawah nama lengkap pada daftar pengguna, memberikan tata letak yang bersih dan rapi.',
+            'Filter Berdasarkan Unit Posko: Menambahkan selektor filter drop-down dinamis berbasis Unit Posko untuk menyaring daftar pengguna secara instan di dashboard admin.',
+            'Standardisasi Dropdown Pilihan Posko: Mengubah form unit penugasan posko pada modal tambah & edit pengguna dari input teks bebas menjadi dropdown select dengan 5 opsi standar (Posko Graha Lt. 1, Graha Ground, CDC, NPCT, Koja) dengan penanganan kompatibilitas data lama.'
+        ]
+    },
+    {
+        version: '0.4.18-beta',
+        releaseDate: '29 September 2026',
+        title: 'Perbaikan Prioritas Pemetaan Warna, Penyelarasan Indeks Jadwal, & Filter Identitas Impor Excel',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Color Mapping Priority, Day Alignment Fix, Identity Data Filtering',
+        changes: [
+            'Perbaikan Prioritas Pemetaan Warna: Menentukan prioritas utama bagi aturan warna latar Excel di atas teks agar sel dengan teks "P" (tanpa warna => Graha) tidak menimpa sel "P" berwarna kuning (dengan warna => TPSL).',
+            'Penyelesaian Masalah Indeks Jadwal Pratinjau: Memperbaiki pergeseran pencocokan kolom 1-2 (Nama & NIP) ke kolom 3 s.d 33 sehingga pratinjau tanggal 1 s.d 31 selaras sempurna dengan isi grid data.',
+            'Filter Otomatis Identitas Pegawai (Nama & NIP): Menyaring entri Nama (>5 karakter) dan NIP (18 digit angka) agar tidak masuk ke daftar aturan pemetaan warna maupun jatuh ke fallback default shift.',
+            'Grouping Konsistensi Warna Putih: Mengelompokkan warna putih (#ffffff) atau tanpa warna secara otomatis di bawah aturan teks "P" (Graha) demi menyederhanakan konfigurasi pemetaan rules.'
+        ]
+    },
+    {
+        version: '0.4.17-beta',
+        releaseDate: '29 September 2026',
+        title: 'Optimasi Paste Excel, Perlindungan Super Admin, Terminology Role User, & Standardisasi Checkbox',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Excel Paste Performance, Role Alignment, Checkbox Standardisation',
+        changes: [
+            'Optimasi Performa Paste Excel (CTRL+V): Memperkenalkan komponen memoized GridRow dan GridCell pada Grid Impor (150 baris × 40 kolom) mengurangi re-render dari 6.000 sel menjadi <100 sel per perubahan. Sensitivitas dan waktu respon meningkat drastis.',
+            'Akses Tempel Clipboard Instan: Menambahkan tombol "Tempel Excel (Clipboard)" yang memungkinkah pengimporan tabel Excel berserta format warnanya secara instan via klik tombol.',
+            'Pengecualian Pemetaan Warna Kolom Identitas: Mencegah pemetaan aturan warna merusak atau mengubah sel pada kolom identitas Nama & NIP (Kolom 1 & 2) saat menempel data.',
+            'Perlindungan Akun Super Admin: Memastikan Super Admin tidak dapat dihapus dan menyembunyikan tombol permintaan hapus akun / reset password untuk seluruh Admin.',
+            'Terminologi Peran "Role User": Menyelaraskan menu "Profil Tingkat Otoritas dan Hak Akses" menjadi "Role User" dan menyajikan daftar dalam tampilan grid 1 kolom.',
+            'Standardisasi Checkbox Komponen: Menerapkan komponen UI kustom Checkbox di seluruh form dan list sasaran impor untuk menyinkronkan tema terang/gelap/pencilsketch secara global.',
+            'Penyelarasan Form Akun Pegawai: Mengubah susunan form identitas pada tab Akun menjadi Nama Pegawai terlebih dahulu, disusul oleh NIP Pegawai.'
+        ]
+    },
+    {
         version: '0.4.16-beta',
         releaseDate: '29 September 2026',
         title: 'Responsivitas Judul Tema Industrial, Integrasi 120 Profil Pegawai, dan Perapihan Form Admin',
-        isLatest: true,
+        isLatest: false,
         isMajor: false,
         tag: 'Industrial Theme UI Fix, Staff Profiles Pre-population, Title Scaling & Admin Form Cleanup',
         changes: [
@@ -105,7 +208,7 @@ export const VERSION_HISTORY: VersionItem[] = [
         changes: [
             'Tampilan Nama & NIP Pengguna di Sidebar: Menampilkan identitas profil Nama dan NIP pegawai di bilah sisi (sidebar) tepat di bawah logo/judul aplikasi dan di atas menu utama.',
             'Dukungan Dua Kelompok Pengguna (Role-Based Access Control): Memisahkan hak akses antara 1. Admin dan 2. End-User.',
-            'Dashboard Administrator Terpadu: Menyediakan panel khusus admin berisi 4 sub-menu: 1. Daftar Pengguna (Reset Password langsung mengosongkan password, Tambah, Edit, Hapus, Nonaktifkan, dan Otoritas Pengguna); 2. Salin Jadwal Massal untuk seluruh pengguna dan non-pengguna (posko luar untuk statistik); 3. Sesi Pengguna dengan tampilan kartu lipat (folded page / accordion per user); 4. Profil Otoritas.',
+            'Dashboard Administrator Terpadu: Menyediakan panel khusus admin berisi 4 sub-menu: 1. Daftar Pengguna (Reset Password langsung mengosongkan password, Tambah, Edit, Hapus, Nonaktifkan, dan Otoritas Pengguna); 2. Salin Jadwal Massal untuk seluruh pengguna dan non-pengguna (posko luar untuk statistik); 3. Sesi Pengguna dengan tampilan kartu lipat (folded page / accordion per user); 4. Role Otoritas.',
             'Penataan Ulang & Klarifikasi Label Nama: Menyertakan label "Nama" dan "NIP" secara eksplisit dan rapi pada daftar pengguna di Dashboard Admin dan tab Akun.',
             'Deteksi Geografis & Sesi Riil: Menggunakan deteksi lokasi riil berbasis timezone & jaringan serta membersihkan log simulasi/shift.'
         ]

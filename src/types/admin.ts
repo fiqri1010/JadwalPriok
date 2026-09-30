@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'end-user';
+export type UserRole = 'admin' | 'end-user' | 'non-user';
 
 export interface AuthorityProfile {
     id: string;

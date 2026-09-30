@@ -103,7 +103,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
         },
         {
             id: 'authorities' as AdminSubMenu,
-            label: 'Profil Otoritas',
+            label: 'Role Otoritas',
             icon: Shield,
             count: profiles.length,
         },
@@ -188,11 +188,27 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                         >
                             2. End-User
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                onRoleChange('non-user');
+                                onShowToast('Beralih ke mode NON-USER (Semua menu admin dinonaktifkan).');
+                            }}
+                            className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                                currentRole === 'non-user'
+                                    ? 'bg-slate-600 text-white shadow-2xs'
+                                    : 'opacity-60 hover:opacity-100'
+                            }`}
+                        >
+                            3. Non User
+                        </button>
                     </div>
                 </div>
-
+ 
                 {/* Sub-menu Navigation Bar */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pt-4 mt-4 border-t border-current/15 pb-1 no-scrollbar">
+                <div className={`flex items-center gap-1.5 overflow-x-auto pt-4 mt-4 border-t border-current/15 pb-1 no-scrollbar transition-all duration-200 min-w-full ${
+                    currentRole === 'non-user' ? 'opacity-30 pointer-events-none select-none filter grayscale' : ''
+                }`}>
                     {subMenus.map((item) => {
                         const Icon = item.icon;
                         const isSelected = activeSubMenu === item.id;
@@ -200,6 +216,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                             <button
                                 key={item.id}
                                 type="button"
+                                disabled={currentRole === 'non-user'}
                                 onClick={() => setActiveSubMenu(item.id)}
                                 className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 shrink-0 transition-all cursor-pointer ${
                                     isSelected
@@ -207,7 +224,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                                             ? 'bg-[#2DD4BF]/20 text-[#2DD4BF] border border-[#2DD4BF]/40'
                                             : 'bg-rose-600 text-white shadow-xs'
                                         : 'hover:bg-current/10 border border-current/15 opacity-70 hover:opacity-100'
-                                }`}
+                                } ${currentRole === 'non-user' ? 'cursor-not-allowed' : ''}`}
                             >
                                 <Icon className="w-4 h-4 shrink-0" />
                                 <span>{item.label}</span>
@@ -227,9 +244,11 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                     })}
                 </div>
             </div>
-
+ 
             {/* Sub-menu View Content */}
-            <div className={`p-4 sm:p-5 rounded-2xl border ${
+            <div className={`relative p-4 sm:p-5 rounded-2xl border transition-all duration-200 ${
+                currentRole === 'non-user' ? 'opacity-30 pointer-events-none select-none filter grayscale' : ''
+            } ${
                 isIndustrial
                     ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.15)] text-[#E2E8F0]'
                     : isPaperSketch
@@ -272,7 +291,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                     />
                 )}
 
-                {/* 4. Sub Menu: Profil Otoritas */}
+                {/* 4. Sub Menu: Role Otoritas */}
                 {activeSubMenu === 'authorities' && (
                     <AdminAuthorityProfilesTab
                         profiles={profiles}

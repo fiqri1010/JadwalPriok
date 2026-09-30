@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { AuthorityProfile, UserRole, UserAccount } from '../../types/admin';
 import { AppTheme } from '../../types';
+import { Checkbox } from '../ui/Checkbox';
 
 interface AdminAuthorityProfilesTabProps {
     profiles: AuthorityProfile[];
@@ -107,6 +108,15 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
             setCanBroadcastSchedule(true);
             setCanViewAllSessions(true);
             setCanEditAuthorities(true);
+        } else if (newRole === 'non-user') {
+            setCanAccessAdmin(false);
+            setCanManageUsers(false);
+            setCanResetPassword(false);
+            setCanBroadcastSchedule(false);
+            setCanViewAllSessions(false);
+            setCanDeleteAdminAuthority(false);
+            setCanEditAuthorities(false);
+            setCanEditOwnSchedule(false);
         } else {
             setCanAccessAdmin(false);
             setCanManageUsers(false);
@@ -115,6 +125,21 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
             setCanViewAllSessions(false);
             setCanDeleteAdminAuthority(false);
             setCanEditAuthorities(false);
+            setCanEditOwnSchedule(true);
+        }
+    };
+
+    const handleEditRoleTypeChange = (newRole: UserRole) => {
+        setRoleType(newRole);
+        if (newRole === 'non-user') {
+            setCanAccessAdmin(false);
+            setCanManageUsers(false);
+            setCanResetPassword(false);
+            setCanBroadcastSchedule(false);
+            setCanViewAllSessions(false);
+            setCanDeleteAdminAuthority(false);
+            setCanEditAuthorities(false);
+            setCanEditOwnSchedule(false);
         }
     };
 
@@ -128,6 +153,8 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
         const badgeColor =
             roleType === 'admin'
                 ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30'
+                : roleType === 'non-user'
+                ? 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30'
                 : 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30';
 
         const newProf: AuthorityProfile = {
@@ -169,6 +196,8 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                     badgeColor:
                         roleType === 'admin'
                             ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30'
+                            : roleType === 'non-user'
+                            ? 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30'
                             : 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30',
                     permissions: {
                         canAccessAdminDashboard: canAccessAdmin,
@@ -218,10 +247,10 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                     <div>
                         <div className="flex items-center gap-2">
                             <h3 className="text-sm sm:text-base font-extrabold uppercase tracking-wide">
-                                Profil Tingkat Otoritas & Hak Akses
+                                Role User
                             </h3>
                             <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30">
-                                {profiles.length} Profil
+                                {profiles.length} Role
                             </span>
                         </div>
                         <p className="text-xs opacity-70">
@@ -236,12 +265,12 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                     className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs cursor-pointer flex items-center justify-center space-x-2 active:scale-95 transition-all"
                 >
                     <ShieldPlus className="w-4 h-4" />
-                    <span>Tambah Profil Otoritas Baru</span>
+                    <span>Tambah Role</span>
                 </button>
             </div>
 
             {/* List Profil Otoritas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
                 {profiles.map((prof) => {
                     const assignedUsersCount = users.filter((u) => u.authorityProfileId === prof.id).length;
                     return (
@@ -366,7 +395,7 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                             <div className="flex items-center space-x-2">
                                 <ShieldPlus className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                                 <h3 className="text-sm sm:text-base font-extrabold uppercase tracking-wide">
-                                    Tambah Profil Otoritas Baru
+                                    Tambah Role Baru
                                 </h3>
                             </div>
                             <button
@@ -380,7 +409,7 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
 
                         <form onSubmit={handleSaveNewProfile} className="space-y-3.5">
                             <div>
-                                <label className="text-xs font-bold block mb-1">Nama Profil Otoritas:</label>
+                                <label className="text-xs font-bold block mb-1">Nama Role Otoritas:</label>
                                 <input
                                     type="text"
                                     value={name}
@@ -391,20 +420,9 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                                 />
                             </div>
 
-                            <div>
+                             <div>
                                 <label className="text-xs font-bold block mb-1">Kelompok Tingkat Role:</label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => handleRoleTypeChange('end-user')}
-                                        className={`p-2.5 rounded-xl border text-xs font-bold text-center cursor-pointer transition-all ${
-                                            roleType === 'end-user'
-                                                ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
-                                                : 'border-current/20 hover:bg-current/5'
-                                        }`}
-                                    >
-                                        2. End-User (Petugas Posko)
-                                    </button>
+                                <div className="grid grid-cols-3 gap-2">
                                     <button
                                         type="button"
                                         onClick={() => handleRoleTypeChange('admin')}
@@ -414,7 +432,29 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                                                 : 'border-current/20 hover:bg-current/5'
                                         }`}
                                     >
-                                        1. Admin (Administrator Posko)
+                                        1. Admin
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRoleTypeChange('end-user')}
+                                        className={`p-2.5 rounded-xl border text-xs font-bold text-center cursor-pointer transition-all ${
+                                            roleType === 'end-user'
+                                                ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
+                                                : 'border-current/20 hover:bg-current/5'
+                                        }`}
+                                    >
+                                        2. End-User
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRoleTypeChange('non-user')}
+                                        className={`p-2.5 rounded-xl border text-xs font-bold text-center cursor-pointer transition-all ${
+                                            roleType === 'non-user'
+                                                ? 'bg-slate-600 text-white border-slate-600 shadow-xs'
+                                                : 'border-current/20 hover:bg-current/5'
+                                        }`}
+                                    >
+                                        3. Non User
                                     </button>
                                 </div>
                             </div>
@@ -425,88 +465,75 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                                     rows={2}
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    placeholder="Jelaskan peran tugas profil otoritas ini..."
+                                    placeholder="Jelaskan peran tugas role ini..."
                                     className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 outline-none focus:border-teal-500"
                                 />
                             </div>
 
                             {/* Permission Checklist */}
-                            <div className="p-3 rounded-xl bg-current/5 border border-current/10 space-y-2">
+                            <div className={`p-3 rounded-xl bg-current/5 border border-current/10 space-y-2 transition-all duration-200 ${
+                                roleType === 'non-user' ? 'opacity-40 pointer-events-none select-none filter grayscale' : ''
+                            }`}>
                                 <span className="text-xs font-extrabold uppercase tracking-wider block">
                                     Konfigurasi Hak Izin (Permissions):
                                 </span>
 
-                                <div className="space-y-1.5">
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canAccessAdmin}
-                                            onChange={(e) => setCanAccessAdmin(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Dapat Mengakses Dashboard Admin Posko</span>
-                                    </label>
+                                <div className="space-y-1.5 flex flex-col gap-1.5">
+                                    <Checkbox
+                                        id="add-can-access-admin"
+                                        theme={theme}
+                                        checked={canAccessAdmin}
+                                        onChange={(e) => setCanAccessAdmin(e.target.checked)}
+                                        label="Dapat Mengakses Dashboard Admin Posko"
+                                    />
 
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canManageUsers}
-                                            onChange={(e) => setCanManageUsers(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Dapat Menambah, Edit, dan Hapus Pengguna</span>
-                                    </label>
+                                    <Checkbox
+                                        id="add-can-manage-users"
+                                        theme={theme}
+                                        checked={canManageUsers}
+                                        onChange={(e) => setCanManageUsers(e.target.checked)}
+                                        label="Dapat Menambah, Edit, dan Hapus Pengguna"
+                                    />
 
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canResetPassword}
-                                            onChange={(e) => setCanResetPassword(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Dapat Mereset & Mengosongkan Password User</span>
-                                    </label>
+                                    <Checkbox
+                                        id="add-can-reset-password"
+                                        theme={theme}
+                                        checked={canResetPassword}
+                                        onChange={(e) => setCanResetPassword(e.target.checked)}
+                                        label="Dapat Mereset & Mengosongkan Password User"
+                                    />
 
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canBroadcastSchedule}
-                                            onChange={(e) => setCanBroadcastSchedule(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Dapat Mengimpor Jadwal Pengguna dari Excel</span>
-                                    </label>
+                                    <Checkbox
+                                        id="add-can-broadcast"
+                                        theme={theme}
+                                        checked={canBroadcastSchedule}
+                                        onChange={(e) => setCanBroadcastSchedule(e.target.checked)}
+                                        label="Dapat Mengimpor Jadwal Pengguna dari Excel"
+                                    />
 
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canViewAllSessions}
-                                            onChange={(e) => setCanViewAllSessions(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Dapat Melihat Log Sesi Seluruh Pengguna</span>
-                                    </label>
+                                    <Checkbox
+                                        id="add-can-view-sessions"
+                                        theme={theme}
+                                        checked={canViewAllSessions}
+                                        onChange={(e) => setCanViewAllSessions(e.target.checked)}
+                                        label="Dapat Melihat Log Sesi Seluruh Pengguna"
+                                    />
 
-                                    {/* HAK IZIN BARU */}
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canEditAuthorities}
-                                            onChange={(e) => setCanEditAuthorities(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Edit Otoritas (Ubah Nama, Role, & Hak Akses)</span>
-                                    </label>
+                                    <Checkbox
+                                        id="add-can-edit-authorities"
+                                        theme={theme}
+                                        checked={canEditAuthorities}
+                                        onChange={(e) => setCanEditAuthorities(e.target.checked)}
+                                        label="Edit Otoritas (Ubah Nama, Role, & Hak Akses)"
+                                    />
 
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canDeleteAdminAuthority}
-                                            onChange={(e) => setCanDeleteAdminAuthority(e.target.checked)}
-                                            className="rounded text-rose-600 focus:ring-rose-500"
-                                        />
-                                        <span className="text-rose-600 dark:text-rose-400">Hapus Otoritas Admin (Izin Menghapus Profil Admin)</span>
-                                    </label>
+                                    <Checkbox
+                                        id="add-can-delete-admin"
+                                        theme={theme}
+                                        checked={canDeleteAdminAuthority}
+                                        onChange={(e) => setCanDeleteAdminAuthority(e.target.checked)}
+                                        label={<span className="text-rose-600 dark:text-rose-400">Hapus Otoritas Admin (Izin Menghapus Profil Admin)</span>}
+                                    />
                                 </div>
                             </div>
 
@@ -523,7 +550,7 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                                     className="px-4 py-2 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white cursor-pointer shadow-xs flex items-center gap-1.5"
                                 >
                                     <Check className="w-4 h-4" />
-                                    <span>Simpan Profil Otoritas</span>
+                                    <span>Simpan Role</span>
                                 </button>
                             </div>
                         </form>
@@ -548,7 +575,7 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                             <div className="flex items-center space-x-2">
                                 <Edit className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                                 <h3 className="text-sm sm:text-base font-extrabold uppercase tracking-wide">
-                                    Edit Otoritas: {activeProfile.name}
+                                    Edit Role: {activeProfile.name}
                                 </h3>
                             </div>
                             <button
@@ -562,7 +589,7 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
 
                         <form onSubmit={handleUpdateProfileSubmit} className="space-y-3.5">
                             <div>
-                                <label className="text-xs font-bold block mb-1">Nama Profil Otoritas:</label>
+                                <label className="text-xs font-bold block mb-1">Nama Role Otoritas:</label>
                                 <input
                                     type="text"
                                     value={name}
@@ -572,12 +599,23 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                                 />
                             </div>
 
-                            <div>
+                             <div>
                                 <label className="text-xs font-bold block mb-1">Kelompok Tingkat Role:</label>
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-3 gap-2">
                                     <button
                                         type="button"
-                                        onClick={() => setRoleType('end-user')}
+                                        onClick={() => handleEditRoleTypeChange('admin')}
+                                        className={`p-2.5 rounded-xl border text-xs font-bold text-center cursor-pointer transition-all ${
+                                            roleType === 'admin'
+                                                ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
+                                                : 'border-current/20 hover:bg-current/5'
+                                        }`}
+                                    >
+                                        1. Admin
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleEditRoleTypeChange('end-user')}
                                         className={`p-2.5 rounded-xl border text-xs font-bold text-center cursor-pointer transition-all ${
                                             roleType === 'end-user'
                                                 ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
@@ -588,14 +626,14 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => setRoleType('admin')}
+                                        onClick={() => handleEditRoleTypeChange('non-user')}
                                         className={`p-2.5 rounded-xl border text-xs font-bold text-center cursor-pointer transition-all ${
-                                            roleType === 'admin'
-                                                ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
+                                            roleType === 'non-user'
+                                                ? 'bg-slate-600 text-white border-slate-600 shadow-xs'
                                                 : 'border-current/20 hover:bg-current/5'
                                         }`}
                                     >
-                                        1. Admin
+                                        3. Non User
                                     </button>
                                 </div>
                             </div>
@@ -611,82 +649,69 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                             </div>
 
                             {/* Permission Checklist */}
-                            <div className="p-3 rounded-xl bg-current/5 border border-current/10 space-y-2">
+                            <div className={`p-3 rounded-xl bg-current/5 border border-current/10 space-y-2 transition-all duration-200 ${
+                                roleType === 'non-user' ? 'opacity-40 pointer-events-none select-none filter grayscale' : ''
+                            }`}>
                                 <span className="text-xs font-extrabold uppercase tracking-wider block">
                                     Konfigurasi Hak Izin (Permissions):
                                 </span>
 
-                                <div className="space-y-1.5">
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canAccessAdmin}
-                                            onChange={(e) => setCanAccessAdmin(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Dapat Mengakses Dashboard Admin Posko</span>
-                                    </label>
+                                <div className="space-y-1.5 flex flex-col gap-1.5">
+                                    <Checkbox
+                                        id="edit-can-access-admin"
+                                        theme={theme}
+                                        checked={canAccessAdmin}
+                                        onChange={(e) => setCanAccessAdmin(e.target.checked)}
+                                        label="Dapat Mengakses Dashboard Admin Posko"
+                                    />
 
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canManageUsers}
-                                            onChange={(e) => setCanManageUsers(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Dapat Menambah, Edit, dan Hapus Pengguna</span>
-                                    </label>
+                                    <Checkbox
+                                        id="edit-can-manage-users"
+                                        theme={theme}
+                                        checked={canManageUsers}
+                                        onChange={(e) => setCanManageUsers(e.target.checked)}
+                                        label="Dapat Menambah, Edit, dan Hapus Pengguna"
+                                    />
 
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canResetPassword}
-                                            onChange={(e) => setCanResetPassword(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Dapat Mereset & Mengosongkan Password User</span>
-                                    </label>
+                                    <Checkbox
+                                        id="edit-can-reset-password"
+                                        theme={theme}
+                                        checked={canResetPassword}
+                                        onChange={(e) => setCanResetPassword(e.target.checked)}
+                                        label="Dapat Mereset & Mengosongkan Password User"
+                                    />
 
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canBroadcastSchedule}
-                                            onChange={(e) => setCanBroadcastSchedule(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Dapat Mengimpor Jadwal Pengguna dari Excel</span>
-                                    </label>
+                                    <Checkbox
+                                        id="edit-can-broadcast"
+                                        theme={theme}
+                                        checked={canBroadcastSchedule}
+                                        onChange={(e) => setCanBroadcastSchedule(e.target.checked)}
+                                        label="Dapat Mengimpor Jadwal Pengguna dari Excel"
+                                    />
 
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canViewAllSessions}
-                                            onChange={(e) => setCanViewAllSessions(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Dapat Melihat Log Sesi Seluruh Pengguna</span>
-                                    </label>
+                                    <Checkbox
+                                        id="edit-can-view-sessions"
+                                        theme={theme}
+                                        checked={canViewAllSessions}
+                                        onChange={(e) => setCanViewAllSessions(e.target.checked)}
+                                        label="Dapat Melihat Log Sesi Seluruh Pengguna"
+                                    />
 
-                                    {/* HAK IZIN BARU */}
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canEditAuthorities}
-                                            onChange={(e) => setCanEditAuthorities(e.target.checked)}
-                                            className="rounded text-teal-600 focus:ring-teal-500"
-                                        />
-                                        <span>Edit Otoritas (Ubah Nama, Role, & Hak Akses)</span>
-                                    </label>
+                                    <Checkbox
+                                        id="edit-can-edit-authorities"
+                                        theme={theme}
+                                        checked={canEditAuthorities}
+                                        onChange={(e) => setCanEditAuthorities(e.target.checked)}
+                                        label="Edit Otoritas (Ubah Nama, Role, & Hak Akses)"
+                                    />
 
-                                    <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={canDeleteAdminAuthority}
-                                            onChange={(e) => setCanDeleteAdminAuthority(e.target.checked)}
-                                            className="rounded text-rose-600 focus:ring-rose-500"
-                                        />
-                                        <span className="text-rose-600 dark:text-rose-400">Hapus Otoritas Admin (Izin Menghapus Profil Admin)</span>
-                                    </label>
+                                    <Checkbox
+                                        id="edit-can-delete-admin"
+                                        theme={theme}
+                                        checked={canDeleteAdminAuthority}
+                                        onChange={(e) => setCanDeleteAdminAuthority(e.target.checked)}
+                                        label={<span className="text-rose-600 dark:text-rose-400">Hapus Otoritas Admin (Izin Menghapus Profil Admin)</span>}
+                                    />
                                 </div>
                             </div>
 
@@ -729,13 +754,13 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
                                 <AlertTriangle className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="text-sm sm:text-base font-extrabold">Hapus Profil Otoritas</h3>
+                                <h3 className="text-sm sm:text-base font-extrabold">Hapus Role</h3>
                                 <p className="text-xs opacity-75 font-mono">{activeProfile.name}</p>
                             </div>
                         </div>
 
                         <p className="text-xs opacity-85 leading-relaxed">
-                            Apakah Anda yakin ingin menghapus profil otoritas <strong>{activeProfile.name}</strong>? Tindakan ini tidak dapat dibatalkan.
+                            Apakah Anda yakin ingin menghapus role otoritas <strong>{activeProfile.name}</strong>? Tindakan ini tidak dapat dibatalkan.
                         </p>
 
                         <div className="flex items-center justify-end space-x-2 pt-2 border-t border-current/10">

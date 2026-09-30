@@ -48,8 +48,8 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
     const isDark = theme === 'dark';
 
     // State Akun Pegawai
-    const [nip, setNip] = useState(() => localStorage.getItem(LOCAL_STORAGE_NIP_KEY) || '199208152015021002');
-    const [namaPegawai, setNamaPegawai] = useState(() => localStorage.getItem(LOCAL_STORAGE_NAME_KEY) || 'Petugas Posko Shift Graha & TPSL');
+    const [nip, setNip] = useState(() => localStorage.getItem(LOCAL_STORAGE_NIP_KEY) || '199510102015121002');
+    const [namaPegawai, setNamaPegawai] = useState(() => localStorage.getItem(LOCAL_STORAGE_NAME_KEY) || 'Ahmad Fiqri');
     const [hasPassword, setHasPassword] = useState(() => Boolean(localStorage.getItem(LOCAL_STORAGE_PASS_KEY)));
     
     // Form Ubah/Set Password (tidak memerlukan password lama)
@@ -302,6 +302,16 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                     <form onSubmit={handleSaveProfile} className="mt-4 pt-4 border-t border-current/15 space-y-3">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
+                                <label className="text-xs font-bold block mb-1">Nama Pegawai:</label>
+                                <input
+                                    type="text"
+                                    value={namaPegawai}
+                                    onChange={(e) => setNamaPegawai(e.target.value)}
+                                    placeholder="Nama Pegawai / Posko..."
+                                    className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-bold outline-none focus:border-teal-500"
+                                />
+                            </div>
+                            <div>
                                 <label className="text-xs font-bold block mb-1">NIP Pegawai (18 Digit):</label>
                                 <input
                                     type="text"
@@ -309,16 +319,6 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                                     onChange={(e) => setNip(e.target.value)}
                                     placeholder="Masukkan 18 digit NIP..."
                                     className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-mono font-bold outline-none focus:border-teal-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold block mb-1">Nama Tampilan / Satuan Tugas:</label>
-                                <input
-                                    type="text"
-                                    value={namaPegawai}
-                                    onChange={(e) => setNamaPegawai(e.target.value)}
-                                    placeholder="Nama Pegawai / Posko..."
-                                    className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-bold outline-none focus:border-teal-500"
                                 />
                             </div>
                         </div>
@@ -575,44 +575,46 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                 </div>
             </div>
 
-            {/* 5. PALING BAWAH: Permintaan Hapus Akun Pengguna */}
-            <div className={`p-4 rounded-xl border space-y-3 ${
-                isIndustrial
-                    ? 'bg-[#0F1115] border-rose-500/20 text-[#E2E8F0]'
-                    : isPaperSketch
-                    ? 'bg-white border-2 border-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b]'
-                    : isTechnical
-                    ? 'bg-[#F8F7F4] dark:bg-[#0D1117] border-[1.5px] border-rose-500/30 dark:border-rose-900/40'
-                    : isWinamp
-                    ? 'bg-black border border-rose-500 text-rose-400'
-                    : isDark
-                    ? 'bg-[#161616] border-rose-900/40 text-slate-100'
-                    : 'bg-rose-50/40 border-rose-200 text-slate-900'
-            }`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="space-y-0.5">
-                        <h4 className="text-xs sm:text-sm font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-wide flex items-center gap-1.5">
-                            <Trash2 className="w-4 h-4" />
-                            <span>Permintaan Hapus Akun Pengguna</span>
-                        </h4>
-                        <p className="text-xs opacity-75">
-                            Kirim permintaan hapus akun pengguna ke admin
-                        </p>
-                    </div>
+            {/* 5. PALING BAWAH: Permintaan Hapus Akun Pengguna (Hanya untuk non-admin) */}
+            {localStorage.getItem('jadwalpriok_current_user_role') !== 'admin' && (
+                <div className={`p-4 rounded-xl border space-y-3 ${
+                    isIndustrial
+                        ? 'bg-[#0F1115] border-rose-500/20 text-[#E2E8F0]'
+                        : isPaperSketch
+                        ? 'bg-white border-2 border-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b]'
+                        : isTechnical
+                        ? 'bg-[#F8F7F4] dark:bg-[#0D1117] border-[1.5px] border-rose-500/30 dark:border-rose-900/40'
+                        : isWinamp
+                        ? 'bg-black border border-rose-500 text-rose-400'
+                        : isDark
+                        ? 'bg-[#161616] border-rose-900/40 text-slate-100'
+                        : 'bg-rose-50/40 border-rose-200 text-slate-900'
+                }`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="space-y-0.5">
+                            <h4 className="text-xs sm:text-sm font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-wide flex items-center gap-1.5">
+                                <Trash2 className="w-4 h-4" />
+                                <span>Permintaan Hapus Akun Pengguna</span>
+                            </h4>
+                            <p className="text-xs opacity-75">
+                                Kirim permintaan hapus akun pengguna ke admin
+                            </p>
+                        </div>
 
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setDeleteConfirmInput('');
-                            setIsDeleteModalOpen(true);
-                        }}
-                        className="px-3.5 py-2 text-xs font-bold rounded-lg border border-rose-500/50 bg-rose-600 hover:bg-rose-700 text-white cursor-pointer shadow-xs transition-all active:scale-95 flex items-center gap-1.5 self-start sm:self-center"
-                    >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Kirim Permintaan Hapus</span>
-                    </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setDeleteConfirmInput('');
+                                setIsDeleteModalOpen(true);
+                            }}
+                            className="px-3.5 py-2 text-xs font-bold rounded-lg border border-rose-500/50 bg-rose-600 hover:bg-rose-700 text-white cursor-pointer shadow-xs transition-all active:scale-95 flex items-center gap-1.5 self-start sm:self-center"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Kirim Permintaan Hapus</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* MODAL KONFIRMASI HAPUS AKUN */}
             {isDeleteModalOpen && (

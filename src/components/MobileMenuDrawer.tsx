@@ -15,7 +15,7 @@ interface MobileMenuDrawerProps {
     isAdmin?: boolean;
     userName?: string;
     userNip?: string;
-    userRole?: 'admin' | 'end-user';
+    userRole?: 'admin' | 'end-user' | 'non-user';
 }
 
 export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({

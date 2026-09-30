@@ -50,7 +50,7 @@ interface DesktopSidebarProps {
     isAdmin?: boolean;
     userName?: string;
     userNip?: string;
-    userRole?: 'admin' | 'end-user';
+    userRole?: 'admin' | 'end-user' | 'non-user';
 }
 
 export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({

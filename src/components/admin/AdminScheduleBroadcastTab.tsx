@@ -187,23 +187,46 @@ function resolveShiftFromCell(
     rawText: string,
     colorHex?: string | null,
     customMap?: Record<string, ShiftType | ''>
-): ShiftType {
+): ShiftType | '' {
     const textClean = (rawText || '').trim().toUpperCase();
 
-    // 1. Check custom user map first (text keys like "TEXT_P", "TEXT_OFF", etc.)
-    if (customMap) {
-        if (textClean && customMap[`TEXT_${textClean}`] !== undefined) {
-            const mapped = customMap[`TEXT_${textClean}`];
-            if (mapped) return mapped as ShiftType;
-        }
-        if (colorHex && customMap[colorHex.toLowerCase()] !== undefined) {
-            const mapped = customMap[colorHex.toLowerCase()];
-            if (mapped) return mapped as ShiftType;
-        }
+    // Deteksi tipe data sesuai spesifikasi:
+    // Nama: Karakter lebih dari 5
+    // NIP: berupa angka 18 digit
+    // Shift: 1-5 karakter
+    const isNip = /^\d{18}$/.test(textClean);
+    const isNama = textClean.length > 5;
+    const isShiftText = textClean.length >= 1 && textClean.length <= 5;
+
+    // Jika berupa Nama atau NIP (bukan shift), abaikan dan kembalikan kosong!
+    if (isNama || isNip) {
+        return '';
     }
 
-    // 2. Check system defaults
-    if (textClean) {
+    const normalizedColorKey = colorHex ? colorHex.trim().toLowerCase() : null;
+    const hasRealColor = normalizedColorKey && 
+                         normalizedColorKey !== '#ffffff' && 
+                         normalizedColorKey !== '#fff' && 
+                         normalizedColorKey !== 'transparent';
+
+    // 1. PRIORITAS UTAMA: Jika sel memiliki warna latar riil, gunakan aturan warna kustom
+    if (hasRealColor && customMap && customMap[normalizedColorKey] !== undefined) {
+        return customMap[normalizedColorKey];
+    }
+
+    // 2. Jika warna latar riil tidak diatur kustom, cek sistem default dari warna tersebut
+    if (hasRealColor) {
+        const mappedFromColor = SYSTEM_DEFAULT_EXCEL_MAP[normalizedColorKey];
+        if (mappedFromColor) return mappedFromColor;
+    }
+
+    // 3. PRIORITAS KEDUA: Cek aturan pemetaan teks kustom (misal TEXT_P, TEXT_O, dll)
+    if (isShiftText && customMap && customMap[`TEXT_${textClean}`] !== undefined) {
+        return customMap[`TEXT_${textClean}`];
+    }
+
+    // 4. Jika teks kustom tidak diatur, cek sistem default teks
+    if (isShiftText) {
         if (EXCEL_SHIFT_MAPPING[textClean]) return EXCEL_SHIFT_MAPPING[textClean];
         if (SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_${textClean}`]) return SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_${textClean}`];
         if (textClean === 'P' || textClean === 'PAGI' || textClean === '1' || textClean === 'DS') return 'Graha';
@@ -218,13 +241,120 @@ function resolveShiftFromCell(
         if (textClean === 'NPCT' || textClean === 'N') return 'NPCT';
     }
 
-    if (colorHex) {
-        const mappedFromColor = SYSTEM_DEFAULT_EXCEL_MAP[colorHex.toLowerCase()];
-        if (mappedFromColor) return mappedFromColor;
+    // 5. Cadangan terakhir jika tidak ada warna riil, tapi warna putih/default terdaftar di customMap
+    if (normalizedColorKey && customMap && customMap[normalizedColorKey] !== undefined) {
+        return customMap[normalizedColorKey];
     }
 
-    return textClean ? 'Graha' : '';
+    // Hanya jika benar-benar merupakan format teks shift yang valid (1-5 karakter) barulah jatuh ke default 'Graha'
+    return isShiftText ? 'Graha' : '';
 }
+
+import { Checkbox } from '../ui/Checkbox';
+
+const GridCell = React.memo(({
+    rIdx,
+    cIdx,
+    cell,
+    isFocused,
+    onSelect,
+    onChange
+}: {
+    rIdx: number;
+    cIdx: number;
+    cell: BroadcastGridCell;
+    isFocused: boolean;
+    onSelect: (r: number, c: number) => void;
+    onChange: (r: number, c: number, value: string) => void;
+}) => {
+    const cellVal = cell.value || '';
+    const customStyle: React.CSSProperties = {};
+    if (cell.bgColor) {
+        customStyle.backgroundColor = cell.bgColor;
+    }
+    if (cell.textColor) {
+        customStyle.color = cell.textColor;
+    }
+
+    return (
+        <td
+            onClick={() => onSelect(rIdx, cIdx)}
+            style={customStyle}
+            className={`p-0 border border-current/15 text-center transition-all cursor-cell ${
+                isFocused ? 'ring-2 ring-teal-500 z-10 bg-teal-500/10' : ''
+            } font-bold w-14 min-w-[56px] h-7`}
+        >
+            {isFocused ? (
+                <input
+                    type="text"
+                    autoFocus
+                    value={cellVal}
+                    onChange={(e) => onChange(rIdx, cIdx, e.target.value)}
+                    style={{ color: cell.textColor || undefined }}
+                    className="w-full h-full text-center bg-transparent outline-none font-mono text-xs px-0.5 animate-none"
+                />
+            ) : (
+                <span style={{ color: cell.textColor || undefined }} className="font-mono text-xs select-none">
+                    {cellVal}
+                </span>
+            )}
+        </td>
+    );
+}, (prevProps, nextProps) => {
+    return (
+        prevProps.isFocused === nextProps.isFocused &&
+        prevProps.cell.value === nextProps.cell.value &&
+        prevProps.cell.bgColor === nextProps.cell.bgColor &&
+        prevProps.cell.textColor === nextProps.cell.textColor &&
+        prevProps.onSelect === nextProps.onSelect &&
+        prevProps.onChange === nextProps.onChange
+    );
+});
+
+const GridRow = React.memo(({
+    rIdx,
+    rowCells,
+    selectedCol,
+    onSelect,
+    onChange
+}: {
+    rIdx: number;
+    rowCells: BroadcastGridCell[];
+    selectedCol: number | null;
+    onSelect: (r: number, c: number) => void;
+    onChange: (r: number, c: number, value: string) => void;
+}) => {
+    return (
+        <tr className="hover:bg-current/5 transition-colors">
+            {/* Sticky Row Number 1-150 */}
+            <td className="sticky left-0 z-10 p-1 border border-current/20 bg-slate-200/80 dark:bg-slate-800/80 text-center font-bold text-[10.5px] opacity-75">
+                {rIdx + 1}
+            </td>
+            {rowCells.map((cell, cIdx) => {
+                const isFocused = selectedCol === cIdx;
+                return (
+                    <GridCell
+                        key={cIdx}
+                        rIdx={rIdx}
+                        cIdx={cIdx}
+                        cell={cell}
+                        isFocused={isFocused}
+                        onSelect={onSelect}
+                        onChange={onChange}
+                    />
+                );
+            })}
+        </tr>
+    );
+}, (prevProps, nextProps) => {
+    return (
+        prevProps.rIdx === nextProps.rIdx &&
+        prevProps.selectedCol === nextProps.selectedCol &&
+        prevProps.rowCells === nextProps.rowCells &&
+        prevProps.onSelect === nextProps.onSelect &&
+        prevProps.onChange === nextProps.onChange
+    );
+});
 
 export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps> = ({
     users,
@@ -322,7 +452,7 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
     }, [refreshRandomUsers]);
 
     // Cell value updater
-    const handleCellChange = (r: number, c: number, value: string) => {
+    const handleCellChange = useCallback((r: number, c: number, value: string) => {
         setGridData((prev) => {
             const next = prev.map((row, rIdx) => {
                 if (rIdx !== r) return row;
@@ -332,7 +462,11 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
             });
             return next;
         });
-    };
+    }, []);
+
+    const handleSelectCell = useCallback((r: number, c: number) => {
+        setSelectedCell({ r, c });
+    }, []);
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -432,9 +566,11 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
 
                     // Parse text or map custom color
                     let cellVal = pCell.value || '';
-                    if (!cellVal && pCell.bgColor) {
-                        const shift = resolveShiftFromCell('', pCell.bgColor, customColorMap);
-                        if (shift) cellVal = shift;
+                    if (targetC >= 2) {
+                        if (!cellVal && pCell.bgColor) {
+                            const shift = resolveShiftFromCell('', pCell.bgColor, customColorMap);
+                            if (shift) cellVal = shift;
+                        }
                     }
 
                     next[targetR][targetC] = {
@@ -448,6 +584,84 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
         });
 
         onShowToast(`Berhasil menempel data Excel (${matrix.length} baris × ${matrix[0]?.length || 0} kolom).`);
+    }, [selectedCell, customColorMap, onShowToast]);
+
+    // Direct Click Paste Handler (using navigator.clipboard for click event copy-paste from Excel)
+    const handleDirectPasteFromClipboard = useCallback(async () => {
+        if (typeof navigator === 'undefined' || !navigator.clipboard) {
+            onShowToast('Akses clipboard tidak didukung oleh browser Anda.');
+            return;
+        }
+        try {
+            const startR = selectedCell.r;
+            const startC = selectedCell.c;
+            let matrix: { value: string; bgColor: string | null; textColor: string | null }[][] = [];
+
+            if (navigator.clipboard.read) {
+                const items = await navigator.clipboard.read();
+                for (const item of items) {
+                    if (item.types.includes('text/html')) {
+                        const blob = await item.getType('text/html');
+                        const htmlText = await blob.text();
+                        if (htmlText) {
+                            matrix = parseExcelHtmlTo2DCells(htmlText);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (matrix.length === 0 && navigator.clipboard.readText) {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    const lines = text.split(/\r\n|\n|\r/);
+                    lines.forEach((line) => {
+                        if (line.trim().length === 0) return;
+                        const cells = line.split('\t');
+                        matrix.push(cells.map((c) => ({ value: c.trim(), bgColor: null, textColor: null })));
+                    });
+                }
+            }
+
+            if (matrix.length === 0) {
+                onShowToast('Clipboard kosong atau tidak berisi format tabel Excel yang valid.');
+                return;
+            }
+
+            // Apply pasted matrix to grid starting at selectedCell
+            setGridData((prev) => {
+                const next = prev.map((row) => [...row]);
+                matrix.forEach((pRow, rIdx) => {
+                    const targetR = startR + rIdx;
+                    if (targetR >= TOTAL_GRID_ROWS) return;
+                    pRow.forEach((pCell, cIdx) => {
+                        const targetC = startC + cIdx;
+                        if (targetC >= TOTAL_GRID_COLS) return;
+
+                        // Parse text or map custom color
+                        let cellVal = pCell.value || '';
+                        if (targetC >= 2) {
+                            if (!cellVal && pCell.bgColor) {
+                                const shift = resolveShiftFromCell('', pCell.bgColor, customColorMap);
+                                if (shift) cellVal = shift;
+                            }
+                        }
+
+                        next[targetR][targetC] = {
+                            value: cellVal,
+                            bgColor: pCell.bgColor ? pCell.bgColor : null,
+                            textColor: pCell.textColor ? pCell.textColor : null,
+                        };
+                    });
+                });
+                return next;
+            });
+
+            onShowToast(`Berhasil menempel data Excel (${matrix.length} baris × ${matrix[0]?.length || 0} kolom).`);
+        } catch (err) {
+            console.warn('Gagal membaca clipboard langsung:', err);
+            onShowToast('Harap berikan izin akses clipboard jika diminta oleh sistem browser Anda.');
+        }
     }, [selectedCell, customColorMap, onShowToast]);
 
     // Global Paste Listener for higher sensitivity and instant capture
@@ -642,11 +856,21 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                 const text = (cell.value || '').trim();
                 const textClean = text.toUpperCase();
 
-                // Abaikan jika isinya murni angka panjang (NIP) atau berisi spasi nama lengkap
-                if (/^\d{10,}$/.test(textClean)) return;
-                if (textClean.split(/\s+/).length > 1 && textClean.length > 5) return;
+                // Deteksi tipe data sesuai spesifikasi:
+                // Nama: Karakter lebih dari 5
+                // NIP: berupa angka 18 digit
+                // Shift: 1-5 karakter
+                const isNip = /^\d{18}$/.test(textClean);
+                const isNama = textClean.length > 5;
+                const isShiftText = textClean.length >= 1 && textClean.length <= 5;
 
-                if (bg) {
+                // Jika berupa Nama atau NIP (bukan shift), abaikan dan jangan masukkan ke pemetaan
+                if (isNama || isNip) return;
+                if (!isShiftText && !bg) return;
+
+                const hasRealColor = bg && bg !== '#ffffff' && bg !== '#fff' && bg !== 'transparent';
+
+                if (hasRealColor) {
                     const colorKey = bg;
                     const existing = map.get(colorKey);
                     if (existing) {
@@ -663,7 +887,7 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                             displayColor: bg,
                         });
                     }
-                } else if (textClean) {
+                } else if (textClean && isShiftText) {
                     const colorKey = `TEXT_${textClean}`;
                     const existing = map.get(colorKey);
                     if (existing) {
@@ -802,6 +1026,16 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                         >
                             <Upload className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                             <span>Impor dari File Langsung</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleDirectPasteFromClipboard}
+                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-current/20 hover:bg-current/10 cursor-pointer flex items-center gap-1.5"
+                            title="Tempel tabel Excel berserta format warnanya langsung dari clipboard (Ctrl+V)"
+                        >
+                            <ClipboardPaste className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                            <span>Tempel Excel (Clipboard)</span>
                         </button>
 
                         <button
@@ -1012,56 +1246,19 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                             </tr>
                         </thead>
                         <tbody>
-                            {/* Render first 40 rows immediately, scrolling renders the rest up to 150 */}
-                            {Array.from({ length: TOTAL_GRID_ROWS }).map((_, rIdx) => (
-                                <tr key={rIdx} className="hover:bg-current/5 transition-colors">
-                                    {/* Sticky Row Number 1-150 */}
-                                    <td className="sticky left-0 z-10 p-1 border border-current/20 bg-slate-200/80 dark:bg-slate-800/80 text-center font-bold text-[10.5px] opacity-75">
-                                        {rIdx + 1}
-                                    </td>
-                                    {/* Grid Cells with Excel Styling Preservation */}
-                                    {Array.from({ length: TOTAL_GRID_COLS }).map((_, cIdx) => {
-                                        const cell = gridData[rIdx][cIdx] || { value: '', bgColor: null, textColor: null };
-                                        const cellVal = cell.value || '';
-                                        const isFocused = selectedCell.r === rIdx && selectedCell.c === cIdx;
-
-                                        // Apply background/text colors pasted directly from Excel if available
-                                        const customStyle: React.CSSProperties = {};
-                                        if (cell.bgColor) {
-                                            customStyle.backgroundColor = cell.bgColor;
-                                        }
-                                        if (cell.textColor) {
-                                            customStyle.color = cell.textColor;
-                                        }
-
-                                        return (
-                                            <td
-                                                key={cIdx}
-                                                onClick={() => setSelectedCell({ r: rIdx, c: cIdx })}
-                                                style={customStyle}
-                                                className={`p-0 border border-current/15 text-center transition-all cursor-cell ${
-                                                    isFocused ? 'ring-2 ring-teal-500 z-10 bg-teal-500/10' : ''
-                                                } font-bold w-14 min-w-[56px] h-7`}
-                                            >
-                                                {isFocused ? (
-                                                    <input
-                                                        type="text"
-                                                        autoFocus
-                                                        value={cellVal}
-                                                        onChange={(e) => handleCellChange(rIdx, cIdx, e.target.value)}
-                                                        style={{ color: cell.textColor || undefined }}
-                                                        className="w-full h-full text-center bg-transparent outline-none font-mono text-xs px-0.5"
-                                                    />
-                                                ) : (
-                                                    <span style={{ color: cell.textColor || undefined }} className="font-mono text-xs select-none">
-                                                        {cellVal}
-                                                    </span>
-                                                )}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                            ))}
+                            {gridData.map((rowCells, rIdx) => {
+                                const selectedCol = selectedCell.r === rIdx ? selectedCell.c : null;
+                                return (
+                                    <GridRow
+                                        key={rIdx}
+                                        rIdx={rIdx}
+                                        rowCells={rowCells}
+                                        selectedCol={selectedCol}
+                                        onSelect={handleSelectCell}
+                                        onChange={handleCellChange}
+                                    />
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -1146,7 +1343,8 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
 
                                         {/* Shift Badges per Tanggal */}
                                         {Array.from({ length: daysInSelectedMonth }).map((_, dIdx) => {
-                                            const cell = userGridRow[dIdx] || { value: '', bgColor: null, textColor: null };
+                                            // Kolom 1 (indeks 0) adalah Nama, Kolom 2 (indeks 1) adalah NIP. Jadwal hari pertama dimulai dari Kolom 3 (indeks 2).
+                                            const cell = userGridRow[dIdx + 2] || { value: '', bgColor: null, textColor: null };
                                             const cellVal = cell.value || '';
                                             const shiftResolved = resolveShiftFromCell(cellVal, cell.bgColor, customColorMap);
                                             const color = shiftResolved ? SHIFT_COLORS[shiftResolved] : null;
@@ -1238,18 +1436,13 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
 
                 {/* Bulk Checkbox Toggle Header */}
                 <div className="flex items-center justify-between pt-2 border-t border-current/10">
-                    <button
-                        type="button"
-                        onClick={() => toggleSelectAll(!allSelected)}
-                        className="flex items-center space-x-2 text-xs font-bold hover:opacity-80 cursor-pointer"
-                    >
-                        {allSelected ? (
-                            <CheckSquare className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                        ) : (
-                            <Square className="w-4 h-4 opacity-60" />
-                        )}
-                        <span>Pilih Semua Target yang Tampil ({filteredTargets.length})</span>
-                    </button>
+                    <Checkbox
+                        id="bulk-toggle-targets"
+                        theme={theme}
+                        checked={allSelected}
+                        onChange={() => toggleSelectAll(!allSelected)}
+                        label={`Pilih Semua Target yang Tampil (${filteredTargets.length})`}
+                    />
 
                     <span className="text-xs opacity-75 font-mono">
                         Terpilih: <strong>{selectedCount}</strong> dari {targets.length} personel
@@ -1274,18 +1467,19 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                             target.selected
                                 ? isIndustrial
                                     ? 'bg-[#1A1D23] border-teal-400/50'
-                                    : 'bg-teal-50/50 dark:bg-teal-950/20 border-teal-300/60 dark:border-teal-700/60'
-                                : 'bg-current/5 border-current/10 opacity-70'
-                        }`}
-                    >
-                        <div className="flex items-center space-x-3 min-w-0">
-                            <div className="shrink-0">
-                                {target.selected ? (
-                                    <CheckSquare className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                                ) : (
-                                    <Square className="w-4 h-4 opacity-50" />
-                                )}
-                            </div>
+                                        : 'bg-teal-50/50 dark:bg-teal-950/20 border-teal-300/60 dark:border-teal-700/60'
+                                    : 'bg-current/5 border-current/10 opacity-70'
+                            }`}
+                        >
+                            <div className="flex items-center space-x-3 min-w-0">
+                                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                                    <Checkbox
+                                        id={`target-select-${target.userId}`}
+                                        theme={theme}
+                                        checked={target.selected}
+                                        onChange={() => toggleTarget(target.userId)}
+                                    />
+                                </div>
 
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">

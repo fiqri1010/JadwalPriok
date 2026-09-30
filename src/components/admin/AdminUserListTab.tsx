@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     Users,
     UserPlus,
@@ -20,6 +20,15 @@ import {
 } from 'lucide-react';
 import { UserAccount, AuthorityProfile, UserRole } from '../../types/admin';
 import { AppTheme } from '../../types';
+import { Checkbox } from '../ui/Checkbox';
+
+export const POSKO_OPTIONS = [
+    'Posko Graha Lt. 1',
+    'Posko Graha Ground',
+    'Posko CDC',
+    'Posko NPCT',
+    'Posko Koja',
+];
 
 interface AdminUserListTabProps {
     users: UserAccount[];
@@ -45,6 +54,18 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState<'all' | UserRole | 'external'>('all');
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+    const [poskoFilter, setPoskoFilter] = useState<'all' | string>('all');
+
+    // Kumpulkan daftar penugasan Posko unik dari seluruh pengguna secara dinamis
+    const uniquePoskoList = useMemo(() => {
+        const set = new Set<string>();
+        users.forEach((u) => {
+            if (u.unitPosko && u.unitPosko.trim()) {
+                set.add(u.unitPosko.trim());
+            }
+        });
+        return Array.from(set).sort();
+    }, [users]);
 
     // Modals
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -55,7 +76,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     // Form state for Add/Edit
     const [formNip, setFormNip] = useState('');
     const [formName, setFormName] = useState('');
-    const [formUnit, setFormUnit] = useState('Posko Pelayanan Graha Lantai 2');
+    const [formUnit, setFormUnit] = useState('Posko Graha Lt. 1');
     const [formProfileId, setFormProfileId] = useState(authorityProfiles[0]?.id || 'prof-petugas-posko');
     const [formSquad, setFormSquad] = useState<'Regu A' | 'Regu B' | 'Regu C' | 'Regu D' | 'Non-Regu'>('Regu A');
     const [formIsExternal, setFormIsExternal] = useState(false);
@@ -64,7 +85,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     const openAddModal = () => {
         setFormNip('');
         setFormName('');
-        setFormUnit('Posko Pelayanan Graha Lantai 2');
+        setFormUnit('Posko Graha Lt. 1');
         setFormProfileId(authorityProfiles.find(p => p.roleType === 'end-user')?.id || authorityProfiles[0]?.id || '');
         setFormSquad('Regu A');
         setFormIsExternal(false);
@@ -123,6 +144,9 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
         }
 
         const selectedProfile = authorityProfiles.find((p) => p.id === formProfileId) || authorityProfiles[0];
+        const isSuperAdmin = editingUser.authorityProfileId === 'prof-superadmin' || editingUser.nip === '199510102015121002';
+        const finalActive = isSuperAdmin ? true : formIsActive;
+
         const updated = users.map((u) => {
             if (u.id === editingUser.id) {
                 return {
@@ -134,7 +158,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                     authorityName: selectedProfile?.name || u.authorityName,
                     assignedSquad: formSquad,
                     isExternalNonAppUser: formIsExternal,
-                    isActive: formIsActive,
+                    isActive: finalActive,
                 };
             }
             return u;
@@ -147,6 +171,11 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
 
     // Toggle Aktif via Checkbox
     const handleToggleCheckbox = (user: UserAccount) => {
+        const isSuperAdmin = user.authorityProfileId === 'prof-superadmin' || user.nip === '199510102015121002';
+        if (isSuperAdmin) {
+            onShowToast('Akun Utama Super Admin tidak dapat dinonaktifkan.');
+            return;
+        }
         const nextState = !user.isActive;
         const updated = users.map((u) => (u.id === user.id ? { ...u, isActive: nextState } : u));
         onUpdateUsers(updated);
@@ -196,7 +225,10 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
         if (statusFilter === 'active') matchesStatus = u.isActive;
         else if (statusFilter === 'inactive') matchesStatus = !u.isActive;
 
-        return matchesSearch && matchesRole && matchesStatus;
+        let matchesPosko = true;
+        if (poskoFilter !== 'all') matchesPosko = u.unitPosko === poskoFilter;
+
+        return matchesSearch && matchesRole && matchesStatus && matchesPosko;
     });
 
     return (
@@ -256,7 +288,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
                     <div className="flex items-center gap-1 text-xs shrink-0">
                         <Filter className="w-3.5 h-3.5 opacity-60" />
-                        <span className="opacity-70 font-medium">Otoritas:</span>
+                        <span className="opacity-70 font-medium">Role:</span>
                         <select
                             value={roleFilter}
                             onChange={(e) => setRoleFilter(e.target.value as any)}
@@ -281,6 +313,22 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                             <option value="inactive">Nonaktif</option>
                         </select>
                     </div>
+
+                    <div className="flex items-center gap-1 text-xs shrink-0">
+                        <span className="opacity-70 font-medium">Posko:</span>
+                        <select
+                            value={poskoFilter}
+                            onChange={(e) => setPoskoFilter(e.target.value)}
+                            className="text-xs p-1.5 rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer max-w-[150px] truncate"
+                        >
+                            <option value="all">Semua Posko</option>
+                            {uniquePoskoList.map((p) => (
+                                <option key={p} value={p}>
+                                    {p}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -294,18 +342,18 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                     ? 'bg-[#161616] border-slate-800'
                     : 'bg-white border-slate-200'
             }`}>
-                <div className="overflow-x-auto select-none no-scrollbar">
+                <div className="overflow-x-auto select-none no-scrollbar max-h-[340px] overflow-y-auto">
                     <table className="w-full border-collapse text-xs">
                         <thead>
-                            <tr className="bg-current/5 border-b border-current/15 text-left font-bold text-[11px] uppercase tracking-wider">
-                                <th className="p-3 text-center w-12 min-w-[48px]">No.</th>
-                                <th className="p-3 min-w-[200px]">Nama</th>
-                                <th className="p-3 min-w-[150px]">NIP</th>
-                                <th className="p-3 min-w-[180px]">Posko</th>
-                                <th className="p-3 text-center min-w-[110px]">Aktif</th>
-                                <th className="p-3 text-center min-w-[120px]">Reset Pass</th>
-                                <th className="p-3 text-center min-w-[90px]">Edit</th>
-                                <th className="p-3 text-center min-w-[90px]">Hapus</th>
+                            <tr className="bg-current/5 border-b border-current/15 text-left font-bold text-[10.5px] uppercase tracking-wider sticky top-0 bg-slate-200/90 dark:bg-[#161616]/95 backdrop-blur-xs z-10">
+                                <th className="py-2 px-2.5 text-center w-10 min-w-[36px]">No.</th>
+                                <th className="py-2 px-2.5 min-w-[160px]">Nama</th>
+                                <th className="py-2 px-2.5 min-w-[110px]">NIP</th>
+                                <th className="py-2 px-2.5 min-w-[140px]">Posko</th>
+                                <th className="py-2 px-2.5 text-center min-w-[85px]">Aktif</th>
+                                <th className="py-2 px-2.5 text-center min-w-[100px]">Reset Pass</th>
+                                <th className="py-2 px-2.5 text-center min-w-[70px]">Edit</th>
+                                <th className="py-2 px-2.5 text-center min-w-[70px]">Hapus</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-current/10 font-sans">
@@ -320,18 +368,18 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                         }`}
                                     >
                                         {/* 1. No. */}
-                                        <td className="p-3 text-center font-mono font-bold opacity-70">
+                                        <td className="py-2 px-2.5 text-center font-mono font-bold opacity-70">
                                             {idx + 1}
                                         </td>
 
                                         {/* 2. Nama */}
-                                        <td className="p-3 font-bold">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="truncate">{u.name}</span>
+                                        <td className="py-2 px-2.5 font-bold">
+                                            <div className="truncate text-xs font-extrabold">{u.name}</div>
+                                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                                                 <span className={`text-[9.5px] font-mono px-1.5 py-0.5 rounded font-bold uppercase border ${
                                                     prof?.badgeColor || (u.role === 'admin' ? 'bg-teal-500/15 text-teal-600 border-teal-500/30' : 'bg-slate-500/15 text-slate-600 border-slate-500/30')
                                                 }`}>
-                                                    {u.authorityName || (u.role === 'admin' ? 'ADMIN' : 'END-USER')}
+                                                    {prof?.name || u.authorityName || (u.role === 'admin' ? 'ADMIN' : 'END-USER')}
                                                 </span>
                                                 {u.isExternalNonAppUser && (
                                                     <span className="text-[9.5px] font-mono px-1.5 py-0.5 rounded font-bold bg-indigo-500/15 text-indigo-600 border border-indigo-500/30">
@@ -342,12 +390,12 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                         </td>
 
                                         {/* 3. NIP */}
-                                        <td className="p-3 font-mono font-bold opacity-85 tracking-wide">
+                                        <td className="py-2 px-2.5 font-mono font-bold opacity-85 tracking-wide">
                                             {u.nip}
                                         </td>
 
                                         {/* 4. Posko */}
-                                        <td className="p-3 opacity-80">
+                                        <td className="py-2 px-2.5 opacity-80">
                                             <div className="flex items-center gap-1.5">
                                                 <Building2 className="w-3.5 h-3.5 opacity-60 shrink-0" />
                                                 <span className="truncate">{u.unitPosko}</span>
@@ -355,59 +403,65 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                         </td>
 
                                         {/* 5. Checkbox Aktif (Untuk mengaktifkan akun) */}
-                                        <td className="p-3 text-center">
-                                            <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={u.isActive}
-                                                    onChange={() => handleToggleCheckbox(u)}
-                                                    className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
-                                                />
-                                                <span className={`text-[11px] font-bold ${
-                                                    u.isActive ? 'text-emerald-600 dark:text-emerald-400' : 'opacity-50'
-                                                }`}>
-                                                    {u.isActive ? 'Aktif' : 'Nonaktif'}
-                                                </span>
-                                            </label>
+                                        <td className="py-2 px-2.5 text-center">
+                                            <Checkbox
+                                                id={`status-chk-${u.id}`}
+                                                theme={theme}
+                                                size="12px"
+                                                checked={u.isActive}
+                                                disabled={u.authorityProfileId === 'prof-superadmin' || u.nip === '199510102015121002'}
+                                                onChange={() => handleToggleCheckbox(u)}
+                                                label={
+                                                    <span className={`text-[10px] font-bold ${
+                                                        u.isActive ? 'text-emerald-600 dark:text-emerald-400' : 'opacity-50'
+                                                    }`}>
+                                                        {u.isActive ? 'Aktif' : 'Nonaktif'}
+                                                    </span>
+                                                }
+                                            />
                                         </td>
 
                                         {/* 6. Tombol Reset Pass */}
-                                        <td className="p-3 text-center">
+                                        <td className="py-2 px-2.5 text-center">
                                             <button
                                                 type="button"
                                                 onClick={() => setResettingUser(u)}
-                                                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 cursor-pointer inline-flex items-center gap-1 transition-all"
+                                                className="px-2 py-0.5 text-[10px] font-bold rounded border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 cursor-pointer inline-flex items-center gap-1 transition-all"
                                                 title="Reset dan kosongkan password akun ini"
                                             >
-                                                <KeyRound className="w-3.5 h-3.5" />
+                                                <KeyRound className="w-3 h-3" />
                                                 <span>Reset Pass</span>
                                             </button>
                                         </td>
 
                                         {/* 7. Tombol Edit */}
-                                        <td className="p-3 text-center">
+                                        <td className="py-2 px-2.5 text-center">
                                             <button
                                                 type="button"
                                                 onClick={() => openEditModal(u)}
-                                                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-current/20 hover:bg-current/10 cursor-pointer inline-flex items-center gap-1 transition-all"
+                                                className="px-2 py-0.5 text-[10px] font-bold rounded border border-current/20 hover:bg-current/10 cursor-pointer inline-flex items-center gap-1 transition-all"
                                                 title="Edit Akun Pengguna"
                                             >
-                                                <Edit3 className="w-3.5 h-3.5 text-teal-600" />
+                                                <Edit3 className="w-3 h-3 text-teal-600" />
                                                 <span>Edit</span>
                                             </button>
                                         </td>
 
                                         {/* 8. Tombol Hapus */}
-                                        <td className="p-3 text-center">
-                                            <button
-                                                type="button"
-                                                onClick={() => setDeletingUser(u)}
-                                                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-rose-500/40 text-rose-600 hover:bg-rose-500/10 cursor-pointer inline-flex items-center gap-1 transition-all"
-                                                title="Hapus Akun Pengguna"
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                                <span>Hapus</span>
-                                            </button>
+                                        <td className="py-2 px-2.5 text-center">
+                                            {u.authorityProfileId === 'prof-superadmin' || u.nip === '199510102015121002' ? (
+                                                <span className="text-[10px] opacity-50 select-none font-bold">Admin Utama</span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDeletingUser(u)}
+                                                    className="px-2 py-0.5 text-[10px] font-bold rounded border border-rose-500/40 text-rose-600 hover:bg-rose-500/10 cursor-pointer inline-flex items-center gap-1 transition-all"
+                                                    title="Hapus Akun Pengguna"
+                                                >
+                                                    <Trash2 className="w-3 h-3" />
+                                                    <span>Hapus</span>
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 );
@@ -583,17 +637,21 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
 
                             <div>
                                 <label className="text-xs font-bold block mb-1">Unit Penugasan Posko:</label>
-                                <input
-                                    type="text"
+                                <select
                                     value={formUnit}
                                     onChange={(e) => setFormUnit(e.target.value)}
-                                    placeholder="Contoh: Posko Pelayanan Graha Lantai 2"
-                                    className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 outline-none focus:border-teal-500"
-                                />
+                                    className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer focus:border-teal-500"
+                                >
+                                    {POSKO_OPTIONS.map((p) => (
+                                        <option key={p} value={p}>
+                                            {p}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div>
-                                <label className="text-xs font-bold block mb-1">Profil Hak Akses & Otoritas:</label>
+                                <label className="text-xs font-bold block mb-1">Role Otoritas:</label>
                                 <select
                                     value={formProfileId}
                                     onChange={(e) => setFormProfileId(e.target.value)}
@@ -607,26 +665,22 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 </select>
                             </div>
 
-                            <div className="p-3 rounded-xl bg-current/5 border border-current/10 space-y-2">
-                                <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={formIsActive}
-                                        onChange={(e) => setFormIsActive(e.target.checked)}
-                                        className="rounded text-teal-600 focus:ring-teal-500"
-                                    />
-                                    <span>Akun Langsung Aktif</span>
-                                </label>
+                            <div className="p-3 rounded-xl bg-current/5 border border-current/10 space-y-2 flex flex-col gap-1.5">
+                                <Checkbox
+                                    id="add-user-form-active"
+                                    theme={theme}
+                                    checked={formIsActive}
+                                    onChange={(e) => setFormIsActive(e.target.checked)}
+                                    label="Akun Langsung Aktif"
+                                />
 
-                                <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={formIsExternal}
-                                        onChange={(e) => setFormIsExternal(e.target.checked)}
-                                        className="rounded text-indigo-600 focus:ring-indigo-500"
-                                    />
-                                    <span>Petugas Posko Luar (Data jadwal disalin terpusat untuk statistik)</span>
-                                </label>
+                                <Checkbox
+                                    id="add-user-form-external"
+                                    theme={theme}
+                                    checked={formIsExternal}
+                                    onChange={(e) => setFormIsExternal(e.target.checked)}
+                                    label="Petugas Posko Luar (Data jadwal disalin terpusat untuk statistik)"
+                                />
                             </div>
 
                             <div className="flex items-center justify-end space-x-2 pt-2 border-t border-current/10">
@@ -705,16 +759,21 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
 
                             <div>
                                 <label className="text-xs font-bold block mb-1">Unit Penugasan Posko:</label>
-                                <input
-                                    type="text"
+                                <select
                                     value={formUnit}
                                     onChange={(e) => setFormUnit(e.target.value)}
-                                    className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 outline-none focus:border-teal-500"
-                                />
+                                    className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer focus:border-teal-500"
+                                >
+                                    {(POSKO_OPTIONS.includes(formUnit) ? POSKO_OPTIONS : [formUnit, ...POSKO_OPTIONS]).map((p) => (
+                                        <option key={p} value={p}>
+                                            {p}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div>
-                                <label className="text-xs font-bold block mb-1">Profil Hak Akses & Otoritas:</label>
+                                <label className="text-xs font-bold block mb-1">Role Otoritas:</label>
                                 <select
                                     value={formProfileId}
                                     onChange={(e) => setFormProfileId(e.target.value)}
@@ -728,26 +787,23 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 </select>
                             </div>
 
-                            <div className="p-3 rounded-xl bg-current/5 border border-current/10 space-y-2">
-                                <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={formIsActive}
-                                        onChange={(e) => setFormIsActive(e.target.checked)}
-                                        className="rounded text-teal-600 focus:ring-teal-500"
-                                    />
-                                    <span>Status Akun Aktif</span>
-                                </label>
+                            <div className="p-3 rounded-xl bg-current/5 border border-current/10 space-y-2 flex flex-col gap-1.5">
+                                <Checkbox
+                                    id="edit-user-form-active"
+                                    theme={theme}
+                                    checked={formIsActive}
+                                    disabled={editingUser?.authorityProfileId === 'prof-superadmin' || editingUser?.nip === '199510102015121002'}
+                                    onChange={(e) => setFormIsActive(e.target.checked)}
+                                    label="Status Akun Aktif"
+                                />
 
-                                <label className="flex items-center space-x-2 text-xs font-bold cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={formIsExternal}
-                                        onChange={(e) => setFormIsExternal(e.target.checked)}
-                                        className="rounded text-indigo-600 focus:ring-indigo-500"
-                                    />
-                                    <span>Petugas Posko Luar (Non-User)</span>
-                                </label>
+                                <Checkbox
+                                    id="edit-user-form-external"
+                                    theme={theme}
+                                    checked={formIsExternal}
+                                    onChange={(e) => setFormIsExternal(e.target.checked)}
+                                    label="Petugas Posko Luar (Non-User)"
+                                />
                             </div>
 
                             <div className="flex items-center justify-end space-x-2 pt-2 border-t border-current/10">

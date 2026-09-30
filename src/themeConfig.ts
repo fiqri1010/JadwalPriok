@@ -374,7 +374,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             // 2. Top Header / Navbar
             navbarClass: 'sticky top-0 z-50 bg-[#0F1115]/90 backdrop-blur-md text-[#E2E8F0] border-b-[1.5px] border-[rgba(226,232,240,0.1)] shrink-0 font-[\'Inter\']',
             logoContainerClass: 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center bg-[#1A1D23] text-[#2DD4BF] border border-[rgba(226,232,240,0.15)] shrink-0 rounded-none',
-            titleClass: 'text-[8px] sm:text-[9.5px] lg:text-[11px] font-extrabold uppercase tracking-tight text-[#E2E8F0] font-[\'Syne\']',
+            titleClass: 'text-[5.5px] sm:text-[6.5px] lg:text-[7.5px] font-extrabold uppercase tracking-tight text-[#E2E8F0] font-[\'Syne\']',
             versionBadgeClass: 'bg-[#1A1D23] text-[#E2E8F0]/70 border border-[rgba(226,232,240,0.15)] text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-[4px] font-[\'JetBrains_Mono\'] tracking-widest uppercase',
             subtitleClass: 'hidden sm:block text-[10.5px] text-[#E2E8F0]/60 font-[\'JetBrains_Mono\'] tracking-wider uppercase',
             supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#1A1D23] px-2.5 py-1 text-xs border border-[rgba(226,232,240,0.1)] text-[#E2E8F0] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
