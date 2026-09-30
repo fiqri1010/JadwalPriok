@@ -85,26 +85,21 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
     // Check if current user has permission to approve delete account or reset password
     const canViewApprovals = currentRole === 'admin' || currentRole === 'superadmin';
 
-    const pendingApprovalsCount = getApprovalRequests().filter((r) => r.status === 'pending').length;
-
     const subMenus = [
         {
             id: 'users' as AdminSubMenu,
             label: 'Data Akun',
             icon: Users,
-            count: users.length,
         },
         {
             id: 'broadcast' as AdminSubMenu,
             label: 'Impor Jadwal',
             icon: FileSpreadsheet,
-            count: users.length,
         },
         {
             id: 'authorities' as AdminSubMenu,
             label: 'Role',
             icon: Shield,
-            count: profiles.length,
         },
         ...(canViewApprovals
             ? [
@@ -112,8 +107,6 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                       id: 'approvals' as AdminSubMenu,
                       label: 'Persetujuan',
                       icon: ClipboardCheck,
-                      count: pendingApprovalsCount,
-                      badgeAlert: pendingApprovalsCount > 0,
                   },
               ]
             : []),
@@ -135,10 +128,13 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                     ? 'bg-black border-2 border-[#00FF00] text-[#00FF00] font-mono'
                     : isDark
                     ? 'bg-[#1E1E1E] border-slate-800 text-slate-100'
+                    : isDashboard
+                    ? 'bg-[#FFF5D0] border-[#4D2A00]/25 text-[#4D2A00] shadow-sm'
                     : 'bg-white border-slate-200/90 text-slate-900 shadow-sm'
             }`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center space-x-3">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
+                    {/* Sisi Kiri: Judul & Keterangan Dashboard */}
+                    <div className="flex items-center space-x-3 shrink-0">
                         <div className={`p-2 rounded-xl shrink-0 ${
                             isIndustrial
                                 ? 'bg-[#0F1115] text-[#2DD4BF] border border-[#2DD4BF]/40'
@@ -160,119 +156,106 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                             </p>
                         </div>
                     </div>
-                </div>
 
-                {/* Sub-menu Navigation Bar - Menggunakan UI/UX Kotak Pilihan Tab Tersegmen dari Sub-Menu Pengaturan */}
-                <div className="flex justify-center pt-3 sm:pt-3.5 mt-2.5 sm:mt-3 border-t border-current/15 w-full">
-                    <div
-                        className={`relative p-[3px] rounded-[10px] grid ${
-                            subMenus.length === 4
-                                ? 'grid-cols-4 max-w-[540px] sm:max-w-[620px]'
-                                : 'grid-cols-3 max-w-[400px] sm:max-w-[480px]'
-                        } items-center select-none w-full ${
-                            isWinamp
-                                ? 'bg-black border border-zinc-700 rounded-none'
-                                : isDark
-                                ? 'bg-[#161616] border border-slate-800'
-                                : isVista
-                                ? 'bg-sky-100/70 border border-sky-200/80 backdrop-blur-xs'
-                                : isPaperSketch
-                                ? 'bg-[#fdfcf0] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
-                                : isIndustrial
-                                ? 'bg-[#0F1115] border border-[rgba(226,232,240,0.15)] font-["JetBrains_Mono"]'
-                                : isTechnical
-                                ? 'bg-[#F8F7F4] border-[1.5px] border-[#111113] font-["JetBrains_Mono"]'
-                                : isEditorial
-                                ? 'bg-[#fcfbf9] border border-slate-300 font-serif'
-                                : isDashboard
-                                ? 'bg-slate-100 border border-slate-200'
-                                : 'bg-[#dadadb]'
-                        }`}
-                    >
-                        {/* Animated Sliding Indicator Pill */}
+                    {/* Sisi Kanan: Sub-menu Navigation Bar (Paling Kanan Header, tanpa pemotongan teks) */}
+                    <div className="w-full lg:w-auto overflow-x-auto no-scrollbar shrink-0 pb-1 lg:pb-0">
                         <div
-                            className={`absolute top-[3px] bottom-[3px] transition-transform duration-200 ease-out pointer-events-none z-0 ${
+                            className={`relative p-[2.5px] rounded-[8px] grid ${
+                                subMenus.length === 4
+                                    ? 'grid-cols-4 min-w-[390px] sm:min-w-[440px] md:min-w-[480px] lg:min-w-[500px]'
+                                    : 'grid-cols-3 min-w-[300px] sm:min-w-[340px] md:min-w-[370px] lg:min-w-[390px]'
+                            } items-center select-none ${
                                 isWinamp
-                                    ? 'bg-[#00FF00] rounded-none'
+                                    ? 'bg-black border border-zinc-700 rounded-none'
                                     : isDark
-                                    ? 'bg-[#2a2f3b] border border-white/10 shadow-[0px_3px_8px_rgba(0,0,0,0.35)] rounded-[8px]'
+                                    ? 'bg-[#161616] border border-slate-800'
                                     : isVista
-                                    ? 'bg-white/95 border border-white/80 shadow-[0px_3px_8px_rgba(14,116,224,0.18)] rounded-[8px]'
+                                    ? 'bg-sky-100/70 border border-sky-200/80 backdrop-blur-xs'
                                     : isPaperSketch
-                                    ? 'bg-[#ff4747] border-2 border-[#2b2b2b] rounded-lg'
+                                    ? 'bg-[#fdfcf0] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
                                     : isIndustrial
-                                    ? 'bg-[#2DD4BF]/20 border border-[#2DD4BF]/40 rounded-[4px]'
+                                    ? 'bg-[#0F1115] border border-[rgba(226,232,240,0.15)] font-["JetBrains_Mono"]'
                                     : isTechnical
-                                    ? 'bg-[#111113] rounded-none'
+                                    ? 'bg-[#F8F7F4] border-[1.5px] border-[#111113] font-["JetBrains_Mono"]'
                                     : isEditorial
-                                    ? 'bg-[#2a7373] rounded-lg'
+                                    ? 'bg-[#fcfbf9] border border-slate-300 font-serif'
                                     : isDashboard
-                                    ? 'bg-[#297373] rounded-lg shadow-xs'
-                                    : 'bg-white border-[0.5px] border-black/5 shadow-[0px_3px_8px_rgba(0,0,0,0.12),0px_3px_1px_rgba(0,0,0,0.04)] rounded-[8px]'
+                                    ? 'bg-[#FFF0BE] border border-[#4D2A00]/25'
+                                    : 'bg-[#dadadb]'
                             }`}
-                            style={{
-                                left: '3px',
-                                width: `calc((100% - 6px) / ${subMenus.length})`,
-                                transform: `translateX(${activeIndex * 100}%)`,
-                            }}
-                        />
+                        >
+                            {/* Animated Sliding Indicator Pill */}
+                            <div
+                                className={`absolute top-[2.5px] bottom-[2.5px] transition-transform duration-200 ease-out pointer-events-none z-0 ${
+                                    isWinamp
+                                        ? 'bg-[#00FF00] rounded-none'
+                                        : isDark
+                                        ? 'bg-[#2a2f3b] border border-white/10 shadow-[0px_2px_6px_rgba(0,0,0,0.35)] rounded-[6px]'
+                                        : isVista
+                                        ? 'bg-white/95 border border-white/80 shadow-[0px_2px_6px_rgba(14,116,224,0.18)] rounded-[6px]'
+                                        : isPaperSketch
+                                        ? 'bg-[#ff4747] border-2 border-[#2b2b2b] rounded-lg'
+                                        : isIndustrial
+                                        ? 'bg-[#2DD4BF]/20 border border-[#2DD4BF]/40 rounded-[4px]'
+                                        : isTechnical
+                                        ? 'bg-[#111113] rounded-none'
+                                        : isEditorial
+                                        ? 'bg-[#2a7373] rounded-md'
+                                        : isDashboard
+                                        ? 'bg-[#4D2A00] rounded-md shadow-xs'
+                                        : 'bg-white border-[0.5px] border-black/5 shadow-[0px_2px_6px_rgba(0,0,0,0.12)] rounded-[6px]'
+                                }`}
+                                style={{
+                                    left: '2.5px',
+                                    width: `calc((100% - 5px) / ${subMenus.length})`,
+                                    transform: `translateX(${activeIndex * 100}%)`,
+                                }}
+                            />
 
-                        {subMenus.map((item) => {
-                            const Icon = item.icon;
-                            const isSelected = activeSubMenu === item.id;
-                            return (
-                                <button
-                                    key={item.id}
-                                    type="button"
-                                    onClick={() => setActiveSubMenu(item.id)}
-                                    className={`relative z-10 w-full py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-center flex items-center justify-center space-x-1.5 transition-all duration-200 cursor-pointer whitespace-nowrap px-1 sm:px-2 ${
-                                        isSelected
-                                            ? isWinamp
-                                                ? 'text-black font-mono'
-                                                : isDark
-                                                ? 'text-white'
-                                                : isVista
-                                                ? 'text-sky-950'
-                                                : isPaperSketch
-                                                ? 'text-white font-["Gochi_Hand"] text-sm'
-                                                : isIndustrial
-                                                ? 'text-[#2DD4BF] font-["JetBrains_Mono"] uppercase'
-                                                : isTechnical
-                                                ? 'text-white font-["JetBrains_Mono"] uppercase'
-                                                : isEditorial
-                                                ? 'text-white'
-                                                : isDashboard
-                                                ? 'text-white'
-                                                : 'text-slate-900'
-                                            : isPaperSketch
-                                            ? 'text-[#2b2b2b] font-["Gochi_Hand"] text-sm'
-                                            : isIndustrial
-                                            ? 'text-[#E2E8F0]/70 font-["JetBrains_Mono"] uppercase'
-                                            : isTechnical
-                                            ? 'text-[#111113]/70 font-["JetBrains_Mono"] uppercase'
-                                            : 'opacity-60 hover:opacity-90'
-                                    }`}
-                                >
-                                    <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                                    <span>{item.label}</span>
-                                    {item.count !== undefined && (
-                                        <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold shrink-0 ml-0.5 ${
-                                            (item as any).badgeAlert
-                                                ? 'bg-rose-500 text-white animate-pulse'
-                                                : isSelected
-                                                ? isIndustrial
-                                                    ? 'bg-[#2DD4BF]/20 text-[#2DD4BF]'
+                            {subMenus.map((item) => {
+                                const Icon = item.icon;
+                                const isSelected = activeSubMenu === item.id;
+                                return (
+                                    <button
+                                        key={item.id}
+                                        type="button"
+                                        onClick={() => setActiveSubMenu(item.id)}
+                                        className={`relative z-10 w-full py-1.5 text-[10.5px] sm:text-xs font-bold text-center flex items-center justify-center gap-1 sm:gap-1.5 transition-all duration-200 cursor-pointer px-2 sm:px-2.5 whitespace-nowrap ${
+                                            isSelected
+                                                ? isWinamp
+                                                    ? 'text-black font-mono'
+                                                    : isDark
+                                                    ? 'text-white'
+                                                    : isVista
+                                                    ? 'text-sky-950'
+                                                    : isPaperSketch
+                                                    ? 'text-white font-["Gochi_Hand"] text-sm'
+                                                    : isIndustrial
+                                                    ? 'text-[#2DD4BF] font-["JetBrains_Mono"] uppercase'
                                                     : isTechnical
-                                                    ? 'bg-white/20 text-white'
-                                                    : 'bg-black/10 dark:bg-white/20 text-current'
-                                                : 'bg-current/10 text-current'
-                                        }`}>
-                                            {item.count}
-                                        </span>
-                                    )}
-                                </button>
-                            );
-                        })}
+                                                    ? 'text-white font-["JetBrains_Mono"] uppercase'
+                                                    : isEditorial
+                                                    ? 'text-white'
+                                                    : isDashboard
+                                                    ? 'text-[#FFF9E6]'
+                                                    : 'text-slate-900'
+                                                : isPaperSketch
+                                                ? 'text-[#2b2b2b] font-["Gochi_Hand"] text-sm'
+                                                : isIndustrial
+                                                ? 'text-[#E2E8F0]/70 font-["JetBrains_Mono"] uppercase'
+                                                : isTechnical
+                                                ? 'text-[#111113]/70 font-["JetBrains_Mono"] uppercase'
+                                                : isDashboard
+                                                ? 'text-[#4D2A00]/70 hover:text-[#4D2A00]'
+                                                : 'opacity-60 hover:opacity-90'
+                                        }`}
+                                    >
+                                        <Icon className="w-3.5 h-3.5 shrink-0" />
+                                        <span className="whitespace-nowrap">{item.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -291,6 +274,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                     ? 'bg-black border border-[#00FF00] text-[#00FF00]'
                     : isDark
                     ? 'bg-[#1E1E1E] border-slate-800 text-slate-100'
+                    : isDashboard
+                    ? 'bg-[#FFF5D0] border-[#4D2A00]/25 text-[#4D2A00] shadow-2xs'
                     : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
             }`}>
                 {/* 1. Sub Menu: Akun Pengguna (Tabel List No | Nama | NIP | Posko | Sesi | Aktif | Reset | Edit | Hapus) */}
@@ -322,6 +307,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                         profiles={profiles}
                         users={users}
                         onUpdateProfiles={handleUpdateProfiles}
+                        onUpdateUsers={handleUpdateUsers}
                         onShowToast={onShowToast}
                         theme={theme}
                     />

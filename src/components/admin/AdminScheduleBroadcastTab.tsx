@@ -29,7 +29,39 @@ import {
 import { UserAccount, ScheduleCopyTarget } from '../../types/admin';
 import { DayData, AppTheme, ShiftType, SHIFT_COLORS, EXCEL_SHIFT_MAPPING, SHIFT_OPTIONS } from '../../types';
 import { SYSTEM_DEFAULT_EXCEL_MAP } from '../../data/excelMappings';
-import { loadSavedExcelColorMap, saveExcelColorMap, normalizeColor, parseInlineStyle, parseExcelStylesheet } from '../ExcelSpreadsheet';
+import {
+    loadSavedExcelColorMap,
+    saveExcelColorMap,
+    normalizeColor,
+    guessShiftFromColor,
+    parseInlineStyle,
+    parseExcelStylesheet,
+} from '../ExcelSpreadsheet';
+
+// Helper normalisasi kode shift dari teks
+export const matchShiftCode = (cellVal: string): ShiftType | null => {
+    if (!cellVal) return null;
+    const clean = cellVal.replace(/\u00a0/g, ' ').trim().toUpperCase();
+    if (!clean) return null;
+
+    if (clean === 'P' || clean === 'PM') return 'PM';
+    if (clean === 'G' || clean === 'GRAHA') return 'Graha';
+    if (clean === 'N' || clean === 'NPCT' || clean === 'NPCS') return 'NPCT';
+    if (clean === 'L' || clean === 'OFF' || clean === 'O' || clean === 'LIBUR' || clean === 'FREE') return 'OFF';
+    if (clean === 'TPSL' || clean === 'TP' || clean === 'T') return 'TPSL';
+    if (clean === 'SM' || clean === 'S2' || clean === 'S1') return 'SM';
+    if (clean === 'M' || clean === 'MALAM' || clean === 'MLM' || clean === '3') return 'Malam';
+    if (clean === 'CUTI' || clean === 'CT' || clean === 'C' || clean === 'CTI') return 'CUTI';
+
+    if (EXCEL_SHIFT_MAPPING[clean] !== undefined) {
+        return EXCEL_SHIFT_MAPPING[clean] || null;
+    }
+
+    const directMatch = SHIFT_OPTIONS.find((s) => s.toUpperCase() === clean);
+    if (directMatch) return directMatch;
+
+    return null;
+};
 
 // Fungsi terpadu untuk mem-parsing HTML tabel dari Excel / Google Sheets ke format 2D dengan mempertahankan format gaya warna
 export const parseExcelHtmlTo2DCells = (htmlText: string): { value: string; bgColor: string | null; textColor: string | null }[][] => {
@@ -105,26 +137,27 @@ export const parseExcelHtmlTo2DCells = (htmlText: string): { value: string; bgCo
 
                     const cleanStyle: Record<string, any> = {};
                     Object.keys(combinedStyle).forEach((key) => {
+                        const keyLower = key.toLowerCase();
                         if (
-                            !key.startsWith('mso') &&
-                            !key.startsWith('vnd') &&
-                            !key.startsWith('borderTop') &&
-                            !key.startsWith('borderRight') &&
-                            !key.startsWith('borderBottom') &&
-                            !key.startsWith('borderLeft')
+                            !keyLower.startsWith('mso') &&
+                            !keyLower.startsWith('vnd') &&
+                            !keyLower.startsWith('border') &&
+                            !keyLower.startsWith('outline')
                         ) {
                             cleanStyle[key] = (combinedStyle as any)[key];
                         }
                     });
 
-                    const cellText = (cell as HTMLElement).innerText?.trim() || cell.textContent?.trim() || '';
+                    const cellText = ((cell as HTMLElement).innerText ?? cell.textContent ?? '').replace(/\u00a0/g, ' ').trim();
                     const rawBg = cleanStyle.backgroundColor || cleanStyle.background || bgcolorAttr;
                     const normalizedBg = normalizeColor(rawBg);
+                    const isWhiteOrTransparent = !normalizedBg || normalizedBg === '#ffffff' || normalizedBg === 'transparent';
+                    const finalBg = isWhiteOrTransparent ? null : normalizedBg;
                     const normalizedTextColor = normalizeColor(cleanStyle.color);
 
                     rowCells.push({
                         value: cellText,
-                        bgColor: normalizedBg,
+                        bgColor: finalBg,
                         textColor: normalizedTextColor,
                     });
                 });
@@ -182,71 +215,86 @@ function parseColorToHex(colorStr: string): string | null {
     return null;
 }
 
-// Convert raw text or color to recognized ShiftType (supporting custom map)
-function resolveShiftFromCell(
+// Convert raw text or color to recognized ShiftType (supporting custom map, full system map & RGB heuristics)
+export function resolveShiftFromCell(
     rawText: string,
     colorHex?: string | null,
-    customMap?: Record<string, ShiftType | ''>
+    customMap?: Record<string, ShiftType | ''>,
+    textColorHex?: string | null
 ): ShiftType | '' {
-    const textClean = (rawText || '').trim().toUpperCase();
+    const textClean = (rawText || '').replace(/\u00a0/g, ' ').trim().toUpperCase();
 
     // Deteksi tipe data sesuai spesifikasi:
-    // Nama: Karakter lebih dari 5
+    // Nama: Karakter lebih dari 5 (kecuali nama shift seperti 'GRAHA', 'MALAM')
     // NIP: berupa angka 18 digit
-    // Shift: 1-5 karakter
     const isNip = /^\d{18}$/.test(textClean);
-    const isNama = textClean.length > 5;
-    const isShiftText = textClean.length >= 1 && textClean.length <= 5;
+    const isNamaNonShift = textClean.length > 5 && !['MALAM', 'GRAHA'].includes(textClean);
 
     // Jika berupa Nama atau NIP (bukan shift), abaikan dan kembalikan kosong!
-    if (isNama || isNip) {
+    if (isNamaNonShift || isNip) {
         return '';
     }
 
-    const normalizedColorKey = colorHex ? colorHex.trim().toLowerCase() : null;
-    const hasRealColor = normalizedColorKey && 
-                         normalizedColorKey !== '#ffffff' && 
-                         normalizedColorKey !== '#fff' && 
-                         normalizedColorKey !== 'transparent';
+    const normalizedBg = normalizeColor(colorHex);
+    const normalizedTextCol = normalizeColor(textColorHex);
+    const hasRealBg = normalizedBg && 
+                      normalizedBg !== '#ffffff' && 
+                      normalizedBg !== '#fff' && 
+                      normalizedBg !== 'transparent';
 
-    // 1. PRIORITAS UTAMA: Jika sel memiliki warna latar riil, gunakan aturan warna kustom
-    if (hasRealColor && customMap && customMap[normalizedColorKey] !== undefined) {
-        return customMap[normalizedColorKey];
+    // 1. PRIORITAS UTAMA: Aturan Warna Latar Kustom Pengguna
+    if (hasRealBg && customMap && customMap[normalizedBg] !== undefined) {
+        return customMap[normalizedBg];
     }
 
-    // 2. Jika warna latar riil tidak diatur kustom, cek sistem default dari warna tersebut
-    if (hasRealColor) {
-        const mappedFromColor = SYSTEM_DEFAULT_EXCEL_MAP[normalizedColorKey];
-        if (mappedFromColor) return mappedFromColor;
+    // 2. Aturan Warna Teks Kustom (Font Color)
+    if (normalizedTextCol && customMap && customMap[`TEXT_COLOR_${normalizedTextCol}`] !== undefined) {
+        return customMap[`TEXT_COLOR_${normalizedTextCol}`];
     }
 
-    // 3. PRIORITAS KEDUA: Cek aturan pemetaan teks kustom (misal TEXT_P, TEXT_O, dll)
-    if (isShiftText && customMap && customMap[`TEXT_${textClean}`] !== undefined) {
+    // 3. Aturan Kode Teks Kustom (misal TEXT_P, TEXT_O, TEXT_G)
+    if (textClean && customMap && customMap[`TEXT_${textClean}`] !== undefined) {
         return customMap[`TEXT_${textClean}`];
     }
 
-    // 4. Jika teks kustom tidak diatur, cek sistem default teks
-    if (isShiftText) {
-        if (EXCEL_SHIFT_MAPPING[textClean]) return EXCEL_SHIFT_MAPPING[textClean];
-        if (SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_${textClean}`]) return SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_${textClean}`];
-        if (textClean === 'P' || textClean === 'PAGI' || textClean === '1' || textClean === 'DS') return 'Graha';
-        if (textClean === 'S' || textClean === 'SIANG' || textClean === '2') return 'NPCT';
-        if (textClean === 'M' || textClean === 'MALAM' || textClean === '3') return 'Malam';
-        if (textClean === 'L' || textClean === 'LIBUR' || textClean === 'OFF' || textClean === 'O' || textClean === 'FREE') return 'OFF';
-        if (textClean === 'TPSL' || textClean === 'TP' || textClean === 'T') return 'TPSL';
-        if (textClean === 'SM' || textClean === 'S2') return 'SM';
-        if (textClean === 'PM') return 'PM';
-        if (textClean === 'CUTI' || textClean === 'CT' || textClean === 'C') return 'CUTI';
-        if (textClean === 'GRAHA' || textClean === 'G') return 'Graha';
-        if (textClean === 'NPCT' || textClean === 'N') return 'NPCT';
+    // 4. Sistem Kamus Bawaan (SYSTEM_DEFAULT_EXCEL_MAP) untuk Warna Latar
+    if (hasRealBg && SYSTEM_DEFAULT_EXCEL_MAP[normalizedBg]) {
+        return SYSTEM_DEFAULT_EXCEL_MAP[normalizedBg];
     }
 
-    // 5. Cadangan terakhir jika tidak ada warna riil, tapi warna putih/default terdaftar di customMap
-    if (normalizedColorKey && customMap && customMap[normalizedColorKey] !== undefined) {
-        return customMap[normalizedColorKey];
+    // 5. Sistem Kamus Bawaan untuk Font Color
+    if (normalizedTextCol && SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_COLOR_${normalizedTextCol}`]) {
+        return SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_COLOR_${normalizedTextCol}`];
     }
 
-    // Hanya jika benar-benar merupakan format teks shift yang valid (1-5 karakter) barulah jatuh ke default 'Graha'
+    // 6. Sistem Kamus Bawaan untuk Kode Teks (misal TEXT_P -> PM)
+    if (textClean && SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_${textClean}`]) {
+        return SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_${textClean}`];
+    }
+
+    // 7. Match Shift Code dari Teks (EXCEL_SHIFT_MAPPING / Aliases / 'P' -> 'PM')
+    if (textClean) {
+        const matched = matchShiftCode(textClean);
+        if (matched) return matched;
+    }
+
+    // 8. Estimasi Spektrum RGB Warna (guessShiftFromColor)
+    if (hasRealBg) {
+        const guessed = guessShiftFromColor(normalizedBg, rawText);
+        if (guessed) return guessed;
+    }
+    if (normalizedTextCol) {
+        const guessed = guessShiftFromColor(normalizedTextCol, rawText);
+        if (guessed) return guessed;
+    }
+
+    // 9. Jika ada mapping untuk warna putih/default
+    if (normalizedBg && customMap && customMap[normalizedBg] !== undefined) {
+        return customMap[normalizedBg];
+    }
+
+    // Hanya jika benar-benar merupakan format teks shift yang valid (1-5 karakter) barulah default 'Graha'
+    const isShiftText = textClean.length >= 1 && textClean.length <= 5;
     return isShiftText ? 'Graha' : '';
 }
 
@@ -257,6 +305,7 @@ const GridCell = React.memo(({
     cIdx,
     cell,
     isFocused,
+    customColorMap,
     onSelect,
     onChange
 }: {
@@ -264,15 +313,23 @@ const GridCell = React.memo(({
     cIdx: number;
     cell: BroadcastGridCell;
     isFocused: boolean;
+    customColorMap?: Record<string, ShiftType | ''>;
     onSelect: (r: number, c: number) => void;
     onChange: (r: number, c: number, value: string) => void;
 }) => {
     const cellVal = cell.value || '';
+    const isShiftCol = cIdx >= 2;
+    
+    // Resolve shift styling if this is a shift column (cIdx >= 2) or contains shift data
+    const shiftResolved = isShiftCol ? resolveShiftFromCell(cellVal, cell.bgColor, customColorMap, cell.textColor) : null;
+    const shiftStyle = shiftResolved ? SHIFT_COLORS[shiftResolved] : null;
+
+    const hasRealBg = cell.bgColor && cell.bgColor !== '#ffffff' && cell.bgColor !== 'transparent';
     const customStyle: React.CSSProperties = {};
-    if (cell.bgColor) {
+    if (hasRealBg && cell.bgColor) {
         customStyle.backgroundColor = cell.bgColor;
     }
-    if (cell.textColor) {
+    if (cell.textColor && cell.textColor !== '#000000' && cell.textColor !== '#011627') {
         customStyle.color = cell.textColor;
     }
 
@@ -280,7 +337,7 @@ const GridCell = React.memo(({
         <td
             onClick={() => onSelect(rIdx, cIdx)}
             style={customStyle}
-            className={`p-0 border border-current/15 text-center transition-all cursor-cell ${
+            className={`p-0 border border-current/15 text-center transition-all cursor-cell relative ${
                 isFocused ? 'ring-2 ring-teal-500 z-10 bg-teal-500/10' : ''
             } font-bold w-14 min-w-[56px] h-7`}
         >
@@ -293,6 +350,17 @@ const GridCell = React.memo(({
                     style={{ color: cell.textColor || undefined }}
                     className="w-full h-full text-center bg-transparent outline-none font-mono text-xs px-0.5 animate-none"
                 />
+            ) : hasRealBg ? (
+                <span style={{ color: cell.textColor || undefined }} className="font-mono text-xs select-none">
+                    {cellVal || (shiftResolved ? shiftResolved.slice(0, 4) : '')}
+                </span>
+            ) : shiftResolved && shiftStyle ? (
+                <span
+                    className={`inline-block w-[calc(100%-4px)] py-0.5 px-0.5 rounded text-[10px] font-mono font-bold border truncate select-none ${shiftStyle.bg} ${shiftStyle.text} ${shiftStyle.border}`}
+                    title={shiftResolved}
+                >
+                    {cellVal || shiftResolved.slice(0, 4)}
+                </span>
             ) : (
                 <span style={{ color: cell.textColor || undefined }} className="font-mono text-xs select-none">
                     {cellVal}
@@ -306,6 +374,7 @@ const GridCell = React.memo(({
         prevProps.cell.value === nextProps.cell.value &&
         prevProps.cell.bgColor === nextProps.cell.bgColor &&
         prevProps.cell.textColor === nextProps.cell.textColor &&
+        prevProps.customColorMap === nextProps.customColorMap &&
         prevProps.onSelect === nextProps.onSelect &&
         prevProps.onChange === nextProps.onChange
     );
@@ -315,12 +384,14 @@ const GridRow = React.memo(({
     rIdx,
     rowCells,
     selectedCol,
+    customColorMap,
     onSelect,
     onChange
 }: {
     rIdx: number;
     rowCells: BroadcastGridCell[];
     selectedCol: number | null;
+    customColorMap?: Record<string, ShiftType | ''>;
     onSelect: (r: number, c: number) => void;
     onChange: (r: number, c: number, value: string) => void;
 }) => {
@@ -339,6 +410,7 @@ const GridRow = React.memo(({
                         cIdx={cIdx}
                         cell={cell}
                         isFocused={isFocused}
+                        customColorMap={customColorMap}
                         onSelect={onSelect}
                         onChange={onChange}
                     />
@@ -351,6 +423,7 @@ const GridRow = React.memo(({
         prevProps.rIdx === nextProps.rIdx &&
         prevProps.selectedCol === nextProps.selectedCol &&
         prevProps.rowCells === nextProps.rowCells &&
+        prevProps.customColorMap === nextProps.customColorMap &&
         prevProps.onSelect === nextProps.onSelect &&
         prevProps.onChange === nextProps.onChange
     );
@@ -367,6 +440,7 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
     const isTechnical = theme === 'technical';
     const isWinamp = theme === 'winamp';
     const isDark = theme === 'dark';
+    const isDashboard = theme === 'dashboard';
 
     // Target Month & Year
     const [selectedMonth, setSelectedMonth] = useState<number>(() => new Date().getMonth() + 1);
@@ -401,6 +475,7 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
 
     const [isImporting, setIsImporting] = useState(false);
     const [importSuccess, setImportSuccess] = useState<string | null>(null);
+    const [isTargetsFolded, setIsTargetsFolded] = useState<boolean>(true);
 
     // State Pemetaan Warna & Kode Teks Kustom (Mendukung integrasi sinkronisasi warna dengan spreadsheet)
     const [customColorMap, setCustomColorMap] = useState<Record<string, ShiftType | ''>>(() => loadSavedExcelColorMap());
@@ -450,6 +525,42 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
     useEffect(() => {
         refreshRandomUsers();
     }, [refreshRandomUsers]);
+
+    const previewScrollRef = useRef<HTMLDivElement>(null);
+
+    // Keyboard scroll for table horizontal navigation using ArrowLeft and ArrowRight
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const activeEl = document.activeElement;
+            const isTyping = activeEl && (
+                activeEl.tagName === 'INPUT' ||
+                activeEl.tagName === 'TEXTAREA' ||
+                activeEl.tagName === 'SELECT' ||
+                (activeEl as HTMLElement).isContentEditable
+            );
+
+            // Also ignore if the spreadsheet grid has focus
+            const isSpreadsheetFocused = activeEl && (
+                activeEl.classList.contains('broadcast-grid-table-container') ||
+                activeEl.closest('.broadcast-grid-table-container')
+            );
+
+            if (isTyping || isSpreadsheetFocused) return;
+
+            if (previewScrollRef.current) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    previewScrollRef.current.scrollBy({ left: -120, behavior: 'smooth' });
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    previewScrollRef.current.scrollBy({ left: 120, behavior: 'smooth' });
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     // Cell value updater
     const handleCellChange = useCallback((r: number, c: number, value: string) => {
@@ -841,7 +952,7 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
         const map = new Map<string, {
             count: number;
             sampleText: string;
-            categoryType: 'color' | 'text';
+            categoryType: 'color' | 'text_color' | 'text';
             colorKey: string;
             displayColor: string | null;
         }>();
@@ -849,55 +960,64 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
         gridData.forEach((row) => {
             row.forEach((cell, cIdx) => {
                 if (!cell) return;
-                // Aturan: Jangan masukkan warna/teks dari kolom NIP dan Nama (kolom indeks 0 dan 1) ke pemetaan
-                if (cIdx < 2) return;
-
+                // Aturan: Jangan masukkan warna/teks dari kolom NIP dan Nama (kolom indeks 0 dan 1) ke pemetaan jika berupa NIP/Nama
                 const bg = normalizeColor(cell.bgColor);
+                const textCol = normalizeColor(cell.textColor);
                 const text = (cell.value || '').trim();
                 const textClean = text.toUpperCase();
 
-                // Deteksi tipe data sesuai spesifikasi:
-                // Nama: Karakter lebih dari 5
-                // NIP: berupa angka 18 digit
-                // Shift: 1-5 karakter
+                // Deteksi tipe data: Nama > 5 char (kecuali GRAHA/MALAM), NIP 18 digit
                 const isNip = /^\d{18}$/.test(textClean);
-                const isNama = textClean.length > 5;
+                const isNama = textClean.length > 5 && !['MALAM', 'GRAHA'].includes(textClean);
+                if (isNama || isNip) return;
+
+                const hasRealBg = bg && bg !== '#ffffff' && bg !== '#fff' && bg !== 'transparent';
+                const isDefaultTextCol = !textCol || ['#000000', '#011627', 'black', '#333333', '#111827'].includes(textCol);
+                const hasCustomTextCol = !isDefaultTextCol && Boolean(textCol);
                 const isShiftText = textClean.length >= 1 && textClean.length <= 5;
 
-                // Jika berupa Nama atau NIP (bukan shift), abaikan dan jangan masukkan ke pemetaan
-                if (isNama || isNip) return;
-                if (!isShiftText && !bg) return;
+                if (!isShiftText && !hasRealBg && !hasCustomTextCol) return;
 
-                const hasRealColor = bg && bg !== '#ffffff' && bg !== '#fff' && bg !== 'transparent';
-
-                if (hasRealColor) {
-                    const colorKey = bg;
-                    const existing = map.get(colorKey);
+                if (hasRealBg && bg) {
+                    const existing = map.get(bg);
                     if (existing) {
                         existing.count++;
-                        if (!existing.sampleText && text) {
-                            existing.sampleText = text;
-                        }
+                        if (!existing.sampleText && text) existing.sampleText = text;
                     } else {
-                        map.set(colorKey, {
+                        map.set(bg, {
                             count: 1,
                             sampleText: text,
                             categoryType: 'color',
-                            colorKey,
+                            colorKey: bg,
                             displayColor: bg,
                         });
                     }
+                } else if (hasCustomTextCol && textCol) {
+                    const key = `TEXT_COLOR_${textCol}`;
+                    const existing = map.get(key);
+                    if (existing) {
+                        existing.count++;
+                        if (!existing.sampleText && text) existing.sampleText = text;
+                    } else {
+                        map.set(key, {
+                            count: 1,
+                            sampleText: text,
+                            categoryType: 'text_color',
+                            colorKey: key,
+                            displayColor: textCol,
+                        });
+                    }
                 } else if (textClean && isShiftText) {
-                    const colorKey = `TEXT_${textClean}`;
-                    const existing = map.get(colorKey);
+                    const key = `TEXT_${textClean}`;
+                    const existing = map.get(key);
                     if (existing) {
                         existing.count++;
                     } else {
-                        map.set(colorKey, {
+                        map.set(key, {
                             count: 1,
                             sampleText: text,
                             categoryType: 'text',
-                            colorKey,
+                            colorKey: key,
                             displayColor: null,
                         });
                     }
@@ -907,7 +1027,7 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
 
         const list: {
             color: string;
-            categoryType: 'color' | 'text';
+            categoryType: 'color' | 'text_color' | 'text';
             count: number;
             assignedShift: ShiftType | '';
             sampleText?: string;
@@ -915,17 +1035,45 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
         }[] = [];
 
         map.forEach((item, key) => {
+            let defaultAssigned: ShiftType | '' = '';
+            if (customColorMap[key] !== undefined) {
+                defaultAssigned = customColorMap[key];
+            } else if (item.categoryType === 'color') {
+                defaultAssigned =
+                    SYSTEM_DEFAULT_EXCEL_MAP[key] ||
+                    guessShiftFromColor(item.colorKey, item.sampleText) ||
+                    matchShiftCode(item.sampleText) ||
+                    '';
+            } else if (item.categoryType === 'text_color') {
+                defaultAssigned =
+                    SYSTEM_DEFAULT_EXCEL_MAP[key] ||
+                    guessShiftFromColor(item.displayColor, item.sampleText) ||
+                    matchShiftCode(item.sampleText) ||
+                    '';
+            } else if (item.categoryType === 'text') {
+                defaultAssigned =
+                    SYSTEM_DEFAULT_EXCEL_MAP[key] ||
+                    matchShiftCode(item.sampleText) ||
+                    '';
+            }
+
             list.push({
                 color: key,
                 categoryType: item.categoryType,
                 count: item.count,
-                assignedShift: customColorMap[key] !== undefined ? customColorMap[key] : '',
+                assignedShift: defaultAssigned,
                 sampleText: item.sampleText,
                 displayColor: item.displayColor,
             });
         });
 
-        return list.sort((a, b) => b.count - a.count);
+        const order = { color: 1, text_color: 2, text: 3 };
+        return list.sort((a, b) => {
+            if (order[a.categoryType] !== order[b.categoryType]) {
+                return order[a.categoryType] - order[b.categoryType];
+            }
+            return b.count - a.count;
+        });
     }, [gridData, customColorMap]);
 
     return (
@@ -937,17 +1085,9 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                         <FileSpreadsheet className="w-5 h-5" />
                     </div>
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h3 className="text-sm sm:text-base font-extrabold uppercase tracking-wide">
-                                Impor Jadwal Pengguna
-                            </h3>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30">
-                                150 Rows × 40 Cols
-                            </span>
-                        </div>
-                        <p className="text-xs opacity-70">
-                            Impor dan petakan jadwal shift kerja dari berkas/data tabel Excel langsung ke pengguna posko maupun posko luar
-                        </p>
+                        <h3 className="text-sm sm:text-base font-extrabold uppercase tracking-wide">
+                            Impor Jadwal Pengguna
+                        </h3>
                     </div>
                 </div>
 
@@ -962,7 +1102,7 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                     }`}
                 >
                     <Send className="w-4 h-4" />
-                    <span>{isImporting ? 'Memproses Impor...' : `Impor ke ${selectedCount} Pengguna Terpilih`}</span>
+                    <span>{isImporting ? 'Memproses Impor...' : `Terapkan semua ke ${selectedCount} Pengguna`}</span>
                 </button>
             </div>
 
@@ -977,8 +1117,8 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                     : 'bg-white border-slate-200 text-slate-900'
             }`}>
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-                    {/* Pilih Bulan & Tahun */}
-                    <div className="flex items-center gap-2.5">
+                    {/* Pilih Bulan, Tahun & Tombol Muat Contoh Data Grid */}
+                    <div className="flex items-end gap-2.5 flex-wrap">
                         <div>
                             <label className="text-[11px] font-bold block mb-1">Target Bulan:</label>
                             <select
@@ -1007,10 +1147,31 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                                 <option value={2028}>2028</option>
                             </select>
                         </div>
+
+                        {/* Tombol Muat Contoh Data Grid - Tepat di sebelah kanan Target Tahun */}
+                        <button
+                            type="button"
+                            onClick={handleLoadSample}
+                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-current/20 hover:bg-current/10 cursor-pointer flex items-center gap-1.5 transition-all"
+                            title="Muat data contoh sampel jadwal ke dalam grid"
+                        >
+                            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                            <span>Muat Contoh Data Grid</span>
+                        </button>
                     </div>
 
-                    {/* Toolbar Tombol Aksi Grid */}
+                    {/* Toolbar Tombol Aksi Grid: Tempel Data di kiri Impor dari File */}
                     <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                            type="button"
+                            onClick={handleDirectPasteFromClipboard}
+                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-current/20 hover:bg-current/10 cursor-pointer flex items-center gap-1.5 transition-all"
+                            title="Tempel tabel Excel beserta format warnanya langsung dari clipboard (Ctrl+V)"
+                        >
+                            <ClipboardPaste className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                            <span>Tempel Data</span>
+                        </button>
+
                         {/* Hidden File Input */}
                         <input
                             type="file"
@@ -1022,29 +1183,10 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-current/20 hover:bg-current/10 cursor-pointer flex items-center gap-1.5"
+                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-current/20 hover:bg-current/10 cursor-pointer flex items-center gap-1.5 transition-all"
                         >
                             <Upload className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-                            <span>Impor dari File Langsung</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={handleDirectPasteFromClipboard}
-                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-current/20 hover:bg-current/10 cursor-pointer flex items-center gap-1.5"
-                            title="Tempel tabel Excel berserta format warnanya langsung dari clipboard (Ctrl+V)"
-                        >
-                            <ClipboardPaste className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-                            <span>Tempel Excel (Clipboard)</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={handleLoadSample}
-                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-current/20 hover:bg-current/10 cursor-pointer flex items-center gap-1.5"
-                        >
-                            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                            <span>Muat Contoh Data Grid</span>
+                            <span>Impor dari File</span>
                         </button>
 
                         {detectedColorsList.length > 0 && (
@@ -1093,6 +1235,8 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                         ? 'bg-white border-2 border-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b]'
                         : isDark
                         ? 'bg-[#1e1e1e] border-slate-800 text-slate-100'
+                        : isDashboard
+                        ? 'bg-[#FFF5D0] border-[#4D2A00]/25 text-[#4D2A00]'
                         : 'bg-slate-50 border-slate-200 text-slate-900'
                 }`}>
                     <div className="flex items-center justify-between border-b border-current/10 pb-2 flex-wrap gap-2">
@@ -1141,6 +1285,8 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                                             ? 'bg-[#0F1115] border-[rgba(226,232,240,0.1)] text-[#E2E8F0]'
                                             : isDark
                                             ? 'bg-slate-900/60 border-slate-800'
+                                            : isDashboard
+                                            ? 'bg-[#FFF0BE] border-[#4D2A00]/25 text-[#4D2A00]'
                                             : 'bg-white border-slate-200'
                                     }`}
                                 >
@@ -1151,6 +1297,14 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                                                 style={{ backgroundColor: item.displayColor || item.color }}
                                                 title={`Warna Latar: ${item.color}`}
                                             />
+                                        ) : item.categoryType === 'text_color' ? (
+                                            <div
+                                                className="w-7 h-7 rounded-md border border-current/20 bg-current/5 shrink-0 shadow-2xs flex items-center justify-center font-mono font-bold text-xs"
+                                                style={{ color: item.displayColor || item.color }}
+                                                title={`Warna Font: ${item.color}`}
+                                            >
+                                                {item.sampleText || 'Aa'}
+                                            </div>
                                         ) : (
                                             <div
                                                 className="w-7 h-7 rounded-md border border-teal-500/40 bg-teal-500/10 text-teal-600 shrink-0 shadow-2xs flex items-center justify-center font-mono font-bold text-xs"
@@ -1164,6 +1318,8 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                                             <span className="block text-[11px] font-bold truncate">
                                                 {item.categoryType === 'text' ? (
                                                     <span>Kode Teks <strong className="text-teal-500 font-mono">"{item.sampleText}"</strong></span>
+                                                ) : item.categoryType === 'text_color' ? (
+                                                    <span>Warna Teks <strong className="font-mono">{item.displayColor || item.color}</strong> {item.sampleText ? `("${item.sampleText}")` : ''}</span>
                                                 ) : (
                                                     <span>Warna Latar {item.sampleText ? `"${item.sampleText}" (${item.color})` : item.color}</span>
                                                 )}
@@ -1212,6 +1368,8 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                         ? 'bg-white border-2 border-[#2b2b2b]'
                         : isDark
                         ? 'bg-[#161616] border-slate-800'
+                        : isDashboard
+                        ? 'bg-[#FFF5D0] border-[#4D2A00]/25 text-[#4D2A00]'
                         : 'bg-white border-slate-200'
                 }`}
             >
@@ -1254,6 +1412,7 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                                         rIdx={rIdx}
                                         rowCells={rowCells}
                                         selectedCol={selectedCol}
+                                        customColorMap={customColorMap}
                                         onSelect={handleSelectCell}
                                         onChange={handleCellChange}
                                     />
@@ -1272,13 +1431,15 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                     ? 'bg-white border-2 border-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b]'
                     : isDark
                     ? 'bg-[#161616] border-slate-800 text-slate-100'
+                    : isDashboard
+                    ? 'bg-[#FFF9E6] border-[#4D2A00]/25 text-[#4D2A00]'
                     : 'bg-white border-slate-200 text-slate-900'
             }`}>
                 <div className="flex items-center justify-between flex-wrap gap-2 border-b border-current/10 pb-2.5">
                     <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                         <h4 className="text-xs sm:text-sm font-extrabold uppercase tracking-wide">
-                            Pratinjau Jadwal (5 Personel Posko Terpilih Otomatis)
+                            Pratinjau Jadwal 5 Pengguna Acak
                         </h4>
                     </div>
 
@@ -1299,12 +1460,12 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                 </div>
 
                 {/* Horizontal Scroll Matrix: Nama Pegawai | Tanggal 1 s.d. 31 */}
-                <div className="overflow-x-auto rounded-xl border border-current/15 select-none no-scrollbar">
+                <div ref={previewScrollRef} className="overflow-x-auto rounded-xl border border-current/15 select-none no-scrollbar">
                     <table className="w-full border-collapse text-xs">
                         <thead>
                             <tr className="bg-current/5 border-b border-current/15">
                                 {/* Sticky Kolom Nama Pegawai */}
-                                <th className="sticky left-0 z-20 p-2 text-left font-extrabold min-w-[180px] max-w-[220px] bg-slate-100 dark:bg-slate-900 border-r border-current/20 shadow-xs">
+                                <th className="sticky left-0 z-20 p-2 text-left font-extrabold min-w-[125px] max-w-[155px] bg-slate-100 dark:bg-slate-900 border-r border-current/20 shadow-xs">
                                     Nama Pegawai
                                 </th>
                                 {/* Kolom Tanggal 1 s.d. 28/29/30/31 */}
@@ -1336,7 +1497,7 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                                 return (
                                     <tr key={user.id} className="border-b border-current/10 hover:bg-current/5 transition-colors">
                                         {/* Sticky Kolom Nama Pegawai */}
-                                        <td className="sticky left-0 z-10 p-2.5 font-bold min-w-[180px] max-w-[220px] bg-slate-50 dark:bg-[#1A1D23] border-r border-current/20 shadow-xs">
+                                        <td className="sticky left-0 z-10 p-2 font-bold min-w-[125px] max-w-[155px] bg-slate-50 dark:bg-[#1A1D23] border-r border-current/20 shadow-xs">
                                             <div className="truncate font-sans">{user.name}</div>
                                             <div className="text-[10px] opacity-60 font-mono">NIP: {user.nip}</div>
                                         </td>
@@ -1346,7 +1507,7 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                                             // Kolom 1 (indeks 0) adalah Nama, Kolom 2 (indeks 1) adalah NIP. Jadwal hari pertama dimulai dari Kolom 3 (indeks 2).
                                             const cell = userGridRow[dIdx + 2] || { value: '', bgColor: null, textColor: null };
                                             const cellVal = cell.value || '';
-                                            const shiftResolved = resolveShiftFromCell(cellVal, cell.bgColor, customColorMap);
+                                            const shiftResolved = resolveShiftFromCell(cellVal, cell.bgColor, customColorMap, cell.textColor);
                                             const color = shiftResolved ? SHIFT_COLORS[shiftResolved] : null;
 
                                             return (
@@ -1379,8 +1540,8 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                 </div>
             </div>
 
-            {/* Target Pengguna Penerima Jadwal */}
-            <div className={`p-4 rounded-xl border space-y-3.5 ${
+            {/* Target Pengguna Penerapan Jadwal (Collapsible / Terlipat Bawaan) */}
+            <div className={`rounded-xl border overflow-hidden transition-all ${
                 isIndustrial
                     ? 'bg-[#0F1115] border-[rgba(226,232,240,0.15)] text-[#E2E8F0]'
                     : isPaperSketch
@@ -1389,65 +1550,156 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                     ? 'bg-[#161616] border-slate-800'
                     : 'bg-white border-slate-200'
             }`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center space-x-2">
-                        <Users className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                {/* Collapsible Header */}
+                <div 
+                    onClick={() => setIsTargetsFolded((prev) => !prev)}
+                    className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 cursor-pointer hover:bg-current/5 transition-colors select-none"
+                >
+                    <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                        <Users className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
                         <h4 className="text-xs sm:text-sm font-extrabold uppercase tracking-wide">
-                            Pilih Sasaran Pengguna / Posko Penerima
+                            Pilih Pengguna Penerapan Jadwal
                         </h4>
+                        <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30">
+                            {selectedCount} / {targets.length} Terpilih
+                        </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                        <span className="text-[11px] font-medium opacity-70">
+                            {isTargetsFolded ? 'Buka Sasaran' : 'Lipat Sasaran'}
+                        </span>
                         <button
                             type="button"
-                            onClick={() => setTargetScope('all')}
-                            className={`py-1 px-2.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
-                                targetScope === 'all'
-                                    ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
-                                    : 'border-current/15 hover:bg-current/5'
-                            }`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsTargetsFolded((prev) => !prev);
+                            }}
+                            className="p-1 rounded-md bg-current/5 hover:bg-current/10 transition-colors"
+                            title={isTargetsFolded ? 'Buka Daftar Sasaran' : 'Lipat Daftar Sasaran'}
                         >
-                            Semua ({targets.length})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setTargetScope('app_users')}
-                            className={`py-1 px-2.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
-                                targetScope === 'app_users'
-                                    ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
-                                    : 'border-current/15 hover:bg-current/5'
-                            }`}
-                        >
-                            Pengguna App ({targets.filter((t) => !t.isExternal).length})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setTargetScope('external_posko')}
-                            className={`py-1 px-2.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
-                                targetScope === 'external_posko'
-                                    ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
-                                    : 'border-current/15 hover:bg-current/5'
-                            }`}
-                        >
-                            Posko Luar ({targets.filter((t) => t.isExternal).length})
+                            {isTargetsFolded ? (
+                                <ChevronDown className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                            ) : (
+                                <ChevronUp className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                            )}
                         </button>
                     </div>
                 </div>
 
-                {/* Bulk Checkbox Toggle Header */}
-                <div className="flex items-center justify-between pt-2 border-t border-current/10">
-                    <Checkbox
-                        id="bulk-toggle-targets"
-                        theme={theme}
-                        checked={allSelected}
-                        onChange={() => toggleSelectAll(!allSelected)}
-                        label={`Pilih Semua Target yang Tampil (${filteredTargets.length})`}
-                    />
+                {/* Collapsible Body */}
+                {!isTargetsFolded && (
+                    <div className="p-3.5 sm:p-4 border-t border-current/10 space-y-3.5 bg-current/2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                                <button
+                                    type="button"
+                                    onClick={() => setTargetScope('all')}
+                                    className={`py-1 px-2.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                                        targetScope === 'all'
+                                            ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                                            : 'border-current/15 hover:bg-current/5'
+                                    }`}
+                                >
+                                    Semua ({targets.length})
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setTargetScope('app_users')}
+                                    className={`py-1 px-2.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                                        targetScope === 'app_users'
+                                            ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                                            : 'border-current/15 hover:bg-current/5'
+                                    }`}
+                                >
+                                    Pengguna App ({targets.filter((t) => !t.isExternal).length})
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setTargetScope('external_posko')}
+                                    className={`py-1 px-2.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                                        targetScope === 'external_posko'
+                                            ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                                            : 'border-current/15 hover:bg-current/5'
+                                    }`}
+                                >
+                                    Posko Luar ({targets.filter((t) => t.isExternal).length})
+                                </button>
+                            </div>
 
-                    <span className="text-xs opacity-75 font-mono">
-                        Terpilih: <strong>{selectedCount}</strong> dari {targets.length} personel
-                    </span>
-                </div>
+                            <span className="text-xs opacity-75 font-mono">
+                                Terpilih: <strong>{selectedCount}</strong> dari {targets.length} personel
+                            </span>
+                        </div>
+
+                        {/* Bulk Checkbox Toggle Header */}
+                        <div className="flex items-center justify-between pt-2 border-t border-current/10">
+                            <Checkbox
+                                id="bulk-toggle-targets"
+                                theme={theme}
+                                checked={allSelected}
+                                onChange={() => toggleSelectAll(!allSelected)}
+                                label={`Pilih Semua Target yang Tampil (${filteredTargets.length})`}
+                            />
+                        </div>
+
+                        {/* List Target Penerima Impor Jadwal */}
+                        <div className="space-y-2 max-h-[380px] overflow-y-auto no-scrollbar pt-1">
+                            {filteredTargets.map((target) => (
+                                <div
+                                    key={target.userId}
+                                    onClick={() => toggleTarget(target.userId)}
+                                    className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                                        target.selected
+                                            ? isIndustrial
+                                                ? 'bg-[#1A1D23] border-teal-400/50'
+                                                : 'bg-teal-50/50 dark:bg-teal-950/20 border-teal-300/60 dark:border-teal-700/60'
+                                            : 'bg-current/5 border-current/10 opacity-70'
+                                    }`}
+                                >
+                                    <div className="flex items-center space-x-3 min-w-0">
+                                        <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                                            <Checkbox
+                                                id={`target-select-${target.userId}`}
+                                                theme={theme}
+                                                checked={target.selected}
+                                                onChange={() => toggleTarget(target.userId)}
+                                            />
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className="text-xs font-extrabold truncate">{target.name}</span>
+                                                {target.isExternal ? (
+                                                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                                                        Posko Luar (Non-User)
+                                                    </span>
+                                                ) : (
+                                                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-500/15 text-teal-700 dark:text-teal-400 border border-teal-500/30">
+                                                        Pengguna App Posko
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-[11px] opacity-75 font-mono">
+                                                NIP: {target.nip} • {target.unitPosko}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="text-right shrink-0">
+                                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                                            target.selected
+                                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                                                : 'bg-current/10 opacity-60 border-current/15'
+                                        }`}>
+                                            {target.selected ? 'Siap Diimpor' : 'Dilewati'}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {importSuccess && (
@@ -1456,62 +1708,6 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
                     <span>{importSuccess}</span>
                 </div>
             )}
-
-            {/* List Target Penerima Impor Jadwal */}
-            <div className="space-y-2">
-                {filteredTargets.map((target) => (
-                    <div
-                        key={target.userId}
-                        onClick={() => toggleTarget(target.userId)}
-                        className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
-                            target.selected
-                                ? isIndustrial
-                                    ? 'bg-[#1A1D23] border-teal-400/50'
-                                        : 'bg-teal-50/50 dark:bg-teal-950/20 border-teal-300/60 dark:border-teal-700/60'
-                                    : 'bg-current/5 border-current/10 opacity-70'
-                            }`}
-                        >
-                            <div className="flex items-center space-x-3 min-w-0">
-                                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                                    <Checkbox
-                                        id={`target-select-${target.userId}`}
-                                        theme={theme}
-                                        checked={target.selected}
-                                        onChange={() => toggleTarget(target.userId)}
-                                    />
-                                </div>
-
-                            <div className="min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="text-xs font-extrabold truncate">{target.name}</span>
-                                    {target.isExternal ? (
-                                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
-                                            Posko Luar (Non-User)
-                                        </span>
-                                    ) : (
-                                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-500/15 text-teal-700 dark:text-teal-400 border border-teal-500/30">
-                                            Pengguna App Posko
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-[11px] opacity-75 font-mono">
-                                    NIP: {target.nip} • {target.unitPosko}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="text-right shrink-0">
-                            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-                                target.selected
-                                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
-                                    : 'bg-current/10 opacity-60 border-current/15'
-                            }`}>
-                                {target.selected ? 'Siap Diimpor' : 'Dilewati'}
-                            </span>
-                        </div>
-                    </div>
-                ))}
-            </div>
         </div>
     );
 };

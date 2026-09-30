@@ -56,20 +56,6 @@ export const RoadmapView: React.FC<RoadmapViewProps> = ({ theme = 'default' }) =
 
     const featureList: FeatureItem[] = [
         {
-            id: 'feat-01',
-            title: 'Fitur Reset Password dari Halaman Login & Notifikasi User Admin',
-            description: 'Menyediakan tombol "Reset Password" pada halaman login yang mengirimkan sinyal/notifikasi pengajuan reset password secara real-time ke Dashboard User Admin untuk disetujui.',
-            category: 'auth',
-            priority: 'high',
-            status: 'planned',
-            targetRelease: 'v0.4.9-beta',
-            notes: [
-                'Tombol "Lupa / Reset Password" pada antarmuka login awal.',
-                'Notifikasi instan pada panel User Admin posko.',
-                'Opsi bagi Admin untuk menyetujui reset kredensial NIP terkait.',
-            ],
-        },
-        {
             id: 'feat-02',
             title: 'Dashboard Manajemen User & Audit Sesi Komputer untuk Admin Posko',
             description: 'Panel khusus Administrator untuk melihat seluruh daftar pegawai, status NIP aktif, log sesi komputer yang terhubung, dan pengaturan otorisasi hak akses.',

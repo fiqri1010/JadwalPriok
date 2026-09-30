@@ -428,6 +428,7 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
             if (isWinamp) return 'border-[#00FF00] bg-[#00FF00]/10 text-[#00FF00]';
             if (isVista) return 'border-sky-400 bg-sky-500/10 text-sky-900';
             if (isIndustrial) return 'border-[#2DD4BF] bg-[#2DD4BF]/15 text-[#2DD4BF] font-bold';
+            if (isDashboard) return 'border-[#4D2A00] bg-[#FFF0BE] text-[#4D2A00] font-bold';
             if (isDark) return 'border-teal-500/85 bg-teal-500/15 text-teal-300';
             return 'border-teal-500 bg-teal-500/10 text-teal-800 dark:text-teal-300';
         }
@@ -435,6 +436,7 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
         if (isWinamp) return 'border-[#00FF00]/20 hover:bg-zinc-900/50 text-[#00FF00]/70';
         if (isVista) return 'border-sky-200/50 hover:bg-sky-50/50 text-slate-600';
         if (isIndustrial) return 'border-[rgba(226,232,240,0.15)] hover:bg-white/5 text-[#E2E8F0]/80';
+        if (isDashboard) return 'border-[#4D2A00]/25 hover:bg-[#FFF0BE] text-[#4D2A00]/80';
         if (isDark) return 'border-slate-800 hover:bg-slate-800/20 text-slate-300';
         return 'border-slate-200 hover:bg-slate-50 text-slate-600';
     };
@@ -446,6 +448,7 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
             if (isWinamp) return 'bg-[#00FF00] text-black font-black rounded-none';
             if (isVista) return 'bg-sky-600 text-white font-black shadow-xs';
             if (isIndustrial) return 'bg-[#2DD4BF] text-[#0F1115] font-extrabold uppercase tracking-wider rounded-[4px]';
+            if (isDashboard) return 'bg-[#4D2A00] text-[#F9E6A8] font-bold rounded-md';
             return 'bg-teal-600 text-white font-black shadow-xs';
         }
         return isPaperSketch ? 'opacity-80 hover:opacity-100 font-[\'Gaegu\'] text-sm text-[#2b2b2b]' : 'opacity-70 hover:opacity-100';
@@ -458,12 +461,14 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
             if (isWinamp) return 'bg-[#00FF00] text-black border-[#00FF00] font-black rounded-none';
             if (isVista) return 'bg-sky-600 text-white border-sky-700 font-black shadow-xs';
             if (isIndustrial) return 'bg-[#2DD4BF] text-[#0F1115] border-[#2DD4BF] font-extrabold rounded-[4px]';
+            if (isDashboard) return 'bg-[#4D2A00] text-[#F9E6A8] border-[#4D2A00] font-bold';
             return 'bg-teal-600 text-white border-teal-700 font-black shadow-xs';
         }
         if (isPaperSketch) return 'border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/20 text-[#2b2b2b] bg-white';
         if (isWinamp) return 'border-[#00FF00]/30 hover:bg-[#00FF00]/10 text-[#00FF00] rounded-none';
         if (isVista) return 'border-sky-200 hover:bg-sky-50 text-sky-850';
         if (isIndustrial) return 'border-[rgba(226,232,240,0.15)] hover:bg-white/5 text-[#E2E8F0] rounded-[4px]';
+        if (isDashboard) return 'border-[#4D2A00]/25 hover:bg-[#FFF0BE] text-[#4D2A00]';
         return 'border-current/15 hover:bg-current/10 text-slate-700 dark:text-slate-300';
     };
 
@@ -511,6 +516,8 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                             ? 'bg-white/85 backdrop-blur-2xl border-white/90 text-slate-900 shadow-[0_20px_60px_rgba(14,116,224,0.3)] ring-1 ring-sky-300/40'
                             : isIndustrial
                             ? 'bg-[#1A1D23] border border-[rgba(226,232,240,0.15)] text-[#E2E8F0] font-[\'JetBrains_Mono\']'
+                            : isDashboard
+                            ? 'bg-[#FFFBF0] border border-[#4D2A00]/30 text-[#4D2A00] font-["Inter"] shadow-xl'
                             : isDark
                             ? 'bg-slate-900 border-slate-700 text-slate-100'
                             : 'bg-white border-slate-200 text-slate-900'

@@ -2,7 +2,7 @@ import React from 'react';
 
 export type BorderBeamSize = 'sm' | 'md' | 'line' | 'pulse-outside' | 'pulse-inner' | number;
 export type BorderBeamTheme = 'dark' | 'light' | 'auto';
-export type BorderBeamColorVariant = 'colorful' | 'mono' | 'ocean' | 'sunset' | 'forest' | 'candy' | 'ice' | 'gold';
+export type BorderBeamColorVariant = 'colorful' | 'mono' | 'ocean' | 'sunset' | 'forest' | 'candy' | 'ice' | 'gold' | 'warm';
 
 export interface BorderBeamProps extends React.HTMLAttributes<HTMLDivElement> {
     children?: React.ReactNode;
@@ -28,6 +28,7 @@ const COLOR_GRADIENTS: Record<BorderBeamColorVariant, string> = {
     ice: 'conic-gradient(from 0deg, #E0F7FA 0deg, #80DEEA 30deg, #26C6DA 60deg, transparent 100deg, transparent 180deg, #E0F7FA 180deg, #80DEEA 210deg, #26C6DA 240deg, transparent 280deg, transparent 360deg)',
     gold: 'conic-gradient(from 0deg, #FFE082 0deg, #FFD54F 30deg, #FFB300 60deg, transparent 100deg, transparent 180deg, #FFE082 180deg, #FFD54F 210deg, #FFB300 240deg, transparent 280deg, transparent 360deg)',
     mono: 'conic-gradient(from 0deg, #ffffff 0deg, #9ca3af 30deg, #4b5563 60deg, transparent 100deg, transparent 180deg, #ffffff 180deg, #9ca3af 210deg, #4b5563 240deg, transparent 280deg, transparent 360deg)',
+    warm: 'conic-gradient(from 0deg, #4D2A00 0deg, #E65F2B 25deg, #FFF5D0 50deg, transparent 95deg, transparent 180deg, #4D2A00 180deg, #E65F2B 205deg, #FFF5D0 230deg, transparent 275deg, transparent 360deg)',
 };
 
 export const BorderBeam = React.forwardRef<HTMLDivElement, BorderBeamProps>(({

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShiftNamingConfig, ShiftItemConfig } from '../../types';
+import { ShiftNamingConfig, ShiftItemConfig, AppTheme } from '../../types';
 import { AlertTriangle, Tag, Sparkles } from 'lucide-react';
 
 interface ShiftNamingInputProps {
@@ -7,6 +7,7 @@ interface ShiftNamingInputProps {
     onChange: (naming: ShiftNamingConfig) => void;
     currentShiftId?: string;
     existingShifts?: ShiftItemConfig[];
+    theme?: AppTheme;
 }
 
 export const ShiftNamingInput: React.FC<ShiftNamingInputProps> = ({
@@ -14,7 +15,11 @@ export const ShiftNamingInput: React.FC<ShiftNamingInputProps> = ({
     onChange,
     currentShiftId,
     existingShifts = [],
+    theme = 'default',
 }) => {
+    const isDashboard = theme === 'dashboard';
+    const labelClass = isDashboard ? 'text-[#4D2A00]' : 'text-slate-800 dark:text-slate-200';
+
     // Collision detection check
     const cleanCode = naming.copyCode.trim().toUpperCase();
     const cleanBadge = naming.displayBadge.trim().toUpperCase();
@@ -57,7 +62,7 @@ export const ShiftNamingInput: React.FC<ShiftNamingInputProps> = ({
                     {/* Nama Lengkap */}
                     <div className="md:col-span-2 space-y-1">
                         <div className="flex justify-between items-center text-xs">
-                            <label className="font-bold text-slate-800 dark:text-slate-200">Nama Lengkap:</label>
+                            <label className={`font-bold ${labelClass}`}>Nama Lengkap:</label>
                             <span className="text-[10px] opacity-60">Untuk laporan & detail</span>
                         </div>
                         <input
@@ -72,7 +77,7 @@ export const ShiftNamingInput: React.FC<ShiftNamingInputProps> = ({
                     {/* Nama di Badge */}
                     <div className="md:col-span-1 space-y-1">
                         <div className="flex justify-between items-center text-xs">
-                            <label className="font-bold text-slate-800 dark:text-slate-200 truncate">Nama di Badge:</label>
+                            <label className={`font-bold truncate ${labelClass}`}>Nama di Badge:</label>
                         </div>
                         <input
                             type="text"
@@ -91,7 +96,7 @@ export const ShiftNamingInput: React.FC<ShiftNamingInputProps> = ({
                     {/* Dropdown Sublabel Description */}
                     <div className="md:col-span-2 space-y-1">
                         <div className="flex justify-between items-center text-xs">
-                            <label className="font-bold text-slate-800 dark:text-slate-200">Sublabel / Deskripsi Dropdown:</label>
+                            <label className={`font-bold ${labelClass}`}>Sublabel / Deskripsi Dropdown:</label>
                             <span className="text-[10px] opacity-60">Keterangan jam di dropdown</span>
                         </div>
                         <input
@@ -106,7 +111,7 @@ export const ShiftNamingInput: React.FC<ShiftNamingInputProps> = ({
                     {/* Copy Code */}
                     <div className="md:col-span-1 space-y-1">
                         <div className="flex justify-between items-center text-xs">
-                            <label className="font-bold text-slate-800 dark:text-slate-200 truncate">Kode Singkat Salin:</label>
+                            <label className={`font-bold truncate ${labelClass}`}>Kode Singkat Salin:</label>
                         </div>
                         <input
                             type="text"

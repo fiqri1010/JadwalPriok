@@ -61,7 +61,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             case 'vista': return 'Old Windows';
             case 'paperSketch': return 'PaperSketch';
             case 'winamp': return 'Winamp';
-            case 'dashboard': return 'Terang Minimalis';
+            case 'dashboard': return 'Warm';
             case 'editorial': return 'Editorial';
             case 'industrial': return 'Industrial';
             case 'technical': return 'Technical';
@@ -113,7 +113,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                 {pageTab === 'settings' && 'Pengaturan Aplikasi'}
                                 {pageTab === 'version' && 'Catatan Riwayat Versi'}
                                 {pageTab === 'roadmap' && 'Rencana Fitur & Roadmap'}
-                                {pageTab === 'admin' && 'Dashboard Administrator Posko'}
+                                {pageTab === 'admin' && 'Dashboard Administrator'}
                                 {pageTab === 'landing' && 'Landing Page & Otentikasi NIP'}
                             </span>
                         </div>
@@ -267,33 +267,33 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                         {currentTheme === 'winamp' && <Check className="h-3.5 w-3.5" />}
                                     </button>
 
-                                    {/* 2. Kelompok Tema dalam Pengembangan */}
-                                    <div className="px-2.5 pt-2 pb-1 text-[10px] font-black uppercase tracking-wider opacity-60 border-t border-b border-current/10 mt-2 mb-1 flex items-center justify-between">
-                                        <span>Tema dalam Pengembangan</span>
-                                        <span className="text-[9px] bg-amber-500/20 text-amber-500 px-1.5 py-0.2 rounded font-bold">BETA</span>
-                                    </div>
-
-                                    {/* Dashboard */}
+                                    {/* Warm */}
                                     <button
                                         type="button"
                                         onClick={() => {
                                             onThemeChange('dashboard');
                                             setIsThemeDropdownOpen(false);
                                         }}
-                                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[6px] text-xs font-bold font-['Inter'] transition-all duration-150 cursor-pointer ${
+                                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-none text-xs font-bold font-['Inter'] transition-all duration-150 cursor-pointer ${
                                             currentTheme === 'dashboard'
-                                                ? 'bg-[#297373] text-white'
+                                                ? 'bg-[#4D2A00] text-[#F9E6A8]'
                                                 : currentTheme === 'industrial' || currentTheme === 'dark' || currentTheme === 'winamp'
                                                 ? 'text-slate-100 hover:bg-white/10'
-                                                : 'text-[#011627] hover:bg-black/5'
+                                                : 'text-[#4D2A00] hover:bg-[#4D2A00]/10'
                                         }`}
                                     >
                                         <span className="flex items-center space-x-2">
-                                            <LayoutDashboard className="h-4 w-4 text-[#297373] group-hover:text-inherit" />
-                                            <span>Terang Minimalis</span>
+                                            <LayoutDashboard className="h-4 w-4 text-[#4D2A00] group-hover:text-inherit" />
+                                            <span>Warm</span>
                                         </span>
                                         {currentTheme === 'dashboard' && <Check className="h-3.5 w-3.5" />}
                                     </button>
+
+                                    {/* 2. Kelompok Tema dalam Pengembangan */}
+                                    <div className="px-2.5 pt-2 pb-1 text-[10px] font-black uppercase tracking-wider opacity-60 border-t border-b border-current/10 mt-2 mb-1 flex items-center justify-between">
+                                        <span>Tema dalam Pengembangan</span>
+                                        <span className="text-[9px] bg-amber-500/20 text-amber-500 px-1.5 py-0.2 rounded font-bold">BETA</span>
+                                    </div>
 
                                     {/* Editorial */}
                                     <button

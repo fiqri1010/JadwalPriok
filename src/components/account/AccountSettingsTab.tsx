@@ -46,6 +46,7 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
     const isTechnical = theme === 'technical';
     const isWinamp = theme === 'winamp';
     const isDark = theme === 'dark';
+    const isDashboard = theme === 'dashboard';
 
     // State Akun Pegawai
     const [nip, setNip] = useState(() => localStorage.getItem(LOCAL_STORAGE_NIP_KEY) || '199510102015121002');
@@ -233,7 +234,7 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
         addApprovalRequest({
             userNip: nip,
             userName: namaPegawai,
-            unitPosko: 'Posko Pelayanan Graha & TPSL',
+            unitPosko: 'Pelayanan Graha & TPSL',
             requestType: 'delete_account',
             reason: 'Pengajuan penghapusan akun oleh pengguna dari menu Pengaturan Akun',
         });
@@ -257,6 +258,8 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                     ? 'bg-black border border-[#00FF00] text-[#00FF00]'
                     : isDark
                     ? 'bg-[#161616] border-slate-800 text-slate-100'
+                    : isDashboard
+                    ? 'bg-[#FFF5D0] border border-[#4D2A00]/25 text-[#4D2A00]'
                     : 'bg-slate-50/80 border-slate-200 text-slate-900'
             }`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -306,6 +309,8 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                     ? 'bg-black border border-[#00FF00] text-[#00FF00]'
                     : isDark
                     ? 'bg-[#161616] border-slate-800 text-slate-100'
+                    : isDashboard
+                    ? 'bg-[#FFF5D0] border border-[#4D2A00]/25 text-[#4D2A00]'
                     : 'bg-white border-slate-200 text-slate-900'
             }`}>
                 <div className="flex items-center justify-between">
@@ -398,6 +403,8 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                     ? 'bg-black border border-[#00FF00] text-[#00FF00]'
                     : isDark
                     ? 'bg-[#161616] border-slate-800 text-slate-100'
+                    : isDashboard
+                    ? 'bg-[#FFF5D0] border border-[#4D2A00]/25 text-[#4D2A00]'
                     : 'bg-white border-slate-200 text-slate-900'
             }`}>
                 <div className="flex items-center justify-between border-b border-current/10 pb-2.5">
@@ -459,6 +466,8 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                     ? 'bg-black border border-[#00FF00] text-[#00FF00]'
                     : isDark
                     ? 'bg-[#161616] border-slate-800 text-slate-100'
+                    : isDashboard
+                    ? 'bg-[#FFF5D0] border border-[#4D2A00]/25 text-[#4D2A00]'
                     : 'bg-white border-slate-200 text-slate-900'
             }`}>
                 <div className="flex items-center justify-between border-b border-current/10 pb-2.5">
@@ -591,6 +600,8 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                             ? 'bg-black border-2 border-rose-500 text-rose-400 font-mono'
                             : isDark
                             ? 'bg-[#1E1E1E] border-slate-800 text-slate-100'
+                            : isDashboard
+                            ? 'bg-[#FFF5D0] border-2 border-[#4D2A00]/40 text-[#4D2A00]'
                             : 'bg-white border-slate-200 text-slate-900'
                     }`}>
                         <div className="flex items-center space-x-3 text-rose-600 dark:text-rose-400">

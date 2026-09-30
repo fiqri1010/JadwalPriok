@@ -9,6 +9,7 @@ import {
 import { DayData, normalizeShift, LiburNasional, AppTheme } from '../types';
 import { ShiftSettingsTab } from './shift-studio/ShiftSettingsTab';
 import { AccountSettingsTab } from './account/AccountSettingsTab';
+import { getCurrentUserPermissions } from '../utils/adminStorage';
 
 export type SettingsTab = 'account' | 'shift' | 'import_reset';
 
@@ -164,6 +165,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 insetBox: 'bg-white/50 backdrop-blur-md border border-white/70 rounded-lg text-slate-900',
             };
         }
+        if (isDashboard) {
+            return {
+                cardOuter: 'bg-[#4D2A00] rounded-none p-[2px] shadow-lg font-["Inter"]',
+                cardInner: 'bg-[#FFFBF0] text-[#4D2A00] rounded-none p-4 sm:p-5',
+                tabActive: 'bg-[#4D2A00] text-[#F9E6A8] font-bold rounded-none',
+                tabInactive: 'text-[#4D2A00]/70 hover:text-[#4D2A00] hover:bg-[#FFF0BE] rounded-none',
+                accentBtn: 'bg-[#4D2A00] hover:bg-[#381B00] text-[#F9E6A8] font-bold rounded-none shadow-xs transition-all',
+                outlineBtn: 'bg-[#FFF0BE] text-[#4D2A00] border border-[#4D2A00]/30 hover:bg-[#FFE8A3] rounded-none transition-all',
+                insetBox: 'bg-[#FFF5D0] border border-[#4D2A00]/25 rounded-none text-[#4D2A00]',
+            };
+        }
         // Default Light Theme
         return {
             cardOuter: 'bg-white rounded-lg shadow-sm border border-slate-200/90',
@@ -189,7 +201,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         </div>
                         <div>
                             <h2 className="text-base sm:text-lg font-black">Pengaturan Aplikasi</h2>
-                            <p className="text-xs opacity-60">Ekspor, Impor, & Cadangan Jadwal</p>
                         </div>
                     </div>
 
@@ -213,7 +224,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     : isEditorial
                                     ? 'bg-[#fcfbf9] border border-slate-300 font-serif'
                                     : isDashboard
-                                    ? 'bg-slate-100 border border-slate-200'
+                                    ? 'bg-[#FFF0BE] border border-[#4D2A00]/30'
                                     : 'bg-[#dadadb]'
                             }`}
                         >
@@ -235,7 +246,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                         : isEditorial
                                         ? 'bg-[#2a7373] rounded-md'
                                         : isDashboard
-                                        ? 'bg-[#297373] rounded-md shadow-xs'
+                                        ? 'bg-[#4D2A00] rounded-none shadow-2xs'
                                         : 'bg-white border-[0.5px] border-black/5 shadow-[0px_2px_6px_rgba(0,0,0,0.12)] rounded-[6px]'
                                 }`}
                                 style={{
@@ -380,13 +391,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     )}
 
                     {/* Tab 2: Shift Studio & Konfigurasi Shift */}
-                    {activeTab === 'shift' && (
-                        <ShiftSettingsTab
-                            daysState={daysState}
-                            onShowToast={onShowToast}
-                            theme={theme}
-                        />
-                    )}
+                    {activeTab === 'shift' && (() => {
+                        const userPermissions = getCurrentUserPermissions();
+                        const canEditAllShifts = userPermissions.canEditAllShifts !== false;
+                        const canEditSomeShifts = Boolean(userPermissions.canEditSomeShifts);
+                        const canAccessShiftTab = canEditAllShifts || canEditSomeShifts;
+
+                        return canAccessShiftTab ? (
+                            <ShiftSettingsTab
+                                daysState={daysState}
+                                onShowToast={onShowToast}
+                                theme={theme}
+                            />
+                        ) : (
+                            <div className="p-8 text-center space-y-3 bg-current/5 rounded-xl border border-current/15">
+                                <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto" />
+                                <h4 className="font-extrabold text-sm">Akses Pengaturan Shift Dibatasi</h4>
+                                <p className="text-xs opacity-75 max-w-md mx-auto leading-relaxed">
+                                    Anda tidak memiliki hak izin untuk mengakses halaman pengaturan shift (Memerlukan izin &quot;Edit Seluruh Shift&quot; atau &quot;Edit Sebagian Shift&quot;).
+                                </p>
+                            </div>
+                        );
+                    })()}
 
                     {/* Tab 3: Impor Data Cadangan & Reset Hapus Data (Gabungan) */}
                     {activeTab === 'import_reset' && (

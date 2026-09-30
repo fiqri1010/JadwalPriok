@@ -257,7 +257,7 @@ export const guessShiftFromColor = (hexColor: string | null, cellText?: string):
   return null;
 };
 
-// Fungsi helper untuk membersihkan inline CSS
+// Fungsi helper untuk membersihkan inline CSS (mengabaikan seluruh border, outline, dan style vendor)
 export const parseInlineStyle = (cssText: string): React.CSSProperties => {
   const styleObj: Record<string, string> = {};
   if (!cssText) return styleObj;
@@ -268,12 +268,12 @@ export const parseInlineStyle = (cssText: string): React.CSSProperties => {
       const property = parts[0].trim();
       const value = parts.slice(1).join(':').trim();
       const propLower = property.toLowerCase();
+      // Abaikan semua style border dan outline sesuai instruksi
       if (
-        propLower.startsWith('border-top') ||
-        propLower.startsWith('border-right') ||
-        propLower.startsWith('border-bottom') ||
-        propLower.startsWith('border-left') ||
-        propLower.startsWith('vnd.')
+        propLower.startsWith('border') ||
+        propLower.startsWith('outline') ||
+        propLower.startsWith('vnd.') ||
+        propLower.startsWith('mso-border')
       ) {
         return;
       }
@@ -289,7 +289,9 @@ export const parseInlineStyle = (cssText: string): React.CSSProperties => {
         return;
       }
       const camelCaseProp = propLower.replace(/-./g, (c) => c.toUpperCase().replace('-', ''));
-      styleObj[camelCaseProp] = value;
+      if (!camelCaseProp.toLowerCase().startsWith('border') && !camelCaseProp.toLowerCase().startsWith('outline')) {
+        styleObj[camelCaseProp] = value;
+      }
     }
   });
   return styleObj as React.CSSProperties;
@@ -401,28 +403,29 @@ export const parseExcelHtmlToCells = (htmlText: string): ExcelCellData[] => {
 
           const cleanStyle: Record<string, any> = {};
           Object.keys(combinedStyle).forEach((key) => {
+            const keyLower = key.toLowerCase();
             if (
-              !key.startsWith('mso') &&
-              !key.startsWith('vnd') &&
-              !key.startsWith('borderTop') &&
-              !key.startsWith('borderRight') &&
-              !key.startsWith('borderBottom') &&
-              !key.startsWith('borderLeft')
+              !keyLower.startsWith('mso') &&
+              !keyLower.startsWith('vnd') &&
+              !keyLower.startsWith('border') &&
+              !keyLower.startsWith('outline')
             ) {
               cleanStyle[key] = (combinedStyle as any)[key];
             }
           });
 
-          const cellText = (cell as HTMLElement).innerText?.trim() || cell.textContent?.trim() || '';
+          const cellText = ((cell as HTMLElement).innerText ?? cell.textContent ?? '').replace(/\u00a0/g, ' ').trim();
           const rawBg = cleanStyle.backgroundColor || cleanStyle.background || bgcolorAttr;
           const normalizedBg = normalizeColor(rawBg);
+          const isWhiteOrTransparent = !normalizedBg || normalizedBg === '#ffffff' || normalizedBg === 'transparent';
+          const finalBg = isWhiteOrTransparent ? null : normalizedBg;
           const normalizedTextColor = normalizeColor(cleanStyle.color);
 
           flatCells.push({
             value: cellText,
             style: { ...cleanStyle, textAlign: 'center' } as React.CSSProperties,
             raw: cellText,
-            bgColor: normalizedBg,
+            bgColor: finalBg,
             textColor: normalizedTextColor,
           });
         });
@@ -553,14 +556,21 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
   // Helper normalisasi kode shift dari teks
   const matchShiftCode = useCallback((cellVal: string): ShiftType | null => {
     if (!cellVal) return null;
-    const clean = cellVal.trim().toUpperCase();
+    const clean = cellVal.replace(/\u00a0/g, ' ').trim().toUpperCase();
     if (!clean) return null;
+
+    if (clean === 'P' || clean === 'PM') return 'PM';
+    if (clean === 'G' || clean === 'GRAHA') return 'Graha';
+    if (clean === 'N' || clean === 'NPCT' || clean === 'NPCS') return 'NPCT';
+    if (clean === 'L' || clean === 'OFF' || clean === 'O' || clean === 'LIBUR' || clean === 'FREE') return 'OFF';
+    if (clean === 'TPSL' || clean === 'TP' || clean === 'T') return 'TPSL';
+    if (clean === 'SM' || clean === 'S2' || clean === 'S1') return 'SM';
+    if (clean === 'M' || clean === 'MALAM' || clean === 'MLM' || clean === '3') return 'Malam';
+    if (clean === 'CUTI' || clean === 'CT' || clean === 'C' || clean === 'CTI') return 'CUTI';
 
     if (EXCEL_SHIFT_MAPPING[clean] !== undefined) {
       return EXCEL_SHIFT_MAPPING[clean] || null;
     }
-
-    if (clean === 'P') return 'PM';
 
     const found = SHIFT_OPTIONS.find((opt) => opt.toUpperCase() === clean);
     if (found) return found;
@@ -736,15 +746,23 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
         return { shift: customColorMap['__BLANK_EMPTY__'] as ShiftType, detectedBy: 'custom_map' };
       }
 
-      // 5. Cek apakah teks sel cocok dengan kode shift resmi
+      // 5. Cek apakah teks sel cocok dengan kode shift resmi atau kamus bawaan sistem (misal TEXT_P -> PM)
       if (hasText) {
+        if (SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_${cleanText}`]) {
+          return { shift: SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_${cleanText}`], detectedBy: 'text' };
+        }
         const textMatch = matchShiftCode(cleanText);
         if (textMatch) {
           return { shift: textMatch, detectedBy: 'text' };
         }
       }
 
-      // 6. Cek warna latar belakang sel jika memiliki warna
+      // 6. Cek warna latar belakang sel dari kamus bawaan sistem
+      if (hasBg && cellBg && SYSTEM_DEFAULT_EXCEL_MAP[cellBg]) {
+        return { shift: SYSTEM_DEFAULT_EXCEL_MAP[cellBg], detectedBy: 'color' };
+      }
+
+      // 7. Cek warna latar belakang sel jika memiliki warna
       if (hasBg && cellBg) {
         const colorMatch = guessShiftFromColor(cellBg, rawText);
         if (colorMatch) {
@@ -752,8 +770,11 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
         }
       }
 
-      // 7. Cek warna teks (Font Color) jika memiliki warna khusus
+      // 8. Cek warna teks (Font Color) jika memiliki warna khusus
       if (hasCustomTextColor && cellTextColor) {
+        if (SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_COLOR_${cellTextColor}`]) {
+          return { shift: SYSTEM_DEFAULT_EXCEL_MAP[`TEXT_COLOR_${cellTextColor}`], detectedBy: 'color' };
+        }
         const textColorMatch = guessShiftFromColor(cellTextColor, rawText);
         if (textColorMatch) {
           return { shift: textColorMatch, detectedBy: 'color' };

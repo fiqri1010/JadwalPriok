@@ -8,6 +8,7 @@ export interface AuthorityProfile {
     badgeColor: string;
     isSystemDefault?: boolean;
     permissions: {
+        canLoginToApp?: boolean; // Izin masuk / login ke aplikasi
         canAccessAdminDashboard: boolean;
         canManageUsers: boolean;
         canResetUserPassword: boolean;
@@ -16,6 +17,10 @@ export interface AuthorityProfile {
         canEditOwnSchedule: boolean;
         canDeleteAdminAuthority: boolean; // Hapus otoritas admin
         canEditAuthorities: boolean; // Edit Otoritas
+        canEditHolidays?: boolean; // Edit daftar libur
+        canAccessApprovals?: boolean; // Akses halaman persetujuan
+        canEditAllShifts?: boolean; // Edit Seluruh Shift
+        canEditSomeShifts?: boolean; // Edit Sebagian Shift
     };
     userCount?: number;
 }
@@ -70,7 +75,7 @@ export interface UserApprovalRequest {
     userNip: string;
     userName: string;
     unitPosko: string;
-    requestType: 'delete_account' | 'reset_password';
+    requestType: 'delete_account' | 'reset_password' | 'change_role_ppf';
     reason?: string;
     requestedAt: string;
     status: 'pending' | 'approved' | 'rejected';

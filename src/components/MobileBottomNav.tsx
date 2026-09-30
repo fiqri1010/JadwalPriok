@@ -4,9 +4,12 @@ import {
     Flag,
     Sliders,
     History,
+    ShieldAlert,
 } from 'lucide-react';
 import { AppTheme } from '../types';
 import { ThemeConfig } from '../themeConfig';
+import { getCurrentUserRoleInfo, getCurrentUserPermissions } from '../utils/adminStorage';
+import { UserRole } from '../types/admin';
 
 type PageTabType = 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing';
 
@@ -24,6 +27,15 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     theme,
     themeConfig,
 }) => {
+    const activeUserName = localStorage.getItem('jadwalpriok_user_name') || 'Ahmad Fiqri';
+    const activeUserNip = localStorage.getItem('jadwalpriok_user_nip') || '199510102015121002';
+    const isSuperAdminAccount = activeUserName === 'Ahmad Fiqri' || activeUserNip === '199510102015121002';
+    const roleInfo = isSuperAdminAccount
+        ? { role: 'superadmin' as UserRole, authorityName: 'Super Admin' }
+        : getCurrentUserRoleInfo();
+    const permissions = getCurrentUserPermissions();
+    const canAccessAdmin = isSuperAdminAccount || roleInfo.role === 'admin' || roleInfo.role === 'superadmin' || permissions.canAccessAdminDashboard;
+
     return (
         <nav
             className={`fixed bottom-0 left-0 right-0 w-full z-50 md:hidden px-1.5 pt-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] transition-all duration-300 ease-in-out ${
@@ -35,6 +47,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                     ? 'bg-[#18181B]/95 border-t border-[#333333] backdrop-blur-md text-[#E0E0E0] shadow-[0_-4px_20px_rgba(0,0,0,0.1)]'
                     : theme === 'vista'
                     ? 'bg-white/75 border-t border-white/70 backdrop-blur-xl text-[#0F172A] shadow-[0_-4px_25px_rgba(14,116,224,0.15)]'
+                    : theme === 'dashboard'
+                    ? 'bg-[#FFF6D6] border-t border-[#4D2A00]/30 text-[#4D2A00] font-[\'Inter\'] shadow-none'
                     : 'bg-white/95 border-t border-slate-200 backdrop-blur-md text-[#011627] shadow-[0_-4px_20px_rgba(0,0,0,0.1)]'
             }`}
         >
@@ -90,6 +104,21 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                     <History className={`h-4 w-4 ${pageTab === 'version' ? 'stroke-[2.5]' : 'stroke-2'}`} />
                     <span className="text-[9.5px] mt-0.5 tracking-tight font-bold">Versi</span>
                 </button>
+
+                {canAccessAdmin && (
+                    <button
+                        type="button"
+                        onClick={() => onTabChange('admin')}
+                        className={`flex flex-col items-center justify-center flex-1 py-1.5 px-1 transition-all duration-200 cursor-pointer ${
+                            pageTab === 'admin'
+                                ? themeConfig.mobileNavItemActiveClass
+                                : themeConfig.mobileNavItemInactiveClass
+                        }`}
+                    >
+                        <ShieldAlert className={`h-4 w-4 ${pageTab === 'admin' ? 'stroke-[2.5]' : 'stroke-2'}`} />
+                        <span className="text-[9.5px] mt-0.5 tracking-tight font-bold">Dasbor</span>
+                    </button>
+                )}
             </div>
         </nav>
     );

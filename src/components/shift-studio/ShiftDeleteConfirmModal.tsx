@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, AlertTriangle, Trash2, ArrowRightLeft } from 'lucide-react';
-import { ShiftItemConfig } from '../../types';
+import { ShiftItemConfig, AppTheme } from '../../types';
 import { CustomDropdown } from '../common/CustomDropdown';
 
 interface ShiftDeleteConfirmModalProps {
@@ -10,6 +10,7 @@ interface ShiftDeleteConfirmModalProps {
     shiftToDelete: ShiftItemConfig | null;
     availableShifts: ShiftItemConfig[];
     onConfirmDelete: (shiftId: string, action: 'delete_all' | 'migrate', targetShiftId?: string) => void;
+    theme?: AppTheme;
 }
 
 export const ShiftDeleteConfirmModal: React.FC<ShiftDeleteConfirmModalProps> = ({
@@ -18,6 +19,7 @@ export const ShiftDeleteConfirmModal: React.FC<ShiftDeleteConfirmModalProps> = (
     shiftToDelete,
     availableShifts,
     onConfirmDelete,
+    theme = 'default',
 }) => {
     const [action, setAction] = useState<'delete_all' | 'migrate'>('migrate');
     const [targetShiftId, setTargetShiftId] = useState<string>('');

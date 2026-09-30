@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Save, Palette, Tag, Clock, Briefcase, Smile, Undo2, Redo2, RotateCcw, Check, Settings } from 'lucide-react';
 import { ShiftItemConfig, AppTheme } from '../../types';
+import { getCurrentUserPermissions } from '../../utils/adminStorage';
 import { ShiftColorStudio } from './ShiftColorStudio';
 import { ShiftPatternStudio } from './ShiftPatternStudio';
 import { ShiftNamingInput } from './ShiftNamingInput';
@@ -34,9 +35,18 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
     const [history, setHistory] = useState<ShiftItemConfig[]>([]);
     const [historyIndex, setHistoryIndex] = useState<number>(-1);
 
-    const [activeTab, setActiveTab] = useState<EditTabType>('latar');
+    const permissions = getCurrentUserPermissions();
+    const canEditAllShifts = permissions.canEditAllShifts !== false;
+
+    const [activeTab, setActiveTab] = useState<EditTabType>(() => 'latar');
     const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
     const [isApplied, setIsApplied] = useState(false);
+
+    useEffect(() => {
+        if (!canEditAllShifts && activeTab === 'ruleset') {
+            setActiveTab('latar');
+        }
+    }, [canEditAllShifts, activeTab]);
 
     useEffect(() => {
         if (shift && isOpen) {
@@ -109,6 +119,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
 
     const isIndustrial = theme === 'industrial';
     const isPaperSketch = theme === 'paperSketch';
+    const isDashboard = theme === 'dashboard';
 
     return createPortal(
         <div className="fixed inset-0 sm:top-7 z-[10000] overflow-y-auto p-2 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 flex justify-center items-start sm:items-center">
@@ -118,6 +129,8 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                     ? 'bg-[#1A1D23] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-lg font-[\'JetBrains_Mono\']'
                     : isPaperSketch
                     ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[6px_6px_0px_#2b2b2b] rounded-2xl font-[\'Gaegu\'] text-base'
+                    : isDashboard
+                    ? 'bg-[#FFFBF0] text-[#4D2A00] border border-[#4D2A00]/30 rounded-2xl font-["Inter"] shadow-2xl'
                     : 'rounded-2xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 border border-slate-200/90 dark:border-slate-700'
             }`}>
                 {/* Header */}
@@ -126,6 +139,8 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                         ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
                         : isPaperSketch
                         ? 'bg-[#f2efeb] border-[#2b2b2b] border-b-2'
+                        : isDashboard
+                        ? 'bg-[#FFF0BE] border-[#4D2A00]/25'
                         : 'bg-white dark:bg-[#1E1E1E] border-slate-200/80 dark:border-zinc-800'
                 }`}>
                     <div className="flex items-center space-x-2.5">
@@ -175,6 +190,8 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                         ? 'bg-[#0F1115]'
                         : isPaperSketch
                         ? 'bg-[#fdfcf0]'
+                        : isDashboard
+                        ? 'bg-[#FFF9E6]'
                         : 'bg-slate-50/20 dark:bg-zinc-900/10'
                 }`}>
                     
@@ -184,6 +201,8 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                             ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
                             : isPaperSketch
                             ? 'bg-[#f2efeb] border-[#2b2b2b] md:border-r-2'
+                            : isDashboard
+                            ? 'bg-[#FFF0BE] border-[#4D2A00]/25'
                             : 'bg-slate-50/60 dark:bg-black/20 border-slate-200/80 dark:border-zinc-800'
                     }`}>
                         
@@ -198,6 +217,7 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                         visual={draftShift.visual}
                                         naming={draftShift.naming}
                                         isPiket={draftShift.isPiket}
+                                        theme={theme}
                                     />
                                 </div>
                             </div>
@@ -219,11 +239,15 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                                         ? 'bg-[#1A1D23] text-[#2DD4BF] border-[#2DD4BF]/50 shadow-xs font-extrabold rounded-[4px]'
                                                         : isPaperSketch
                                                         ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold rounded-lg'
+                                                        : isDashboard
+                                                        ? 'bg-[#4D2A00] text-[#FFFBF0] border-[#4D2A00] shadow-xs font-extrabold'
                                                         : 'bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 border-teal-500/80 dark:border-teal-400 shadow-xs ring-1 ring-teal-500/10 font-extrabold'
                                                     : isIndustrial
                                                     ? 'bg-transparent text-[#E2E8F0]/70 hover:text-[#E2E8F0] hover:bg-white/5 border-transparent'
                                                     : isPaperSketch
                                                     ? 'bg-transparent text-[#2b2b2b] hover:bg-[#2ec4b6]/20 border-2 border-transparent font-bold'
+                                                    : isDashboard
+                                                    ? 'bg-transparent text-[#4D2A00]/70 hover:bg-[#4D2A00]/10 border-transparent'
                                                     : 'bg-transparent text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/40 hover:text-slate-900 dark:hover:text-slate-100 border-transparent'
                                             }`}
                                         >
@@ -243,11 +267,15 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                                         ? 'bg-[#1A1D23] text-[#2DD4BF] border-[#2DD4BF]/50 shadow-xs font-extrabold rounded-[4px]'
                                                         : isPaperSketch
                                                         ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold rounded-lg'
+                                                        : isDashboard
+                                                        ? 'bg-[#4D2A00] text-[#FFFBF0] border-[#4D2A00] shadow-xs font-extrabold'
                                                         : 'bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 border-teal-500/80 dark:border-teal-400 shadow-xs ring-1 ring-teal-500/10 font-extrabold'
                                                     : isIndustrial
                                                     ? 'bg-transparent text-[#E2E8F0]/70 hover:text-[#E2E8F0] hover:bg-white/5 border-transparent'
                                                     : isPaperSketch
                                                     ? 'bg-transparent text-[#2b2b2b] hover:bg-[#2ec4b6]/20 border-2 border-transparent font-bold'
+                                                    : isDashboard
+                                                    ? 'bg-transparent text-[#4D2A00]/70 hover:bg-[#4D2A00]/10 border-transparent'
                                                     : 'bg-transparent text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/40 hover:text-slate-900 dark:hover:text-slate-100 border-transparent'
                                             }`}
                                         >
@@ -257,28 +285,34 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                                     </li>
 
                                     {/* Tab 3: Rule Set */}
-                                    <li className="flex-1 md:w-full shrink-0">
-                                        <button
-                                            type="button"
-                                            onClick={() => setActiveTab('ruleset')}
-                                            className={`w-full text-xs font-bold flex items-center justify-center md:justify-start gap-2.5 px-2.5 md:px-3.5 py-2.5 md:py-3 group rounded-xl transition-all duration-150 select-none cursor-pointer border ${
-                                                activeTab === 'ruleset'
-                                                    ? isIndustrial
-                                                        ? 'bg-[#1A1D23] text-[#2DD4BF] border-[#2DD4BF]/50 shadow-xs font-extrabold rounded-[4px]'
+                                    {canEditAllShifts && (
+                                        <li className="flex-1 md:w-full shrink-0">
+                                            <button
+                                                type="button"
+                                                onClick={() => setActiveTab('ruleset')}
+                                                className={`w-full text-xs font-bold flex items-center justify-center md:justify-start gap-2.5 px-2.5 md:px-3.5 py-2.5 md:py-3 group rounded-xl transition-all duration-150 select-none cursor-pointer border ${
+                                                    activeTab === 'ruleset'
+                                                        ? isIndustrial
+                                                            ? 'bg-[#1A1D23] text-[#2DD4BF] border-[#2DD4BF]/50 shadow-xs font-extrabold rounded-[4px]'
+                                                            : isPaperSketch
+                                                            ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold rounded-lg'
+                                                            : isDashboard
+                                                            ? 'bg-[#4D2A00] text-[#FFFBF0] border-[#4D2A00] shadow-xs font-extrabold'
+                                                            : 'bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 border-teal-500/80 dark:border-teal-400 shadow-xs ring-1 ring-teal-500/10 font-extrabold'
+                                                        : isIndustrial
+                                                        ? 'bg-transparent text-[#E2E8F0]/70 hover:text-[#E2E8F0] hover:bg-white/5 border-transparent'
                                                         : isPaperSketch
-                                                        ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold rounded-lg'
-                                                        : 'bg-white dark:bg-zinc-800 text-teal-600 dark:text-teal-400 border-teal-500/80 dark:border-teal-400 shadow-xs ring-1 ring-teal-500/10 font-extrabold'
-                                                    : isIndustrial
-                                                    ? 'bg-transparent text-[#E2E8F0]/70 hover:text-[#E2E8F0] hover:bg-white/5 border-transparent'
-                                                    : isPaperSketch
-                                                    ? 'bg-transparent text-[#2b2b2b] hover:bg-[#2ec4b6]/20 border-2 border-transparent font-bold'
-                                                    : 'bg-transparent text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/40 hover:text-slate-900 dark:hover:text-slate-100 border-transparent'
-                                            }`}
-                                        >
-                                            <Settings className="w-4 h-4 shrink-0 transition-transform group-hover:rotate-45 duration-300" />
-                                            <span>Rule Set</span>
-                                        </button>
-                                    </li>
+                                                        ? 'bg-transparent text-[#2b2b2b] hover:bg-[#2ec4b6]/20 border-2 border-transparent font-bold'
+                                                        : isDashboard
+                                                        ? 'bg-transparent text-[#4D2A00]/70 hover:bg-[#4D2A00]/10 border-transparent'
+                                                        : 'bg-transparent text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/40 hover:text-slate-900 dark:hover:text-slate-100 border-transparent'
+                                                }`}
+                                            >
+                                                <Settings className="w-4 h-4 shrink-0 transition-transform group-hover:rotate-45 duration-300" />
+                                                <span>Rule Set</span>
+                                            </button>
+                                        </li>
+                                    )}
                                 </ul>
                             </div>
                         </div>
@@ -329,6 +363,8 @@ export const ShiftEditModal: React.FC<ShiftEditModalProps> = ({
                             ? 'bg-[#0F1115] text-[#E2E8F0]'
                             : isPaperSketch
                             ? 'bg-[#fdfcf0] text-[#2b2b2b]'
+                            : isDashboard
+                            ? 'bg-[#FFF9E6] text-[#4D2A00]'
                             : 'bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100'
                     }`}>
                         

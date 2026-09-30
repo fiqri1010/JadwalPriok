@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Users,
     UserPlus,
@@ -20,19 +20,68 @@ import {
     ArrowUpDown,
     ArrowUp,
     ArrowDown,
+    Laptop,
+    Radio,
+    PowerOff,
+    RefreshCw,
+    Globe,
+    Wifi,
 } from 'lucide-react';
 import { UserAccount, AuthorityProfile, UserRole, UserSessionRecord } from '../../types/admin';
 import { AppTheme } from '../../types';
 import { Checkbox } from '../ui/Checkbox';
-import { getAllUserSessions, getApprovalRequests, saveApprovalRequests, LOCAL_STORAGE_CURRENT_NIP_KEY, LOCAL_STORAGE_CURRENT_PASS_KEY } from '../../utils/adminStorage';
+import {
+    getAllUserSessions,
+    saveAllUserSessions,
+    getApprovalRequests,
+    saveApprovalRequests,
+    purgeUserDataCompletely,
+    LOCAL_STORAGE_CURRENT_NIP_KEY,
+    LOCAL_STORAGE_CURRENT_PASS_KEY,
+} from '../../utils/adminStorage';
 
 export const POSKO_OPTIONS = [
-    'Posko Graha Lt. 1',
-    'Posko Graha Ground',
-    'Posko CDC',
-    'Posko NPCT',
-    'Posko Koja',
+    'Graha Segara Lt. 1',
+    'Graha Ground',
+    'CDC',
+    'NPCT',
+    'Koja',
 ];
+
+/**
+ * Hapus kata 'Posko' dari nama posko untuk konsistensi dan tampilan bersih
+ */
+export const cleanPoskoName = (name?: string): string => {
+    if (!name) return '';
+    return name.replace(/^Posko\s+/i, '').replace(/\bPosko\b/gi, '').trim() || name;
+};
+
+/**
+ * Format nama display jika lebih dari 3 kata, inisialkan nama tengah.
+ * Contoh: "Ahmad Fauzi Razna Sidakkal Harahap" -> "Ahmad F. R. S. Harahap"
+ * Contoh: "Raden Muhammad Raka Pratama" -> "Raden M. R. Pratama"
+ * Contoh: "Aldo Monang Simanjuntak" -> "Aldo Monang Simanjuntak" (3 kata tetap utuh)
+ */
+export const formatDisplayName = (fullName: string): string => {
+    if (!fullName) return '';
+    const trimmed = fullName.trim();
+    const parts = trimmed.split(/\s+/);
+    if (parts.length <= 3) {
+        return trimmed;
+    }
+    const first = parts[0];
+    const last = parts[parts.length - 1];
+    const middleInitials = parts
+        .slice(1, parts.length - 1)
+        .map((w) => {
+            const cleanWord = w.replace(/[^a-zA-Z0-9]/g, '');
+            return cleanWord ? `${cleanWord.charAt(0).toUpperCase()}.` : '';
+        })
+        .filter(Boolean)
+        .join(' ');
+
+    return `${first} ${middleInitials} ${last}`;
+};
 
 interface AdminUserListTabProps {
     users: UserAccount[];
@@ -58,11 +107,50 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     const isTechnical = theme === 'technical';
     const isWinamp = theme === 'winamp';
     const isDark = theme === 'dark';
+    const isDashboard = theme === 'dashboard';
+
+    const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+    // Keyboard scroll for table horizontal navigation using ArrowLeft and ArrowRight
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const activeEl = document.activeElement;
+            const isTyping = activeEl && (
+                activeEl.tagName === 'INPUT' ||
+                activeEl.tagName === 'TEXTAREA' ||
+                activeEl.tagName === 'SELECT' ||
+                (activeEl as HTMLElement).isContentEditable
+            );
+
+            if (isTyping) return;
+
+            if (scrollContainerRef.current) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    scrollContainerRef.current.scrollBy({ left: -120, behavior: 'smooth' });
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    scrollContainerRef.current.scrollBy({ left: 120, behavior: 'smooth' });
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     // Daftar sesi aktif yang tersinkronisasi penuh dengan Pengaturan Akun
-    const activeSessions = useMemo(() => {
-        return sessions && sessions.length > 0 ? sessions : getAllUserSessions();
+    const [localSessions, setLocalSessions] = useState<UserSessionRecord[]>(() => sessions && sessions.length > 0 ? sessions : getAllUserSessions());
+
+    useEffect(() => {
+        if (sessions && sessions.length > 0) {
+            setLocalSessions(sessions);
+        } else {
+            setLocalSessions(getAllUserSessions());
+        }
     }, [sessions]);
+
+    const activeSessions = localSessions;
 
     // Helper untuk mengecek apakah akun pengguna adalah Super Admin
     const isSuperAdminUser = (u: UserAccount) => {
@@ -89,7 +177,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
         const set = new Set<string>();
         users.forEach((u) => {
             if (u.unitPosko && u.unitPosko.trim()) {
-                set.add(u.unitPosko.trim());
+                set.add(cleanPoskoName(u.unitPosko.trim()));
             }
         });
         return Array.from(set).sort();
@@ -100,11 +188,44 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
     const [resettingUser, setResettingUser] = useState<UserAccount | null>(null);
     const [deletingUser, setDeletingUser] = useState<UserAccount | null>(null);
+    const [sessionModalData, setSessionModalData] = useState<{ user: UserAccount; session: UserSessionRecord | null } | null>(null);
+
+    // Force disconnect / logout session handler
+    const handleTerminateSession = (targetNip: string, userName: string) => {
+        const updated = localSessions.map((s) => {
+            if (s.userNip === targetNip) {
+                return {
+                    ...s,
+                    isOnline: false,
+                    lastActive: 'Sesi diputus oleh Admin',
+                };
+            }
+            return s;
+        });
+        setLocalSessions(updated);
+        saveAllUserSessions(updated);
+        if (sessionModalData && sessionModalData.user.nip === targetNip) {
+            const updatedSession = updated.find((s) => s.userNip === targetNip) || null;
+            setSessionModalData({ ...sessionModalData, session: updatedSession });
+        }
+        onShowToast(`Sesi perangkat untuk ${userName} (NIP: ${targetNip}) berhasil diputuskan.`);
+    };
+
+    // Refresh session data handler
+    const handleRefreshSessions = () => {
+        const refreshed = getAllUserSessions();
+        setLocalSessions(refreshed);
+        if (sessionModalData) {
+            const updatedSession = refreshed.find((s) => s.userNip === sessionModalData.user.nip) || null;
+            setSessionModalData({ ...sessionModalData, session: updatedSession });
+        }
+        onShowToast('Data sesi seluruh perangkat berhasil disinkronkan kembali.');
+    };
 
     // Form state for Add/Edit
     const [formNip, setFormNip] = useState('');
     const [formName, setFormName] = useState('');
-    const [formUnit, setFormUnit] = useState('Posko Graha Lt. 1');
+    const [formUnit, setFormUnit] = useState('Graha Segara Lt. 1');
     const [formProfileId, setFormProfileId] = useState(authorityProfiles[0]?.id || 'prof-petugas-posko');
     const [formSquad, setFormSquad] = useState<'Regu A' | 'Regu B' | 'Regu C' | 'Regu D' | 'Non-Regu'>('Regu A');
     const [formIsExternal, setFormIsExternal] = useState(false);
@@ -113,7 +234,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     const openAddModal = () => {
         setFormNip('');
         setFormName('');
-        setFormUnit('Posko Graha Lt. 1');
+        setFormUnit('Graha Segara Lt. 1');
         setFormProfileId(authorityProfiles.find(p => p.roleType === 'end-user')?.id || authorityProfiles[0]?.id || '');
         setFormSquad('Regu A');
         setFormIsExternal(false);
@@ -129,7 +250,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
         setEditingUser(user);
         setFormNip(user.nip);
         setFormName(user.name);
-        setFormUnit(user.unitPosko);
+        setFormUnit(cleanPoskoName(user.unitPosko));
         setFormProfileId(user.authorityProfileId);
         setFormSquad(user.assignedSquad || 'Regu A');
         setFormIsExternal(Boolean(user.isExternalNonAppUser));
@@ -148,10 +269,10 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
             id: `usr-${Date.now()}`,
             nip: formNip.trim(),
             name: formName.trim(),
-            unitPosko: formUnit.trim() || 'Posko Pelayanan Graha',
+            unitPosko: cleanPoskoName(formUnit.trim()) || 'Graha Segara Lt. 1',
             role: selectedProfile?.roleType || 'end-user',
             authorityProfileId: selectedProfile?.id || '',
-            authorityName: selectedProfile?.name || 'Petugas Posko',
+            authorityName: selectedProfile?.name || 'PPF',
             isActive: formIsActive,
             hasPassword: false,
             passwordValue: '',
@@ -189,7 +310,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                 return {
                     ...u,
                     name: formName.trim(),
-                    unitPosko: formUnit.trim() || u.unitPosko,
+                    unitPosko: cleanPoskoName(formUnit.trim()) || cleanPoskoName(u.unitPosko),
                     role: selectedProfile?.roleType || u.role,
                     authorityProfileId: selectedProfile?.id || u.authorityProfileId,
                     authorityName: selectedProfile?.name || u.authorityName,
@@ -277,18 +398,21 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
             setDeletingUser(null);
             return;
         }
+        // Hapus seluruh data terkait pengguna secara menyeluruh dari aplikasi
+        purgeUserDataCompletely(deletingUser.nip);
         const updated = users.filter((u) => u.id !== deletingUser.id);
         onUpdateUsers(updated);
         setDeletingUser(null);
-        onShowToast(`Pengguna ${deletingUser.name} berhasil dihapus dari sistem posko.`);
+        onShowToast(`Pengguna ${deletingUser.name} beserta seluruh datanya berhasil dihapus dari sistem posko.`);
     };
 
     // Filter pengguna
     const filteredUsers = users.filter((u) => {
+        const cleanedUnit = cleanPoskoName(u.unitPosko);
         const matchesSearch =
             u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             u.nip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            u.unitPosko.toLowerCase().includes(searchQuery.toLowerCase());
+            cleanedUnit.toLowerCase().includes(searchQuery.toLowerCase());
 
         let matchesRole = true;
         if (roleFilter === 'admin') matchesRole = u.role === 'admin';
@@ -300,7 +424,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
         else if (statusFilter === 'inactive') matchesStatus = !u.isActive;
 
         let matchesPosko = true;
-        if (poskoFilter !== 'all') matchesPosko = u.unitPosko === poskoFilter;
+        if (poskoFilter !== 'all') matchesPosko = cleanedUnit === poskoFilter;
 
         return matchesSearch && matchesRole && matchesStatus && matchesPosko;
     });
@@ -392,9 +516,6 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 {users.length} Total Pegawai
                             </span>
                         </div>
-                        <p className="text-xs opacity-70">
-                            Kelola akun, status aktif akun, sesi perangkat, reset password, dan perizinan petugas
-                        </p>
                     </div>
                 </div>
 
@@ -409,34 +530,36 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
             </div>
 
             {/* Filter & Search Bar */}
-            <div className={`p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+            <div className={`p-2 sm:p-2.5 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-2.5 ${
                 isIndustrial
                     ? 'bg-[#0F1115] border-[rgba(226,232,240,0.15)] text-[#E2E8F0]'
                     : isPaperSketch
                     ? 'bg-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
                     : isDark
                     ? 'bg-[#161616] border-slate-800'
+                    : isDashboard
+                    ? 'bg-[#FFF0BE] border-[#4D2A00]/25 text-[#4D2A00]'
                     : 'bg-white border-slate-200'
             }`}>
-                <div className="relative flex-1">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 opacity-50" />
+                <div className="relative flex-1 min-w-[180px] max-w-full md:max-w-xs">
+                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 opacity-50" />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Cari berdasarkan Nama, NIP, atau Posko..."
-                        className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-current/20 bg-current/5 outline-none font-bold focus:border-teal-500"
+                        placeholder=""
+                        className="w-full pl-8 pr-2.5 py-1.5 text-xs rounded-lg border border-current/20 bg-current/5 outline-none font-bold focus:border-teal-500 transition-colors"
                     />
                 </div>
 
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap overflow-x-auto no-scrollbar py-0.5">
                     <div className="flex items-center gap-1 text-xs shrink-0">
-                        <Filter className="w-3.5 h-3.5 opacity-60" />
-                        <span className="opacity-70 font-medium">Role:</span>
+                        <Filter className="w-3 h-3 opacity-60 shrink-0" />
+                        <span className="opacity-70 font-medium text-[11px]">Role:</span>
                         <select
                             value={roleFilter}
                             onChange={(e) => setRoleFilter(e.target.value as any)}
-                            className="text-xs p-1.5 rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer"
+                            className="text-xs py-1 px-1.5 rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer"
                         >
                             <option value="all">Semua Tipe</option>
                             <option value="admin">Admin</option>
@@ -446,11 +569,11 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                     </div>
 
                     <div className="flex items-center gap-1 text-xs shrink-0">
-                        <span className="opacity-70 font-medium">Status:</span>
+                        <span className="opacity-70 font-medium text-[11px]">Status:</span>
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value as any)}
-                            className="text-xs p-1.5 rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer"
+                            className="text-xs py-1 px-1.5 rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer"
                         >
                             <option value="all">Semua Status</option>
                             <option value="active">Hanya Aktif</option>
@@ -459,11 +582,11 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                     </div>
 
                     <div className="flex items-center gap-1 text-xs shrink-0">
-                        <span className="opacity-70 font-medium">Posko:</span>
+                        <span className="opacity-70 font-medium text-[11px]">Posko:</span>
                         <select
                             value={poskoFilter}
                             onChange={(e) => setPoskoFilter(e.target.value)}
-                            className="text-xs p-1.5 rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer max-w-[150px] truncate"
+                            className="text-xs py-1 px-1.5 rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer max-w-[140px] truncate"
                         >
                             <option value="all">Semua Posko</option>
                             {uniquePoskoList.map((p) => (
@@ -476,7 +599,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                 </div>
             </div>
 
-            {/* TABEL LIST PENGGUNA (No. | Nama | NIP | Posko | Checkbox Aktif | Reset Pass | Edit | Hapus) */}
+            {/* TABEL LIST PENGGUNA (Minimalis & High Information Density) */}
             <div className={`rounded-xl border overflow-hidden ${
                 isIndustrial
                     ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.15)] text-[#E2E8F0]'
@@ -484,21 +607,25 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                     ? 'bg-white border-2 border-[#2b2b2b]'
                     : isDark
                     ? 'bg-[#161616] border-slate-800'
+                    : isDashboard
+                    ? 'bg-[#FFF9E6] border-[#4D2A00]/25 text-[#4D2A00]'
                     : 'bg-white border-slate-200'
             }`}>
-                <div className="overflow-x-auto select-none no-scrollbar max-h-[520px] lg:max-h-[580px] overflow-y-auto">
-                    <table className="w-full min-w-[720px] border-collapse text-xs">
+                <div ref={scrollContainerRef} className="overflow-x-auto select-none no-scrollbar max-h-[520px] lg:max-h-[580px] overflow-y-auto">
+                    <table className="w-full table-auto border-collapse text-xs">
                         <thead>
-                            <tr className="bg-current/5 border-b border-current/15 text-center font-bold text-[10.5px] uppercase tracking-wider sticky top-0 bg-slate-200/90 dark:bg-[#161616]/95 backdrop-blur-xs z-10">
+                            <tr className={`border-b border-current/15 text-center font-bold text-[10px] sm:text-[11px] uppercase tracking-wider sticky top-0 backdrop-blur-xs z-10 ${
+                                isDashboard ? 'bg-[#FFF0BE] text-[#4D2A00]' : 'bg-slate-200/90 dark:bg-[#161616]/95'
+                            }`}>
                                 {/* 1. No */}
                                 <th
                                     onClick={() => handleSort('no')}
-                                    className={`py-2 px-1.5 text-center w-12 min-w-[38px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                    className={`py-2 px-1 text-center cursor-pointer hover:bg-current/10 transition-colors select-none group w-1 whitespace-nowrap ${
                                         sortField === 'no' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
                                     }`}
                                     title="Klik untuk mengurutkan No. Urut"
                                 >
-                                    <div className="inline-flex items-center justify-center gap-0.5 w-full mx-auto text-center">
+                                    <div className="inline-flex items-center justify-center gap-0.5 mx-auto text-center">
                                         <span>No.</span>
                                         {renderSortIcon('no')}
                                     </div>
@@ -507,12 +634,12 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 {/* 2. Nama */}
                                 <th
                                     onClick={() => handleSort('name')}
-                                    className={`py-2 px-2 text-center min-w-[140px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                    className={`py-2 px-2 text-left cursor-pointer hover:bg-current/10 transition-colors select-none group whitespace-nowrap ${
                                         sortField === 'name' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
                                     }`}
                                     title="Klik untuk mengurutkan Nama Pengguna"
                                 >
-                                    <div className="inline-flex items-center justify-center gap-1 w-full mx-auto text-center">
+                                    <div className="inline-flex items-center gap-0.5">
                                         <span>Nama</span>
                                         {renderSortIcon('name')}
                                     </div>
@@ -521,12 +648,12 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 {/* 3. NIP */}
                                 <th
                                     onClick={() => handleSort('nip')}
-                                    className={`py-2 px-2 text-center min-w-[105px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                    className={`py-2 px-1 text-center cursor-pointer hover:bg-current/10 transition-colors select-none group w-1 whitespace-nowrap ${
                                         sortField === 'nip' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
                                     }`}
                                     title="Klik untuk mengurutkan NIP"
                                 >
-                                    <div className="inline-flex items-center justify-center gap-1 w-full mx-auto text-center">
+                                    <div className="inline-flex items-center justify-center gap-0.5 mx-auto text-center">
                                         <span>NIP</span>
                                         {renderSortIcon('nip')}
                                     </div>
@@ -535,12 +662,12 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 {/* 4. Posko */}
                                 <th
                                     onClick={() => handleSort('unitPosko')}
-                                    className={`py-2 px-2 text-center min-w-[125px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                    className={`py-2 px-1.5 text-left cursor-pointer hover:bg-current/10 transition-colors select-none group whitespace-nowrap ${
                                         sortField === 'unitPosko' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
                                     }`}
                                     title="Klik untuk mengurutkan Posko"
                                 >
-                                    <div className="inline-flex items-center justify-center gap-1 w-full mx-auto text-center">
+                                    <div className="inline-flex items-center gap-0.5">
                                         <span>Posko</span>
                                         {renderSortIcon('unitPosko')}
                                     </div>
@@ -549,12 +676,12 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 {/* 5. Sesi */}
                                 <th
                                     onClick={() => handleSort('session')}
-                                    className={`py-2 px-2 text-center min-w-[125px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                    className={`py-2 px-1 text-center cursor-pointer hover:bg-current/10 transition-colors select-none group w-1 whitespace-nowrap ${
                                         sortField === 'session' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
                                     }`}
                                     title="Klik untuk mengurutkan status Sesi Perangkat"
                                 >
-                                    <div className="inline-flex items-center justify-center gap-1 w-full mx-auto text-center">
+                                    <div className="inline-flex items-center justify-center gap-0.5 mx-auto text-center">
                                         <span>Sesi</span>
                                         {renderSortIcon('session')}
                                     </div>
@@ -563,27 +690,27 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 {/* 6. Aktif */}
                                 <th
                                     onClick={() => handleSort('isActive')}
-                                    className={`py-2 px-1 text-center min-w-[70px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                    className={`py-2 px-1 text-center cursor-pointer hover:bg-current/10 transition-colors select-none group w-1 whitespace-nowrap ${
                                         sortField === 'isActive' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
                                     }`}
                                     title="Klik untuk mengurutkan Status Aktif"
                                 >
-                                    <div className="inline-flex items-center justify-center gap-0.5 w-full mx-auto text-center">
+                                    <div className="inline-flex items-center justify-center gap-0.5 mx-auto text-center">
                                         <span>Aktif</span>
                                         {renderSortIcon('isActive')}
                                     </div>
                                 </th>
 
-                                {/* 7. Reset Pass - Diperkecil & Autoscale */}
+                                {/* 7. Reset Pass */}
                                 <th
                                     onClick={() => handleSort('hasPassword')}
-                                    className={`py-2 px-0.5 sm:px-1 text-center w-14 sm:w-16 min-w-[48px] sm:min-w-[56px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                    className={`py-2 px-1 text-center cursor-pointer hover:bg-current/10 transition-colors select-none group w-1 whitespace-nowrap ${
                                         sortField === 'hasPassword' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
                                     }`}
                                     title="Klik untuk mengurutkan status password"
                                 >
-                                    <div className="inline-flex items-center justify-center gap-0.5 w-full mx-auto text-center">
-                                        <span className="truncate">Reset</span>
+                                    <div className="inline-flex items-center justify-center gap-0.5 mx-auto text-center">
+                                        <span>Reset</span>
                                         {renderSortIcon('hasPassword')}
                                     </div>
                                 </th>
@@ -591,12 +718,12 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 {/* 8. Edit */}
                                 <th
                                     onClick={() => handleSort('edit')}
-                                    className={`py-2 px-0.5 sm:px-1 text-center w-14 min-w-[48px] sm:min-w-[54px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                    className={`py-2 px-1 text-center cursor-pointer hover:bg-current/10 transition-colors select-none group w-1 whitespace-nowrap ${
                                         sortField === 'edit' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
                                     }`}
                                     title="Klik untuk mengurutkan izin edit"
                                 >
-                                    <div className="inline-flex items-center justify-center gap-0.5 w-full mx-auto text-center">
+                                    <div className="inline-flex items-center justify-center gap-0.5 mx-auto text-center">
                                         <span>Edit</span>
                                         {renderSortIcon('edit')}
                                     </div>
@@ -605,12 +732,12 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 {/* 9. Hapus */}
                                 <th
                                     onClick={() => handleSort('delete')}
-                                    className={`py-2 px-0.5 sm:px-1 text-center w-14 min-w-[52px] sm:min-w-[58px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                    className={`py-2 px-1 text-center cursor-pointer hover:bg-current/10 transition-colors select-none group w-1 whitespace-nowrap ${
                                         sortField === 'delete' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
                                     }`}
                                     title="Klik untuk mengurutkan akun yang dapat dihapus"
                                 >
-                                    <div className="inline-flex items-center justify-center gap-0.5 w-full mx-auto text-center">
+                                    <div className="inline-flex items-center justify-center gap-0.5 mx-auto text-center">
                                         <span>Hapus</span>
                                         {renderSortIcon('delete')}
                                     </div>
@@ -623,6 +750,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 const userSession = activeSessions.find((s) => s.userNip === u.nip);
                                 const isSuperAdmin = isSuperAdminUser(u);
                                 const isFrozen = isAccountFrozen(u);
+                                const isPasswordEmpty = !u.hasPassword || (u.passwordValue !== undefined && u.passwordValue.trim() === '');
 
                                 return (
                                     <tr
@@ -632,21 +760,23 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                         }`}
                                     >
                                         {/* 1. No. */}
-                                        <td className="py-2 px-1.5 text-center font-mono font-bold opacity-70">
+                                        <td className="py-2 px-1 text-center font-mono font-bold text-xs opacity-75 whitespace-nowrap w-1">
                                             {idx + 1}
                                         </td>
 
                                         {/* 2. Nama */}
-                                        <td className="py-2 px-2 font-bold">
-                                            <div className="truncate text-xs font-extrabold">{u.name}</div>
-                                            <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                                <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold uppercase border ${
+                                        <td className="py-2 px-2 font-bold whitespace-nowrap">
+                                            <div className="whitespace-nowrap text-xs sm:text-[13px] font-extrabold leading-tight" title={u.name}>
+                                                {formatDisplayName(u.name)}
+                                            </div>
+                                            <div className="flex items-center gap-1 mt-0.5 whitespace-nowrap">
+                                                <span className={`text-[9.5px] font-mono px-1.5 py-0.5 rounded font-bold uppercase border leading-tight ${
                                                     prof?.badgeColor || (u.role === 'admin' ? 'bg-teal-500/15 text-teal-600 border-teal-500/30' : 'bg-slate-500/15 text-slate-600 border-slate-500/30')
                                                 }`}>
                                                     {prof?.name || u.authorityName || (u.role === 'admin' ? 'ADMIN' : 'PPF')}
                                                 </span>
                                                 {u.isExternalNonAppUser && (
-                                                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded font-bold bg-indigo-500/15 text-indigo-600 border border-indigo-500/30">
+                                                    <span className="text-[9.5px] font-mono px-1.5 py-0.5 rounded font-bold bg-indigo-500/15 text-indigo-600 border border-indigo-500/30 leading-tight">
                                                         Luar
                                                     </span>
                                                 )}
@@ -654,65 +784,71 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                         </td>
 
                                         {/* 3. NIP */}
-                                        <td className="py-2 px-2 font-mono font-bold opacity-85 tracking-wide text-center">
+                                        <td className="py-2 px-1 font-mono font-bold text-xs opacity-85 tracking-wide text-center whitespace-nowrap w-1">
                                             {u.nip}
                                         </td>
 
                                         {/* 4. Posko */}
-                                        <td className="py-2 px-2 opacity-80">
-                                            <div className="flex items-center gap-1">
-                                                <Building2 className="w-3.5 h-3.5 opacity-60 shrink-0" />
-                                                <span className="truncate">{u.unitPosko}</span>
+                                        <td className="py-2 px-1.5 opacity-80 text-xs sm:text-[13px] whitespace-nowrap">
+                                            <div className="inline-flex items-center gap-1">
+                                                <Building2 className="w-3 h-3 opacity-60 shrink-0" />
+                                                <span className="whitespace-nowrap">{cleanPoskoName(u.unitPosko)}</span>
                                             </div>
                                         </td>
 
                                         {/* 5. Sesi (Online / Offline & Perangkat Riil Tersinkronisasi) */}
-                                        <td className="py-2 px-2 text-center min-w-[125px]">
-                                            {userSession ? (
-                                                <div className="inline-flex flex-col items-center justify-center text-center mx-auto max-w-[125px]">
-                                                    <div className="flex items-center justify-center gap-1.5">
-                                                        <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${
-                                                            userSession.isOnline
-                                                                ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)] animate-pulse'
-                                                                : 'bg-slate-400'
-                                                        }`} />
-                                                        <span className={`text-[10px] font-extrabold ${
-                                                            userSession.isOnline
-                                                                ? 'text-emerald-600 dark:text-emerald-400'
-                                                                : 'opacity-55'
-                                                        }`}>
-                                                            {userSession.isOnline ? 'Online' : 'Offline'}
-                                                        </span>
+                                        <td className="py-2 px-1 text-center whitespace-nowrap w-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setSessionModalData({ user: u, session: userSession || null })}
+                                                className="inline-block p-1 rounded-md hover:bg-current/10 active:scale-95 transition-all cursor-pointer text-center group"
+                                                title="Klik untuk melihat spesifikasi detail perangkat & sesi riil"
+                                            >
+                                                {userSession ? (
+                                                    <div className="inline-flex flex-col items-center justify-center text-center mx-auto">
+                                                        <div className="flex items-center justify-center gap-1">
+                                                            <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${
+                                                                userSession.isOnline
+                                                                    ? 'bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.8)] animate-pulse'
+                                                                    : 'bg-slate-400'
+                                                            }`} />
+                                                            <span className={`text-[10px] sm:text-[11px] font-extrabold leading-none ${
+                                                                userSession.isOnline
+                                                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                                                    : 'opacity-55'
+                                                            }`}>
+                                                                {userSession.isOnline ? 'Online' : 'Offline'}
+                                                            </span>
+                                                        </div>
+                                                        <div
+                                                            className="text-[9.5px] font-mono opacity-75 whitespace-nowrap mt-0.5 font-bold group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors leading-tight"
+                                                        >
+                                                            {userSession.ipAddress || userSession.deviceName}
+                                                        </div>
+                                                        <div className="text-[8.5px] opacity-50 whitespace-nowrap leading-tight">
+                                                            {userSession.lastActive}
+                                                        </div>
                                                     </div>
-                                                    <div
-                                                        className="text-[9.5px] font-mono opacity-75 truncate max-w-[120px] mt-0.5 font-bold"
-                                                        title={`${userSession.deviceName} (${userSession.ipAddress}) • ${userSession.browser} / ${userSession.os}`}
-                                                    >
-                                                        {userSession.ipAddress || userSession.deviceName}
+                                                ) : (
+                                                    <div className="inline-flex items-center justify-center gap-1 text-[10px] opacity-40 font-mono group-hover:opacity-75 whitespace-nowrap">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400/50" />
+                                                        <span>Belum Login</span>
                                                     </div>
-                                                    <div className="text-[9px] opacity-55 truncate max-w-[120px]">
-                                                        {userSession.lastActive}
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="inline-flex items-center justify-center gap-1 text-[10px] opacity-40 font-mono">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400/50" />
-                                                    <span>Belum Login</span>
-                                                </div>
-                                            )}
+                                                )}
+                                            </button>
                                         </td>
 
                                         {/* 6. Checkbox Aktif (Untuk mengaktifkan akun) */}
-                                        <td className="py-2 px-1 text-center">
+                                        <td className="py-2 px-1 text-center whitespace-nowrap w-1">
                                             <Checkbox
                                                 id={`status-chk-${u.id}`}
                                                 theme={theme}
-                                                size="12px"
+                                                size="13px"
                                                 checked={u.isActive}
                                                 disabled={isSuperAdmin}
                                                 onChange={() => handleToggleCheckbox(u)}
                                                 label={
-                                                    <span className={`text-[10px] font-bold ${
+                                                    <span className={`text-[10.5px] sm:text-xs font-bold ${
                                                         u.isActive ? 'text-emerald-600 dark:text-emerald-400' : 'opacity-50'
                                                     }`}>
                                                         {u.isActive ? 'Aktif' : 'Nonaktif'}
@@ -721,24 +857,34 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                             />
                                         </td>
 
-                                        {/* 7. Tombol Reset Pass - Kompak, Autoscale & Dibekukan jika Super Admin */}
-                                        <td className="py-2 px-0.5 sm:px-1 text-center w-14 sm:w-16 min-w-[48px] sm:min-w-[56px]">
+                                        {/* 7. Tombol Reset Pass - Kompak & Minimalis */}
+                                        <td className="py-2 px-1 text-center whitespace-nowrap w-1">
                                             {isFrozen ? (
                                                 <button
                                                     type="button"
                                                     disabled
                                                     onClick={() => onShowToast('Reset password akun Super Admin dibekukan untuk role Admin.')}
-                                                    className="w-full max-w-[52px] mx-auto py-1 px-0.5 text-[9px] font-bold rounded border border-current/15 bg-current/5 opacity-40 cursor-not-allowed inline-flex items-center justify-center gap-0.5 select-none"
+                                                    className="py-1 px-2 text-[10px] sm:text-xs font-bold rounded border border-current/15 bg-current/5 opacity-40 cursor-not-allowed inline-flex items-center justify-center gap-0.5 select-none"
                                                     title="Reset password dibekukan: Hanya Super Admin yang dapat mereset akun Super Admin"
                                                 >
                                                     <Lock className="w-2.5 h-2.5 shrink-0" />
-                                                    <span className="text-[8.5px]">Beku</span>
+                                                    <span>Beku</span>
+                                                </button>
+                                            ) : isPasswordEmpty ? (
+                                                <button
+                                                    type="button"
+                                                    disabled
+                                                    className="py-1 px-2 text-[10px] sm:text-xs font-bold rounded border border-current/15 bg-current/5 opacity-40 cursor-not-allowed inline-flex items-center justify-center gap-0.5 select-none text-current"
+                                                    title="Password masih kosong (belum diatur oleh pengguna)"
+                                                >
+                                                    <KeyRound className="w-2.5 h-2.5 shrink-0 opacity-50" />
+                                                    <span>Reset</span>
                                                 </button>
                                             ) : (
                                                 <button
                                                     type="button"
                                                     onClick={() => setResettingUser(u)}
-                                                    className="w-full max-w-[52px] mx-auto py-1 px-0.5 text-[9px] font-bold rounded border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-0.5 transition-all"
+                                                    className="py-1 px-2 text-[10px] sm:text-xs font-bold rounded border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-0.5 transition-all shadow-2xs"
                                                     title="Reset dan kosongkan password akun ini"
                                                 >
                                                     <KeyRound className="w-2.5 h-2.5 shrink-0" />
@@ -747,24 +893,24 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                             )}
                                         </td>
 
-                                        {/* 8. Tombol Edit - Dibekukan untuk Super Admin jika operator Admin */}
-                                        <td className="py-2 px-0.5 sm:px-1 text-center w-14 min-w-[48px] sm:min-w-[54px]">
+                                        {/* 8. Tombol Edit - Kompak & Minimalis */}
+                                        <td className="py-2 px-1 text-center whitespace-nowrap w-1">
                                             {isFrozen ? (
                                                 <button
                                                     type="button"
                                                     disabled
                                                     onClick={() => onShowToast('Akses edit ke akun Super Admin dibekukan untuk role Admin.')}
-                                                    className="w-full max-w-[50px] mx-auto py-1 px-0.5 text-[9px] font-bold rounded border border-current/15 bg-current/5 opacity-40 cursor-not-allowed inline-flex items-center justify-center gap-0.5 select-none"
+                                                    className="py-1 px-2 text-[10px] sm:text-xs font-bold rounded border border-current/15 bg-current/5 opacity-40 cursor-not-allowed inline-flex items-center justify-center gap-0.5 select-none"
                                                     title="Akses edit dibekukan: Hanya Super Admin yang dapat mengubah akun Super Admin"
                                                 >
                                                     <Lock className="w-2.5 h-2.5 text-slate-400 shrink-0" />
-                                                    <span className="text-[8.5px]">Beku</span>
+                                                    <span>Beku</span>
                                                 </button>
                                             ) : (
                                                 <button
                                                     type="button"
                                                     onClick={() => openEditModal(u)}
-                                                    className="w-full max-w-[50px] mx-auto py-1 px-0.5 text-[9.5px] font-bold rounded border border-current/20 hover:bg-current/10 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-0.5 transition-all"
+                                                    className="py-1 px-2 text-[10px] sm:text-xs font-bold rounded border border-current/20 hover:bg-current/10 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-0.5 transition-all"
                                                     title="Edit Akun Pengguna"
                                                 >
                                                     <Edit3 className="w-2.5 h-2.5 text-teal-600 dark:text-teal-400 shrink-0" />
@@ -773,10 +919,10 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                             )}
                                         </td>
 
-                                        {/* 9. Tombol Hapus */}
-                                        <td className="py-2 px-0.5 sm:px-1 text-center w-14 min-w-[52px] sm:min-w-[58px]">
+                                        {/* 9. Tombol Hapus - Kompak & Minimalis */}
+                                        <td className="py-1.5 px-1 text-center whitespace-nowrap">
                                             {isSuperAdmin ? (
-                                                <span className="text-[9px] opacity-40 select-none font-bold uppercase tracking-wider inline-flex items-center justify-center gap-0.5 text-center w-full">
+                                                <span className="text-[8.5px] opacity-40 select-none font-bold uppercase tracking-wider inline-flex items-center justify-center gap-0.5 text-center">
                                                     <Lock className="w-2.5 h-2.5 shrink-0" />
                                                     <span>Admin</span>
                                                 </span>
@@ -784,11 +930,12 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                                 <button
                                                     type="button"
                                                     onClick={() => setDeletingUser(u)}
-                                                    className="w-full max-w-[52px] mx-auto py-1 px-0.5 text-[9.5px] font-bold rounded border border-rose-500/40 text-rose-600 hover:bg-rose-500/10 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-0.5 transition-all"
+                                                    className="btn-glitch-delete py-0.5 px-1.5 text-[8.5px] font-bold rounded border border-rose-500/40 text-rose-600 hover:bg-rose-500/10 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-0.5 transition-all"
                                                     title="Hapus Akun Pengguna"
+                                                    data-text="Hapus"
                                                 >
-                                                    <Trash2 className="w-2.5 h-2.5 shrink-0" />
-                                                    <span>Hapus</span>
+                                                    <Trash2 className="w-2.5 h-2.5 shrink-0 relative z-10" />
+                                                    <span className="relative z-10">Hapus</span>
                                                 </button>
                                             )}
                                         </td>
@@ -898,10 +1045,11 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                             <button
                                 type="button"
                                 onClick={handleExecuteDelete}
-                                className="px-4 py-2 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white cursor-pointer shadow-xs flex items-center gap-1.5"
+                                className="btn-glitch-delete px-4 py-2 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white cursor-pointer shadow-xs flex items-center gap-1.5"
+                                data-text="Hapus Pengguna"
                             >
-                                <Trash2 className="w-4 h-4" />
-                                <span>Hapus Pengguna</span>
+                                <Trash2 className="w-4 h-4 relative z-10" />
+                                <span className="relative z-10">Hapus Pengguna</span>
                             </button>
                         </div>
                     </div>
@@ -967,13 +1115,13 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                             <div>
                                 <label className="text-xs font-bold block mb-1">Unit Penugasan Posko:</label>
                                 <select
-                                    value={formUnit}
-                                    onChange={(e) => setFormUnit(e.target.value)}
+                                    value={cleanPoskoName(formUnit)}
+                                    onChange={(e) => setFormUnit(cleanPoskoName(e.target.value))}
                                     className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer focus:border-teal-500"
                                 >
                                     {POSKO_OPTIONS.map((p) => (
-                                        <option key={p} value={p}>
-                                            {p}
+                                        <option key={p} value={cleanPoskoName(p)}>
+                                            {cleanPoskoName(p)}
                                         </option>
                                     ))}
                                 </select>
@@ -1152,6 +1300,157 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL DETAIL SESI & PERANGKAT PENGGUNA */}
+            {sessionModalData && (
+                <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+                    <div className="fixed inset-0" onClick={() => setSessionModalData(null)} />
+                    <div className={`relative z-10 w-full max-w-lg p-5 sm:p-6 rounded-2xl border space-y-4 shadow-2xl ${
+                        isIndustrial
+                            ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.2)] text-[#E2E8F0] font-["JetBrains_Mono"]'
+                            : isPaperSketch
+                            ? 'bg-white border-2 border-[#2b2b2b] shadow-[5px_5px_0px_#2b2b2b]'
+                            : isTechnical
+                            ? 'bg-[#F8F7F4] dark:bg-[#0D1117] border-[1.5px] border-[#111113] dark:border-slate-700'
+                            : isWinamp
+                            ? 'bg-black border border-[#00FF00] text-[#00FF00]'
+                            : isDark
+                            ? 'bg-[#1E1E1E] border-slate-800 text-slate-100'
+                            : 'bg-white border-slate-200 text-slate-900 shadow-xl'
+                    }`}>
+                        {/* Header Modal */}
+                        <div className="flex items-center justify-between border-b border-current/10 pb-3">
+                            <div className="flex items-center space-x-2.5">
+                                <div className="p-2 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30">
+                                    <Laptop className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="text-sm sm:text-base font-extrabold uppercase tracking-wide">
+                                            Detail Sesi Perangkat
+                                        </h3>
+                                        <span className={`px-2 py-0.5 rounded text-[9.5px] font-mono font-bold uppercase border ${
+                                            sessionModalData.session?.isOnline
+                                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                                                : 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30'
+                                        }`}>
+                                            {sessionModalData.session?.isOnline ? 'Online' : 'Offline'}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs opacity-75 font-mono">
+                                        {sessionModalData.user.name} • NIP: {sessionModalData.user.nip}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSessionModalData(null)}
+                                className="p-1 rounded-lg hover:bg-current/10 opacity-70 hover:opacity-100 cursor-pointer"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Isi Spesifikasi Sesi (Identik dengan format di Pengaturan Akun) */}
+                        {sessionModalData.session ? (
+                            <div className="space-y-3 text-xs">
+                                <div className="p-3.5 rounded-xl border border-current/15 bg-current/5 space-y-2 font-mono">
+                                    <div>
+                                        <span className="font-bold font-sans opacity-75">Nama Perangkat: </span>
+                                        <span className="font-bold text-teal-600 dark:text-teal-400">
+                                            {sessionModalData.session.deviceName}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="font-bold font-sans opacity-75">Tipe & OS: </span>
+                                        <span className="font-bold text-teal-600 dark:text-teal-400">
+                                            {sessionModalData.session.deviceType.toUpperCase()}
+                                        </span>
+                                        <span className="opacity-75 font-sans"> & </span>
+                                        <span className="font-bold text-teal-600 dark:text-teal-400">
+                                            {sessionModalData.session.os}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="font-bold font-sans opacity-75">Browser: </span>
+                                        <span className="font-bold">{sessionModalData.session.browser}</span>
+                                    </div>
+                                    <div>
+                                        <span className="font-bold font-sans opacity-75">IP & Lokasi: </span>
+                                        <span className="font-bold">{sessionModalData.session.ipAddress}</span>
+                                        <span className="opacity-75 font-sans"> | </span>
+                                        <span className="font-bold">
+                                            {sessionModalData.session.location.includes(',')
+                                                ? sessionModalData.session.location
+                                                : `Tanjung Priok, ${sessionModalData.session.location}`}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="font-bold font-sans opacity-75">MAC Address: </span>
+                                        <span className="font-bold tracking-wider">{sessionModalData.session.macAddress}</span>
+                                    </div>
+                                    <div>
+                                        <span className="font-bold font-sans opacity-75">Waktu Login: </span>
+                                        <span className="font-bold">{sessionModalData.session.loginTime}</span>
+                                    </div>
+                                    <div>
+                                        <span className="font-bold font-sans opacity-75">Aktivitas Terakhir: </span>
+                                        <span className={`font-bold ${
+                                            sessionModalData.session.isOnline
+                                                ? 'text-emerald-600 dark:text-emerald-400'
+                                                : 'opacity-65'
+                                        }`}>
+                                            {sessionModalData.session.lastActive}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="p-6 text-center space-y-2 opacity-75">
+                                <Laptop className="w-8 h-8 mx-auto opacity-40 mb-1" />
+                                <p className="font-bold text-xs">Belum ada riwayat sesi masuk untuk pengguna ini.</p>
+                                <p className="text-[11px] opacity-70">
+                                    Pengguna belum pernah membuka aplikasi atau login dari perangkat mana pun.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Footer Action Buttons */}
+                        <div className="flex items-center justify-between pt-2 border-t border-current/10 gap-2">
+                            <button
+                                type="button"
+                                onClick={handleRefreshSessions}
+                                className="px-3 py-1.5 text-xs font-bold rounded-lg border border-current/20 hover:bg-current/10 cursor-pointer flex items-center gap-1.5"
+                                title="Perbarui status sesi dari data sistem"
+                            >
+                                <RefreshCw className="w-3.5 h-3.5 text-teal-500" />
+                                <span>Sinkronkan Sesi</span>
+                            </button>
+
+                            <div className="flex items-center gap-2">
+                                {sessionModalData.session && sessionModalData.session.isOnline && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleTerminateSession(sessionModalData.user.nip, sessionModalData.user.name)}
+                                        className="px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95 transition-all"
+                                        title="Putuskan koneksi perangkat ini secara paksa"
+                                    >
+                                        <PowerOff className="w-3.5 h-3.5" />
+                                        <span>Putuskan Sesi</span>
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => setSessionModalData(null)}
+                                    className="px-4 py-1.5 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white cursor-pointer shadow-xs active:scale-95 transition-all"
+                                >
+                                    Tutup
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

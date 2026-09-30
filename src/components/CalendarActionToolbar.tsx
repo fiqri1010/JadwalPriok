@@ -72,7 +72,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                 return 'bg-[#fcfbf9] border border-[#1a1a1a]/15 text-[#1a1a1a] font-[\'Geist\'] rounded-md p-1.5 sm:p-2';
             }
             if (isDashboard) {
-                return 'bg-white border border-[rgba(1,22,39,0.08)] text-[#011627] font-[\'Inter\'] rounded-lg shadow-2xs p-1.5 sm:p-2';
+                return 'bg-[#FFF0BE] border border-[#4D2A00]/25 text-[#4D2A00] font-[\'Inter\'] rounded-lg shadow-2xs p-1.5 sm:p-2';
             }
             if (isDark) {
                 return 'bg-[#1E1E1E]/90 border border-slate-800 text-slate-100 rounded-lg shadow-xs p-1.5 sm:p-2';
@@ -99,7 +99,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
             return 'bg-[#fcfbf9] border border-[#1a1a1a]/15 text-[#1a1a1a] font-[\'Geist\'] rounded-md shadow-sm p-2 sm:p-2.5 lg:p-3';
         }
         if (isDashboard) {
-            return 'bg-white border border-[rgba(1,22,39,0.08)] text-[#011627] font-[\'Inter\'] rounded-lg shadow-sm p-2 sm:p-2.5 lg:p-3';
+            return 'bg-[#FFF0BE] border border-[#4D2A00]/25 text-[#4D2A00] font-[\'Inter\'] rounded-lg shadow-sm p-2 sm:p-2.5 lg:p-3';
         }
         if (isDark) {
             return 'bg-[#1E1E1E] border border-slate-800 text-slate-100 rounded-lg sm:rounded-xl shadow-xs p-2 sm:p-2.5 lg:p-3';
@@ -148,7 +148,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                                 : isEditorial
                                 ? 'bg-white border-[#1a1a1a]/15 text-[#2a7373] hover:bg-[#2a7373]/10'
                                 : isDashboard
-                                ? 'bg-[#f8fafc] border-slate-200 text-[#297373] hover:bg-[#297373]/10'
+                                ? 'bg-[#FFF5D0] border-[#4D2A00]/25 text-[#4D2A00] hover:bg-[#FFE8A3]'
                                 : isDark
                                 ? 'bg-white/5 border-white/10 text-teal-300 hover:bg-white/10'
                                 : 'bg-slate-50 border-slate-200 text-teal-700 hover:bg-teal-50'
@@ -197,7 +197,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                                 : isEditorial
                                 ? 'bg-white border-[#1a1a1a]/15 text-[#1a1a1a] hover:bg-black/5'
                                 : isDashboard
-                                ? 'bg-[#f8fafc] border-slate-200 text-slate-700 hover:bg-slate-100'
+                                ? 'bg-[#FFF5D0] border-[#4D2A00]/25 text-[#4D2A00] hover:bg-[#FFE8A3]'
                                 : isDark
                                 ? 'bg-white/5 border-white/10 text-sky-300 hover:bg-white/10'
                                 : 'bg-slate-50 border-slate-200 text-sky-700 hover:bg-sky-50'
@@ -244,7 +244,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                                 : isEditorial
                                 ? 'bg-white border-rose-300 text-rose-700 hover:bg-rose-50'
                                 : isDashboard
-                                ? 'bg-[#f8fafc] border-slate-200 text-rose-600 hover:bg-rose-50'
+                                ? 'bg-[#FFF5D0] border-[#4D2A00]/25 text-rose-700 hover:bg-rose-100/80'
                                 : isDark
                                 ? 'bg-white/5 border-white/10 text-rose-400 hover:bg-white/10'
                                 : 'bg-slate-50 border-slate-200 text-rose-600 hover:bg-rose-50'
@@ -287,7 +287,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                                     : isEditorial
                                     ? 'bg-[#1a1a1a]/10 text-[#1a1a1a] border border-[#1a1a1a]/30 font-bold'
                                     : isDashboard
-                                    ? 'bg-amber-500/15 text-amber-700 border border-amber-500/30 font-bold'
+                                    ? 'bg-[#4D2A00] text-[#F9E6A8] border border-[#4D2A00] font-bold'
                                     : 'bg-amber-500/20 text-amber-500 border-amber-500/50 font-bold'
                                 : isPaperSketch
                                 ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] hover:bg-[#2ec4b6] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5'
@@ -302,7 +302,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                                 : isEditorial
                                 ? 'bg-white border-[#1a1a1a]/15 text-[#1a1a1a] hover:bg-[#2a7373] hover:text-white'
                                 : isDashboard
-                                ? 'bg-[#f8fafc] border-slate-200 text-slate-700 hover:bg-slate-100'
+                                ? 'bg-[#FFF5D0] border-[#4D2A00]/25 text-[#4D2A00] hover:bg-[#FFE8A3]'
                                 : isDark
                                 ? 'bg-white/5 border-white/10 text-slate-200 hover:bg-white/10'
                                 : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'

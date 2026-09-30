@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShiftVisualStyle, ShiftNamingConfig } from '../../types';
+import { ShiftVisualStyle, ShiftNamingConfig, AppTheme } from '../../types';
 import { ICON_CATALOG } from './ShiftIconPickerModal';
 import { BADGE_PATTERNS, isCustomPatternImage, parseCssPatternToStyle } from './patterns';
 import { Smartphone, Monitor } from 'lucide-react';
@@ -8,12 +8,15 @@ interface ShiftLiveBadgePreviewProps {
     visual: ShiftVisualStyle;
     naming: ShiftNamingConfig;
     isPiket?: boolean;
+    theme?: AppTheme;
 }
 
 export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
     visual,
     naming,
+    theme = 'default',
 }) => {
+    const isDashboard = theme === 'dashboard';
     const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
 
     // Build background CSS style based on visual config from ColorPicker
@@ -131,61 +134,22 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
     };
 
     return (
-        <div className="p-1.5 rounded-xl bg-white/70 dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800 shadow-2xs w-full">
-            {/* Preview row with compact badge area & device toggle right next to it */}
-            <div className="flex items-stretch justify-between gap-1.5 sm:gap-2">
-                {/* Container Preview Area - Compact 2x Badge Width & Reduced Height */}
-                <div className="flex-1 flex items-center justify-center p-1 sm:p-1.5 rounded-lg bg-slate-50/80 dark:bg-zinc-900/80 border border-slate-200/70 dark:border-zinc-800/80 min-h-[38px] min-w-0">
-                    {previewDevice === 'desktop' ? (
-                        /* Desktop Preview Card Badge */
-                        <div
-                            className="relative px-2.5 py-0.5 rounded-[5px] font-black text-[11px] shadow-xs border flex items-center space-x-1 select-none overflow-hidden transition-all max-w-full"
-                            style={{
-                                ...getBackgroundStyle(),
-                                color: visual.textColor || '#FFFFFF',
-                                borderColor: visual.borderColor || '#83C5BE',
-                            }}
-                        >
-                            {renderPatternOverlay()}
-                            <div className="relative z-10 flex items-center space-x-1 min-w-0 max-w-full">
-                                {renderIcon('w-3.5 h-3.5 shrink-0')}
-                                <span className="tracking-tight truncate max-w-[110px] sm:max-w-[140px] uppercase" title={(naming.displayBadge || 'SHIFT').toUpperCase()}>
-                                    {(naming.displayBadge || 'SHIFT').toUpperCase()}
-                                </span>
-                            </div>
-                        </div>
-                    ) : (
-                        /* Mobile Preview Card Badge */
-                        <div className="flex items-center space-x-1.5 min-w-0 flex-1 justify-center">
-                            <div
-                                className="relative w-5 h-5 rounded-[4px] font-black text-[9.5px] shadow-2xs border flex items-center justify-center select-none overflow-hidden shrink-0 uppercase"
-                                style={{
-                                    ...getBackgroundStyle(),
-                                    color: visual.textColor || '#FFFFFF',
-                                    borderColor: visual.borderColor || '#83C5BE',
-                                }}
-                            >
-                                {renderPatternOverlay()}
-                                <span className="relative z-10 truncate max-w-full">{(naming.copyCode || (naming.displayBadge || 'S').slice(0, 1)).toUpperCase()}</span>
-                            </div>
-                            <div className="text-[10px] leading-tight text-slate-600 dark:text-zinc-300 min-w-0 flex-1 max-w-[130px] sm:max-w-[180px]">
-                                <span className="font-bold block truncate w-full" title={naming.fullName || 'Nama Shift'}>
-                                    {naming.fullName || 'Nama Shift'}
-                                </span>
-                                <span className="block text-[9px] text-slate-400 dark:text-zinc-500 truncate w-full" title={`Salin: '${naming.copyCode || 'S'}'`}>
-                                    Salin: &apos;{naming.copyCode || 'S'}&apos;
-                                </span>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Stacked Device Toggle Buttons */}
-                <div className="flex flex-col justify-center gap-0.5 p-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-[9px] border border-slate-200/60 dark:border-zinc-700/50 shrink-0">
+        <div className={`p-1.5 rounded-xl ${
+            isDashboard
+                ? 'bg-[#FFFBF0] border border-[#4D2A00]/25 shadow-2xs'
+                : 'bg-white/70 dark:bg-[#161616] border border-slate-200/80 dark:border-zinc-800'
+        } shadow-2xs w-full flex flex-col gap-1.5`}>
+            {/* Horizontal Device Toggle Bar on top */}
+            <div className="flex items-center justify-end gap-1">
+                <div className={`flex flex-row items-center gap-0.5 p-0.5 rounded-md ${
+                    isDashboard
+                        ? 'bg-[#FFF0BE] border border-[#4D2A00]/25 text-[#4D2A00]'
+                        : 'bg-slate-100 dark:bg-zinc-800 text-[9px] border border-slate-200/60 dark:border-zinc-700/50'
+                } text-[9px] shrink-0 font-sans`}>
                     <button
                         type="button"
                         onClick={() => setPreviewDevice('desktop')}
-                        className={`px-1.5 py-0.5 rounded font-bold flex items-center justify-center space-x-1 cursor-pointer transition-colors ${
+                        className={`px-2 py-0.5 rounded font-bold flex items-center justify-center space-x-1 cursor-pointer transition-colors ${
                             previewDevice === 'desktop'
                                 ? 'bg-teal-600 text-white shadow-2xs'
                                 : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
@@ -198,7 +162,7 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
                     <button
                         type="button"
                         onClick={() => setPreviewDevice('mobile')}
-                        className={`px-1.5 py-0.5 rounded font-bold flex items-center justify-center space-x-1 cursor-pointer transition-colors ${
+                        className={`px-2 py-0.5 rounded font-bold flex items-center justify-center space-x-1 cursor-pointer transition-colors ${
                             previewDevice === 'mobile'
                                 ? 'bg-teal-600 text-white shadow-2xs'
                                 : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
@@ -209,6 +173,52 @@ export const ShiftLiveBadgePreview: React.FC<ShiftLiveBadgePreviewProps> = ({
                         <span className="text-[9px]">Mobile</span>
                     </button>
                 </div>
+            </div>
+
+            {/* Container Preview Area - Full width below */}
+            <div className="w-full flex items-center justify-center p-1.5 rounded-lg bg-slate-50/80 dark:bg-zinc-900/80 border border-slate-200/70 dark:border-zinc-800/80 min-h-[40px]">
+                {previewDevice === 'desktop' ? (
+                    /* Desktop Preview Card Badge */
+                    <div
+                        className="relative px-2.5 py-1 rounded-[5px] font-black text-[11px] shadow-xs border flex items-center space-x-1 select-none overflow-hidden transition-all max-w-full"
+                        style={{
+                            ...getBackgroundStyle(),
+                            color: visual.textColor || '#FFFFFF',
+                            borderColor: visual.borderColor || '#83C5BE',
+                        }}
+                    >
+                        {renderPatternOverlay()}
+                        <div className="relative z-10 flex items-center space-x-1 min-w-0 max-w-full">
+                            {renderIcon('w-3.5 h-3.5 shrink-0')}
+                            <span className="tracking-tight truncate max-w-full uppercase" title={(naming.displayBadge || 'SHIFT').toUpperCase()}>
+                                {(naming.displayBadge || 'SHIFT').toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                ) : (
+                    /* Mobile Preview Card Badge */
+                    <div className="flex items-center space-x-2 min-w-0 flex-1 justify-center max-w-full">
+                        <div
+                            className="relative w-5 h-5 rounded-[4px] font-black text-[9.5px] shadow-2xs border flex items-center justify-center select-none overflow-hidden shrink-0 uppercase"
+                            style={{
+                                ...getBackgroundStyle(),
+                                color: visual.textColor || '#FFFFFF',
+                                borderColor: visual.borderColor || '#83C5BE',
+                            }}
+                        >
+                            {renderPatternOverlay()}
+                            <span className="relative z-10 truncate max-w-full">{(naming.copyCode || (naming.displayBadge || 'S').slice(0, 1)).toUpperCase()}</span>
+                        </div>
+                        <div className="text-[10px] leading-tight text-slate-600 dark:text-zinc-300 min-w-0 flex-1 max-w-full">
+                            <span className="font-bold block truncate w-full" title={naming.fullName || 'Nama Shift'}>
+                                {naming.fullName || 'Nama Shift'}
+                            </span>
+                            <span className="block text-[9px] text-slate-400 dark:text-zinc-500 truncate w-full" title={`Salin: '${naming.copyCode || 'S'}'`}>
+                                Salin: &apos;{naming.copyCode || 'S'}&apos;
+                            </span>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

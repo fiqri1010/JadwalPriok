@@ -338,22 +338,22 @@ export const DayCell = React.memo<DayCellProps>(({
     const getDashboardShiftClass = (shift: string) => {
         switch (shift.toUpperCase()) {
             case 'SM':
-                return 'bg-[#83C5BE] text-[#011627]';
+                return 'bg-[#FFF0BE] text-[#4D2A00] border border-[#4D2A00]/40';
             case 'PM':
             case 'MALAM':
-                return 'bg-[#297373] text-white';
+                return 'bg-[#4D2A00] text-[#F9E6A8] border border-[#4D2A00]';
             case 'TPSL':
-                return 'bg-[#E29578] text-white';
+                return 'bg-[#B45309] text-white border border-[#B45309]';
             case 'OFF':
-                return 'bg-[#BE1A1A] text-white';
+                return 'bg-[#BE1A1A] text-white border border-[#BE1A1A]';
             case 'NPCT':
-                return 'bg-[#FFDDD2] text-[#011627]';
+                return 'bg-[#FDE68A] text-[#4D2A00] border border-[#4D2A00]/35';
             case 'GRAHA':
-                return 'bg-[#EDF6F9] text-[#011627] border border-[#83C5BE]';
+                return 'bg-[#FEF3C7] text-[#4D2A00] border border-[#4D2A00]/30';
             case 'CUTI':
-                return 'bg-[#011627] text-white';
+                return 'bg-[#291700] text-[#F9E6A8] border border-[#291700]';
             default:
-                return 'bg-[#F6F7F8] text-[#011627] border border-[rgba(1,22,39,0.08)]';
+                return 'bg-[#FFF8E1] text-[#4D2A00] border border-[#4D2A00]/20';
         }
     };
 
@@ -367,7 +367,7 @@ export const DayCell = React.memo<DayCellProps>(({
             : isIndustrial
             ? 'text-[#BE1A1A] font-[\'JetBrains_Mono\'] font-bold'
             : isDashboard
-            ? 'text-[#FF3366] font-[\'Inter\'] font-bold'
+            ? 'text-[#BE1A1A] font-[\'Inter\'] font-bold'
             : 'text-rose-500 font-black'
         : isPaperSketch
         ? 'text-[#2b2b2b] font-[\'Gochi_Hand\'] font-bold text-base sm:text-lg'
@@ -378,7 +378,7 @@ export const DayCell = React.memo<DayCellProps>(({
         : isIndustrial
         ? 'text-[#E2E8F0] font-[\'JetBrains_Mono\'] font-bold'
         : isDashboard
-        ? 'text-[#011627] font-[\'Inter\'] font-bold'
+        ? 'text-[#4D2A00] font-[\'Inter\'] font-bold'
         : isWinamp
         ? 'text-[#00FF00] font-black'
         : isDark
@@ -417,7 +417,9 @@ export const DayCell = React.memo<DayCellProps>(({
                         // Autoscale typography: adapts automatically as date card width expands from mobile to desktop
                         'text-[6.8px] min-[360px]:text-[7.5px] min-[400px]:text-[8px] sm:text-[8.5px] md:text-[9.5px] lg:text-[10px] xl:text-[10.5px] 2xl:text-[11px] px-1 min-[360px]:px-1.5 md:px-2 py-[0.5px] md:py-[1px]'
                     } ${
-                        isWinamp
+                        isDashboard
+                            ? 'bg-[#FFF0BE] text-[#4D2A00] border-[#4D2A00]/30 rounded-none'
+                            : isWinamp
                             ? 'bg-black text-[#00FF00] border-zinc-800 shadow-[0_0_5px_rgba(0,255,0,0.3)]'
                             : isDark
                             ? 'bg-black/75 text-teal-300 border-teal-500/40 shadow-xs'
@@ -497,18 +499,18 @@ export const DayCell = React.memo<DayCellProps>(({
     const getCardStyle = (elevated: boolean = false): React.CSSProperties => {
         if (isDashboard) {
             return {
-                borderRadius: '8px',
-                backgroundColor: '#FFFFFF',
-                border: elevated 
-                    ? '1.5px solid #297373' 
-                    : isToday 
-                    ? '1.5px solid #297373' 
-                    : '1px solid rgba(1, 22, 39, 0.08)',
-                boxShadow: elevated
-                    ? '0 10px 25px -5px rgba(41, 115, 115, 0.2)'
+                borderRadius: '0px',
+                backgroundColor: '#FFFBF0',
+                border: elevated || isExpandedDesktop
+                    ? '2px solid #4D2A00'
                     : isToday
-                    ? '0 0 10px rgba(41, 115, 115, 0.15)'
-                    : '0 1px 3px rgba(0, 0, 0, 0.02)',
+                    ? '2px solid #4D2A00'
+                    : 'none',
+                boxShadow: elevated || isExpandedDesktop
+                    ? '0 12px 28px -4px rgba(77, 42, 0, 0.35)'
+                    : isToday
+                    ? 'inset 0 0 0 1px #4D2A00'
+                    : 'none',
             };
         }
         if (isIndustrial) {
@@ -623,7 +625,7 @@ export const DayCell = React.memo<DayCellProps>(({
     const horizontalPositionClass = isRightEdge ? 'right-0' : 'left-0';
     const verticalPositionClass = isBottomEdge ? 'bottom-0' : 'top-0';
 
-    const beamColorVariant = isWinamp ? 'forest' : isVista ? 'ocean' : isIndustrial ? 'ice' : (isDashboard || isEditorial || isTechnical) ? 'ocean' : isDark ? 'candy' : 'colorful';
+    const beamColorVariant = isWinamp ? 'forest' : isVista ? 'ocean' : isIndustrial ? 'ice' : isDashboard ? 'warm' : (isEditorial || isTechnical) ? 'ocean' : isDark ? 'candy' : 'colorful';
     const beamTheme = (isDark || isWinamp) ? 'dark' : 'light';
 
     const innerCardContent = (
@@ -650,7 +652,9 @@ export const DayCell = React.memo<DayCellProps>(({
                     }
                 }}
                 className={`md:hidden flex flex-col justify-between p-1 sm:p-1.5 transition-transform duration-150 ease-out select-none w-full h-full cursor-pointer hover:scale-[1.02] active:scale-[0.98] transform-gpu outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 overflow-hidden ${
-                    isPaperSketch
+                    isDashboard
+                        ? 'rounded-none text-[#4D2A00]'
+                        : isPaperSketch
                         ? 'text-[#2b2b2b]'
                         : isWinamp
                         ? 'text-[#00FF00] font-mono'
@@ -741,7 +745,7 @@ export const DayCell = React.memo<DayCellProps>(({
                             <div
                                 className={`w-full py-0.5 px-0.5 text-center font-black border flex items-center justify-center gap-0.5 overflow-hidden ${
                                     isDashboard
-                                        ? `rounded-[4px] font-['JetBrains_Mono'] font-bold ${getDashboardShiftClass(normalizedShift)}`
+                                        ? `rounded-none font-['JetBrains_Mono'] font-bold ${getDashboardShiftClass(normalizedShift)}`
                                         : isEditorial
                                         ? `rounded-none font-['Geist_Mono'] font-medium ${getEditorialShiftClass(normalizedShift)}`
                                         : isTechnical
@@ -774,7 +778,9 @@ export const DayCell = React.memo<DayCellProps>(({
                         ) : (
                             <div
                                 className={`w-full py-0.5 text-center text-[11px] sm:text-[12px] font-bold border flex items-center justify-center ${
-                                    isEditorial
+                                    isDashboard
+                                        ? 'border-[#4D2A00]/20 text-[#4D2A00]/30 font-[\'JetBrains_Mono\'] rounded-none'
+                                        : isEditorial
                                         ? 'border-[#1a1a1a]/15 text-[#1a1a1a]/30 font-[\'Geist_Mono\'] rounded-none'
                                         : isTechnical
                                         ? 'border-[#111113]/30 text-[#111113]/40 font-[\'JetBrains_Mono\'] rounded-none'
@@ -821,10 +827,16 @@ export const DayCell = React.memo<DayCellProps>(({
                 }}
                 className={`hidden md:flex flex-col justify-between absolute ${verticalPositionClass} ${horizontalPositionClass} transition-[width,height,min-height,box-shadow,border-color,background] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] select-none transform-gpu outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                     isExpandedDesktop
-                        ? 'overflow-visible w-[calc(200%+0.375rem)] min-h-[max(270px,calc(200%+0.375rem))] p-3 sm:p-3.5 cursor-default'
-                        : 'overflow-hidden rounded-[8px] w-full h-full px-1.5 py-1 sm:px-2 sm:py-1.5 cursor-pointer hover:scale-[1.015] active:scale-[0.99] hover:z-40 focus-within:z-40'
+                        ? `overflow-visible w-[calc(200%+0.375rem)] min-h-[max(270px,calc(200%+0.375rem))] p-3 sm:p-3.5 cursor-default ${
+                            isDashboard ? 'rounded-none' : ''
+                        }`
+                        : `overflow-hidden w-full h-full px-1.5 py-1 sm:px-2 sm:py-1.5 cursor-pointer hover:scale-[1.015] active:scale-[0.99] hover:z-40 focus-within:z-40 ${
+                            isDashboard ? 'rounded-none' : 'rounded-[8px]'
+                        }`
                 } ${
-                    isPaperSketch
+                    isDashboard
+                        ? 'text-[#4D2A00]'
+                        : isPaperSketch
                         ? 'text-[#2b2b2b]'
                         : isWinamp
                         ? 'text-[#00FF00] font-mono text-xs'
@@ -1249,7 +1261,7 @@ export const DayCell = React.memo<DayCellProps>(({
     return (
         <div
             data-day-number={dayNumber}
-            className={`relative w-full h-full rounded-[8px] transition-all duration-150 ${
+            className={`relative w-full h-full ${isDashboard ? 'rounded-none' : 'rounded-[8px]'} transition-all duration-150 ${
                 isExpandedDesktop
                     ? 'z-[60] overflow-visible'
                     : isDropdownOpen
@@ -1257,7 +1269,7 @@ export const DayCell = React.memo<DayCellProps>(({
                     : 'z-[1]'
             } ${
                 isToday
-                    ? `rounded-[10px] ${isExpandedDesktop ? 'overflow-visible' : ''}`
+                    ? `${isDashboard ? 'rounded-none' : 'rounded-[10px]'} ${isExpandedDesktop ? 'overflow-visible' : ''}`
                     : ''
             }`}
         >
@@ -1266,7 +1278,7 @@ export const DayCell = React.memo<DayCellProps>(({
                     size="md"
                     colorVariant={beamColorVariant}
                     theme={beamTheme}
-                    borderRadius={8}
+                    borderRadius={isDashboard ? 0 : 8}
                     className="w-full h-full"
                 >
                     {innerCardContent}

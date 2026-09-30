@@ -144,22 +144,22 @@ export const themes: Record<'light' | 'dark' | 'paperSketch' | 'technical' | 'ed
         },
     },
     dashboard: {
-        name: 'Clean SaaS Dashboard',
-        background: '#F6F7F8',
-        surface: '#FFFFFF',
-        text: '#011627',
-        textSecondary: 'rgba(1, 22, 39, 0.6)',
-        primary: '#297373',
+        name: 'Warm',
+        background: '#F9E6A8',
+        surface: '#FFF5D0',
+        text: '#4D2A00',
+        textSecondary: 'rgba(77, 42, 0, 0.7)',
+        primary: '#4D2A00',
         status: {
-            piket: '#297373',
+            piket: '#6E3C00',
             off: '#BE1A1A',
-            cuti: '#011627',
-            penugasan: '#E29578',
+            cuti: '#4D2A00',
+            penugasan: '#B45309',
         },
         penugasanColors: {
-            ST_PERIKSA_FISIK_LUAR_KAWASAN: '#297373',
-            ST_ATA_CARNET: '#E29578',
-            ST_LAINNYA: '#83C5BE',
+            ST_PERIKSA_FISIK_LUAR_KAWASAN: '#4D2A00',
+            ST_ATA_CARNET: '#B45309',
+            ST_LAINNYA: '#7A4300',
         },
     },
 };
@@ -279,77 +279,77 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             palette: themes.dashboard,
             penugasanColors: themes.dashboard.penugasanColors,
 
-            // 1. Kanvas Utama (Clean SaaS Dashboard: #F6F7F8 bg, #011627 ink, Inter font)
-            wrapperClass: 'h-full min-h-full w-full flex-1 bg-[#F6F7F8] text-[#011627] flex flex-col font-[\'Inter\'] relative selection:bg-[#297373] selection:text-white overflow-hidden',
+            // 1. Kanvas Utama (Warm: #F9E6A8 bg, #4D2A00 ink, Inter font)
+            wrapperClass: 'h-full min-h-full w-full flex-1 bg-[#F9E6A8] text-[#4D2A00] flex flex-col font-[\'Inter\'] relative selection:bg-[#4D2A00] selection:text-[#F9E6A8] overflow-hidden',
 
-            // 2. Top Header / Navbar (Clean white 64px, subtle border)
-            navbarClass: 'sticky top-0 z-50 bg-[#FFFFFF] text-[#011627] border-b border-[rgba(1,22,39,0.08)] shadow-none shrink-0 font-[\'Inter\']',
-            logoContainerClass: 'flex h-8 w-8 items-center justify-center bg-[#297373] text-white rounded-[8px] shrink-0 shadow-2xs',
-            titleClass: 'text-xs sm:text-[13px] lg:text-[14px] font-extrabold tracking-tight truncate text-[#011627] font-[\'Inter\']',
-            versionBadgeClass: 'bg-[#F1F5F9] text-[#011627]/70 border border-[rgba(1,22,39,0.08)] text-[9px] sm:text-[10px] px-2 py-0.5 rounded-[6px] font-[\'JetBrains_Mono\'] font-medium uppercase tracking-wider',
-            subtitleClass: 'hidden sm:block text-[11px] text-[#011627]/60 font-[\'JetBrains_Mono\'] tracking-wider uppercase',
-            supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#FFFFFF] px-2.5 py-1 text-xs border border-[rgba(1,22,39,0.08)] text-[#011627] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[6px]',
-            holidayBtnClass: 'flex items-center space-x-1.5 bg-[#BE1A1A] hover:bg-[#a51515] px-3 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border border-[#BE1A1A]/30 font-[\'Inter\'] rounded-[6px]',
-            themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-[#011627] transition-all duration-150 cursor-pointer border border-[rgba(1,22,39,0.08)] select-none font-[\'Inter\'] rounded-[6px] shadow-none',
-            themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-64 bg-[#FFFFFF] p-2 flex flex-col gap-1 text-[#011627] border border-[rgba(1,22,39,0.08)] shadow-xl animate-in fade-in zoom-in-95 duration-150 font-[\'Inter\'] rounded-[8px]',
-            settingsBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] px-2.5 py-1.5 text-xs font-bold text-[#011627] transition-all cursor-pointer border border-[rgba(1,22,39,0.08)] font-[\'Inter\'] rounded-[6px]',
-            syncBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] px-2.5 py-1.5 text-xs font-bold text-[#011627] transition-all cursor-pointer border border-[rgba(1,22,39,0.08)] font-[\'Inter\'] rounded-[6px]',
-            saveBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#297373] hover:bg-[#236060] text-white px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer border border-[#297373] font-[\'Inter\'] rounded-[6px]',
+            // 2. Top Header / Navbar (Clean #F9E6A8, subtle border)
+            navbarClass: 'sticky top-0 z-50 bg-[#F9E6A8] text-[#4D2A00] border-b border-[#4D2A00]/20 shadow-none shrink-0 font-[\'Inter\']',
+            logoContainerClass: 'flex h-8 w-8 items-center justify-center bg-[#4D2A00] text-[#F9E6A8] rounded-none shrink-0 shadow-2xs',
+            titleClass: 'text-xs sm:text-[13px] lg:text-[14px] font-extrabold tracking-tight truncate text-[#4D2A00] font-[\'Inter\']',
+            versionBadgeClass: 'bg-[#FFF0BE] text-[#4D2A00]/85 border border-[#4D2A00]/25 text-[9px] sm:text-[10px] px-2 py-0.5 rounded-none font-[\'JetBrains_Mono\'] font-medium uppercase tracking-wider',
+            subtitleClass: 'hidden sm:block text-[11px] text-[#4D2A00]/70 font-[\'JetBrains_Mono\'] tracking-wider uppercase',
+            supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#FFF0BE] px-2.5 py-1 text-xs border border-[#4D2A00]/25 text-[#4D2A00] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-none',
+            holidayBtnClass: 'flex items-center space-x-1.5 bg-[#BE1A1A] hover:bg-[#a51515] px-3 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border border-[#BE1A1A]/30 font-[\'Inter\'] rounded-none',
+            themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#FFF0BE] hover:bg-[#F3DE97] px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-[#4D2A00] transition-all duration-150 cursor-pointer border border-[#4D2A00]/25 select-none font-[\'Inter\'] rounded-none shadow-none',
+            themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-64 bg-[#FFF6D6] p-2 flex flex-col gap-1 text-[#4D2A00] border border-[#4D2A00]/30 shadow-xl animate-in fade-in zoom-in-95 duration-150 font-[\'Inter\'] rounded-none',
+            settingsBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#FFF0BE] hover:bg-[#F3DE97] px-2.5 py-1.5 text-xs font-bold text-[#4D2A00] transition-all cursor-pointer border border-[#4D2A00]/25 font-[\'Inter\'] rounded-none',
+            syncBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#FFF0BE] hover:bg-[#F3DE97] px-2.5 py-1.5 text-xs font-bold text-[#4D2A00] transition-all cursor-pointer border border-[#4D2A00]/25 font-[\'Inter\'] rounded-none',
+            saveBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#4D2A00] hover:bg-[#381F00] text-[#F9E6A8] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer border border-[#4D2A00] font-[\'Inter\'] rounded-none',
 
             // 3. View Switcher & Navigasi Bulan
-            viewSwitcherCardClass: 'flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2 bg-[#FFFFFF] p-2 border border-[rgba(1,22,39,0.08)] font-[\'Inter\'] rounded-[8px]',
-            viewSwitcherPillsWrapperClass: 'flex flex-row flex-nowrap items-center overflow-x-auto no-scrollbar scroll-smooth p-1 gap-1 bg-[#F6F7F8] border border-[rgba(1,22,39,0.08)] max-w-full min-w-0 shrink flex-1 rounded-[6px]',
-            tabActiveClass: 'bg-[#297373] text-white font-bold border border-[#297373] font-[\'Inter\'] text-xs rounded-[6px] shadow-2xs',
-            tabInactiveClass: 'text-[#011627]/60 hover:text-[#011627] hover:bg-black/5 transition-colors duration-150 font-[\'Inter\'] text-xs rounded-[6px]',
-            monthNavBtnClass: 'border border-[rgba(1,22,39,0.08)] bg-[#F1F5F9] p-1.5 sm:p-2 text-[#011627] hover:bg-[#E2E8F0] transition-colors cursor-pointer shrink-0 rounded-[6px]',
-            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border border-[rgba(1,22,39,0.08)] bg-[#FFFFFF] hover:bg-[#F6F7F8] px-3 py-1 text-sm sm:text-base font-extrabold text-[#011627] transition-all cursor-pointer w-[150px] sm:w-[176px] shrink-0 font-[\'Inter\'] tracking-tight rounded-[6px]',
-            todayBtnClass: 'flex items-center space-x-1 border border-[#297373]/30 bg-[#297373]/10 hover:bg-[#297373]/20 text-[#297373] px-2.5 py-1 text-xs font-bold transition-all cursor-pointer shrink-0 font-[\'Inter\'] rounded-[6px]',
+            viewSwitcherCardClass: 'flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2 bg-[#FFF4CE] p-2 border border-[#4D2A00]/25 font-[\'Inter\'] rounded-none',
+            viewSwitcherPillsWrapperClass: 'flex flex-row flex-nowrap items-center overflow-x-auto no-scrollbar scroll-smooth p-1 gap-1 bg-[#F9E6A8] border border-[#4D2A00]/25 max-w-full min-w-0 shrink flex-1 rounded-none',
+            tabActiveClass: 'bg-[#4D2A00] text-[#F9E6A8] font-bold border border-[#4D2A00] font-[\'Inter\'] text-xs rounded-none shadow-2xs',
+            tabInactiveClass: 'text-[#4D2A00]/70 hover:text-[#4D2A00] hover:bg-[#4D2A00]/10 transition-colors duration-150 font-[\'Inter\'] text-xs rounded-none',
+            monthNavBtnClass: 'border border-[#4D2A00]/25 bg-[#FFF0BE] p-1.5 sm:p-2 text-[#4D2A00] hover:bg-[#F3DE97] transition-colors cursor-pointer shrink-0 rounded-none',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border border-[#4D2A00]/25 bg-[#FFF4CE] hover:bg-[#FFF0BE] px-3 py-1 text-sm sm:text-base font-extrabold text-[#4D2A00] transition-all cursor-pointer min-w-[150px] sm:min-w-[185px] shrink-0 font-[\'Inter\'] tracking-tight rounded-none whitespace-nowrap',
+            todayBtnClass: 'flex items-center space-x-1 border border-[#4D2A00]/40 bg-[#4D2A00]/15 hover:bg-[#4D2A00]/25 text-[#4D2A00] px-2.5 py-1 text-xs font-bold transition-all cursor-pointer shrink-0 font-[\'Inter\'] rounded-none',
 
             // 4. Sub-toolbar Aksi Kalender
-            subToolbarCardClass: 'flex items-center justify-between bg-[#FFFFFF] p-2 border border-[rgba(1,22,39,0.08)] gap-2 font-[\'Inter\'] rounded-[8px]',
-            subToolbarTitleClass: 'text-sm font-bold text-[#011627] truncate font-[\'Inter\'] tracking-tight',
-            subToolbarDotClass: 'flex h-2 w-2 rounded-full bg-[#297373] shrink-0',
-            pasteBtnClass: 'flex items-center space-x-1.5 border border-[rgba(1,22,39,0.08)] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#011627] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-[6px]',
-            undoBtnClass: 'flex items-center space-x-1.5 border border-[rgba(1,22,39,0.08)] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#011627] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-[6px]',
-            resetBtnClass: 'flex items-center space-x-1.5 border border-[#BE1A1A]/30 bg-[#F1F5F9] hover:bg-[#BE1A1A] hover:text-white text-[#BE1A1A] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-[6px]',
-            lockBtnClass: 'flex items-center space-x-1.5 border border-[rgba(1,22,39,0.08)] bg-[#F1F5F9] text-[#011627] hover:bg-[#297373] hover:text-white px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-[6px]',
-            expandBtnClass: 'flex items-center space-x-1.5 border border-[rgba(1,22,39,0.08)] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#011627] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-[6px]',
+            subToolbarCardClass: 'flex items-center justify-between bg-[#FFF4CE] p-2 border border-[#4D2A00]/25 gap-2 font-[\'Inter\'] rounded-none',
+            subToolbarTitleClass: 'text-sm font-bold text-[#4D2A00] truncate font-[\'Inter\'] tracking-tight',
+            subToolbarDotClass: 'flex h-2 w-2 bg-[#4D2A00] shrink-0 rounded-none',
+            pasteBtnClass: 'flex items-center space-x-1.5 border border-[#4D2A00]/25 bg-[#FFF0BE] hover:bg-[#F3DE97] text-[#4D2A00] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-none',
+            undoBtnClass: 'flex items-center space-x-1.5 border border-[#4D2A00]/25 bg-[#FFF0BE] hover:bg-[#F3DE97] text-[#4D2A00] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-none',
+            resetBtnClass: 'flex items-center space-x-1.5 border border-[#BE1A1A]/40 bg-[#FFF0BE] hover:bg-[#BE1A1A] hover:text-white text-[#BE1A1A] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-none',
+            lockBtnClass: 'flex items-center space-x-1.5 border border-[#4D2A00]/25 bg-[#FFF0BE] text-[#4D2A00] hover:bg-[#4D2A00] hover:text-[#F9E6A8] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-none',
+            expandBtnClass: 'flex items-center space-x-1.5 border border-[#4D2A00]/25 bg-[#FFF0BE] hover:bg-[#F3DE97] text-[#4D2A00] px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer font-[\'Inter\'] rounded-none',
 
-            // 5. Area Grid Kalender
-            calendarContainerCardClass: 'bg-[#FFFFFF] p-2 border border-[rgba(1,22,39,0.08)] rounded-[12px]',
-            dayNamesHeaderClass: 'grid grid-cols-7 gap-0 py-2 text-center text-[11px] font-[\'JetBrains_Mono\'] font-bold uppercase tracking-[0.1em] text-[#011627]/60 border-b border-[rgba(1,22,39,0.08)] bg-[#F6F7F8] rounded-t-[8px]',
-            weekdayNameTextClass: 'text-[#011627]/70',
+            // 5. Area Grid Kalender (Borderless container, merged 1px grid table borders)
+            calendarContainerCardClass: 'bg-[#FFF4CE] p-0 border border-[#4D2A00]/30 rounded-none shadow-none',
+            dayNamesHeaderClass: 'grid grid-cols-7 gap-0 py-2 text-center text-[11px] font-[\'JetBrains_Mono\'] font-bold uppercase tracking-[0.1em] text-[#4D2A00] border-t border-x border-[#4D2A00]/30 bg-[#FFF0BE] rounded-none',
+            weekdayNameTextClass: 'text-[#4D2A00]',
             weekendNameTextClass: 'text-[#BE1A1A]',
-            emptyCellClass: 'bg-[#F6F7F8]/70 border border-dashed border-[rgba(1,22,39,0.06)] p-1 rounded-[6px]',
+            emptyCellClass: 'bg-[#F9E6A8]/50 border-r border-b border-[#4D2A00]/30 p-1 rounded-none',
 
             // 6. Summary Cards Panel
-            summaryPanelCardClass: 'bg-[#F6F7F8] p-3.5 border border-[rgba(1,22,39,0.08)] font-[\'Inter\'] rounded-[12px]',
-            summaryTitleClass: 'text-sm font-bold text-[#011627] flex items-center font-[\'Inter\'] tracking-tight',
-            summaryHeaderBorderClass: 'border-b border-[rgba(1,22,39,0.08)] pb-2',
-            summarySubtextClass: 'text-xs text-[#011627]/60 font-[\'JetBrains_Mono\'] tracking-widest uppercase',
+            summaryPanelCardClass: 'bg-[#FFF4CE] p-3.5 border border-[#4D2A00]/25 font-[\'Inter\'] rounded-none',
+            summaryTitleClass: 'text-sm font-bold text-[#4D2A00] flex items-center font-[\'Inter\'] tracking-tight',
+            summaryHeaderBorderClass: 'border-b border-[#4D2A00]/20 pb-2',
+            summarySubtextClass: 'text-xs text-[#4D2A00]/70 font-[\'JetBrains_Mono\'] tracking-widest uppercase',
 
             // 7. Modal & Pop-up
-            modalCardClass: 'bg-[#FFFFFF] border border-[rgba(1,22,39,0.12)] shadow-2xl text-[#011627] font-[\'Inter\'] rounded-[12px]',
-            modalHeaderClass: 'border-b border-[rgba(1,22,39,0.08)] bg-[#F6F7F8] px-4 py-3 font-[\'Inter\'] rounded-t-[12px]',
-            modalTitleClass: 'text-base sm:text-lg font-bold text-[#011627] font-[\'Inter\'] tracking-tight',
-            modalBodyClass: 'bg-[#FFFFFF] text-[#011627]',
+            modalCardClass: 'bg-[#FFF6D6] border border-[#4D2A00]/30 shadow-2xl text-[#4D2A00] font-[\'Inter\'] rounded-none',
+            modalHeaderClass: 'border-b border-[#4D2A00]/20 bg-[#FFF0BE] px-4 py-3 font-[\'Inter\'] rounded-none',
+            modalTitleClass: 'text-base sm:text-lg font-bold text-[#4D2A00] font-[\'Inter\'] tracking-tight',
+            modalBodyClass: 'bg-[#FFF6D6] text-[#4D2A00]',
 
             // 8. Mobile Drawer & FAB
-            mobileFabClass: 'flex h-13 w-13 items-center justify-center bg-[#297373] text-white shadow-lg border border-[#297373] active:scale-95 transition-all cursor-pointer rounded-[10px]',
-            mobileDrawerClass: 'relative z-10 w-full max-w-lg bg-[#FFFFFF] p-5 shadow-2xl animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto border-t border-[rgba(1,22,39,0.15)] text-[#011627] font-[\'Inter\'] rounded-t-[16px]',
-            mobileDrawerHeaderClass: 'border-b border-[rgba(1,22,39,0.08)] pb-3 bg-[#F6F7F8]',
-            mobileDrawerTitleClass: 'text-base font-bold text-[#011627] font-[\'Inter\'] tracking-tight',
-            mobileDrawerSubtextClass: 'text-xs text-[#011627]/60 font-[\'JetBrains_Mono\']',
-            mobileDrawerNavBtnActive: 'bg-[#297373] text-white font-bold border border-[#297373] font-[\'Inter\'] text-xs rounded-[6px]',
-            mobileDrawerNavBtnInactive: 'text-[#011627] hover:bg-black/5 font-[\'Inter\'] text-xs rounded-[6px]',
-            mobileNavItemActiveClass: 'bg-[#297373] text-white border border-[#297373] font-[\'Inter\'] rounded-[6px]',
-            mobileNavItemInactiveClass: 'text-[#011627] hover:bg-black/5 font-[\'Inter\'] rounded-[6px]',
+            mobileFabClass: 'flex h-13 w-13 items-center justify-center bg-[#4D2A00] text-[#F9E6A8] shadow-lg border border-[#4D2A00] active:scale-95 transition-all cursor-pointer rounded-none',
+            mobileDrawerClass: 'relative z-10 w-full max-w-lg bg-[#FFF6D6] p-5 shadow-2xl animate-in slide-in-from-bottom duration-200 max-h-[90vh] overflow-y-auto border-t border-[#4D2A00]/30 text-[#4D2A00] font-[\'Inter\'] rounded-none',
+            mobileDrawerHeaderClass: 'border-b border-[#4D2A00]/20 pb-3 bg-[#FFF0BE]',
+            mobileDrawerTitleClass: 'text-base font-bold text-[#4D2A00] font-[\'Inter\'] tracking-tight',
+            mobileDrawerSubtextClass: 'text-xs text-[#4D2A00]/70 font-[\'JetBrains_Mono\']',
+            mobileDrawerNavBtnActive: 'bg-[#4D2A00] text-[#F9E6A8] font-bold border border-[#4D2A00] font-[\'Inter\'] text-xs rounded-none',
+            mobileDrawerNavBtnInactive: 'text-[#4D2A00] hover:bg-[#4D2A00]/10 font-[\'Inter\'] text-xs rounded-none',
+            mobileNavItemActiveClass: 'bg-[#4D2A00] text-[#F9E6A8] border border-[#4D2A00] font-[\'Inter\'] rounded-none',
+            mobileNavItemInactiveClass: 'text-[#4D2A00] hover:bg-[#4D2A00]/10 font-[\'Inter\'] rounded-none',
 
             // 9. Desktop Left Side Menu
-            sidebarClass: 'border-r border-[rgba(1,22,39,0.08)] bg-[#FFFFFF] text-[#011627] font-[\'Inter\']',
-            sidebarItemActiveClass: 'bg-[#297373] text-white font-semibold shadow-xs font-[\'Inter\'] text-xs rounded-[8px]',
-            sidebarItemInactiveClass: 'text-[#011627]/70 hover:text-[#297373] hover:bg-[rgba(41,115,115,0.05)] border border-transparent transition-all font-[\'Inter\'] text-xs rounded-[8px]',
-            sidebarDividerClass: 'border-b border-[rgba(1,22,39,0.08)]',
+            sidebarClass: 'border-r border-[#4D2A00]/20 bg-[#FFF4CE] text-[#4D2A00] font-[\'Inter\']',
+            sidebarItemActiveClass: 'bg-[#4D2A00] text-[#F9E6A8] font-semibold shadow-xs font-[\'Inter\'] text-xs rounded-none',
+            sidebarItemInactiveClass: 'text-[#4D2A00]/80 hover:text-[#4D2A00] hover:bg-[#4D2A00]/10 border border-transparent transition-all font-[\'Inter\'] text-xs rounded-none',
+            sidebarDividerClass: 'border-b border-[#4D2A00]/20',
         };
     }
 
@@ -391,7 +391,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             tabActiveClass: 'bg-[#2DD4BF]/15 text-[#2DD4BF] font-bold border border-[#2DD4BF]/30 font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase rounded-[4px]',
             tabInactiveClass: 'text-[#E2E8F0]/60 hover:text-[#E2E8F0] hover:bg-white/5 transition-colors duration-150 font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase rounded-[4px]',
             monthNavBtnClass: 'border border-[rgba(226,232,240,0.15)] bg-[#1A1D23] p-1.5 sm:p-2 text-[#E2E8F0] hover:bg-white/5 transition-colors cursor-pointer shrink-0 rounded-[4px]',
-            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border border-[rgba(226,232,240,0.15)] bg-[#0F1115] hover:bg-[#1A1D23] px-3 py-1 text-sm sm:text-base font-extrabold text-[#E2E8F0] transition-all cursor-pointer w-[150px] sm:w-[176px] shrink-0 font-[\'Syne\'] tracking-tight rounded-[4px]',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border border-[rgba(226,232,240,0.15)] bg-[#0F1115] hover:bg-[#1A1D23] px-3 py-1 text-sm sm:text-base font-extrabold text-[#E2E8F0] transition-all cursor-pointer min-w-[150px] sm:min-w-[185px] shrink-0 font-[\'Syne\'] tracking-tight rounded-[4px] whitespace-nowrap',
             todayBtnClass: 'flex items-center space-x-1 border border-[#2DD4BF]/30 bg-[#2DD4BF]/20 hover:bg-[#2DD4BF]/30 text-[#2DD4BF] px-2.5 py-1 text-xs font-bold transition-all cursor-pointer shrink-0 font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
 
             // 4. Sub-toolbar Aksi Kalender
@@ -480,7 +480,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             tabActiveClass: 'bg-[#1a1a1a] text-[#fcfbf9] font-medium border border-[#1a1a1a] font-[\'Geist_Mono\'] text-xs tracking-wider uppercase',
             tabInactiveClass: 'text-[#1a1a1a]/60 hover:text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] transition-colors duration-150 font-[\'Geist_Mono\'] text-xs tracking-wider uppercase',
             monthNavBtnClass: 'border border-[#1a1a1a]/15 bg-[#ffffff] p-1.5 sm:p-2 text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] transition-colors cursor-pointer shrink-0',
-            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border border-[#1a1a1a]/15 bg-[#ffffff] hover:bg-[#fcfbf9] px-3 py-1 text-sm sm:text-base font-semibold italic text-[#1a1a1a] transition-all cursor-pointer w-[150px] sm:w-[176px] shrink-0 font-[\'Cormorant_Garamond\'] tracking-tight',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border border-[#1a1a1a]/15 bg-[#ffffff] hover:bg-[#fcfbf9] px-3 py-1 text-sm sm:text-base font-semibold italic text-[#1a1a1a] transition-all cursor-pointer min-w-[150px] sm:min-w-[185px] shrink-0 font-[\'Cormorant_Garamond\'] tracking-tight whitespace-nowrap',
             todayBtnClass: 'flex items-center space-x-1 border border-[#2a7373]/30 bg-[#2a7373] hover:bg-[#236060] text-white px-2.5 py-1 text-xs font-medium transition-all cursor-pointer shrink-0 font-[\'Geist_Mono\'] uppercase tracking-wider',
 
             // 4. Sub-toolbar Aksi Kalender
@@ -569,7 +569,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             tabActiveClass: 'bg-[#111113] text-[#F8F7F4] font-bold border border-[#111113] font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase',
             tabInactiveClass: 'text-[#111113]/70 hover:text-[#111113] hover:bg-black/5 transition-colors duration-150 font-[\'JetBrains_Mono\'] text-xs tracking-wider uppercase',
             monthNavBtnClass: 'border-[1.5px] border-[#111113] bg-[#FFFFFF] p-1.5 sm:p-2 text-[#111113] hover:bg-[#111113] hover:text-[#F8F7F4] transition-colors cursor-pointer shrink-0',
-            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border-[1.5px] border-[#111113] bg-[#FFFFFF] hover:bg-[#F8F7F4] px-3 py-1 text-sm sm:text-base font-bold text-[#111113] transition-all cursor-pointer w-[150px] sm:w-[176px] shrink-0 font-[\'JetBrains_Mono\'] tracking-tight uppercase',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 border-[1.5px] border-[#111113] bg-[#FFFFFF] hover:bg-[#F8F7F4] px-3 py-1 text-sm sm:text-base font-bold text-[#111113] transition-all cursor-pointer min-w-[150px] sm:min-w-[185px] shrink-0 font-[\'JetBrains_Mono\'] tracking-tight uppercase whitespace-nowrap',
             todayBtnClass: 'flex items-center space-x-1 border-[1.5px] border-[#111113] bg-[#0D9488] hover:bg-[#0b7a70] text-white px-2.5 py-1 text-xs font-bold transition-all cursor-pointer shrink-0 font-[\'JetBrains_Mono\'] uppercase tracking-wider',
 
             // 4. Sub-toolbar Aksi Kalender
@@ -658,7 +658,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             tabActiveClass: 'bg-[#ff4747] text-white shadow-[2px_2px_0px_#2b2b2b] font-bold rounded-md font-[\'Gaegu\'] text-base tracking-wide',
             tabInactiveClass: 'text-[#2b2b2b] hover:text-[#2b2b2b] hover:bg-[#2ec4b6]/25 rounded-md transition-colors duration-150 font-[\'Gaegu\'] text-base',
             monthNavBtnClass: 'rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] p-1.5 sm:p-2 text-[#2b2b2b] hover:bg-[#2ec4b6] transition-colors cursor-pointer shrink-0 shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5',
-            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#f2efeb] px-2 sm:px-3 py-1 sm:py-1.5 text-base sm:text-lg font-bold text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] transition-all cursor-pointer w-[140px] min-[380px]:w-[150px] sm:w-[176px] shrink-0 font-[\'Gochi_Hand\'] tracking-wide',
+            monthDisplayBtnClass: 'flex items-center justify-center space-x-1.5 sm:space-x-2 rounded-lg border-2 border-[#2b2b2b] bg-[#ffffff] hover:bg-[#f2efeb] px-2 sm:px-3 py-1 sm:py-1.5 text-base sm:text-lg font-bold text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] transition-all cursor-pointer min-w-[150px] sm:min-w-[185px] shrink-0 font-[\'Gochi_Hand\'] tracking-wide whitespace-nowrap',
             todayBtnClass: 'flex items-center space-x-1 rounded-lg border-2 border-[#2b2b2b] bg-[#2ec4b6] hover:bg-[#26a89c] text-[#2b2b2b] px-2 sm:px-2.5 py-1 sm:py-1.5 text-xs font-bold transition-all cursor-pointer shrink-0 shadow-[2px_2px_0px_#2b2b2b] font-[\'Gaegu\'] text-base tracking-wide active:translate-x-0.5 active:translate-y-0.5',
 
             // 4. Sub-toolbar Aksi Kalender

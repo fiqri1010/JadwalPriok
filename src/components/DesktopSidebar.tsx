@@ -19,6 +19,7 @@ import { getCurrentUserRoleInfo } from '../utils/adminStorage';
 import { Tooltip } from './Tooltip';
 import { AppLogo } from './AppLogo';
 import { APP_VERSION } from '../version';
+import { formatDisplayName } from './admin/AdminUserListTab';
 
 const StyledSidebarWrapper = styled.div`
   position: absolute;
@@ -118,12 +119,11 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
                                         v{APP_VERSION}
                                     </span>
                                 )}
-                                {themeConfig.isDashboard && (
-                                    <span className="text-[8px] font-['JetBrains_Mono'] font-bold text-[#297373] uppercase tracking-widest leading-none mb-0.5">
-                                        v{APP_VERSION}
-                                    </span>
-                                )}
-                                <h1 className={`${themeConfig.titleClass} font-black leading-tight truncate text-xs sm:text-[13px] lg:text-[14px]`}>
+                                <h1 className={`${
+                                    themeConfig.isIndustrial
+                                        ? 'text-[11px] sm:text-xs lg:text-[13px] tracking-tight text-[#E2E8F0] font-[\'Syne\'] uppercase'
+                                        : themeConfig.titleClass
+                                } font-black leading-tight truncate`}>
                                     JadwalPriok
                                 </h1>
                                 <p className={`${themeConfig.subtitleClass} leading-tight truncate opacity-75 text-[10px]`}>
@@ -136,7 +136,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
                     {/* 2. Informasi Nama dan NIP Pengguna Aktif (Tanpa SVG Profil Samping) */}
                     <div className="px-2.5 lg:px-3 pt-0.5 pb-1">
                         <div
-                            className={`w-full text-left p-2 rounded-lg border flex flex-col select-none ${
+                            className={`w-full text-left p-2.5 rounded-lg border flex flex-col select-none ${
                                 themeConfig.isIndustrial
                                     ? 'bg-[#1A1D23]/90 border-[rgba(226,232,240,0.12)] text-[#E2E8F0]'
                                     : themeConfig.isPaperSketch
@@ -147,13 +147,15 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
                                     ? 'bg-black border border-[#00FF00]/60 text-[#00FF00]'
                                     : currentTheme === 'dark'
                                     ? 'bg-[#181818] border-zinc-800 text-slate-100'
+                                    : currentTheme === 'dashboard'
+                                    ? 'bg-[#FFF0BE] border border-[#4D2A00]/30 text-[#4D2A00] shadow-2xs'
                                     : 'bg-slate-50/90 dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700/60 text-slate-900 dark:text-slate-100'
                             }`}
                         >
                             <div className="min-w-0 flex-1 overflow-hidden">
                                 <div className="flex items-center gap-1.5">
-                                    <span className="text-xs font-black truncate block leading-tight">
-                                        {activeUserName}
+                                    <span className="text-xs font-black truncate block leading-tight" title={activeUserName}>
+                                        {formatDisplayName(activeUserName)}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-1 mt-0.5 opacity-75">
@@ -162,10 +164,40 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
                                         {activeUserNip}
                                     </span>
                                 </div>
-                                <div className="mt-1.5 flex items-center">
-                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded font-mono uppercase tracking-wide border ${roleInfo.badgeColor}`}>
+                                {/* Baris Bawah: Indikator Role di Kiri & Tombol Dashboard di Sudut Kanan Bawah Sejajar */}
+                                <div className="mt-2 pt-1.5 border-t border-current/10 flex items-center justify-between gap-1 w-full min-w-0">
+                                    <span
+                                        className={`text-[8.5px] font-bold px-1.5 py-0.5 rounded font-mono uppercase tracking-tight border truncate min-w-0 max-w-[55%] sidebar-user-badge ${
+                                            themeConfig.isPaperSketch ? 'text-[7.5px] px-1 py-0 leading-tight border-[#2b2b2b]' : ''
+                                        } ${roleInfo.badgeColor}`}
+                                        title={roleInfo.authorityName}
+                                    >
                                         {roleInfo.authorityName}
                                     </span>
+
+                                    {canAccessAdmin && (
+                                        <Tooltip
+                                            content={<span>Akses <strong>Dashboard Administrator</strong></span>}
+                                            placement="right"
+                                        >
+                                            <button
+                                                type="button"
+                                                id="side-menu-admin"
+                                                onClick={() => setPageTab('admin')}
+                                                className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 text-[9px] font-bold rounded font-mono uppercase tracking-tight transition-all cursor-pointer border shrink-0 whitespace-nowrap sidebar-admin-btn ${
+                                                    themeConfig.isPaperSketch ? 'text-[8px] px-1.5 py-0.5 leading-tight border-[#2b2b2b]' : ''
+                                                } ${
+                                                    pageTab === 'admin'
+                                                        ? 'bg-rose-600 text-white border-rose-600 shadow-2xs'
+                                                        : 'text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/25'
+                                                }`}
+                                                title="Buka Dashboard Administrator"
+                                            >
+                                                <ShieldAlert className={`w-2.5 h-2.5 shrink-0 ${pageTab === 'admin' ? 'text-white' : 'text-rose-500'}`} />
+                                                <span className="whitespace-nowrap font-bold">Dasbor</span>
+                                            </button>
+                                        </Tooltip>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -311,29 +343,6 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
                                 <span className="truncate flex-1 text-left">Landing Page</span>
                             </button>
                         </Tooltip>
-
-                        {/* 7. Dashboard Administrator (Khusus Admin & Super Admin) */}
-                        {canAccessAdmin && (
-                            <Tooltip
-                                content={<span>Akses <strong>Dashboard Administrator Posko</strong></span>}
-                                placement="right"
-                                containerClassName="w-full"
-                            >
-                                <button
-                                    type="button"
-                                    id="side-menu-admin"
-                                    onClick={() => setPageTab('admin')}
-                                    className={`w-full flex items-center space-x-2.5 px-3 py-2 text-xs lg:text-[13px] xl:text-sm font-bold rounded-[5px] lg:rounded-[7px] transition-all cursor-pointer ${
-                                        pageTab === 'admin'
-                                            ? 'bg-rose-600 text-white shadow-xs'
-                                            : 'text-rose-600 dark:text-rose-400 hover:bg-rose-500/10'
-                                    }`}
-                                >
-                                    <ShieldAlert className="h-4 w-4 lg:h-[18px] lg:w-[18px] text-rose-500 shrink-0" />
-                                    <span className="truncate flex-1 text-left">Dashboard Admin</span>
-                                </button>
-                            </Tooltip>
-                        )}
                     </nav>
                 </div>
 

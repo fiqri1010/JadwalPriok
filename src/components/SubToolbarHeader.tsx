@@ -200,7 +200,7 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
                                     <button
                                         type="button"
                                         onClick={onOpenMonthPicker}
-                                        className={`flex items-center justify-center space-x-1.5 cursor-pointer w-[130px] min-[380px]:w-[145px] sm:w-[165px] shrink-0 text-center ${styles.monthTextBtn}`}
+                                        className={`flex items-center justify-center space-x-1.5 cursor-pointer min-w-[140px] sm:min-w-[175px] shrink-0 text-center whitespace-nowrap ${styles.monthTextBtn}`}
                                     >
                                         <CalendarDays className="h-3.5 w-3.5 shrink-0 opacity-70" />
                                         <span className="truncate whitespace-nowrap text-center">

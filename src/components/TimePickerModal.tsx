@@ -473,105 +473,95 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 sm:top-7 z-[100000] flex items-center justify-center bg-slate-950/75 p-3 backdrop-blur-sm animate-in fade-in duration-150 select-none"
+      className="fixed inset-0 sm:top-2 z-[100000] flex items-center justify-center bg-slate-950/75 p-2 sm:p-3 backdrop-blur-xs animate-in fade-in duration-150 select-none overflow-y-auto"
       onMouseUp={handleMouseUp}
     >
       <div 
-        className={`w-full max-w-sm overflow-hidden tp-modal-card shadow-2xl ${
+        className={`w-full max-w-[330px] overflow-hidden tp-modal-card shadow-2xl my-auto ${
           isWinamp ? 'font-mono shadow-[4px_4px_0_#000]' : isVista ? 'backdrop-blur-2xl shadow-[0_25px_60px_rgba(14,116,224,0.3)] ring-1 ring-sky-300/30' : ''
         }`}
         data-theme={theme}
       >
         {/* Header Bar */}
-        <div className="flex items-center justify-between px-5 py-3.5 tp-header">
-          <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 tp-header-icon" />
-            <span className="text-xs font-bold tracking-wide uppercase">{title}</span>
+        <div className="flex items-center justify-between px-3.5 py-2 tp-header">
+          <div className="flex items-center space-x-1.5">
+            <Clock className="h-3.5 w-3.5 tp-header-icon" />
+            <span className="text-[11px] sm:text-xs font-bold tracking-wide uppercase">{title}</span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 transition-colors cursor-pointer tp-header-close-btn"
+            className="p-1 transition-colors cursor-pointer tp-header-close-btn"
             aria-label="Tutup"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </button>
         </div>
 
-        <div className="p-4 space-y-3.5">
+        <div className="p-2.5 space-y-2">
           {/* Multi-Field Tab Selector (Masuk / Pulang / Absen CEISA) */}
-          <div className="grid grid-cols-3 gap-1 p-1 tp-tabs-container">
+          <div className="grid grid-cols-3 gap-1 p-0.5 tp-tabs-container">
             <button
               type="button"
               onClick={() => handleSwitchTab('jamMasuk')}
-              className={`py-1.5 px-2 text-xs font-bold transition-all text-center cursor-pointer tp-tab-btn ${
-                activeTab === 'jamMasuk' ? 'tp-tab-active shadow-xs' : ''
+              className={`py-1 px-1 text-xs font-bold transition-all text-center cursor-pointer tp-tab-btn ${
+                activeTab === 'jamMasuk' ? 'tp-tab-active shadow-3xs' : ''
               }`}
             >
-              <div className="text-[9.5px] opacity-75 uppercase tracking-wider font-semibold">Masuk</div>
-              <div className="font-mono text-xs font-black">{jamMasukVal || '--:--'}</div>
+              <div className="text-[8.5px] opacity-75 uppercase tracking-wider font-semibold">Masuk</div>
+              <div className="font-mono text-[11px] sm:text-xs font-black">{jamMasukVal || '--:--'}</div>
             </button>
 
             <button
               type="button"
               onClick={() => handleSwitchTab('jamPulang')}
-              className={`py-1.5 px-2 text-xs font-bold transition-all text-center cursor-pointer tp-tab-btn ${
-                activeTab === 'jamPulang' ? 'tp-tab-active shadow-xs' : ''
+              className={`py-1 px-1 text-xs font-bold transition-all text-center cursor-pointer tp-tab-btn ${
+                activeTab === 'jamPulang' ? 'tp-tab-active shadow-3xs' : ''
               }`}
             >
-              <div className="text-[9.5px] opacity-75 uppercase tracking-wider font-semibold">Pulang</div>
-              <div className="font-mono text-xs font-black">{jamPulangVal || '--:--'}</div>
+              <div className="text-[8.5px] opacity-75 uppercase tracking-wider font-semibold">Pulang</div>
+              <div className="font-mono text-[11px] sm:text-xs font-black">{jamPulangVal || '--:--'}</div>
             </button>
 
             <button
               type="button"
               onClick={() => handleSwitchTab('absenCeisa')}
-              className={`py-1.5 px-2 text-xs font-bold transition-all text-center cursor-pointer tp-tab-btn ${
-                activeTab === 'absenCeisa' ? 'tp-tab-active shadow-xs' : ''
+              className={`py-1 px-1 text-xs font-bold transition-all text-center cursor-pointer tp-tab-btn ${
+                activeTab === 'absenCeisa' ? 'tp-tab-active shadow-3xs' : ''
               }`}
             >
-              <div className="text-[9.5px] opacity-75 uppercase tracking-wider font-semibold">CEISA</div>
-              <div className="font-mono text-xs font-black">{absenCeisaVal || '--:--'}</div>
+              <div className="text-[8.5px] opacity-75 uppercase tracking-wider font-semibold">CEISA</div>
+              <div className="font-mono text-[11px] sm:text-xs font-black">{absenCeisaVal || '--:--'}</div>
             </button>
           </div>
 
           {/* Warning Banner Jika Tidak Valid */}
           {isInvalid && (
-            <div className={`flex items-start space-x-2.5 p-3 duration-150 ${
+            <div className={`flex items-start space-x-2 p-1.5 duration-150 ${
               isWinamp 
-                ? 'rounded-none bg-black border-2 border-rose-500 text-rose-400 font-mono' 
+                ? 'rounded-none bg-black border border-rose-500 text-rose-400 font-mono' 
                 : 'rounded-lg bg-rose-50 border border-rose-300 text-rose-900 animate-in fade-in zoom-in-95'
             }`}>
-              <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5 animate-bounce" />
-              <div className="text-xs space-y-1">
+              <AlertTriangle className="h-3.5 w-3.5 text-rose-600 shrink-0 mt-0.5 animate-bounce" />
+              <div className="text-[11px] space-y-0.5">
                 <div className="font-black text-rose-600 flex items-center space-x-1">
                   <span>Waktu Tidak Valid!</span>
-                  <span className={`text-[10px] font-mono px-1.5 py-0.2 font-bold ${
-                    isWinamp ? 'rounded-none bg-rose-950 text-rose-300 border border-rose-700' : 'rounded bg-rose-200/80 text-rose-950'
-                  }`}>
-                    jamMasuk &lt; jamPulang
-                  </span>
                 </div>
-                <p className="text-[11.5px] leading-snug font-medium">
+                <p className="text-[10px] leading-snug font-medium">
                   {validationError}
                 </p>
-                {validationRuleSubtext && (
-                  <p className="text-[10px] font-semibold">
-                    💡 {validationRuleSubtext}
-                  </p>
-                )}
               </div>
             </div>
           )}
 
           {/* Digital Time Display & Mode Switcher */}
-          <div className="flex items-center justify-between p-3 transition-colors tp-digital-container">
-            <div className="flex items-center space-x-1.5">
+          <div className="flex items-center justify-between p-1.5 transition-colors tp-digital-container">
+            <div className="flex items-center space-x-1">
               {/* Hour Input Box */}
               <div
-                className={`relative flex flex-col items-center justify-center px-2.5 py-1 transition-all cursor-text tp-digital-box ${
+                className={`relative flex flex-col items-center justify-center px-1.5 py-0.5 transition-all cursor-text tp-digital-box ${
                   mode === 'hour'
-                    ? (isInvalid ? '!bg-rose-600 !text-white !border-rose-500 shadow-md ring-2 ring-rose-400/60' : 'tp-digital-active shadow-md')
+                    ? (isInvalid ? '!bg-rose-600 !text-white !border-rose-500 shadow-xs' : 'tp-digital-active shadow-xs')
                     : ''
                 }`}
                 onClick={() => {
@@ -596,24 +586,24 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                   }}
                   onChange={handleHourChange}
                   onKeyDown={handleHourKeyDown}
-                  className="w-11 text-center font-mono text-2xl font-black bg-transparent border-none outline-none p-0 selection:bg-white/30 cursor-text text-inherit"
+                  className="w-9 text-center font-mono text-lg font-black bg-transparent border-none outline-none p-0 selection:bg-white/30 cursor-text text-inherit leading-none"
                   aria-label="Ketik Jam (00-23)"
                   title="Klik untuk ketik jam lewat keyboard (00-23)"
                 />
-                <span className="block text-[8px] tracking-wider font-sans uppercase font-bold text-center select-none tp-digital-subtext">
+                <span className="block text-[7.5px] tracking-wider font-sans uppercase font-bold text-center select-none tp-digital-subtext leading-none mt-0.5">
                   Jam
                 </span>
               </div>
 
-              <span className={`text-2xl font-mono font-bold select-none animate-pulse ${
+              <span className={`text-lg font-mono font-bold select-none animate-pulse ${
                 isInvalid ? 'text-rose-500' : 'tp-colon'
               }`}>:</span>
 
               {/* Minute Input Box */}
               <div
-                className={`relative flex flex-col items-center justify-center px-2.5 py-1 transition-all cursor-text tp-digital-box ${
+                className={`relative flex flex-col items-center justify-center px-1.5 py-0.5 transition-all cursor-text tp-digital-box ${
                   mode === 'minute'
-                    ? (isInvalid ? '!bg-rose-600 !text-white !border-rose-500 shadow-md ring-2 ring-rose-400/60' : 'tp-digital-active shadow-md')
+                    ? (isInvalid ? '!bg-rose-600 !text-white !border-rose-500 shadow-xs' : 'tp-digital-active shadow-xs')
                     : ''
                 }`}
                 onClick={() => {
@@ -638,11 +628,11 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                   }}
                   onChange={handleMinuteChange}
                   onKeyDown={handleMinuteKeyDown}
-                  className="w-11 text-center font-mono text-2xl font-black bg-transparent border-none outline-none p-0 selection:bg-white/30 cursor-text text-inherit"
+                  className="w-9 text-center font-mono text-lg font-black bg-transparent border-none outline-none p-0 selection:bg-white/30 cursor-text text-inherit leading-none"
                   aria-label="Ketik Menit (00-59)"
                   title="Klik untuk ketik menit lewat keyboard (00-59)"
                 />
-                <span className="block text-[8px] tracking-wider font-sans uppercase font-bold text-center select-none tp-digital-subtext">
+                <span className="block text-[7.5px] tracking-wider font-sans uppercase font-bold text-center select-none tp-digital-subtext leading-none mt-0.5">
                   Menit
                 </span>
               </div>
@@ -653,7 +643,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               <button
                 type="button"
                 onClick={() => adjustMinute(-1)}
-                className="px-2 py-1.5 text-xs font-bold font-mono transition-colors cursor-pointer tp-stepper-btn"
+                className="px-1 py-0.5 text-[10px] font-bold font-mono transition-colors cursor-pointer tp-stepper-btn"
                 title="Kurangi 1 Menit"
               >
                 -1m
@@ -661,7 +651,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               <button
                 type="button"
                 onClick={() => adjustMinute(1)}
-                className="px-2 py-1.5 text-xs font-bold font-mono transition-colors cursor-pointer tp-stepper-btn tp-stepper-btn-accent"
+                className="px-1 py-0.5 text-[10px] font-bold font-mono transition-colors cursor-pointer tp-stepper-btn tp-stepper-btn-accent"
                 title="Tambah 1 Menit"
               >
                 +1m
@@ -669,17 +659,17 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               <button
                 type="button"
                 onClick={handleSetNow}
-                className="flex items-center space-x-1 px-2 py-1.5 text-xs font-semibold transition-colors cursor-pointer tp-stepper-btn tp-stepper-btn-accent"
+                className="flex items-center space-x-0.5 px-1 py-0.5 text-[10px] font-semibold transition-colors cursor-pointer tp-stepper-btn tp-stepper-btn-accent"
                 title="Set Waktu Saat Ini"
               >
-                <Sparkles className="h-3 w-3" />
-                <span className="text-[10px]">Now</span>
+                <Sparkles className="h-2.5 w-2.5" />
+                <span className="text-[9px]">Now</span>
               </button>
             </div>
           </div>
 
           {/* Interactive Analog Watch Face (Dial Jam Tangan) */}
-          <div className="flex flex-col items-center justify-center pt-1">
+          <div className="flex flex-col items-center justify-center pt-0.5">
             <div
               ref={clockRef}
               onMouseDown={handleMouseDown}
@@ -687,7 +677,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              className="relative w-52 h-52 sm:w-56 sm:h-56 rounded-full cursor-pointer select-none touch-none tp-dial-surface shadow-xl"
+              className="relative w-40 h-40 sm:w-44 sm:h-44 rounded-full cursor-pointer select-none touch-none tp-dial-surface shadow-md"
             >
               {/* Watch Bezel Ticks (60 Menit / Detik) */}
               {Array.from({ length: 60 }).map((_, i) => {
@@ -703,8 +693,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                     }}
                   >
                     <div
-                      className={`w-[1.5px] rounded-full mx-auto ${
-                        isMajor ? 'h-2 tp-dial-tick-major' : 'h-1 tp-dial-tick-minor'
+                      className={`w-[1px] rounded-full mx-auto ${
+                        isMajor ? 'h-1.5 tp-dial-tick-major' : 'h-1 tp-dial-tick-minor'
                       }`}
                     />
                   </div>
@@ -718,13 +708,13 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                   {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((h, idx) => {
                     const angle = idx * 30; // 0 to 330 deg
                     const rad = (angle - 90) * (Math.PI / 180);
-                    const r = 80; // pixel distance from center
+                    const r = 58; // pixel distance from center
                     const isSelected = (hour % 12 === 0 ? 12 : hour % 12) === h && hour <= 12;
                     return (
                       <div
                         key={`h-outer-${h}`}
-                        className={`absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center text-xs font-bold transition-transform rounded-full tp-dial-num ${
-                          isSelected ? 'tp-dial-num-active shadow-md scale-110' : ''
+                        className={`absolute w-4.5 h-4.5 -ml-2.25 -mt-2.25 flex items-center justify-center text-[10px] font-bold transition-transform rounded-full tp-dial-num ${
+                          isSelected ? 'tp-dial-num-active shadow-xs scale-110' : ''
                         }`}
                         style={{
                           left: `calc(50% + ${Math.cos(rad) * r}px)`,
@@ -740,13 +730,13 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                   {[0, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h, idx) => {
                     const angle = idx * 30;
                     const rad = (angle - 90) * (Math.PI / 180);
-                    const r = 52;
+                    const r = 38;
                     const isSelected = hour === h;
                     return (
                       <div
                         key={`h-inner-${h}`}
-                        className={`absolute w-5 h-5 -ml-2.5 -mt-2.5 flex items-center justify-center text-[10px] font-semibold transition-transform rounded-full tp-dial-sub-num ${
-                          isSelected ? 'tp-dial-sub-active font-black shadow-md scale-110' : ''
+                        className={`absolute w-4 h-4 -ml-2 -mt-2 flex items-center justify-center text-[8.5px] font-semibold transition-transform rounded-full tp-dial-sub-num ${
+                          isSelected ? 'tp-dial-sub-active font-black shadow-xs scale-110' : ''
                         }`}
                         style={{
                           left: `calc(50% + ${Math.cos(rad) * r}px)`,
@@ -766,13 +756,13 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                   {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map((m, idx) => {
                     const angle = idx * 30;
                     const rad = (angle - 90) * (Math.PI / 180);
-                    const r = 78;
+                    const r = 58;
                     const isSelected = minute === m;
                     return (
                       <div
                         key={`m-${m}-${idx}`}
-                        className={`absolute w-6 h-6 -ml-3 -mt-3 flex items-center justify-center text-xs font-bold transition-transform rounded-full tp-dial-num ${
-                          isSelected ? 'tp-dial-num-active shadow-md scale-110' : ''
+                        className={`absolute w-4.5 h-4.5 -ml-2.25 -mt-2.25 flex items-center justify-center text-[10px] font-bold transition-transform rounded-full tp-dial-num ${
+                          isSelected ? 'tp-dial-num-active shadow-xs scale-110' : ''
                         }`}
                         style={{
                           left: `calc(50% + ${Math.cos(rad) * r}px)`,
@@ -790,11 +780,11 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               <div
                 className="absolute top-1/2 left-1/2 origin-bottom transition-all duration-75 pointer-events-none tp-hand-hour-elem"
                 style={{
-                  width: '4px',
-                  height: '42px',
-                  borderRadius: isWinamp ? '0' : '3px',
+                  width: '3px',
+                  height: '28px',
+                  borderRadius: isWinamp ? '0' : '2px',
                   transform: `translate(-50%, -100%) rotate(${hourAngle}deg)`,
-                  boxShadow: 'var(--tp-hand-shadow, 0 0 6px rgba(0, 0, 0, 0.25))',
+                  boxShadow: 'var(--tp-hand-shadow, 0 0 4px rgba(0, 0, 0, 0.25))',
                 }}
               />
 
@@ -802,37 +792,37 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               <div
                 className="absolute top-1/2 left-1/2 origin-bottom transition-all duration-75 pointer-events-none tp-hand-minute-elem"
                 style={{
-                  width: '2.5px',
-                  height: '68px',
+                  width: '2px',
+                  height: '48px',
                   borderRadius: isWinamp ? '0' : '2px',
                   transform: `translate(-50%, -100%) rotate(${minuteAngle}deg)`,
-                  boxShadow: 'var(--tp-hand-shadow, 0 0 8px rgba(0, 0, 0, 0.25))',
+                  boxShadow: 'var(--tp-hand-shadow, 0 0 6px rgba(0, 0, 0, 0.25))',
                 }}
               />
 
               {/* Center Pivot Pin */}
               <div 
-                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none tp-pivot-elem ${
-                  isWinamp ? 'rounded-none' : 'rounded-full shadow-md'
+                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none tp-pivot-elem ${
+                  isWinamp ? 'rounded-none' : 'rounded-full shadow-xs'
                 }`} 
               />
             </div>
 
             {/* Hint Navigation Label */}
-            <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] font-medium text-center tp-hint-text">
-              <Keyboard className="h-3.5 w-3.5 shrink-0 tp-colon" />
+            <div className="mt-1 flex items-center justify-center gap-1 text-[9.5px] font-medium text-center tp-hint-text">
+              <Keyboard className="h-3 w-3 shrink-0 tp-colon" />
               <span>
-                Ketik langsung via keyboard <kbd className="px-1 py-0.2 text-[10px] font-mono tp-hint-kbd">00-23</kbd> / <kbd className="px-1 py-0.2 text-[10px] font-mono tp-hint-kbd">00-59</kbd> atau putar dial jam
+                Ketik <kbd className="px-1 py-0.2 text-[8.5px] font-mono tp-hint-kbd">00-23</kbd> / <kbd className="px-1 py-0.2 text-[8.5px] font-mono tp-hint-kbd">00-59</kbd>
               </span>
             </div>
           </div>
 
-          {/* Quick Preset Buttons (8px border-radius) */}
+          {/* Quick Preset Buttons */}
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider block mb-1.5 tp-preset-label">
-              {activeTab === 'absenCeisa' ? 'Preset Waktu CEISA' : `Preset Waktu ${activeTab === 'jamMasuk' ? 'Masuk' : 'Pulang'}`}
+            <span className="text-[9px] font-bold uppercase tracking-wider block mb-1 tp-preset-label">
+              {activeTab === 'absenCeisa' ? 'Preset CEISA' : `Preset ${activeTab === 'jamMasuk' ? 'Masuk' : 'Pulang'}`}
             </span>
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-4 gap-1">
               {(activeTab === 'absenCeisa'
                 ? ['07:15', '07:30', '07:45', '08:00', '16:00', '16:30', '17:00', '19:30']
                 : PRESET_TIMES
@@ -844,8 +834,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                     key={`preset-${preset}-${idx}`}
                     type="button"
                     onClick={() => handlePreset(preset)}
-                    className={`relative py-1.5 text-xs font-mono font-semibold transition-all cursor-pointer tp-preset-btn ${
-                      isSelected ? 'tp-preset-active font-bold shadow-xs' : ''
+                    className={`relative py-0.5 text-[10.5px] font-mono font-semibold transition-all cursor-pointer tp-preset-btn ${
+                      isSelected ? 'tp-preset-active font-bold shadow-3xs' : ''
                     }`}
                     title={`Pilih ${preset}`}
                   >
@@ -858,21 +848,21 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between p-3.5 tp-footer">
+        <div className="flex items-center justify-between p-2 tp-footer">
           <button
             type="button"
             onClick={handleClear}
-            className="flex items-center space-x-1 px-3 py-2 text-xs font-semibold transition-colors cursor-pointer tp-btn-clear"
+            className="flex items-center space-x-1 px-2 py-1 text-[11px] font-semibold transition-colors cursor-pointer tp-btn-clear"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-3 w-3" />
             <span>Kosongkan</span>
           </button>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer tp-btn-secondary"
+              className="px-2.5 py-1 text-[11px] font-bold transition-colors cursor-pointer tp-btn-secondary"
             >
               Batal
             </button>
@@ -880,10 +870,10 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
               type="button"
               onClick={handleApply}
               disabled={isInvalid}
-              className="flex items-center space-x-1.5 px-4 py-2 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 tp-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center space-x-1 px-3 py-1 text-[11px] font-bold transition-all cursor-pointer shadow-3xs active:scale-95 tp-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               title="Simpan waktu untuk semua field"
             >
-              <Check className="h-4 w-4" />
+              <Check className="h-3.5 w-3.5" />
               <span>Simpan Waktu</span>
             </button>
           </div>

@@ -292,6 +292,20 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         btnQuick: 'bg-[#f2efeb] text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/30 shadow-[1.5px_1.5px_0px_#2b2b2b]',
       };
     }
+    if (isDashboard) {
+      return {
+        inputWrapper: 'bg-[#FFF5D0] text-[#4D2A00] border border-[#4D2A00]/30 hover:border-[#4D2A00] focus-within:border-[#4D2A00] focus-within:ring-2 focus-within:ring-[#4D2A00]/20 shadow-xs font-medium',
+        dropdown: 'bg-[#FFF5D0] text-[#4D2A00] border border-[#4D2A00]/30 shadow-2xl rounded-2xl overflow-hidden',
+        header: 'bg-[#FFF0BE] border-b border-[#4D2A00]/25 text-[#4D2A00] font-bold',
+        daySelected: 'bg-[#4D2A00] text-[#F9E6A8] font-black shadow-md rounded-lg',
+        dayToday: 'border-2 border-[#4D2A00] text-[#4D2A00] font-bold bg-[#FFF0BE] rounded-lg',
+        dayNormal: 'text-[#4D2A00] hover:bg-[#FFF0BE] hover:text-[#4D2A00] font-medium rounded-lg',
+        dayOther: 'text-[#4D2A00]/30 hover:bg-[#FFF0BE]/50 rounded-lg',
+        btnNav: 'hover:bg-[#FFF0BE] text-[#4D2A00] border border-[#4D2A00]/25 rounded-lg',
+        btnToday: 'bg-[#4D2A00] text-[#F9E6A8] font-bold hover:bg-[#3D2100] rounded-lg',
+        btnQuick: 'bg-[#FFF0BE] text-[#4D2A00] border border-[#4D2A00]/25 hover:bg-[#FFE8A3] rounded-lg font-bold',
+      };
+    }
     // Default Clean Light Theme
     return {
       inputWrapper: 'bg-white text-[#011627] border border-slate-300 hover:border-[#2EC4B6] focus-within:border-[#2EC4B6] focus-within:ring-2 focus-within:ring-[#2EC4B6]/20 shadow-xs',

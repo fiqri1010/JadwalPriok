@@ -37,6 +37,7 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
     const isTechnical = theme === 'technical';
     const isEditorial = theme === 'editorial';
     const isIndustrial = theme === 'industrial';
+    const isDashboard = theme === 'dashboard';
 
     // Filter Piket matches for the current selected month
     const monthPikets = React.useMemo(() => {
@@ -80,6 +81,9 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
         if (isDark) {
             return 'bg-[#1E1E1E] border border-slate-800 text-slate-100 rounded-xl shadow-xs';
         }
+        if (isDashboard) {
+            return 'bg-[#FFF5D0] border border-[#4D2A00]/25 text-[#4D2A00] rounded-none shadow-2xs';
+        }
         return 'bg-white text-slate-900 rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-black/[0.04]';
     };
 
@@ -104,6 +108,9 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
         }
         if (isDark) {
             return 'bg-slate-800/60 border border-slate-700/80 text-slate-100 p-2.5 rounded-xl shadow-2xs';
+        }
+        if (isDashboard) {
+            return 'bg-[#FFF0BE] border border-[#4D2A00]/30 text-[#4D2A00] p-2.5 rounded-none font-["Inter"] font-bold';
         }
         return 'bg-slate-50 border border-slate-200/60 text-slate-900 p-2.5 rounded-lg shadow-2xs';
     };
@@ -130,6 +137,9 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
         if (isDark) {
             return 'border-b border-white/10 bg-white/5 text-slate-200';
         }
+        if (isDashboard) {
+            return 'border-b border-[#4D2A00]/20 bg-[#FFF0BE] text-[#4D2A00] font-bold';
+        }
         return 'border-b border-slate-100 bg-amber-50/60 text-slate-800';
     };
 
@@ -148,6 +158,9 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
         }
         if (isWinamp) {
             return 'bg-black hover:bg-zinc-900 border border-[#00FF00]/40 shadow-[1px_1px_0_#00FF00] text-[#00FF00] rounded-none';
+        }
+        if (isDashboard) {
+            return 'bg-[#FFFBF0] hover:bg-[#FFF0BE] border border-[#4D2A00]/20 text-[#4D2A00] rounded-none';
         }
         if (isVista) {
             return 'bg-white/65 hover:bg-white/90 border border-white/90 shadow-[0_2px_6px_rgba(14,116,224,0.1)] text-slate-800 backdrop-blur-xs';

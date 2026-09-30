@@ -58,7 +58,7 @@ interface WindowTitleBarProps {
 export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
     theme,
     title = FULL_APP_TITLE,
-    subtitle = 'Kalender Jadwal Kerja',
+    subtitle = '',
     onClose
 }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -194,6 +194,306 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
         }
     };
 
+    // Dashboard (Warm) Edition Title Bar
+    if (theme === 'dashboard') {
+        return (
+            <div
+                data-tauri-drag-region="true"
+                onMouseDown={handleStartDragging}
+                className="hidden sm:block w-full shrink-0 select-none font-['Inter'] text-xs bg-[#F9E6A8] border-b border-[#4D2A00]/20 cursor-default relative z-[999999]"
+            >
+                <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#4D2A00] bg-[#F9E6A8]">
+                    <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
+                        <AppLogo className="h-4 w-4 rounded-xs shrink-0" />
+                        <span data-tauri-drag-region="true" className="font-extrabold text-[#4D2A00] text-[11px] truncate">
+                            {title} {subtitle && <span className="text-[10px] opacity-70 hidden md:inline">({subtitle})</span>}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center space-x-0.5 shrink-0">
+                        {/* Zoom Controls */}
+                        <div className="flex items-center space-x-0.5 mr-[6px]">
+                            <button
+                                type="button"
+                                onClick={handleZoomOut}
+                                className="h-5 w-5 rounded flex items-center justify-center text-[#4D2A00]/70 hover:text-[#4D2A00] hover:bg-[#FFF0BE] transition-colors cursor-pointer"
+                                title="Perkecil Ukuran Tampilan UI (-)"
+                            >
+                                <Minus className="h-2.5 w-2.5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleResetZoom}
+                                className="h-5 px-1.5 rounded flex items-center justify-center text-[#4D2A00]/70 hover:text-[#4D2A00] hover:bg-[#FFF0BE] text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                                title="Reset Ukuran UI ke 100%"
+                            >
+                                {zoomLevel}%
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleZoomIn}
+                                className="h-5 w-5 rounded flex items-center justify-center text-[#4D2A00]/70 hover:text-[#4D2A00] hover:bg-[#FFF0BE] transition-colors cursor-pointer"
+                                title="Perbesar Ukuran Tampilan UI (+)"
+                            >
+                                <Plus className="h-2.5 w-2.5" />
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleMinimize}
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#4D2A00]/70 hover:text-[#4D2A00] hover:bg-[#FFF0BE] transition-colors cursor-pointer"
+                            title="Minimize"
+                        >
+                            <Minus className="h-3 w-3" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleToggleMaximize}
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#4D2A00]/70 hover:text-[#4D2A00] hover:bg-[#FFF0BE] transition-colors cursor-pointer"
+                            title={isFullscreen ? 'Restore' : 'Maximize'}
+                        >
+                            {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#4D2A00]/70 hover:text-white hover:bg-rose-600 transition-colors cursor-pointer"
+                            title="Tutup Jendela"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Industrial Edition Title Bar
+    if (theme === 'industrial') {
+        return (
+            <div
+                data-tauri-drag-region="true"
+                onMouseDown={handleStartDragging}
+                className="hidden sm:block w-full shrink-0 select-none font-['JetBrains_Mono'] text-xs bg-[#0F1115] border-b border-[rgba(226,232,240,0.1)] cursor-default relative z-[999999]"
+            >
+                <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#E2E8F0] bg-[#0F1115]">
+                    <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
+                        <AppLogo className="h-4 w-4 rounded-xs shrink-0" />
+                        <span data-tauri-drag-region="true" className="font-extrabold text-[#E2E8F0] text-[11px] uppercase tracking-wider truncate">
+                            {title}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center space-x-0.5 shrink-0">
+                        {/* Zoom Controls */}
+                        <div className="flex items-center space-x-0.5 mr-[6px]">
+                            <button
+                                type="button"
+                                onClick={handleZoomOut}
+                                className="h-5 w-5 rounded flex items-center justify-center text-[#E2E8F0]/70 hover:text-[#2DD4BF] hover:bg-white/5 transition-colors cursor-pointer"
+                                title="Perkecil Ukuran Tampilan UI (-)"
+                            >
+                                <Minus className="h-2.5 w-2.5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleResetZoom}
+                                className="h-5 px-1.5 rounded flex items-center justify-center text-[#E2E8F0]/70 hover:text-[#2DD4BF] hover:bg-white/5 text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                                title="Reset Ukuran UI ke 100%"
+                            >
+                                {zoomLevel}%
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleZoomIn}
+                                className="h-5 w-5 rounded flex items-center justify-center text-[#E2E8F0]/70 hover:text-[#2DD4BF] hover:bg-white/5 transition-colors cursor-pointer"
+                                title="Perbesar Ukuran Tampilan UI (+)"
+                            >
+                                <Plus className="h-2.5 w-2.5" />
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleMinimize}
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#E2E8F0]/70 hover:text-[#2DD4BF] hover:bg-white/5 transition-colors cursor-pointer"
+                            title="Minimize"
+                        >
+                            <Minus className="h-3 w-3" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleToggleMaximize}
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#E2E8F0]/70 hover:text-[#2DD4BF] hover:bg-white/5 transition-colors cursor-pointer"
+                            title={isFullscreen ? 'Restore' : 'Maximize'}
+                        >
+                            {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#E2E8F0]/70 hover:text-white hover:bg-rose-600 transition-colors cursor-pointer"
+                            title="Tutup Jendela"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Editorial Edition Title Bar
+    if (theme === 'editorial') {
+        return (
+            <div
+                data-tauri-drag-region="true"
+                onMouseDown={handleStartDragging}
+                className="hidden sm:block w-full shrink-0 select-none font-['Geist'] text-xs bg-[#fcfbf9] border-b border-[#1a1a1a]/10 cursor-default relative z-[999999]"
+            >
+                <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#1a1a1a] bg-[#fcfbf9]">
+                    <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
+                        <AppLogo className="h-4 w-4 rounded-xs shrink-0" />
+                        <span data-tauri-drag-region="true" className="font-semibold italic font-['Cormorant_Garamond'] text-sm text-[#1a1a1a] truncate">
+                            {title}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center space-x-0.5 shrink-0">
+                        {/* Zoom Controls */}
+                        <div className="flex items-center space-x-0.5 mr-[6px]">
+                            <button
+                                type="button"
+                                onClick={handleZoomOut}
+                                className="h-5 w-5 rounded flex items-center justify-center text-[#1a1a1a]/75 hover:text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] transition-colors cursor-pointer"
+                                title="Perkecil Ukuran Tampilan UI (-)"
+                            >
+                                <Minus className="h-2.5 w-2.5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleResetZoom}
+                                className="h-5 px-1.5 rounded flex items-center justify-center text-[#1a1a1a]/75 hover:text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                                title="Reset Ukuran UI ke 100%"
+                            >
+                                {zoomLevel}%
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleZoomIn}
+                                className="h-5 w-5 rounded flex items-center justify-center text-[#1a1a1a]/75 hover:text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] transition-colors cursor-pointer"
+                                title="Perbesar Ukuran Tampilan UI (+)"
+                            >
+                                <Plus className="h-2.5 w-2.5" />
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleMinimize}
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#1a1a1a]/75 hover:text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] transition-colors cursor-pointer"
+                            title="Minimize"
+                        >
+                            <Minus className="h-3 w-3" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleToggleMaximize}
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#1a1a1a]/75 hover:text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.05] transition-colors cursor-pointer"
+                            title={isFullscreen ? 'Restore' : 'Maximize'}
+                        >
+                            {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="h-5 w-6 rounded flex items-center justify-center text-[#1a1a1a]/75 hover:text-white hover:bg-rose-500 transition-colors cursor-pointer"
+                            title="Tutup Jendela"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Technical Edition Title Bar
+    if (theme === 'technical') {
+        return (
+            <div
+                data-tauri-drag-region="true"
+                onMouseDown={handleStartDragging}
+                className="hidden sm:block w-full shrink-0 select-none font-['JetBrains_Mono'] text-xs bg-[#F8F7F4] dark:bg-[#0D1117] border-b-[1.5px] border-[#111113] dark:border-slate-700 cursor-default relative z-[999999]"
+            >
+                <div data-tauri-drag-region="true" className="h-7 px-3 flex items-center justify-between text-[#111113] dark:text-slate-100 bg-[#F8F7F4] dark:bg-[#0D1117]">
+                    <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
+                        <AppLogo className="h-4 w-4 rounded-xs shrink-0" />
+                        <span data-tauri-drag-region="true" className="font-extrabold text-[#111113] dark:text-slate-100 text-[11px] uppercase tracking-wider truncate">
+                            {title}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center space-x-0.5 shrink-0">
+                        {/* Zoom Controls */}
+                        <div className="flex items-center space-x-0.5 mr-[6px]">
+                            <button
+                                type="button"
+                                onClick={handleZoomOut}
+                                className="h-5 w-5 rounded flex items-center justify-center text-current/70 hover:text-current hover:bg-[#111113]/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                                title="Perkecil Ukuran Tampilan UI (-)"
+                            >
+                                <Minus className="h-2.5 w-2.5" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleResetZoom}
+                                className="h-5 px-1.5 rounded flex items-center justify-center text-current/70 hover:text-current hover:bg-[#111113]/10 dark:hover:bg-white/10 text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                                title="Reset Ukuran UI ke 100%"
+                            >
+                                {zoomLevel}%
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleZoomIn}
+                                className="h-5 w-5 rounded flex items-center justify-center text-current/70 hover:text-current hover:bg-[#111113]/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                                title="Perbesar Ukuran Tampilan UI (+)"
+                            >
+                                <Plus className="h-2.5 w-2.5" />
+                            </button>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleMinimize}
+                            className="h-5 w-6 rounded flex items-center justify-center text-current/70 hover:text-current hover:bg-[#111113]/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                            title="Minimize"
+                        >
+                            <Minus className="h-3 w-3" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleToggleMaximize}
+                            className="h-5 w-6 rounded flex items-center justify-center text-current/70 hover:text-current hover:bg-[#111113]/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                            title={isFullscreen ? 'Restore' : 'Maximize'}
+                        >
+                            {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="h-5 w-6 rounded flex items-center justify-center text-current/70 hover:text-white hover:bg-rose-600 transition-colors cursor-pointer"
+                            title="Tutup Jendela"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // Paper Sketch Edition Title Bar
     if (theme === 'paperSketch') {
         return (
@@ -206,7 +506,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                     <div data-tauri-drag-region="true" className="flex items-center space-x-2 min-w-0 pr-2 pointer-events-none">
                         <AppLogo className="h-4.5 w-4.5 rounded-sm border border-[#2b2b2b] shrink-0" />
                         <span data-tauri-drag-region="true" className="font-['Gochi_Hand'] font-bold text-[#2b2b2b] text-base truncate">
-                            {title} <span className="text-xs font-mono opacity-60 hidden md:inline">({subtitle})</span>
+                            {title} {subtitle && <span className="text-xs font-mono opacity-60 hidden md:inline">({subtitle})</span>}
                         </span>
                     </div>
 
@@ -296,7 +596,7 @@ export const WindowTitleBar: React.FC<WindowTitleBarProps> = ({
                     <div data-tauri-drag-region="true" className="flex items-center space-x-2 z-10 min-w-0 pr-2">
                         <AppLogo className="h-5 w-5 rounded-md shadow-xs drop-shadow-xs shrink-0 border border-white/40 pointer-events-none" />
                         <span data-tauri-drag-region="true" className="font-extrabold tracking-wide text-sky-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)] truncate pointer-events-none">
-                            {title} <span className="text-[10px] font-semibold text-sky-900/80 hidden md:inline">({subtitle})</span>
+                            {title} {subtitle && <span className="text-[10px] font-semibold text-sky-900/80 hidden md:inline">({subtitle})</span>}
                         </span>
                     </div>
 

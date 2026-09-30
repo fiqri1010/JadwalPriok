@@ -42,6 +42,8 @@ export const ResetConfirmModal: React.FC<ResetConfirmModalProps> = ({
                         ? 'rounded-2xl bg-white/75 backdrop-blur-2xl border-white/80 text-slate-900 shadow-[0_25px_60px_rgba(14,116,224,0.3)] ring-1 ring-sky-300/30'
                         : theme === 'dark'
                         ? 'rounded-2xl bg-[#1E1E1E] border-slate-700 text-[#E0E0E0]'
+                        : theme === 'dashboard'
+                        ? 'rounded-2xl bg-[#FFF5D0] border-[#4D2A00]/25 text-[#4D2A00]'
                         : 'rounded-2xl bg-white border-slate-200 text-[#011627]'
                 }`}
             >
@@ -56,6 +58,8 @@ export const ResetConfirmModal: React.FC<ResetConfirmModalProps> = ({
                                     ? 'text-[#00FF00]'
                                     : theme === 'dark'
                                     ? 'text-white'
+                                    : theme === 'dashboard'
+                                    ? 'text-[#4D2A00]'
                                     : 'text-slate-900'
                             }`}
                         >
@@ -67,6 +71,8 @@ export const ResetConfirmModal: React.FC<ResetConfirmModalProps> = ({
                                     ? 'text-emerald-400'
                                     : theme === 'dark'
                                     ? 'text-slate-400'
+                                    : theme === 'dashboard'
+                                    ? 'text-[#4D2A00]/70'
                                     : 'text-slate-500'
                             }`}
                         >
@@ -81,6 +87,8 @@ export const ResetConfirmModal: React.FC<ResetConfirmModalProps> = ({
                             ? 'text-emerald-300'
                             : theme === 'dark'
                             ? 'text-slate-300'
+                            : theme === 'dashboard'
+                            ? 'text-[#4D2A00]'
                             : 'text-slate-600'
                     }`}
                 >
@@ -104,6 +112,8 @@ export const ResetConfirmModal: React.FC<ResetConfirmModalProps> = ({
                                 ? 'rounded-none border border-[#00FF00] bg-black text-[#00FF00] hover:bg-[#00FF00]/10'
                                 : theme === 'dark'
                                 ? 'rounded-xl border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
+                                : theme === 'dashboard'
+                                ? 'rounded-xl border border-[#4D2A00]/25 bg-[#FFF0BE] text-[#4D2A00] hover:bg-[#FFE8A3]'
                                 : 'rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
                         }`}
                     >

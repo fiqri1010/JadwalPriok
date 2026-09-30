@@ -24,11 +24,11 @@ import { MonthlyHolidaySegment } from './components/MonthlyHolidaySegment';
 import { MonthlyPiketSummarySegment } from './components/MonthlyPiketSummarySegment';
 import { AdminDashboardView } from './components/admin/AdminDashboardView';
 import { LandingPageView, LOCAL_STORAGE_ONBOARDING_DONE_KEY } from './components/LandingPageView';
-import { getCurrentUserRole, setCurrentUserRole } from './utils/adminStorage';
+import { getCurrentUserRole, setCurrentUserRole, getCurrentUserRoleInfo, getCurrentUserPermissions } from './utils/adminStorage';
 import { UserRole } from './types/admin';
 import { calculatePiketMatches } from './utils/piket';
 import { FULL_APP_TITLE, APP_VERSION } from './version';
-import { DEFAULT_HOLIDAYS } from './data/holidays';
+import { DEFAULT_HOLIDAYS, getIndonesianHoliday } from './data/holidays';
 
 const MONTH_NAMES = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -99,6 +99,26 @@ export const App: React.FC = () => {
         };
     }, []);
 
+    // Reset month & year selection to current running month & year whenever any menu/tab changes or user logs in
+    useEffect(() => {
+        const now = new Date();
+        setSelectedMonth(now.getMonth() + 1);
+        setSelectedYear(now.getFullYear());
+    }, [pageTab]);
+
+    // Block admin tab if user lacks access permission
+    useEffect(() => {
+        if (pageTab === 'admin') {
+            const isSuperAdminAccount = userName === 'Ahmad Fiqri' || userNip === '199510102015121002';
+            const roleInfo = getCurrentUserRoleInfo();
+            const permissions = getCurrentUserPermissions();
+            const canAccessAdmin = isSuperAdminAccount || roleInfo.role === 'admin' || roleInfo.role === 'superadmin' || permissions.canAccessAdminDashboard;
+            if (!canAccessAdmin) {
+                setPageTab('calendar');
+            }
+        }
+    }, [pageTab, userName, userNip]);
+
     // Theme state
     const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => {
         const saved = localStorage.getItem(LOCAL_STORAGE_THEME_KEY);
@@ -111,6 +131,64 @@ export const App: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [isScreenSizeBlocked, setIsScreenSizeBlocked] = useState(false);
+
+    // Inisialisasi batasan ukuran jendela minimal untuk desktop (Tauri) dan deteksi pemblokiran ukuran layar
+    useEffect(() => {
+        const initTauriWindowSize = async () => {
+            const isTauri = typeof window !== 'undefined' && Boolean(
+                (window as any).__TAURI_INTERNALS__ ||
+                (window as any).__TAURI__ ||
+                (window as any).isTauri
+            );
+            if (!isTauri) return;
+            try {
+                const { getCurrentWindow, LogicalSize } = await import('@tauri-apps/api/window');
+                const appWindow = getCurrentWindow();
+                if (appWindow) {
+                    await appWindow.setMinSize(new LogicalSize(960, 640));
+                    
+                    // Pastikan ukuran jendela saat ini minimal 960x640
+                    const size = await appWindow.innerSize();
+                    const scaleFactor = await appWindow.scaleFactor();
+                    const logicalWidth = size.width / scaleFactor;
+                    const logicalHeight = size.height / scaleFactor;
+                    
+                    if (logicalWidth < 960 || logicalHeight < 640) {
+                        await appWindow.setSize(new LogicalSize(
+                            Math.max(logicalWidth, 960),
+                            Math.max(logicalHeight, 640)
+                        ));
+                    }
+                }
+            } catch (err) {
+                console.warn('Gagal membatasi ukuran jendela Tauri:', err);
+            }
+        };
+
+        const checkScreenSize = () => {
+            if (typeof window === 'undefined') return;
+            
+            // Cek apakah di lingkungan Mobile Native Capacitor atau mobile user-agent
+            const isMobileUA = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+            const isCapacitor = (window as any).Capacitor?.isNativePlatform?.();
+            
+            if (isMobileUA || isCapacitor) {
+                setIsScreenSizeBlocked(false);
+                return;
+            }
+            
+            // Di desktop (browser maupun Tauri), batasi ukuran layar minimal 960 x 640
+            const tooSmall = window.innerWidth < 960 || window.innerHeight < 640;
+            setIsScreenSizeBlocked(tooSmall);
+        };
+
+        initTauriWindowSize();
+        checkScreenSize();
+
+        window.addEventListener('resize', checkScreenSize);
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
 
     useEffect(() => {
         const handleResize = () => {
@@ -335,6 +413,57 @@ export const App: React.FC = () => {
         }
         return DEFAULT_HOLIDAYS;
     });
+
+    // Automatically apply and register official default holidays for current and neighboring years on startup/login
+    useEffect(() => {
+        const currentYear = new Date().getFullYear();
+        const yearsToApply = [currentYear - 1, currentYear, currentYear + 1];
+        
+        setDaftarLibur((prev) => {
+            const next = [...prev];
+            let modified = false;
+            
+            for (const targetYear of yearsToApply) {
+                for (let m = 1; m <= 12; m++) {
+                    const daysInM = new Date(targetYear, m, 0).getDate();
+                    for (let d = 1; d <= daysInM; d++) {
+                        const officialHoliday = getIndonesianHoliday(targetYear, m, d);
+                        if (officialHoliday) {
+                            const paddedM = String(m).padStart(2, '0');
+                            const paddedD = String(d).padStart(2, '0');
+                            const tanggalIso = `${targetYear}-${paddedM}-${paddedD}`;
+                            
+                            const alreadyExists = next.some((item) => item.tanggal === tanggalIso);
+                            if (!alreadyExists) {
+                                const isCuti = officialHoliday.toLowerCase().includes('cuti');
+                                const kat = isCuti ? 'cuti_bersama' : 'libur_nasional';
+                                next.push({
+                                    tanggal: tanggalIso,
+                                    keterangan: officialHoliday,
+                                    kategori: kat,
+                                    isDisabled: false,
+                                    isCustom: false
+                                });
+                                modified = true;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (modified) {
+                // Sort by date
+                next.sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+                try {
+                    localStorage.setItem(LOCAL_STORAGE_HOLIDAYS_KEY, JSON.stringify(next));
+                } catch (e) {
+                    console.error('Failed to auto persist holidays:', e);
+                }
+                return next;
+            }
+            return prev;
+        });
+    }, []);
 
     // Holiday Map O(1) Lookup Memoization
     const holidayMap = useMemo(() => {
@@ -901,7 +1030,7 @@ export const App: React.FC = () => {
                 <WindowTitleBar
                     theme={currentTheme}
                     title={FULL_APP_TITLE}
-                    subtitle="Kalender Kerja"
+                    subtitle=""
                 />
             </div>
 
@@ -957,7 +1086,11 @@ export const App: React.FC = () => {
                     }`}>
                     {pageTab === 'calendar' && (
                         <div
-                            className="p-2 sm:p-2.5 lg:p-2.5 max-w-[1490px] w-full mx-auto touch-pan-y"
+                            className={`touch-pan-y ${
+                                currentTheme === 'dashboard'
+                                    ? 'p-1.5 sm:p-2 lg:p-2.5 w-full max-w-none'
+                                    : 'p-2 sm:p-2.5 lg:p-2.5 max-w-[1490px] w-full mx-auto'
+                            }`}
                             onTouchStart={handleTouchStart}
                             onTouchEnd={handleTouchEnd}
                         >
@@ -1002,7 +1135,9 @@ export const App: React.FC = () => {
                                             return (
                                                 <div
                                                     key={`weekday-header-${dayName}-${idx}`}
-                                                    className={isWeekend ? themeConfig.weekendNameTextClass : themeConfig.weekdayNameTextClass}
+                                                    className={`${isWeekend ? themeConfig.weekendNameTextClass : themeConfig.weekdayNameTextClass} ${
+                                                        currentTheme === 'dashboard' ? 'border-r border-[#4D2A00]/25 last:border-r-0' : ''
+                                                    }`}
                                                 >
                                                     {dayName}
                                                 </div>
@@ -1017,6 +1152,30 @@ export const App: React.FC = () => {
 
                                         // Dynamic autoscale aspect ratio and minimum height based on viewport and total rows
                                         const getGridAspectStyle = (rows: number): React.CSSProperties => {
+                                            if (currentTheme === 'dashboard') {
+                                                if (isMobile) {
+                                                    return {
+                                                        aspectRatio: '1 / 1',
+                                                        minHeight: 'clamp(58px, 13.5vw, 88px)',
+                                                    };
+                                                }
+                                                if (rows >= 6) {
+                                                    return {
+                                                        aspectRatio: '1.28 / 1',
+                                                        minHeight: 'clamp(96px, 13vh, 142px)',
+                                                    };
+                                                }
+                                                if (rows === 5) {
+                                                    return {
+                                                        aspectRatio: '1.24 / 1',
+                                                        minHeight: 'clamp(104px, 14.5vh, 156px)',
+                                                    };
+                                                }
+                                                return {
+                                                    aspectRatio: '1.18 / 1',
+                                                    minHeight: 'clamp(114px, 16vh, 172px)',
+                                                };
+                                            }
                                             if (isMobile) {
                                                 return {
                                                     aspectRatio: '1 / 1',
@@ -1042,16 +1201,26 @@ export const App: React.FC = () => {
                                         };
 
                                         const cellAspectStyle = getGridAspectStyle(totalRows);
+                                        const isDashboard = currentTheme === 'dashboard';
 
                                         return (
                                             <div 
-                                                className="grid grid-cols-7 gap-1 sm:gap-1.5 relative w-full"
+                                                className={`grid grid-cols-7 relative w-full ${
+                                                    isDashboard
+                                                        ? 'gap-0 border-t border-l border-[#4D2A00]/30 bg-[#FFF4CE]'
+                                                        : 'gap-1 sm:gap-1.5'
+                                                }`}
                                             >
                                                 {/* Empty prefix cells to align Day 1 with its correct day of the week */}
                                                 {Array.from({ length: firstDayOffset }).map((_, emptyIdx) => (
                                                     <div
                                                         key={`empty-prefix-${emptyIdx}`}
-                                                        style={cellAspectStyle} className="opacity-0 pointer-events-none w-full"
+                                                        style={cellAspectStyle}
+                                                        className={`w-full ${
+                                                            isDashboard
+                                                                ? 'bg-[#F9E6A8]/50 border-r border-b border-[#4D2A00]/30 pointer-events-none'
+                                                                : 'opacity-0 pointer-events-none'
+                                                        }`}
                                                         aria-hidden="true"
                                                     />
                                                 ))}
@@ -1088,7 +1257,10 @@ export const App: React.FC = () => {
                                                     return (
                                                         <div
                                                             key={dateKey}
-                                                            style={cellAspectStyle} className="relative w-full"
+                                                            style={cellAspectStyle}
+                                                            className={`relative w-full ${
+                                                                isDashboard ? 'border-r border-b border-[#4D2A00]/30' : ''
+                                                            }`}
                                                         >
                                                             <DayCell
                                                                 dateKey={dateKey}
@@ -1268,7 +1440,7 @@ export const App: React.FC = () => {
                     )}
 
                     {pageTab === 'landing' && (
-                        <div className="p-2 sm:p-4 max-w-[1490px] w-full mx-auto flex-1 flex items-center justify-center min-h-0">
+                        <div className="p-2 sm:p-3 w-full max-w-[1490px] mx-auto flex-1 flex flex-col items-center justify-center min-h-0 overflow-y-auto">
                             <LandingPageView
                                 theme={currentTheme}
                                 onComplete={() => setPageTab('calendar')}

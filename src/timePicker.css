@@ -92,6 +92,93 @@
   --tp-radius-preset: 8px;
 }
 
+/* --- TERANG MINIMALIS THEME (DASHBOARD) --- */
+[data-theme="dashboard"] {
+  --tp-modal-bg: #FFF5D0;
+  --tp-modal-border: #4D2A00;
+  --tp-header-bg: #FFF0BE;
+  --tp-header-text: #4D2A00;
+  --tp-header-subtext: #4D2A00;
+  --tp-header-border: rgba(77, 42, 0, 0.25);
+  --tp-header-close-hover: #FFE8A3;
+
+  --tp-tab-container-bg: #FFF0BE;
+  --tp-tab-container-border: rgba(77, 42, 0, 0.25);
+  --tp-tab-active-bg: #4D2A00;
+  --tp-tab-active-text: #F9E6A8;
+  --tp-tab-inactive-text: #4D2A00;
+  --tp-tab-inactive-hover: #FFE8A3;
+
+  --tp-digital-bg: #FFF0BE;
+  --tp-digital-border: rgba(77, 42, 0, 0.25);
+  --tp-digital-box-bg: #FFFBF0;
+  --tp-digital-box-border: rgba(77, 42, 0, 0.3);
+  --tp-digital-box-text: #4D2A00;
+  --tp-digital-box-subtext: #4D2A00;
+  --tp-digital-box-active-bg: #4D2A00;
+  --tp-digital-box-active-text: #F9E6A8;
+  --tp-colon-text: #4D2A00;
+
+  --tp-stepper-bg: #FFFBF0;
+  --tp-stepper-text: #4D2A00;
+  --tp-stepper-border: rgba(77, 42, 0, 0.25);
+  --tp-stepper-hover-bg: #FFF0BE;
+  --tp-stepper-hover-text: #4D2A00;
+  --tp-stepper-accent-text: #4D2A00;
+
+  --tp-dial-bg: #FFF0BE;
+  --tp-dial-border: rgba(77, 42, 0, 0.25);
+  --tp-dial-tick-major: #4D2A00;
+  --tp-dial-tick-minor: rgba(77, 42, 0, 0.3);
+  --tp-dial-text: #4D2A00;
+  --tp-dial-text-hover: #000000;
+  --tp-dial-text-active-bg: #4D2A00;
+  --tp-dial-text-active-text: #F9E6A8;
+  --tp-dial-sub-text: rgba(77, 42, 0, 0.7);
+  --tp-dial-sub-active-bg: #4D2A00;
+  --tp-dial-sub-active-text: #F9E6A8;
+
+  --tp-hand-hour: #4D2A00;
+  --tp-hand-minute: #4D2A00;
+  --tp-hand-shadow: 0 0 6px rgba(77, 42, 0, 0.3);
+  --tp-pivot-pin: #4D2A00;
+  --tp-pivot-border: #FFFBF0;
+
+  --tp-hint-text: #4D2A00;
+  --tp-hint-kbd-bg: #FFF0BE;
+  --tp-hint-kbd-border: rgba(77, 42, 0, 0.25);
+  --tp-hint-kbd-text: #4D2A00;
+
+  --tp-preset-label: #4D2A00;
+  --tp-preset-active-bg: #4D2A00;
+  --tp-preset-active-border: #4D2A00;
+  --tp-preset-active-text: #F9E6A8;
+  --tp-preset-inactive-bg: #FFFBF0;
+  --tp-preset-inactive-border: rgba(77, 42, 0, 0.25);
+  --tp-preset-inactive-text: #4D2A00;
+  --tp-preset-inactive-hover: #FFF0BE;
+
+  --tp-footer-bg: #FFF0BE;
+  --tp-footer-border: rgba(77, 42, 0, 0.25);
+  --tp-btn-primary-bg: #4D2A00;
+  --tp-btn-primary-hover: #381B00;
+  --tp-btn-primary-text: #F9E6A8;
+  --tp-btn-primary-border: transparent;
+  --tp-accent-color: #4D2A00;
+  --tp-accent-hover: #381B00;
+  --tp-accent-text: #F9E6A8;
+  --tp-btn-secondary-bg: #FFFBF0;
+  --tp-btn-secondary-border: rgba(77, 42, 0, 0.3);
+  --tp-btn-secondary-text: #4D2A00;
+  --tp-btn-secondary-hover-bg: #FFF0BE;
+  --tp-btn-clear-text: #BE1A1A;
+  --tp-btn-clear-hover-bg: #FEE2E2;
+
+  --tp-radius-box: 0px;
+  --tp-radius-button: 0px;
+  --tp-radius-preset: 0px;
+}
+
 /* --- 2. DARK THEME --- */
 [data-theme="industrial"] {
   --tp-modal-bg: #1A1D23;
@@ -168,7 +255,7 @@
   --tp-accent-hover: #26b8a8;
   --tp-accent-text: #0F1115;
   --tp-btn-secondary-bg: #1A1D23;
-  --tp-btn-[#1A1D23]-border: rgba(226, 232, 240, 0.15);
+  --tp-btn-secondary-border: rgba(226, 232, 240, 0.15);
   --tp-btn-secondary-text: #E2E8F0;
   --tp-btn-secondary-hover-bg: rgba(255, 255, 255, 0.1);
   --tp-btn-clear-text: #BE1A1A;

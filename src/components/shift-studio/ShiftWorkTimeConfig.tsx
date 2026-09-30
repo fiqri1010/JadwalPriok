@@ -31,6 +31,7 @@ export const ShiftWorkTimeConfigComponent: React.FC<ShiftWorkTimeConfigProps> = 
     isSplitShiftAllowed = true,
     theme = 'default',
 }) => {
+    const isDashboard = theme === 'dashboard';
     const isOffOrCuti = workTime.jamMasukDasar === '-' || workTime.jamPulangDasar === '-';
 
     // Auto-detect overnight

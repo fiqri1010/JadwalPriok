@@ -138,6 +138,21 @@ export const MonthYearPickerModal: React.FC<MonthYearPickerModalProps> = ({
       };
     }
 
+    if (isDashboard) {
+      return {
+        cardBg: 'bg-[#FFF5D0] text-[#4D2A00] border border-[#4D2A00]/25 rounded-2xl shadow-2xl',
+        headerIconBg: 'bg-[#FFF0BE] text-[#4D2A00] border border-[#4D2A00]/30',
+        titleColor: 'text-[#4D2A00]',
+        subtitleColor: 'text-[#4D2A00]/70',
+        stepperBg: 'bg-[#FFF0BE] border border-[#4D2A00]/25 text-[#4D2A00]',
+        stepperBtn: 'hover:bg-[#FFE8A3] text-[#4D2A00]',
+        monthGhost: 'text-[#4D2A00] hover:bg-[#FFF0BE] active:bg-[#FFE8A3] rounded-xl font-bold',
+        monthActive: 'bg-[#4D2A00] text-[#F9E6A8] font-black rounded-xl shadow-md',
+        footerBtnCancel: 'bg-[#FFF0BE] text-[#4D2A00] border border-[#4D2A00]/25 hover:bg-[#FFE8A3] rounded-xl font-bold',
+        todayBtnText: 'text-[#4D2A00] font-bold hover:underline',
+      };
+    }
+
     // Default light / teal theme
     return {
       cardBg: 'bg-white text-[#011627] border border-slate-200/80 rounded-2xl shadow-2xl',

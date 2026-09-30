@@ -1,12 +1,11 @@
 {
   "name": "jadwal-priok",
   "private": true,
-  "version": "0.4.28",
+  "version": "0.4.60",
   "type": "module",
   "scripts": {
     "start": "node server.js",
     "gcp-build": "vite build && rm -rf build && cp -r dist build",
-    "prestart": "vite build && rm -rf build && cp -r dist build",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build && rm -rf build && cp -r dist build",
     "preview": "vite preview",

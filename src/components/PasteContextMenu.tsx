@@ -173,6 +173,23 @@ export const PasteContextMenu: React.FC<PasteContextMenuProps> = ({
         shortcutColor: 'opacity-60 text-slate-400',
       };
     }
+    if (isDashboard) {
+      return {
+        cardStyle: {
+          backgroundColor: '#FFF5D0',
+          borderRadius: '0px',
+          border: '2px solid #4D2A00',
+          boxShadow: '0 12px 28px -4px rgba(77, 42, 0, 0.35)',
+        },
+        separatorStyle: {
+          borderTop: '1px solid rgba(77, 42, 0, 0.2)',
+        },
+        itemClass: 'text-[#4D2A00] hover:bg-[#4D2A00] hover:text-[#F9E6A8]',
+        deleteItemClass: 'text-[#BE1A1A] hover:bg-[#BE1A1A] hover:text-white',
+        iconColor: '#4D2A00',
+        shortcutColor: 'text-[#4D2A00]/60',
+      };
+    }
     // Default light
     return {
       cardStyle: {

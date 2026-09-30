@@ -14,6 +14,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
     const isPaperSketch = theme === 'paperSketch';
     const isEditorial = theme === 'editorial';
     const isTechnical = theme === 'technical';
+    const isDashboard = theme === 'dashboard';
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isCssInputOpen, setIsCssInputOpen] = useState(false);
     const [cssPatternInput, setCssPatternInput] = useState(
@@ -146,13 +147,15 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                 ? 'bg-[#FCFBF9] text-[#1a1a1a] border-[#1a1a1a]/25 rounded-xl font-serif shadow-xs'
                 : isTechnical
                 ? 'bg-[#F8F7F4] dark:bg-[#0D1117] text-[#111113] dark:text-[#E6EDF3] border-slate-300 dark:border-slate-800 rounded-lg font-mono'
+                : isDashboard
+                ? 'bg-[#FFFBF0] text-[#4D2A00] border-[#4D2A00]/25 rounded-2xl'
                 : 'bg-white dark:bg-[#161616] text-slate-800 dark:text-zinc-100 border-slate-200/80 dark:border-zinc-800 rounded-2xl'
         }`}>
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                     <Layers className={`w-4 h-4 shrink-0 ${
-                        isIndustrial ? 'text-[#2DD4BF]' : isPaperSketch ? 'text-[#ff4747]' : 'text-teal-600 dark:text-teal-400'
+                        isIndustrial ? 'text-[#2DD4BF]' : isPaperSketch ? 'text-[#ff4747]' : isDashboard ? 'text-[#E65F2B]' : 'text-teal-600 dark:text-teal-400'
                     }`} />
                     <span className="text-xs sm:text-[13px] font-black">Katalog Motif Pola (Hero Patterns by Steve Schoger):</span>
                 </div>
@@ -173,6 +176,8 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                         ? 'bg-[#F2EFE9] border-[#1a1a1a]/20'
                         : isTechnical
                         ? 'bg-slate-200/60 dark:bg-[#161B22] border-slate-300 dark:border-slate-800'
+                        : isDashboard
+                        ? 'bg-[#FFF9E6] border-[#4D2A00]/20'
                         : 'bg-slate-50/50 dark:bg-zinc-900/50 border-slate-200/80 dark:border-zinc-800/80'
                 }`}>
                     {BADGE_PATTERNS.map((pattern, idx) => {
@@ -198,6 +203,8 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                             ? 'border-2 border-[#2A7373] bg-[#2A7373]/15 text-[#2A7373] font-extrabold'
                                             : isTechnical
                                             ? 'border-2 border-[#0D9488] bg-[#0D9488]/15 text-[#0D9488] dark:text-teal-300 font-extrabold'
+                                            : isDashboard
+                                            ? 'border-2 border-[#E65F2B] bg-[#FFF0BE]/50 text-[#E65F2B] font-extrabold shadow-sm scale-[1.01]'
                                             : 'border-2 border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-extrabold shadow-xs scale-[1.01]'
                                         : isIndustrial
                                         ? 'border-[rgba(226,232,240,0.12)] bg-[#0F1115] hover:bg-[#252B36] text-[#E2E8F0]'
@@ -207,6 +214,8 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                         ? 'border-[#1a1a1a]/20 bg-[#FCFBF9] hover:bg-[#1a1a1a]/5 text-[#1a1a1a]'
                                         : isTechnical
                                         ? 'border-slate-300 dark:border-slate-800 bg-[#F8F7F4] dark:bg-[#0D1117] hover:bg-slate-200 dark:hover:bg-slate-800 text-[#111113] dark:text-[#E6EDF3]'
+                                        : isDashboard
+                                        ? 'border-[#4D2A00]/15 bg-[#FFF9E6] hover:bg-[#FFF0BE] text-[#4D2A00]/80'
                                         : 'border-slate-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-800/60 hover:bg-slate-100 dark:hover:bg-zinc-700/80 text-slate-700 dark:text-zinc-300'
                                 }`}
                                 title={pattern.name}
@@ -218,6 +227,8 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                             ? 'bg-[#2DD4BF] text-[#0F1115]'
                                             : isPaperSketch
                                             ? 'bg-[#2b2b2b] text-white'
+                                            : isDashboard
+                                            ? 'bg-[#E65F2B] text-white'
                                             : 'bg-teal-500 text-white'
                                     }`}>
                                         <Check className="w-2 h-2 stroke-[3]" />
@@ -250,7 +261,9 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                                 ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
                                 : isPaperSketch
                                 ? 'bg-[#f2efeb] border-2 border-[#2b2b2b]'
-                                : 'bg-slate-50 dark:bg-zinc-800/50 border-slate-200/60 dark:border-zinc-800'
+                                : isDashboard
+                                ? 'bg-[#FFF9E6] border-[#4D2A00]/20 text-[#4D2A00]'
+                                : 'bg-slate-50 dark:bg-zinc-800/50 border-slate-200/60 dark:border-zinc-800 text-[#111113] dark:text-zinc-100'
                         }`}
                         title="Hover & Scroll mouse untuk mengubah opasitas motif"
                         onMouseEnter={handleMouseEnter}
@@ -258,7 +271,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                     >
                         <div className="flex justify-between items-center text-[10.5px] font-bold">
                             <span className="opacity-75">Opasitas Motif:</span>
-                            <span className="font-mono text-teal-600 dark:text-teal-400 font-extrabold">{Math.round(opacityVal * 100)}%</span>
+                            <span className={`font-mono font-extrabold ${isDashboard ? 'text-[#E65F2B]' : 'text-teal-600 dark:text-teal-400'}`}>{Math.round(opacityVal * 100)}%</span>
                         </div>
                         <input
                             type="range"
@@ -268,20 +281,28 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                             value={opacityVal}
                             onChange={(e) => handleOpacityChange(parseFloat(e.target.value))}
                             onWheel={handleSliderWheelOpacity}
-                            className="w-full accent-teal-600 cursor-pointer h-1.5"
+                            className={`w-full cursor-pointer h-1.5 accent-${isDashboard ? '[#E65F2B]' : 'teal-600'}`}
                         />
                     </div>
 
                     {/* Slider 2: Skala / Kepadatan Motif */}
                     <div
-                        className="space-y-1 p-1.5 sm:p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 shadow-3xs"
+                        className={`space-y-1 p-1.5 sm:p-2 rounded-xl border shadow-3xs ${
+                            isIndustrial
+                                ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
+                                : isPaperSketch
+                                ? 'bg-[#f2efeb] border-2 border-[#2b2b2b]'
+                                : isDashboard
+                                ? 'bg-[#FFF9E6] border-[#4D2A00]/20 text-[#4D2A00]'
+                                : 'bg-slate-50 dark:bg-zinc-800/50 border-slate-200/60 dark:border-zinc-800 text-[#111113] dark:text-zinc-100'
+                        }`}
                         title="Hover & Scroll mouse untuk mengubah skala/kepadatan motif"
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
                     >
                         <div className="flex justify-between items-center text-[10.5px] font-bold">
                             <span className="opacity-75">Skala / Kepadatan:</span>
-                            <span className="font-mono text-teal-600 dark:text-teal-400 font-extrabold">{scaleVal.toFixed(1)}x</span>
+                            <span className={`font-mono font-extrabold ${isDashboard ? 'text-[#E65F2B]' : 'text-teal-600 dark:text-teal-400'}`}>{scaleVal.toFixed(1)}x</span>
                         </div>
                         <input
                             type="range"
@@ -291,21 +312,29 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                             value={scaleVal}
                             onChange={(e) => handleScaleChange(parseFloat(e.target.value))}
                             onWheel={handleSliderWheelScale}
-                            className="w-full accent-teal-600 cursor-pointer h-1.5"
+                            className={`w-full cursor-pointer h-1.5 accent-${isDashboard ? '[#E65F2B]' : 'teal-600'}`}
                         />
                     </div>
                 </div>
 
                 {/* Row 2: Slider 3 Ketebalan Motif */}
                 <div
-                    className="space-y-1 p-1.5 sm:p-2 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-800 w-full shadow-3xs"
+                    className={`space-y-1 p-1.5 sm:p-2 rounded-xl border shadow-3xs w-full ${
+                        isIndustrial
+                            ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
+                            : isPaperSketch
+                            ? 'bg-[#f2efeb] border-2 border-[#2b2b2b]'
+                            : isDashboard
+                            ? 'bg-[#FFF9E6] border-[#4D2A00]/20 text-[#4D2A00]'
+                            : 'bg-slate-50 dark:bg-zinc-800/50 border-slate-200/60 dark:border-zinc-800 text-[#111113] dark:text-zinc-100'
+                    }`}
                     title="Hover & Scroll mouse untuk mengubah ketebalan motif"
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
                     <div className="flex justify-between items-center text-[10.5px] font-bold">
                         <span className="opacity-75">Ketebalan Motif:</span>
-                        <span className="font-mono text-teal-600 dark:text-teal-400 font-extrabold">{strokeWidthVal.toFixed(1)}px</span>
+                        <span className={`font-mono font-extrabold ${isDashboard ? 'text-[#E65F2B]' : 'text-teal-600 dark:text-teal-400'}`}>{strokeWidthVal.toFixed(1)}px</span>
                     </div>
                     <input
                         type="range"
@@ -315,7 +344,7 @@ export const ShiftPatternStudio: React.FC<ShiftPatternStudioProps> = ({ visual, 
                         value={strokeWidthVal}
                         onChange={(e) => handleStrokeWidthChange(parseFloat(e.target.value))}
                         onWheel={handleSliderWheelStrokeWidth}
-                        className="w-full accent-teal-600 cursor-pointer h-1.5"
+                        className={`w-full cursor-pointer h-1.5 accent-${isDashboard ? '[#E65F2B]' : 'teal-600'}`}
                     />
                 </div>
             </div>

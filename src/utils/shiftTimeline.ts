@@ -3,9 +3,28 @@ import { DEFAULT_SHIFT_GROUP } from '../data/defaultShifts';
 
 const SHIFT_GROUPS_STORAGE_KEY = 'jadwal_priok_shift_groups_v1';
 
+export function getActiveNip(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('jadwalpriok_user_nip');
+}
+
+export function getActiveRole(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('jadwalpriok_current_user_role');
+}
+
 export function loadShiftGroups(): ShiftGroupProfile[] {
     try {
-        const stored = localStorage.getItem(SHIFT_GROUPS_STORAGE_KEY);
+        const nip = getActiveNip();
+        const role = getActiveRole();
+        const isEndUser = role === 'end-user';
+        const key = isEndUser && nip ? `${SHIFT_GROUPS_STORAGE_KEY}_${nip}` : SHIFT_GROUPS_STORAGE_KEY;
+        
+        let stored = localStorage.getItem(key);
+        if (!stored && isEndUser) {
+            stored = localStorage.getItem(SHIFT_GROUPS_STORAGE_KEY);
+        }
+        
         if (stored) {
             const parsed = JSON.parse(stored);
             if (Array.isArray(parsed) && parsed.length > 0) {
@@ -31,7 +50,12 @@ export function loadShiftGroups(): ShiftGroupProfile[] {
 
 export function saveShiftGroups(groups: ShiftGroupProfile[]): void {
     try {
-        localStorage.setItem(SHIFT_GROUPS_STORAGE_KEY, JSON.stringify(groups));
+        const nip = getActiveNip();
+        const role = getActiveRole();
+        const isEndUser = role === 'end-user';
+        const key = isEndUser && nip ? `${SHIFT_GROUPS_STORAGE_KEY}_${nip}` : SHIFT_GROUPS_STORAGE_KEY;
+        
+        localStorage.setItem(key, JSON.stringify(groups));
     } catch (e) {
         console.error('Failed to save shift groups to storage:', e);
     }

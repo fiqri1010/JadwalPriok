@@ -99,6 +99,9 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
         if (isDark) {
             return 'bg-[#1E1E1E] border border-slate-800 text-slate-100 rounded-xl shadow-xs';
         }
+        if (isDashboard) {
+            return 'bg-[#FFF5D0] border border-[#4D2A00]/25 text-[#4D2A00] rounded-none shadow-2xs';
+        }
         return 'bg-white border border-slate-200 text-slate-900 rounded-xl shadow-2xs';
     };
 
@@ -118,6 +121,9 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
         if (isDark) {
             return 'border-b border-white/10 bg-white/5 text-slate-200';
         }
+        if (isDashboard) {
+            return 'border-b border-[#4D2A00]/20 bg-[#FFF0BE] text-[#4D2A00] font-bold';
+        }
         return 'border-b border-slate-100 bg-slate-50/80 text-slate-800';
     };
 
@@ -136,6 +142,9 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
         }
         if (isDark) {
             return 'hover:bg-slate-800/60 border-b border-slate-800 last:border-b-0 text-slate-200';
+        }
+        if (isDashboard) {
+            return 'hover:bg-[#FFF0BE] border-b border-[#4D2A00]/15 last:border-b-0 text-[#4D2A00]';
         }
         return 'hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-slate-800';
     };

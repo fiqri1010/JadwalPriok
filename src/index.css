@@ -585,6 +585,24 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
         font-weight: 700 !important;
     }
 
+    /* Pastikan indikator role / super admin dan tombol admin di card user sidebar muat di lebar div pada tema paperSketch */
+    [data-theme="paperSketch"] .sidebar-user-badge {
+        font-size: 8.5px !important;
+        line-height: 1.15 !important;
+        letter-spacing: -0.02em !important;
+        padding: 2px 4px !important;
+        box-sizing: border-box !important;
+    }
+
+    [data-theme="paperSketch"] .sidebar-admin-btn {
+        font-size: 9px !important;
+        line-height: 1.15 !important;
+        letter-spacing: -0.02em !important;
+        padding: 2px 5px !important;
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
+    }
+
     [data-theme="paperSketch"] .text-\[9px\],
     [data-theme="paperSketch"] .text-\[9\.5px\],
     [data-theme="paperSketch"] .text-\[10px\],
@@ -1978,11 +1996,28 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
 }
 
 /* Theme compatibility for tooltips */
-[data-theme="dark"] .tooltip,
+[data-theme="dark"] .tooltip {
+  background: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border-color: #374151 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
+}
 
-[data-theme="dark"] .tooltip::after,
+[data-theme="dark"] .tooltip::after {
+  border-color: #1f2937 transparent transparent transparent !important;
+}
 
-[data-theme="dark"] .tooltip.tooltip-bottom::after,
+[data-theme="dark"] .tooltip.tooltip-bottom::after {
+  border-color: transparent transparent #1f2937 transparent !important;
+}
+
+[data-theme="dark"] .tooltip.tooltip-right::after {
+  border-color: transparent #1f2937 transparent transparent !important;
+}
+
+[data-theme="dark"] .tooltip.tooltip-left::after {
+  border-color: transparent transparent transparent #1f2937 !important;
+}
 
 /* Winamp Theme Custom Hint / Retro Tooltip Styles */
 [data-theme="winamp"] .tooltip-container {

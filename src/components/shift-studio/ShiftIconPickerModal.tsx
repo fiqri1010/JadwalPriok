@@ -630,6 +630,7 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
 }) => {
     const isIndustrial = theme === 'industrial';
     const isPaperSketch = theme === 'paperSketch';
+    const isDashboard = theme === 'dashboard';
     const [draftVisual, setDraftVisual] = useState<ShiftVisualStyle>(visual);
     const [history, setHistory] = useState<ShiftVisualStyle[]>([JSON.parse(JSON.stringify(visual))]);
     const [historyIndex, setHistoryIndex] = useState<number>(0);
@@ -841,6 +842,8 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                     ? 'bg-[#1A1D23] text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-xl font-[\'JetBrains_Mono\']'
                     : isPaperSketch
                     ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[6px_6px_0px_#2b2b2b] rounded-2xl font-[\'Gaegu\'] text-base'
+                    : isDashboard
+                    ? 'bg-[#FFFBF0] text-[#4D2A00] border border-[#4D2A00]/30 rounded-2xl font-["Inter"] shadow-2xl'
                     : 'rounded-3xl bg-white dark:bg-[#1E1E1E] text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700'
             }`}>
                 {/* Fixed Top Controls Header (Non-scrolling solid area) */}
@@ -849,6 +852,8 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                         ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)]'
                         : isPaperSketch
                         ? 'bg-[#f2efeb] border-[#2b2b2b] border-b-2'
+                        : isDashboard
+                        ? 'bg-[#FFF0BE] border-[#4D2A00]/20'
                         : 'bg-white dark:bg-[#1E1E1E] border-current/10'
                 }`}>
                     {/* Header with Title + Simple Desktop Badge Preview */}
@@ -894,6 +899,8 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                             ? 'bg-[#0F1115] border-[rgba(226,232,240,0.15)] rounded-[6px]'
                             : isPaperSketch
                             ? 'bg-[#f2efeb] border-2 border-[#2b2b2b] rounded-xl'
+                            : isDashboard
+                            ? 'bg-[#FFF9E6] border-[#4D2A00]/25 rounded-xl text-[#4D2A00]'
                             : 'rounded-xl bg-current/5 border-current/10'
                     }`}>
                         <button
@@ -905,6 +912,8 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                         ? 'bg-[#2DD4BF] text-[#0F1115]'
                                         : isPaperSketch
                                         ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                        : isDashboard
+                                        ? 'bg-[#4D2A00] text-[#FFFBF0] shadow-sm font-extrabold'
                                         : 'bg-indigo-600 text-white shadow-xs'
                                     : 'opacity-70 hover:opacity-100'
                             }`}
@@ -920,6 +929,8 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                         ? 'bg-[#2DD4BF] text-[#0F1115]'
                                         : isPaperSketch
                                         ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                        : isDashboard
+                                        ? 'bg-[#4D2A00] text-[#FFFBF0] shadow-sm font-extrabold'
                                         : 'bg-indigo-600 text-white shadow-xs'
                                     : 'opacity-70 hover:opacity-100'
                             }`}
@@ -960,11 +971,15 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                                     ? 'bg-[#2DD4BF] text-[#0F1115] font-bold rounded-[4px]'
                                                     : isPaperSketch
                                                     ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold'
+                                                    : isDashboard
+                                                    ? 'bg-[#E65F2B] text-white shadow-sm font-extrabold'
                                                     : 'bg-indigo-600 text-white shadow-xs'
                                                 : isIndustrial
                                                 ? 'bg-[#0F1115] text-[#E2E8F0]/70 border border-[rgba(226,232,240,0.15)] hover:text-[#E2E8F0] hover:bg-white/5 rounded-[4px]'
                                                 : isPaperSketch
                                                 ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/20 font-bold'
+                                                : isDashboard
+                                                ? 'bg-[#FFF9E6] text-[#4D2A00]/80 border border-[#4D2A00]/20 hover:bg-[#FFF0BE]'
                                                 : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100 hover:bg-current/10'
                                         }`}
                                     >
@@ -987,11 +1002,15 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                             ? 'bg-[#2DD4BF] text-[#0F1115] font-bold rounded-[4px]'
                                             : isPaperSketch
                                             ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold'
+                                            : isDashboard
+                                            ? 'bg-[#E65F2B] text-white shadow-sm font-extrabold'
                                             : 'bg-indigo-600 text-white shadow-xs'
                                         : isIndustrial
                                         ? 'bg-[#0F1115] text-[#E2E8F0]/70 border border-[rgba(226,232,240,0.15)] hover:text-[#E2E8F0] hover:bg-white/5 rounded-[4px]'
                                         : isPaperSketch
                                         ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/20 font-bold'
+                                        : isDashboard
+                                        ? 'bg-[#FFF9E6] text-[#4D2A00]/80 border border-[#4D2A00]/20 hover:bg-[#FFF0BE]'
                                         : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100 hover:bg-current/10'
                                 }`}
                             >
@@ -1008,11 +1027,15 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                                 ? 'bg-[#2DD4BF] text-[#0F1115] font-bold rounded-[4px]'
                                                 : isPaperSketch
                                                 ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold'
+                                                : isDashboard
+                                                ? 'bg-[#E65F2B] text-white shadow-sm font-extrabold'
                                                 : 'bg-indigo-600 text-white shadow-xs'
                                             : isIndustrial
                                             ? 'bg-[#0F1115] text-[#E2E8F0]/70 border border-[rgba(226,232,240,0.15)] hover:text-[#E2E8F0] hover:bg-white/5 rounded-[4px]'
                                             : isPaperSketch
                                             ? 'bg-[#fdfcf0] text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6]/20 font-bold'
+                                            : isDashboard
+                                            ? 'bg-[#FFF9E6] text-[#4D2A00]/80 border border-[#4D2A00]/20 hover:bg-[#FFF0BE]'
                                             : 'bg-current/5 border border-current/10 opacity-70 hover:opacity-100 hover:bg-current/10'
                                     }`}
                                 >
@@ -1044,11 +1067,15 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                                         ? 'bg-[#2DD4BF]/20 border-[#2DD4BF] text-[#2DD4BF] font-black'
                                                         : isPaperSketch
                                                         ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                                        : isDashboard
+                                                        ? 'bg-[#FFF0BE]/50 border-2 border-[#E65F2B] text-[#E65F2B] font-extrabold scale-105 shadow-sm'
                                                         : 'bg-indigo-600/15 border-indigo-500 text-indigo-500 scale-105 shadow-xs font-bold'
                                                     : isIndustrial
                                                     ? 'bg-[#0F1115] border-[rgba(226,232,240,0.1)] text-[#E2E8F0] hover:border-[#2DD4BF]/50 hover:bg-white/5'
                                                     : isPaperSketch
                                                     ? 'bg-[#fdfcf0] border-2 border-[#2b2b2b] text-[#2b2b2b] hover:bg-[#2ec4b6]/20'
+                                                    : isDashboard
+                                                    ? 'bg-[#FFFBF0] border-[#4D2A00]/15 text-[#4D2A00]/80 hover:border-[#E65F2B]/40 hover:bg-[#FFF0BE]'
                                                     : 'border-current/10 hover:border-current/30 hover:bg-current/5'
                                             }`}
                                             title={`${item.name} (${item.category})`}
@@ -1088,7 +1115,11 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                                                             onClick={() => handleSelectEmoji(em)}
                                                             className={`text-2xl p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
                                                                 isSelected
-                                                                    ? 'bg-indigo-600/20 border-indigo-500 scale-110 shadow-xs ring-2 ring-indigo-500'
+                                                                    ? isDashboard
+                                                                        ? 'bg-[#FFF0BE]/50 border-2 border-[#E65F2B] scale-110 shadow-sm ring-2 ring-[#E65F2B]'
+                                                                        : 'bg-indigo-600/20 border-indigo-500 scale-110 shadow-xs ring-2 ring-indigo-500'
+                                                                    : isDashboard
+                                                                    ? 'border-[#4D2A00]/15 hover:border-[#E65F2B] hover:scale-115 hover:bg-[#FFF0BE]'
                                                                     : 'border-current/10 hover:border-indigo-500 hover:scale-115 hover:bg-current/5'
                                                             }`}
                                                             title={em}
@@ -1168,6 +1199,8 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                             className={`px-3.5 py-1.5 text-xs font-bold rounded-lg border flex items-center space-x-1.5 cursor-pointer shadow-2xs transition-all active:scale-95 ${
                                 isApplied
                                     ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
+                                    : isDashboard
+                                    ? 'bg-[#FFF9E6] hover:bg-[#FFE8CC] text-[#E65F2B] border-[#E65F2B]/30'
                                     : 'bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border-indigo-500/30'
                             }`}
                             title="Terapkan ikon tanpa menutup jendela"
@@ -1178,7 +1211,11 @@ export const ShiftIconPickerModal: React.FC<ShiftIconPickerModalProps> = ({
                         <button
                             type="button"
                             onClick={handleSave}
-                            className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white flex items-center space-x-1.5 cursor-pointer shadow-xs transition-all active:scale-95"
+                            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg flex items-center space-x-1.5 cursor-pointer shadow-xs transition-all active:scale-95 ${
+                                isDashboard
+                                    ? 'bg-[#E65F2B] hover:bg-[#D54E1A] text-white'
+                                    : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                            }`}
                             title="Simpan ikon dan tutup jendela"
                         >
                             <Save className="w-3.5 h-3.5" />

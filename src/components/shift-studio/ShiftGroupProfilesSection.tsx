@@ -226,6 +226,15 @@ const ShiftPreviewDropdown: React.FC<{
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.08)',
             };
         }
+        if (isDashboard) {
+            return {
+                backgroundColor: '#FFFBF0',
+                color: '#4D2A00',
+                borderRadius: '10px',
+                border: '1px solid rgba(77, 42, 0, 0.25)',
+                boxShadow: '0 20px 45px -10px rgba(77, 42, 0, 0.2)',
+            };
+        }
         if (isVista) {
             return {
                 backgroundColor: 'rgba(235, 245, 255, 0.94)',

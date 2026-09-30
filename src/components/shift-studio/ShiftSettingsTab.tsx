@@ -266,6 +266,7 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
     const isPaperSketch = theme === 'paperSketch';
     const isEditorial = theme === 'editorial';
     const isTechnical = theme === 'technical';
+    const isDashboard = theme === 'dashboard';
 
     return (
         <div className="space-y-4">
@@ -322,6 +323,8 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                     ? 'bg-[#FCFBF9] text-[#1a1a1a] border border-[#1a1a1a]/25 font-serif rounded-xl shadow-xs'
                     : isTechnical
                     ? 'bg-[#F8F7F4] dark:bg-[#0D1117] text-[#111113] dark:text-[#E6EDF3] border border-slate-300 dark:border-slate-800 font-mono rounded-lg'
+                    : isDashboard
+                    ? 'bg-[#FFFBF0] text-[#4D2A00] border border-[#4D2A00]/25 rounded-xl shadow-2xs font-["Inter"]'
                     : 'rounded-xl border border-teal-200/80 dark:border-zinc-800 overflow-hidden bg-teal-50/40 dark:bg-zinc-800/40'
             }`}>
                 <div
@@ -334,6 +337,8 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                                 ? 'bg-[#2DD4BF]/15 text-[#2DD4BF] border border-[#2DD4BF]/30'
                                 : isPaperSketch
                                 ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b]'
+                                : isDashboard
+                                ? 'bg-[#4D2A00] text-[#F9E6A8]'
                                 : 'bg-teal-500/10 text-teal-600 dark:text-teal-400'
                         }`}>
                             <HelpCircle className="w-4 h-4" />
@@ -354,6 +359,8 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                                 ? 'bg-[#2DD4BF] text-[#0F1115] border-[#2DD4BF] rounded-[4px] font-extrabold'
                                 : isPaperSketch
                                 ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] rounded-lg shadow-[2px_2px_0px_#2b2b2b]'
+                                : isDashboard
+                                ? 'bg-[#4D2A00] hover:bg-[#381B00] text-[#F9E6A8] border-[#4D2A00] rounded-none'
                                 : 'bg-teal-600 hover:bg-teal-700 text-white rounded-lg border-teal-600'
                         }`}
                     >
@@ -371,25 +378,39 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                            className="overflow-hidden border-t border-teal-200/60 dark:border-zinc-700/60"
+                            className={`overflow-hidden border-t ${
+                                isDashboard ? 'border-[#4D2A00]/20' : 'border-teal-200/60 dark:border-zinc-700/60'
+                            }`}
                         >
-                            <div className="p-3.5 sm:p-4 space-y-3 bg-white/70 dark:bg-zinc-900/60">
+                            <div className={`p-3.5 sm:p-4 space-y-3 ${
+                                isDashboard ? 'bg-[#FFF0BE]/40' : 'bg-white/70 dark:bg-zinc-900/60'
+                            }`}>
                                 {/* Skenario 1 */}
-                                <div className="p-3 rounded-lg bg-teal-50/50 dark:bg-zinc-800/50 border border-teal-200/60 dark:border-zinc-700/60 space-y-2">
+                                <div className={`p-3 rounded-lg border space-y-2 ${
+                                    isDashboard
+                                        ? 'bg-[#FFFBF0] border-[#4D2A00]/25 text-[#4D2A00]'
+                                        : 'bg-teal-50/50 dark:bg-zinc-800/50 border-teal-200/60 dark:border-zinc-700/60'
+                                }`}>
                                     <div className="flex items-center justify-between">
-                                        <h4 className="text-xs font-bold text-teal-700 dark:text-teal-400">
+                                        <h4 className={`text-xs font-bold ${isDashboard ? 'text-[#4D2A00]' : 'text-teal-700 dark:text-teal-400'}`}>
                                             Skenario 1: Hari OFF Setelah Shift Malam
                                         </h4>
-                                        <span className="px-2 py-0.5 rounded-md bg-teal-500/15 text-teal-700 dark:text-teal-400 text-[10px] font-bold">
+                                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                            isDashboard ? 'bg-[#4D2A00]/15 text-[#4D2A00]' : 'bg-teal-500/15 text-teal-700 dark:text-teal-400'
+                                        }`}>
                                             Jam Pulang Kemarin
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2 text-[11px]">
-                                        <div className="p-2 rounded-lg bg-white/80 dark:bg-zinc-800 border border-slate-200/70 dark:border-zinc-700">
+                                        <div className={`p-2 rounded-lg border ${
+                                            isDashboard ? 'bg-[#FFF0BE] border-[#4D2A00]/20' : 'bg-white/80 dark:bg-zinc-800 border-slate-200/70 dark:border-zinc-700'
+                                        }`}>
                                             <span className="opacity-60 block text-[9px]">Data Mentah Kantor:</span>
                                             <div className="font-mono mt-0.5 font-bold">04:30</div>
                                         </div>
-                                        <div className="p-2 rounded-lg bg-teal-500/10 border border-teal-500/30 text-teal-700 dark:text-teal-400">
+                                        <div className={`p-2 rounded-lg border ${
+                                            isDashboard ? 'bg-[#FFF5D0] border-[#4D2A00]/30 text-[#4D2A00]' : 'bg-teal-500/10 border-teal-500/30 text-teal-700 dark:text-teal-400'
+                                        }`}>
                                             <span className="opacity-80 block text-[9px]">Hasil Terjemahan:</span>
                                             <div className="font-bold mt-0.5">Penutup Shift Kemarin & Tetap OFF</div>
                                         </div>
@@ -400,21 +421,31 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                                 </div>
 
                                 {/* Skenario 2 */}
-                                <div className="p-3 rounded-lg bg-amber-50/50 dark:bg-zinc-800/50 border border-amber-200/60 dark:border-zinc-700/60 space-y-2">
+                                <div className={`p-3 rounded-lg border space-y-2 ${
+                                    isDashboard
+                                        ? 'bg-[#FFFBF0] border-[#4D2A00]/25 text-[#4D2A00]'
+                                        : 'bg-amber-50/50 dark:bg-zinc-800/50 border-amber-200/60 dark:border-zinc-700/60'
+                                }`}>
                                     <div className="flex items-center justify-between">
-                                        <h4 className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                        <h4 className={`text-xs font-bold ${isDashboard ? 'text-[#4D2A00]' : 'text-amber-600 dark:text-amber-400'}`}>
                                             Skenario 2: Masuk Ekstra di Hari OFF / Libur
                                         </h4>
-                                        <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-400 text-[10px] font-bold">
+                                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                            isDashboard ? 'bg-[#4D2A00]/15 text-[#4D2A00]' : 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+                                        }`}>
                                             Dinas di Hari Libur
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2 text-[11px]">
-                                        <div className="p-2 rounded-lg bg-white/80 dark:bg-zinc-800 border border-slate-200/70 dark:border-zinc-700">
+                                        <div className={`p-2 rounded-lg border ${
+                                            isDashboard ? 'bg-[#FFF0BE] border-[#4D2A00]/20' : 'bg-white/80 dark:bg-zinc-800 border-slate-200/70 dark:border-zinc-700'
+                                        }`}>
                                             <span className="opacity-60 block text-[9px]">Data Mentah Kantor:</span>
                                             <div className="font-mono mt-0.5 font-bold">Masuk: 08:00 | Pulang: 17:30</div>
                                         </div>
-                                        <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400">
+                                        <div className={`p-2 rounded-lg border ${
+                                            isDashboard ? 'bg-[#FFF5D0] border-[#4D2A00]/30 text-[#4D2A00]' : 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400'
+                                        }`}>
                                             <span className="opacity-80 block text-[9px]">Hasil Terjemahan:</span>
                                             <div className="font-bold mt-0.5">Lembur Hari Libur Diaktifkan</div>
                                         </div>
@@ -425,21 +456,31 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                                 </div>
 
                                 {/* Skenario 3 */}
-                                <div className="p-3 rounded-lg bg-teal-50/50 dark:bg-zinc-800/50 border border-teal-200/60 dark:border-zinc-700/60 space-y-2">
+                                <div className={`p-3 rounded-lg border space-y-2 ${
+                                    isDashboard
+                                        ? 'bg-[#FFFBF0] border-[#4D2A00]/25 text-[#4D2A00]'
+                                        : 'bg-teal-50/50 dark:bg-zinc-800/50 border-teal-200/60 dark:border-zinc-700/60'
+                                }`}>
                                     <div className="flex items-center justify-between">
-                                        <h4 className="text-xs font-bold text-teal-700 dark:text-teal-400">
+                                        <h4 className={`text-xs font-bold ${isDashboard ? 'text-[#4D2A00]' : 'text-teal-700 dark:text-teal-400'}`}>
                                             Skenario 3: Shift Beruntun (Malam lanjut Pagi)
                                         </h4>
-                                        <span className="px-2 py-0.5 rounded-md bg-teal-500/15 text-teal-700 dark:text-teal-400 text-[10px] font-bold">
+                                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                            isDashboard ? 'bg-[#4D2A00]/15 text-[#4D2A00]' : 'bg-teal-500/15 text-teal-700 dark:text-teal-400'
+                                        }`}>
                                             Transisi Flexi
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2 text-[11px]">
-                                        <div className="p-2 rounded-lg bg-white/80 dark:bg-zinc-800 border border-slate-200/70 dark:border-zinc-700">
+                                        <div className={`p-2 rounded-lg border ${
+                                            isDashboard ? 'bg-[#FFF0BE] border-[#4D2A00]/20' : 'bg-white/80 dark:bg-zinc-800 border-slate-200/70 dark:border-zinc-700'
+                                        }`}>
                                             <span className="opacity-60 block text-[9px]">Data Mentah Kantor:</span>
                                             <div className="font-mono mt-0.5 font-bold">Masuk: 04:30 | Pulang: 17:30</div>
                                         </div>
-                                        <div className="p-2 rounded-lg bg-teal-500/10 border border-teal-500/30 text-teal-700 dark:text-teal-400">
+                                        <div className={`p-2 rounded-lg border ${
+                                            isDashboard ? 'bg-[#FFF5D0] border-[#4D2A00]/30 text-[#4D2A00]' : 'bg-teal-500/10 border-teal-500/30 text-teal-700 dark:text-teal-400'
+                                        }`}>
                                             <span className="opacity-80 block text-[9px]">Hasil Terjemahan:</span>
                                             <div className="font-bold mt-0.5">04:30 Kemarin, 07:30-17:30 Hari Ini</div>
                                         </div>
@@ -470,6 +511,7 @@ export const ShiftSettingsTab: React.FC<ShiftSettingsTabProps> = ({
                 shiftToDelete={shiftToDelete}
                 availableShifts={currentGroupToEdit.shifts}
                 onConfirmDelete={handleConfirmDelete}
+                theme={theme}
             />
         </div>
     );

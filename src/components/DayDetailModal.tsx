@@ -138,6 +138,17 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 color: '#0F172A',
             };
         }
+        if (isDashboard) {
+            return {
+                borderRadius: '12px',
+                backgroundColor: '#FFFBF0',
+                backgroundImage: 'linear-gradient(139deg, #FFFBF0 0%, #FFF5D0 100%)',
+                border: '1px solid rgba(77, 42, 0, 0.3)',
+                boxShadow: '0 20px 45px -10px rgba(77, 42, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+                color: '#4D2A00',
+                fontFamily: '"Inter", sans-serif',
+            };
+        }
         // Default light theme
         return {
             borderRadius: '12px',
@@ -222,6 +233,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                             ? 'text-[#E6E0E9]'
                             : isVista
                             ? 'text-sky-950'
+                            : isDashboard
+                            ? 'text-[#4D2A00]'
                             : 'text-slate-900'
                     }`}
                 >
@@ -241,6 +254,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                             ? 'border-white/10'
                             : isVista
                             ? 'border-sky-300/40'
+                            : isDashboard
+                            ? 'border-[#4D2A00]/25'
                             : 'border-slate-200'
                     }`}>
                         <div className="flex items-center space-x-2 min-w-0">
@@ -258,6 +273,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                         ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white'
                                         : isVista
                                         ? 'border-sky-300/80 bg-white/80 hover:bg-white text-sky-900 shadow-xs'
+                                        : isDashboard
+                                        ? 'border-[#4D2A00]/30 bg-[#FFF0BE]/80 hover:bg-[#FFF0BE] text-[#4D2A00] shadow-xs'
                                         : 'border-slate-300 bg-white/90 hover:bg-white text-slate-700 shadow-2xs'
                                 }`}
                                 title="Tanggal sebelumnya (Geser kanan)"
@@ -318,6 +335,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                         ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white'
                                         : isVista
                                         ? 'border-sky-300/80 bg-white/80 hover:bg-white text-sky-900 shadow-xs'
+                                        : isDashboard
+                                        ? 'border-[#4D2A00]/30 bg-[#FFF0BE]/80 hover:bg-[#FFF0BE] text-[#4D2A00] shadow-xs'
                                         : 'border-slate-300 bg-white/90 hover:bg-white text-slate-700 shadow-2xs'
                                 }`}
                                 title="Tanggal berikutnya (Geser kiri)"
@@ -335,6 +354,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                         ? 'hover:bg-zinc-800 text-[#00FF00]'
                                         : isVista
                                         ? 'hover:bg-rose-500/20 hover:text-rose-600 text-sky-800'
+                                        : isDashboard
+                                        ? 'hover:bg-[#4D2A00]/10 text-[#4D2A00]/70 hover:text-[#4D2A00]'
                                         : 'hover:bg-black/10 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white'
                                 }`}
                                 title="Tutup kartu (Esc)"
@@ -355,6 +376,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                 ? 'text-slate-300 bg-white/5 border border-white/10'
                             : isVista
                                 ? 'text-sky-900 bg-sky-500/15 border border-sky-300/40'
+                            : isDashboard
+                                ? 'text-[#4D2A00]/80 bg-[#4D2A00]/10 border border-[#4D2A00]/20'
                                 : 'text-slate-600 bg-black/5 border border-slate-200'
                         }`}>
                             ◄ Geser kartu untuk ganti tanggal ►
@@ -370,6 +393,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                 ? 'text-slate-400'
                                 : isVista
                                 ? 'text-sky-900/80'
+                                : isDashboard
+                                ? 'text-[#4D2A00]/70'
                                 : 'text-slate-500'
                         }`}>
                             Shift Kerja
@@ -392,6 +417,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                 ? 'border-white/10'
                                 : isVista
                                 ? 'border-sky-200/80'
+                                : isDashboard
+                                ? 'border-[#4D2A00]/25'
                                 : 'border-slate-200'
                         }`}
                     />
@@ -406,6 +433,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                                     ? 'text-slate-400'
                                     : isVista
                                     ? 'text-sky-900/80'
+                                    : isDashboard
+                                    ? 'text-[#4D2A00]/70'
                                     : 'text-slate-500'
                             }`}>
                                 Masuk

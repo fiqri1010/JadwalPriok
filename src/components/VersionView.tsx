@@ -26,10 +26,429 @@ export interface VersionItem {
 
 export const VERSION_HISTORY: VersionItem[] = [
     {
+        version: '0.4.60',
+        releaseDate: '30 September 2026',
+        title: 'Auto-Apply Libur Nasional Pegawai, Default Tahun Berjalan, Penyelarasan Title Bar Seamless, & Navigasi Scroll Keyboard',
+        isLatest: true,
+        isMajor: false,
+        tag: 'Auto-Apply Holidays, Keyboard Scroll Tables, Clean Window Title Bar',
+        changes: [
+            'Auto-Apply Libur Nasional Saat Login: Menambahkan fungsi registrasi otomatis hari libur resmi nasional sepanjang 3 tahun (tahun berjalan, setahun sebelum, dan setahun sesudah) ke dalam database lokal saat pengguna masuk ke aplikasi.',
+            'Default Tahun Berjalan Pada Daftar Libur: Menjamin halaman daftar libur kustom otomatis menampilkan dan memfilter tahun berjalan secara default tanpa harus menyesuaikan selektor manual.',
+            'Akses Navigasi Keyboard Scroll Tabel Admin: Mengintegrasikan event listener tombol arah kiri (ArrowLeft) dan arah kanan (ArrowRight) untuk mempermudah scrolling horizontal tabel pada dashboard administrator posko.',
+            'Pembersihan Title Bar Sempurna: Menghapus teks redundan "(Kalender Kerja)" di samping judul utama aplikasi pada komponen WindowTitleBar di seluruh tema desktop.',
+            'Penegakan Login Password Landing Page: Menghapus tombol X (Close/Skip) pada Landing Page untuk mewajibkan otentikasi NIP & password/set password bagi seluruh pengguna posko yang diizinkan.',
+            'Fleksibilitas Hak Izin Non-User: Membuka kunci seluruh checkbox permission kustom pada role bertipe Non-User agar hak izinnya tetap dapat diatur dan dipantau secara granular.'
+        ]
+    },
+    {
+        version: '0.4.59',
+        releaseDate: '30 September 2026',
+        title: 'Pembatasan Ukuran Layar Jendela Desktop, Sinkronisasi Sempurna Tema Warm di Pengeditan Shift, Proteksi PPF non User, & Update Peta Jalan',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Desktop Screen Limit, Warm Theme Edit Shift, PPF non User Block, Roadmap Update',
+        changes: [
+            'Pembatasan Ukuran Layar Jendela Desktop: Membatasi dimensi ukuran layar jendela aplikasi desktop minimal 960x640px di tingkat Tauri (programmatic) serta menambahkan overlay peringatan web-fallback interaktif bagi pengguna desktop browser jika ukuran jendela berada di bawah standar tersebut.',
+            'Penyelarasan Sempurna Tema Warm (Edit Shift): Memperbaiki dan menyelaraskan antarmuka modal edit shift agar sepenuhnya mematuhi palet warna Warm (isDashboard) termasuk warna latar belakang sidebar, panel katalog pola, borders motif aktif, tombol range sliders, serta ikon-ikon penanda tab.',
+            'Warm Theme pada Halaman Pilih Ikon & Emoji: Menyelaraskan seluruh tab 260+ Ikon SVG dan 300+ koleksi Emoji pada modal picker ikon dengan aksen warna dark espresso (#4D2A00), pasta lezat (#E65F2B), dan latar krem lembut.',
+            'Proteksi Akses Akun PPF non User: Melarang akun bertipe PPF non-user melakukan set password atau login mandiri di halaman Landing Page, dengan menampilkan panel pemblokiran visual, deskripsi larangan, dan menaruh tombol pengajuan perubahan role ke admin secara kohesif.',
+            'Tata Kelola Otoritas Tingkat Non-User: Membuka dan menampilkan checkbox hak izin konfigurasi (Permissions) pada tingkat role non-user di dashboard admin agar tetap dapat dipantau dan diatur hak khususnya secara granular.',
+            'Pembaruan Peta Jalan Pengembang (Roadmap): Menghapus baris rencana pengembangan "Fitur Reset Password dari Halaman Login" dari peta jalan karena telah sukses diselesaikan dan diimplementasikan.'
+        ]
+    },
+    {
+        version: '0.4.58',
+        releaseDate: '30 September 2026',
+        title: 'Highlight Hari Ini Tema Warm Sudut Tajam, Gradiasi Oranye Pasta & Tombol Mass Apply Otoritas',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Warm Theme Today Highlight Sharp Border & Mass Apply Buttons',
+        changes: [
+            'Sorotan Hari Ini Tema Warm Sudut Tajam: Menyelaraskan border beam pada tanggal hari ini di tema Warm agar berbentuk kotak sudut tajam (border-radius 0px) sesuai dengan karakteristik minimalis tema.',
+            'Skema Gradiasi Cokelat & Oranye Pasta: Mengembangkan preset conic-gradient "warm" baru pada komponen BorderBeam yang menggabungkan cokelat pekat espresso (#4D2A00), oranye pasta lezat (#E65F2B), dan latar krem (#FFF5D0) untuk perpendaran yang serasi.',
+            'Redesain Tombol Terapkan Role Massal: Mengubah radio button mass apply di submenu Pilih Pengguna menjadi tombol interaktif biasa dan menambahkan "jejak visual" (efek sorotan dan indikator pulsasi) pada tombol peran yang terakhir kali diklik.',
+            'Pembersihan Keterangan Deskripsi Mass Apply: Menghapus teks instruksi pembantu di atas daftar role mass apply agar antarmuka lebih bersih dan bebas dari clutter.'
+        ]
+    },
+    {
+        version: '0.4.57',
+        releaseDate: '30 September 2026',
+        title: 'Penghapusan Deskripsi Pengaturan & Penyelarasan Tema Terang Minimalis Kontrol & Submenu Shift',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Penyelarasan UI Pengaturan & Tema Terang Minimalis',
+        changes: [
+            'Penghapusan Deskripsi Pengaturan Aplikasi: Menghapus teks deskripsi "Ekspor, Impor, & Cadangan Jadwal" pada header Pengaturan Aplikasi.',
+            'Penyelarasan Tema Terang Minimalis di Tombol Kontrol Kalender: Menerapkan warna tema Terang Minimalis (#FFF0BE) pada wadah dan tombol-tombol Kontrol Kalender (Salin, Undo, Reset, Kunci).',
+            'Penyelarasan Tema Terang Minimalis pada Dropdown Ekspor: Menyesuaikan dialog popup ekspor beserta tombol format unduhan (PDF, PNG, Excel, JSON) dengan tema Terang Minimalis.',
+            'Penyelarasan Tema Terang Minimalis pada Sub-menu Shift & Alat Konfigurasi: Memastikan halaman daftar shift, tombol navigasi, serta dropdown preview shift menerapkan aksen krem espresso Terang Minimalis.'
+        ]
+    },
+    {
+        version: '0.4.56',
+        releaseDate: '30 September 2026',
+        title: 'Halaman "Pilih Pengguna" di Menu Role, Filter Posko, & Penyelarasan Tema Terang Minimalis',
+        isLatest: false,
+        isMajor: false,
+        tag: 'User Role Selection Page & Posko Filter Feature',
+        changes: [
+            'Halaman Pilih Pengguna di Menu Role: Menambahkan tab "Pilih Pengguna" di dalam modal Tambah / Edit Role Otoritas untuk mengubah role pengguna secara cepat langsung dari menu role.',
+            'Fitur Filter berdasarkan Posko: Menyediakan dropdown Filter Posko dan pencarian Nama/NIP pada tab Pilih Pengguna untuk kemudahan penyaringan personel.',
+            'Tampilan Minimalis Radio Button Role: Menampilkan tabel ringkas dengan kolom Nama, NIP, dan pilihan Radio Button untuk seluruh role otoritas yang tersedia.',
+            'Penyelarasan Tema Terang Minimalis: Menyempurnakan tema Terang Minimalis di modal MonthPicker, DatePicker, TimePicker, dialog konfirmasi reset/hapus, serta popup role.'
+        ]
+    },
+    {
+        version: '0.4.55',
+        releaseDate: '30 September 2026',
+        title: 'Checkbox Hak Izin "Masuk ke Aplikasi" & Kondisional Hak Reset Password Role',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Role Permission Granularity & Security Access Control',
+        changes: [
+            'Penambahan Hak Izin "Masuk ke Aplikasi": Menambahkan checkbox "Masuk ke Aplikasi" pada modal edit/tambah role otoritas untuk membatasi akun pendukung data/statistik dan mencegah user tanpa NIP masuk ke sistem.',
+            'Penataan Kondisional Reset Password: Memastikan checkbox Reset Password pada edit/tambah otoritas role otomatis dinonaktifkan (greyed out) jika "Akses Dashboard" tidak dichecklist.',
+            'Pembaruan Tampilan Otoritas Role: Menyelaraskan tata letak grid 4-kolom pada grup Administrasi & Akses Sistem di modal edit/tambah role.'
+        ]
+    },
+    {
+        version: '0.4.54',
+        releaseDate: '30 September 2026',
+        title: 'Penerapan Tema Terang Minimalis Komprehensif & Fit Ukuran Judul Sidebar Industrial',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Terang Minimalis Comprehensive Theming & Sidebar Font Sizing',
+        changes: [
+            'Penerapan Tema Terang Minimalis di Dashboard Administrator: Menyelaraskan seluruh kontainer header, sub-menu switcher, filter bar, tabel akun, dan kartu role otoritas ke palet warna krem hangat emas (#FFF5D0 / #FFF0BE) dengan batas & teks espresso (#4D2A00).',
+            'Penerapan Tema Terang Minimalis di Popup Salin Excel: Mengubah modal salin jadwal & absen menggunakan Glowing Shell espresso #4D2A00 dan latar inner krem emas #FFF5D0.',
+            'Penerapan Tema Terang Minimalis di Catatan Versi & Daftar Libur: Menyelaraskan tampilan kartu riwayat versi, badge versi, modal daftar hari libur, dan dropdown pemilih tahun ke Tema Terang Minimalis.',
+            'Optimalisasi Ukuran Judul Sidebar Tema Industrial: Menyelaraskan ukuran teks "JadwalPriok" di sidebar tema Industrial agar seluruh huruf muat sempurna tanpa terpotong.'
+        ]
+    },
+    {
+        version: '0.4.53',
+        releaseDate: '30 September 2026',
+        title: 'Proporsi Komponen Sidebar, Redesain Grid Role & Compact TimePicker',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Sidebar Ratio Alignment, Multi-Column Role Grid & Compact TimePicker',
+        changes: [
+            'Penyelarasan Rasio Komponen Sidebar: Menyesuaikan proporsi tombol, badge role, dan font pada sidebar agar seimbang dengan komponen utama.',
+            'Grid Role User Multi-Kolom & Minimalis: Merombak tampilan role otoritas di dashboard admin menjadi grid responsif 2-3 kolom untuk menghemat ruang.',
+            'Textarea Deskripsi Role: Memperbaiki simpan perubahan deskripsi peran & tanggung jawab di modal edit/tambah role menggunakan input textarea.',
+            'Penanganan Month Navigation Truncation: Memperbaiki batas lebar tombol bulan pada tema Paper Sketch dan Industrial agar nama bulan panjang tidak terpotong.',
+            'Redesain Halaman TimePicker Minimalis: Memperkecil diameter jam analog dan tinggi modal timepicker secara konsisten pada seluruh tema.'
+        ]
+    },
+    {
+        version: '0.4.52',
+        releaseDate: '30 September 2026',
+        title: 'Koreksi Rentang Tanggal Riwayat Prototipe Awal',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Prototype Chronology Adjustment',
+        changes: [
+            'Koreksi Rentang Waktu Prototipe: Memperbarui tanggal rilis dan rentang waktu fase awal prototipe (Pre-Alpha) pada catatan versi menjadi 08 - 20 September 2026, merefleksikan jejak awal inisiasi proyek JadwalPriok secara akurat.'
+        ]
+    },
+    {
+        version: '0.4.51',
+        releaseDate: '30 September 2026',
+        title: 'Dokumentasi Catatan Sejarah Prototipe Awal pada Riwayat Versi',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Prototype Historical Archive & Version Chronology',
+        changes: [
+            'Arsip Sejarah Versi Prototipe Awal: Menambahkan catatan resmi fase awal prototipe (Pre-Alpha) dengan judul "Prototype" di bagian terbawah riwayat versi.',
+            'Dokumentasi Evolusi v1.0.0 s.d. v3.0.0: Menyajikan poin-poin ringkas jejak pengembangan kalender shift, integrasi presensi CEISA, mutasi OFF geser, sinkronisasi Supabase, widget Android, hingga keputusan rekonstruksi ulang aplikasi dari fondasi v0.1.0-alpha.'
+        ]
+    },
+    {
+        version: '0.4.50',
+        releaseDate: '30 September 2026',
+        title: 'Transformasi Visual Tema Terang Minimalis & Optimalisasi Keterbacaan Tombol Dasbor',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Terang Minimalis Colorway, Flat Calendar Grid & Dasbor Button Sizing',
+        changes: [
+            'Palet Warna Baru Tema Terang Minimalis: Merombak skema warna tema Terang Minimalis dari kombinasi putih-hijau menjadi latar belakang krem hangat bernuansa emas #F9E6A8 dengan teks dan aksen cokelat pekat espresso #4D2A00, memberikan estetika modern, hangat, dan kontras tinggi.',
+            'Grid Kalender Terintegrasi & Garis Border Bersatu: Menghapus seluruh margin/celah pemisah (gap-0) antar kartu tanggal dan menggabungkan garis batas menjadi border tabel monolitik 1px yang rapi dan presisi.',
+            'Penghapusan Sudut Lengkung (Flat Rounded-None): Menghilangkan sudut tumpul (rounded corner) pada kartu tanggal, badge shift, dan kontainer kalender sehingga menghadirkan gaya desain minimalis yang tegas dan berstruktur.',
+            'Optimalisasi Ruang Layar & Skala Kalender Otomatis (Autoscale): Memaksimalkan pemanfaatan ruang kosong layar aplikasi dengan menghilangkan pembatas lebar kaku dan menyelaraskan aspect ratio sel tanggal dinamis agar mengisi penuh bidang vertikal dan horizontal layar.',
+            'Penyempurnaan Keterbacaan Tombol Dasbor: Memperbaiki ukuran dan ruang tombol "Dasbor" di kartu profil pengguna pada Desktop Sidebar dan Mobile Menu Drawer, memastikan seluruh teks terbaca utuh tanpa terpotong (truncated) di semua resolusi dan tema.'
+        ]
+    },
+    {
+        version: '0.4.49',
+        releaseDate: '30 September 2026',
+        title: 'Penyesuaian Label Tombol Dasbor di Kartu Profil Sidebar & Mobile Drawer',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Sidebar User Card Dasbor Button Label',
+        changes: [
+            'Penyesuaian Label Tombol Dasbor: Mengubah nama tombol pembuka halaman dashboard administrator pada kartu profil pengguna di Desktop Sidebar dan Mobile Menu Drawer menjadi "Dasbor".',
+            'Kerapian & Keterbacaan Antarmuka: Teks "Dasbor" berpasangan presisi dengan ikon perisai dan berdampingan seimbang dengan badge role otoritas tanpa memicu truncation atau overflow pada seluruh tema aplikasi.'
+        ]
+    },
+    {
+        version: '0.4.48',
+        releaseDate: '30 September 2026',
+        title: 'Penyempurnaan Auto-Sizing Tabel Admin & Optimasi Indikator Super Admin Tema Paper Sketch',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Admin Table Auto Column Sizing & Sidebar Badge Fit',
+        changes: [
+            'Auto-Sizing Kolom Tabel Akun Dashboard Admin: Mengubah sistem lebar kolom tabel dari pembatas kaku (fixed/min-width) menjadi layout table-auto dinamis. Lebar kolom secara otomatis menyesuaikan isi data terpanjang pada tiap kolom (Nama, NIP, Posko, Sesi, Status, dan Tombol Aksi) serta mengisi seluruh bidang layar 1 layar penuh tanpa scroll horizontal pada layar PC kantor.',
+            'Optimasi Indikator Super Admin & Tombol Admin di Tema Paper/Pencil Sketch: Menata ulang tata letak dan ukuran font/padding badge otoritas "SUPER ADMIN" dan tombol "Admin" di kartu profil pengguna pada Desktop Sidebar dan Mobile Menu Drawer agar keduanya tampil sejajar rapi, proporsional, dan presisi di dalam ruang yang tersedia tanpa melewati garis tepi border kartu.'
+        ]
+    },
+    {
+        version: '0.4.47',
+        releaseDate: '30 September 2026',
+        title: 'Penerapan Aturan Singkatan Nama Tengah Pengguna pada Sidebar & Mobile Drawer',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Sidebar User Name Middle Initial Formatting',
+        changes: [
+            'Format Nama Display Sidebar Konsisten: Menerapkan fungsi aturan inisial nama tengah formatDisplayName ke tampilan nama pengguna pada kartu profil di Desktop Sidebar dan Mobile Menu Drawer.',
+            'Pencegahan Text Truncation: Nama yang memiliki 4 kata akan menginisialkan kata ke-2 dan ke-3, serta nama 5 kata menginisialkan kata ke-2, ke-3, dan ke-4, memastikan nama tampil utuh, rapi, dan tidak terpotong (truncated) pada kartu sidebar, lengkap dengan atribut tooltip nama asli.'
+        ]
+    },
+    {
+        version: '0.4.46',
+        releaseDate: '30 September 2026',
+        title: 'Perbaikan Scrollbar Mengambang & Optimalisasi Toolbar Filter Dashboard Admin',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Filter Toolbar Scrollbar Overlay Fix',
+        changes: [
+            'Penghapusan Scrollbar Menutupi UI Filter: Menerapkan utility no-scrollbar pada toolbar filter di tab Akun Pengguna dan Persetujuan sehingga tidak ada scrollbar horizontal bawaan OS yang menimpa dropdown pilihan Role, Status, dan Posko.',
+            'Tata Letak Filter Adaptif & Responsif: Mengubah kontainer filter menjadi flex-wrap adaptif dengan batas lebar input pencarian terstruktur, memastikan dropdown filter tidak bertumpuk atau terpotong pada berbagai resolusi layar.'
+        ]
+    },
+    {
+        version: '0.4.45',
+        releaseDate: '30 September 2026',
+        title: 'Penempatan Tombol Dashboard Sejajar Indikator Admin di DIV Pengguna Sidebar',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Sidebar User Card Admin Button Integration',
+        changes: [
+            'Integrasi Tombol Dashboard Admin ke Dalam DIV User: Memindahkan tombol Dashboard Administrator langsung ke dalam kotak/DIV kartu profil nama user di sidebar (desktop maupun drawer mobile), terletak di sudut kanan bawah sejajar dengan indikator/badge role admin.',
+            'Penyederhanaan Label Tombol & Breadcrumb: Mengubah label tombol menjadi "Dashboard" agar hemat ruang dan presisi berdampingan dengan badge role, serta memperbarui judul breadcrumb navbar menjadi "Dashboard Administrator".'
+        ]
+    },
+    {
+        version: '0.4.44',
+        releaseDate: '30 September 2026',
+        title: 'Optimalisasi Lebar Kolom Nama Dashboard Admin & Reposisi Tombol Menu Admin di Sidebar',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Compact Name Column & Sidebar Admin Button Relocation',
+        changes: [
+            'Optimalisasi Lebar Kolom Nama: Memperkecil lebar kolom Nama pada tabel Akun Pengguna dan tabel Pratinjau Jadwal di Dashboard Administrator secara proporsional agar tabel lebih efisien dan ruang horizontal kolom lainnya lebih lega.',
+            'Reposisi Tombol Dashboard Administrator: Memindahkan tombol menu Dashboard Admin pada Sidebar (Desktop) dan Mobile Menu Drawer tepat ke bawah kotak profil/DIV nama pengguna yang sedang aktif sehingga akses navigasi admin menjadi jauh lebih cepat dan intuitif.'
+        ]
+    },
+    {
+        version: '0.4.43',
+        releaseDate: '30 September 2026',
+        title: 'Penyempurnaan Pembacaan Paste Excel: Pengabaian Border & Dukungan Sel Shift Tanpa Warna',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Excel Paste Border Stripping & Uncolored Shift Recognition',
+        changes: [
+            'Pengabaian Format Border Sel: Seluruh styling border dan garis bingkai kotak dari Excel/Google Sheets diabaikan secara total saat menempel data, sehingga antarmuka grid jadwal tetap rapi dan bersih.',
+            'Dukungan Sel Shift Tanpa Warna / Latar Putih: Memperbaiki logika deteksi kode shift (seperti "P" -> PM, "G" -> Graha, "N" -> NPCT, dll.) pada sel tanpa warna latar atau sel dengan warna putih bawaan Excel sehingga terbaca sempurna sebagai badge shift.',
+            'Pembersihan Karakter Non-Breaking Space: Menghapus spasi non-standar (NBSP) dari hasil salinan Excel agar pencocokan teks kode shift selalu akurat.'
+        ]
+    },
+    {
+        version: '0.4.42',
+        releaseDate: '30 September 2026',
+        title: 'Perbaikan Penyimpanan & Sinkronisasi Data Edit/Tambah Role Otoritas',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Role Management Persistence & Cross-User Sync Fix',
+        changes: [
+            'Perbaikan Penyimpanan Profil Otoritas: Memperbaiki logika getter dan normalisasi profil otoritas pada adminStorage agar tidak menimpa modifikasi nama, deskripsi, tingkat role, dan izin kustom dengan nilai bawaan sistem.',
+            'Sinkronisasi Akun Pengguna Real-Time: Saat admin mengubah nama profil atau tingkat role otoritas, seluruh akun pengguna yang terikat pada role tersebut otomatis tersinkronisasi secara langsung.',
+            'Penyempurnaan Form Handler Modal: Menjamin penanganan submit form dan tombol Simpan Role / Simpan Perubahan berjalan responsif dan akurat.'
+        ]
+    },
+    {
+        version: '0.4.41',
+        releaseDate: '30 September 2026',
+        title: 'Penyederhanaan Header Impor Jadwal & Penyesuaian Label Tombol Terapkan',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Clean Import Header & Apply Button Label Customization',
+        changes: [
+            'Pembersihan Header Impor: Menghapus badge indikator "150 Rows × 40 Cols" dan teks deskripsi penjelasan di bawah judul sub menu Impor Jadwal Pengguna sehingga tampilan lebih bersih dan lapang.',
+            'Penyesuaian Label Tombol Terapkan: Mengubah label tombol eksekusi impor menjadi "Terapkan semua ke <jumlah> Pengguna" secara dinamis sesuai total pengguna terpilih.'
+        ]
+    },
+    {
+        version: '0.4.40',
+        releaseDate: '30 September 2026',
+        title: 'Penataan Tombol Toolbar Impor Jadwal & Pemindahan Tombol Muat Contoh Data',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Import Toolbar Button Organization & Sample Data Button Relocation',
+        changes: [
+            'Penataan Ulang Tombol Toolbar Impor: Mengubah nama "Impor dari File Langsung" menjadi "Impor dari File", mengubah nama "Tempel Excel (Clipboard)" menjadi "Tempel Data", dan memposisikan tombol "Tempel Data" di sebelah kiri tombol "Impor dari File".',
+            'Pemindahan Tombol Muat Contoh Data: Memindahkan tombol "Muat Contoh Data Grid" tepat ke sebelah kanan pemilih Target Tahun untuk alur kerja yang lebih ergonomis dan rapi.'
+        ]
+    },
+    {
+        version: '0.4.39',
+        releaseDate: '30 September 2026',
+        title: 'Pelipatan Sasaran Pengguna Penerapan Jadwal & Penyesuaian Judul Pratinjau',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Collapsible Schedule Target Selection & Preview Label Refinement',
+        changes: [
+            'Pelipatan Sasaran Penerapan Jadwal: Mengubah tampilan target pengguna menjadi komponen akordeon/lipatan (collapsible) yang ringkas dengan status bawaan terlipat (folded), dilengkapi ringkasan jumlah personel terpilih dan tombol buka/tutup lipatan.',
+            'Penyesuaian Label Bagian: Mengubah nama "Pilih Sasaran Pengguna / Posko Penerima" menjadi "Pilih Pengguna Penerapan Jadwal".',
+            'Pembaruan Judul Pratinjau Jadwal: Mengubah label "Pratinjau Jadwal (5 Personel Posko Terpilih Otomatis)" menjadi "Pratinjau Jadwal 5 Pengguna Acak".'
+        ]
+    },
+    {
+        version: '0.4.38',
+        releaseDate: '30 September 2026',
+        title: 'Penghapusan Kata "Posko", Inisialisasi Nama Tengah di Tabel, & Minimalisasi Halaman Role',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Posko Naming Cleanup, Name Middle Initials & Minimalist Role Management',
+        changes: [
+            'Penghapusan Kata "Posko": Menghapus kata "Posko" pada seluruh data unit posko (Graha Lt. 1, Graha Ground, CDC, NPCT, Koja) di database, sesi perangkat, dan dropdown pilihan.',
+            'Penyingkatan Inisial Nama Tengah: Pada tabel akun pengguna, nama dengan lebih dari 3 kata secara otomatis mengaliaskan nama tengah menjadi inisial (misal: 4 kata -> kata ke-2 & ke-3 diinisialkan, 5 kata -> kata ke-2, ke-3 & ke-4 diinisialkan) tanpa mengubah data nama riil saat diedit.',
+            'Pengosongan Search Box Placeholder: Mengosongkan placeholder teks pada kotak pencarian akun pengguna agar lebih bersih dan rapi.',
+            'Minimalisasi Halaman Pengaturan Role: Menghapus logo/ikon dan badge role pada daftar role otoritas serta memadatkan tampilan kartu role menjadi lebih ringkas dan hemat ruang.'
+        ]
+    },
+    {
+        version: '0.4.37',
+        releaseDate: '30 September 2026',
+        title: 'Integrasi Logika Pemetaan Otomatis Pewarnaan Shift Cerdas pada Impor Jadwal Dashboard Admin',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Intelligent Shift Color Heuristics & Large Volume Schedule Mapping Engine',
+        changes: [
+            'Integrasi Logika Pemetaan Shift Cerdas: Mengadopsi mesin pencocokan warna dan heuristik RGB dari Salin Shift by Text (ExcelSpreadsheet) ke dalam grid impor jadwal dashboard admin (150 baris × 40 kolom).',
+            'Pencocokan Multi-Dimensi: Mendeteksi warna latar sel (background color), warna font teks (text color), kode teks shift, serta kamus sistem bawaan (SYSTEM_DEFAULT_EXCEL_MAP) dan aturan kustom pengguna secara otomatis.',
+            'Visualisasi Warna Shift Instan: Setiap sel jadwal dalam grid 150 baris otomatis menampilkan lencana/tema warna shift secara real-time saat terdeteksi.',
+            'Panel Aturan Warna & Kode Terpadu: Mendeteksi seluruh varian warna dan kode pada data impor volume besar secara otomatis dan menyediakan opsi penyesuaian serta penyimpanan aturan kustom.'
+        ]
+    },
+    {
+        version: '0.4.36',
+        releaseDate: '30 September 2026',
+        title: 'Minimalisasi Ukuran & Tata Letak Tabel Menu Akun Pengguna',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Minimalist User Accounts Table & High Information Density',
+        changes: [
+            'Minimalisasi Ukuran Tabel Akun Pengguna: Memadatkan padding vertikal/horizontal sel tabel (th dan td) untuk mencapai densitas informasi tinggi yang rapi dan elegan.',
+            'Optimalisasi Komponen Sel Tabel: Memperkecil proporsi badge role, status sesi perangkat (online/offline), ukuran checkbox status aktif, dan tombol aksi (Reset, Edit, Hapus) agar lebih proporsional dan hemat ruang.',
+            'Penyempurnaan Bar Filter & Pencarian: Menata input pencarian dan dropdown filter (Role, Status, Posko) menjadi lebih ringkas dan hemat ruang vertikal.'
+        ]
+    },
+    {
+        version: '0.4.35',
+        releaseDate: '30 September 2026',
+        title: 'Dependensi Hak Izin Role & Optimalisasi Tata Letak Popup Edit/Tambah Role Hemat Ruang',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Permission Cascading Logic & Ultra-Compact Modal Layout',
+        changes: [
+            'Dependensi Hak Izin Role: Checkbox "Akses Dashboard Admin" otomatis dinonaktifkan (greyed-out) untuk kelompok tingkat role End-User dan Non-User.',
+            'Kaskade Hak Izin Admin: Jika checkbox "Akses Dashboard Admin" tidak dicentang, 5 hak izin turunannya (Kelola Pengguna, Impor Jadwal Shift, Lihat Sesi Perangkat, Edit Otoritas, Hapus Otoritas Admin) secara otomatis di-greyed out dan dinonaktifkan.',
+            'Optimalisasi Popup Modal Hemat Ruang: Merestrukturisasi antarmuka modal Tambah/Edit Role menjadi 2-kolom ringkas pada header, memperluas lebar kontainer, dan memadatkan matriks permission sehingga sangat hemat ruang dan tidak terpotong pendek.',
+            'Perbaikan Teks Tab Sub-Menu: Memperluas lebar minimum kontainer sub-menu dan menerapkan whitespace-nowrap agar teks "Impor Jadwal" tidak lagi terpotong (truncated) saat mengubah ukuran layar.'
+        ]
+    },
+    {
+        version: '0.4.34',
+        releaseDate: '30 September 2026',
+        title: 'Tab Arsip Persetujuan Pengguna, Pembersihan Menyeluruh Data User Terhapus, & Perapian Konfigurasi Hak Izin',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Approval Archive Tab, Deep User Purge, & Permission Matrix Redesign',
+        changes: [
+            'Tab Arsip Persetujuan: Menambahkan pemisah tab "Menunggu" dan "Arsip" di sisi paling kanan header halaman Persetujuan Permintaan Pengguna, dengan pemindahan data otomatis saat permohonan disetujui atau ditolak.',
+            'Tata Letak Baris Minimalis: Merapikan tampilan data permohonan persetujuan dengan posisi waktu "Diajukan" di kanan atas dan status "Diproses" atau tombol aksi di bawahnya.',
+            'Pembersihan Menyeluruh Data User: Menghapus akun pengguna kini secara otomatis mentrigger pembersihan total seluruh data terkait di aplikasi (daftar akun, sesi login aktif, riwayat permohonan, dan penyimpanan lokal pengguna).',
+            'Perapian Konfigurasi Hak Izin: Mengelompokkan pengaturan permission ke dalam 3 kategori terstruktur (Administrasi, Operasional Shift & Sesi, Tata Kelola & Keamanan) dengan kartu interaktif yang modern dan rapi.'
+        ]
+    },
+    {
+        version: '0.4.33',
+        releaseDate: '30 September 2026',
+        title: 'Reposisi Tombol Terapkan Semua & Pembaruan Mikrokopi Impor Format CSV Hari Libur',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Holiday Action Buttons Alignment & Refined CSV Copywriting',
+        changes: [
+            'Reposisi Tombol Aksi: Memindahkan tombol "Terapkan Semua" ke sebelah kanan tombol hapus pada footer daftar hari libur agar tata letak aksi menjadi lebih terpusat dan ergonomis.',
+            'Pembaruan Teks Antarmuka CSV: Menyesuaikan judul panel menjadi "Impor Data CSV Libur" dan deskripsi petunjuk menjadi "Tambahkan data libur nasional menggunakan Format CSV".'
+        ]
+    },
+    {
+        version: '0.4.32',
+        releaseDate: '30 September 2026',
+        title: 'Reposisi Tombol Sub-Menu Dashboard Admin ke Sisi Kanan Header & Eliminasi Indikator Angka',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Header Sub-Menu Right Alignment & Clean Minimalist Tab Design',
+        changes: [
+            'Reposisi Sub-Menu Header: Memindahkan kelompok tombol sub-menu dashboard admin (Data Akun, Impor Jadwal, Role, Persetujuan) langsung ke sisi paling kanan dalam kartu header, berdampingan dengan judul Dashboard Administrator.',
+            'Pembersihan Indikator Angka: Menghapus seluruh badge angka/kuantitas pada tombol sub-menu untuk tampilan antarmuka yang bersih, ringkas, dan selaras dengan desain tab Pengaturan Aplikasi.'
+        ]
+    },
+    {
+        version: '0.4.31',
+        releaseDate: '30 September 2026',
+        title: 'Pembaruan Standarisasi Nama Posko (Graha Segara Lt. 1 -> Graha Lt. 1)',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Posko Standard Naming Refinement',
+        changes: [
+            'Penyeragaman Nama Posko: Mengubah nama posko penugasan "Graha Segara Lt. 1" menjadi "Graha Lt. 1" pada seluruh master data pengguna bawaan, sesi perangkat, pilihan form penugasan, dan logika migrasi data tersimpan.'
+        ]
+    },
+    {
+        version: '0.4.30',
+        releaseDate: '30 September 2026',
+        title: 'Optimalisasi Desain Ultra Minimalis Landing Page & Perbaikan Posisi Kontainer di Bawah Title Bar',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Compact Minimalist Landing Page Card & Safe Title Bar Viewport Boundary',
+        changes: [
+            'Dimensi Ultra Minimalis: Memperkecil tinggi dan lebar kartu Landing Page (max-w-[360px]) dengan tipografi proporsional, padding ramping, dan komponen input yang ringkas tanpa mengurangi kejelasan fungsi.',
+            'Perbaikan Posisi Viewport: Menyesuaikan kontainer flex dan margin layout sehingga bagian atas kartu Landing Page selalu berada aman di bawah Window Title Bar dan tidak pernah terpotong atau melewati batas header.',
+            'Deskripsi & Tombol Kompak: Menyederhanakan mikrokopi keamanan, notifikasi reset, dan tombol aksi ke dalam format ringkas yang responsif di seluruh tema aplikasi.'
+        ]
+    },
+    {
+        version: '0.4.29',
+        releaseDate: '30 September 2026',
+        title: 'Sinkronisasi Real-Time Sesi Perangkat & Optimasi Responsif Sub-Menu Dashboard Admin',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Device Session Consistency & Responsive Admin Sub-Menu Navigation',
+        changes: [
+            'Sinkronisasi Sesi Akurat: Menyelaraskan seluruh data sesi perangkat (Tipe, OS, Browser, IP Address, MAC Address, Lokasi, dan Status Online) antara tab Akun di Pengaturan dan tabel Data Akun di Dashboard Administrator.',
+            'Modal Inspeksi Sesi Perangkat: Menambahkan modal detail sesi perangkat interaktif saat mengklik sel sesi di tabel pengguna posko dengan opsi pemutusan sesi secara paksa (force logout) dan sinkronisasi status.',
+            'Optimasi Sub-Menu Layar Sempit: Memperbaiki kontainer navigasi sub-menu dashboard admin agar adaptif dan utuh pada layar ponsel atau layar sempit tanpa ada menu yang terpotong atau tertutup.'
+        ]
+    },
+    {
         version: '0.4.28',
         releaseDate: '30 September 2026',
         title: 'Penyempurnaan Tampilan Penuh Landing Page, Tombol Tutup X, & Eliminasi Navigasi Pengganggu',
-        isLatest: true,
+        isLatest: false,
         isMajor: false,
         tag: 'Full-View Landing Page, Close Trigger & Clean Onboarding Experience',
         changes: [
@@ -798,6 +1217,22 @@ export const VERSION_HISTORY: VersionItem[] = [
             'Fitur Libur & Piket: Integrasi hari libur nasional, cuti bersama, dan statistik piket.',
             'Navigasi Cepat: Dukungan gesture swipe mobile, shortcut keyboard, dan auto-scale 1 layar.'
         ]
+    },
+    {
+        version: 'Prototype',
+        releaseDate: '08 - 20 September 2026',
+        title: 'Prototype',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Fase Prototipe Awal (v1.0.0 – v3.0.0)',
+        changes: [
+            'v1.0.0 — Fondasi Kalender Shift & Lembur: Kalender shift interaktif (Graha, TPSL, NPCT, SM, PM, Malam, OFF, CUTI), kalkulator otomatis jam lembur (durasi harian ≥ 10,5 jam & dinas tanggal merah), tabel rekapitulasi bulanan, dan penyimpanan lokal (LocalStorage).',
+            'v1.1.0 — Produktivitas & Integrasi Kedisiplinan CEISA: Tempel satu baris kode shift Excel sebulan penuh, evaluasi kedisiplinan absen CEISA (Skala 1–4) dengan toleransi shift & saklar Hold Dokumen, manajemen libur nasional CSV/AI, tombol Reset berproteksi Lock & Undo, serta sistem multi-tema awal.',
+            'v1.2.0 — Mutasi OFF Geser & Desktop Tauri: Sistem tabungan (+1) dan penarikan (-1) hak libur OFF geser hari kerja, dukungan Surat Tugas (ST) libur pengganti, integrasi aplikasi desktop Tauri dengan WindowTitleBar kustom build timestamp, serta navigasi gesture swipe & pintasan keyboard.',
+            'v1.2.1 – v1.2.3 — Cloud Sync Supabase & Android Widget: Sinkronisasi cloud dua arah (Pull & Push) lintas HP Android, laptop/PC, dan browser, modul widget home screen Android harian, serta panduan fitur dan SQL setup interaktif.',
+            'v1.2.4 — Ketahanan Sinkronisasi & Android Modern: Graceful schema fallback penanganan payload Supabase (mencegah error 400), kesiapan Android 12+ API 31–35 (receiver & izin widget), dan sinkronisasi konfigurasi versi lintas platform.',
+            'Evolusi Hingga v3.0.0 & Rekonstruksi Ulang: Versi prototipe ini sempat terus dikembangkan hingga versi 3.0.0 tanpa pencatatan riwayat perubahan terperinci. Mempertimbangkan performa, modularitas kode, skalabilitas jangka panjang, dan arsitektur visual modern, aplikasi kemudian dibangun ulang secara terstruktur dari awal (ground-up rewrite) mulai versi 0.1.0-alpha.'
+        ]
     }
 ];
 
@@ -896,6 +1331,8 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                         ? 'rounded-lg bg-[#1E1E1E] border-slate-800 text-[#E0E0E0]'
                         : isVista
                         ? 'rounded-lg bg-white/90 backdrop-blur-md border-sky-200 text-slate-900'
+                        : isDashboard
+                        ? 'rounded-lg bg-[#FFF5D0] border-[#4D2A00]/25 text-[#4D2A00]'
                         : 'rounded-lg bg-white border-slate-200 text-slate-800'
                 }`}
             >
@@ -911,6 +1348,8 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                     ? 'rounded-md bg-slate-800/80 text-blue-400 border border-slate-700'
                                     : isVista
                                     ? 'rounded-md bg-blue-50 text-blue-600 border border-blue-200'
+                                    : isDashboard
+                                    ? 'rounded-md bg-[#FFF0BE] text-[#4D2A00] border border-[#4D2A00]/30'
                                     : 'rounded-md bg-teal-50 text-teal-700 border border-teal-200'
                             }`}
                         >
@@ -935,6 +1374,8 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                             ? 'rounded-md bg-slate-800 text-slate-300 border border-slate-700'
                                             : isVista
                                             ? 'rounded-md bg-blue-50 text-blue-700 border border-blue-200'
+                                            : isDashboard
+                                            ? 'rounded-md bg-[#4D2A00] text-[#FFF9E6] border border-[#4D2A00]'
                                             : 'rounded-md bg-slate-100 text-slate-700 border border-slate-200'
                                     }`}
                                 >
@@ -1036,6 +1477,8 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                                 ? 'rounded-lg bg-[#1E1E1E] border-slate-800 text-[#E0E0E0] shadow-xs hover:border-slate-700'
                                                 : isVista
                                                 ? 'rounded-lg bg-white/80 backdrop-blur-md border-sky-200/80 text-slate-900 shadow-xs hover:border-sky-300'
+                                                : isDashboard
+                                                ? 'rounded-lg bg-[#FFF5D0] border-[#4D2A00]/25 text-[#4D2A00] shadow-xs hover:border-[#4D2A00]/40'
                                                 : 'rounded-lg bg-white border-slate-200 text-slate-800 shadow-xs hover:border-slate-300'
                                         }`}
                                     >
@@ -1052,6 +1495,8 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                                     ? 'hover:bg-slate-800/40'
                                                     : isVista
                                                     ? 'hover:bg-blue-50/50'
+                                                    : isDashboard
+                                                    ? 'hover:bg-[#FFF0BE]/60'
                                                     : 'hover:bg-slate-50'
                                             }`}
                                         >
@@ -1069,6 +1514,8 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                                                 ? 'rounded-md bg-slate-800 text-slate-200 border-slate-700'
                                                                 : isVista
                                                                 ? 'rounded-md bg-blue-50 text-blue-800 border-blue-200'
+                                                                : isDashboard
+                                                                ? 'rounded-md bg-[#4D2A00] text-[#FFF9E6] border-[#4D2A00]'
                                                                 : 'rounded-md bg-slate-100 text-slate-800 border-slate-200'
                                                         }`}
                                                     >
@@ -1087,6 +1534,8 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                                                     ? 'rounded-md bg-slate-800/50 text-slate-400 border-slate-700/80'
                                                                     : isVista
                                                                     ? 'rounded-md bg-sky-50 text-sky-800 border-sky-200'
+                                                                    : isDashboard
+                                                                    ? 'rounded-md bg-[#FFF0BE] text-[#4D2A00] border-[#4D2A00]/30'
                                                                     : 'rounded-md bg-slate-50 text-slate-600 border-slate-200'
                                                             }`}
                                                         >
@@ -1200,6 +1649,8 @@ export const VersionView: React.FC<VersionViewProps> = ({ theme = 'default' }) =
                                 ? 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
                                 : isVista
                                 ? 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50'
+                                : isDashboard
+                                ? 'bg-[#FFF0BE] text-[#4D2A00] border-[#4D2A00]/30 hover:bg-[#FFF5D0]'
                                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                         }`}
                     >

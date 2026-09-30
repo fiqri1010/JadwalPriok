@@ -78,7 +78,7 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
 
     // Current running year (tahun berjalan secara otomatis)
     const currentRunningYear = useMemo(() => new Date().getFullYear(), []);
-    const [activeYear, setActiveYear] = useState<number>(() => selectedYear || currentRunningYear);
+    const [activeYear, setActiveYear] = useState<number>(() => isPageView ? currentRunningYear : (selectedYear || currentRunningYear));
 
     // Year Dropdown / Search Popover state
     const [isYearDropdownOpen, setIsYearDropdownOpen] = useState<boolean>(false);
@@ -87,10 +87,10 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
     const activeYearBtnRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
-        if (selectedYear) {
+        if (selectedYear && !isPageView) {
             setActiveYear(selectedYear);
         }
-    }, [selectedYear]);
+    }, [selectedYear, isPageView]);
 
     // Close year dropdown on outside click
     useEffect(() => {
@@ -477,6 +477,7 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
         if (isPaperSketch) return 'bg-[#ff4747] hover:bg-[#ff3333] text-white font-bold rounded-xl border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]';
         if (isDark) return 'bg-teal-600 hover:bg-teal-500 text-white shadow-xs';
         if (isVista) return 'bg-gradient-to-b from-[#4facfe] via-[#00a2ff] to-[#0072ff] text-white shadow-xs';
+        if (isDashboard) return 'bg-[#4D2A00] hover:bg-[#6E3C00] text-[#FFF9E6] font-bold rounded-lg shadow-xs transition-all';
         return 'bg-teal-600 hover:bg-teal-700 text-white shadow-xs';
     };
 
@@ -495,6 +496,8 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                     ? 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[4px_4px_0px_#2b2b2b] font-[\'Gaegu\']'
                     : isTechnical
                     ? 'bg-[#F8F7F4] text-[#111113] border-[1.5px] border-[#111113] font-mono'
+                    : isDashboard
+                    ? 'bg-[#FFF5D0] text-[#4D2A00] border-[#4D2A00]/25'
                     : 'bg-white text-slate-800 border-slate-200/70'
             }`}
         >
@@ -544,18 +547,24 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                                     ? isYearDropdownOpen
                                         ? 'bg-[#0F1115] border-[#2DD4BF] text-[#2DD4BF] ring-2 ring-[#2DD4BF]/20'
                                         : 'bg-[#0F1115] hover:bg-[#1A1D23] border-[rgba(226,232,240,0.2)] text-[#E2E8F0]'
+                                    : isDashboard
+                                    ? isYearDropdownOpen
+                                        ? 'bg-[#FFF0BE] border-[#4D2A00] text-[#4D2A00] ring-2 ring-[#4D2A00]/20'
+                                        : 'bg-[#FFF0BE] border-[#4D2A00]/30 text-[#4D2A00]'
                                     : isYearDropdownOpen
                                     ? 'bg-teal-50 dark:bg-[#323741] border-teal-400 text-teal-800 dark:text-white ring-2 ring-teal-500/10'
                                     : 'bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#2a2f3b] dark:hover:bg-[#323741] border-slate-200/80 dark:border-slate-700 text-slate-800 dark:text-white'
                             }`}
                             title="Pilih atau cari tahun"
                         >
-                            <span className={isIndustrial ? 'text-[#E2E8F0]/60' : 'text-slate-400 dark:text-slate-400'}>Tahun:</span>
-                            <span className={`font-semibold ${isIndustrial ? 'text-[#E2E8F0]' : 'text-slate-900 dark:text-white'}`}>{activeYear}</span>
+                            <span className={isIndustrial ? 'text-[#E2E8F0]/60' : isDashboard ? 'text-[#4D2A00]/70' : 'text-slate-400 dark:text-slate-400'}>Tahun:</span>
+                            <span className={`font-semibold ${isIndustrial ? 'text-[#E2E8F0]' : isDashboard ? 'text-[#4D2A00]' : 'text-slate-900 dark:text-white'}`}>{activeYear}</span>
                             {activeYear === currentRunningYear && (
                                 <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-normal leading-none border ${
                                     isIndustrial
                                         ? 'bg-[#2DD4BF]/15 text-[#2DD4BF] border-[#2DD4BF]/30'
+                                        : isDashboard
+                                        ? 'bg-[#4D2A00] text-[#FFF9E6] border-[#4D2A00]'
                                         : 'bg-teal-100 dark:bg-teal-900/60 text-teal-800 dark:text-teal-300 border-teal-200/50 dark:border-teal-700/50'
                                 }`}>
                                     Tahun Ini
@@ -569,6 +578,8 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                             <div className={`absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-[6px] shadow-2xl border p-3 z-50 animate-in fade-in zoom-in-95 duration-200 ${
                                 isIndustrial
                                     ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.2)] text-[#E2E8F0]'
+                                    : isDashboard
+                                    ? 'bg-[#FFF5D0] border-[#4D2A00]/30 text-[#4D2A00]'
                                     : 'bg-white dark:bg-[#2a2f3b] border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100'
                             }`}>
                                 {/* Search input */}
@@ -712,12 +723,28 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                 {/* Kolom Kiri / Utama (7 cols): Daftar Hari Libur Terdaftar */}
                 <div className="lg:col-span-7 space-y-3">
                     {yearItems.length === 0 ? (
-                        <div className={`py-16 text-center text-xs font-medium rounded-xl border border-dashed ${
-                            isIndustrial
-                                ? 'bg-[#0F1115]/50 border-[rgba(226,232,240,0.15)] text-[#E2E8F0]/60'
-                                : 'bg-slate-50/50 dark:bg-slate-850/50 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500'
-                        }`}>
-                            Tidak ada hari libur tersimpan untuk tahun {activeYear}.
+                        <div className="space-y-3">
+                            <div className={`py-14 text-center text-xs font-medium rounded-xl border border-dashed ${
+                                isIndustrial
+                                    ? 'bg-[#0F1115]/50 border-[rgba(226,232,240,0.15)] text-[#E2E8F0]/60'
+                                    : 'bg-slate-50/50 dark:bg-slate-850/50 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500'
+                            }`}>
+                                Tidak ada hari libur tersimpan untuk tahun {activeYear}.
+                            </div>
+                            {/* Footer aksi saat daftar kosong */}
+                            <div className={`pt-3 border-t flex items-center justify-end gap-2.5 ${
+                                isIndustrial ? 'border-[rgba(226,232,240,0.12)]' : 'border-slate-100 dark:border-slate-800'
+                            }`}>
+                                <button
+                                    type="button"
+                                    disabled={isProcessing}
+                                    onClick={handleApplyAllOfficial}
+                                    className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98] ${getAccentButtonClass()}`}
+                                >
+                                    <Check className="h-3.5 w-3.5" />
+                                    <span>Terapkan Semua</span>
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -835,8 +862,8 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                             })}
                             </div>
 
-                            {/* Footer: Hapus Libur Tahun Ini dengan efek Glitch */}
-                            <div className={`pt-3 border-t flex items-center justify-end ${
+                            {/* Footer: Tombol Hapus Libur Tahun Ini & di Samping Kanannya Tombol Terapkan Semua */}
+                            <div className={`pt-3 border-t flex flex-wrap items-center justify-end gap-2.5 ${
                                 isIndustrial ? 'border-[rgba(226,232,240,0.12)]' : 'border-slate-100 dark:border-slate-800'
                             }`}>
                                 <button
@@ -852,12 +879,21 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                                     <Trash2 className="w-3.5 h-3.5 shrink-0 relative z-10" />
                                     <span className="relative z-10">Hapus Libur Tahun Ini</span>
                                 </button>
+                                <button
+                                    type="button"
+                                    disabled={isProcessing}
+                                    onClick={handleApplyAllOfficial}
+                                    className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98] ${getAccentButtonClass()}`}
+                                >
+                                    <Check className="h-3.5 w-3.5" />
+                                    <span>Terapkan Semua</span>
+                                </button>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Kolom Kanan / Sidebar (5 cols): Tambah Hari Libur + Auto Terapkan Libur */}
+                {/* Kolom Kanan / Sidebar (5 cols): Tambah Hari Libur + Impor CSV */}
                 <div className={`lg:col-span-5 space-y-6 lg:border-l lg:pl-6 ${
                     isIndustrial ? 'lg:border-[rgba(226,232,240,0.12)]' : 'lg:border-slate-200/70 lg:dark:border-slate-800'
                 }`}>
@@ -1010,43 +1046,34 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                         </div>
                     </form>
 
-                    {/* B. Auto-Terapkan Libur Resmi & CSV */}
+                    {/* B. Impor Hari Libur Format CSV */}
                     <div className="space-y-3.5">
                         <div className="space-y-0.5">
                             <div className="flex items-center gap-1.5">
-                                <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+                                <FileText className={`w-4 h-4 ${isIndustrial ? 'text-[#2DD4BF]' : 'text-teal-600 dark:text-teal-400'} shrink-0`} />
                                 <h3 className={`text-sm font-bold ${isIndustrial ? 'text-[#E2E8F0] font-[\'Syne\']' : 'text-slate-900 dark:text-slate-100'}`}>
-                                    Auto-Terapkan Libur Resmi {activeYear}
+                                    Impor Data CSV Libur
                                 </h3>
                             </div>
                             <p className={`text-xs ${
                                 isIndustrial ? 'text-[#E2E8F0]/70 font-mono text-[11px]' : 'text-slate-500 dark:text-slate-400'
                             }`}>
-                                Terapkan otomatis seluruh daftar hari libur resmi & cuti bersama tahun {activeYear}.
+                                Tambahkan data libur nasional menggunakan Format CSV
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
-                            <button
-                                type="button"
-                                disabled={isProcessing}
-                                onClick={handleApplyAllOfficial}
-                                className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98] ${getAccentButtonClass()}`}
-                            >
-                                <Check className="h-3.5 w-3.5" />
-                                <span>Terapkan Semua</span>
-                            </button>
+                        <div>
                             <button
                                 type="button"
                                 onClick={() => setIsCsvPanelOpen(!isCsvPanelOpen)}
-                                className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-[0.98] border ${
+                                className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-[0.98] border ${
                                     isIndustrial
                                         ? 'bg-[#0F1115] hover:bg-[#1A1D23] text-[#E2E8F0] border-[rgba(226,232,240,0.2)]'
                                         : 'text-slate-700 dark:text-slate-300 bg-slate-100/90 hover:bg-slate-200/90 border-slate-200/60'
                                 }`}
                             >
                                 <Upload className="h-3.5 w-3.5 opacity-60" />
-                                <span>Format CSV</span>
+                                <span>{isCsvPanelOpen ? 'Tutup Panel CSV' : 'Buka Format CSV'}</span>
                             </button>
                         </div>
 

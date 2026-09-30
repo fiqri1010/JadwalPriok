@@ -76,12 +76,12 @@ export const ShiftColorStudio: React.FC<ShiftColorStudioProps> = ({ visual, onCh
                 };
             case 'dashboard':
                 return {
-                    container: 'bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-2xl shadow-xs',
-                    labelSpan: 'text-slate-600 dark:text-slate-400 font-extrabold',
-                    tabHeader: 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700',
-                    tabActive: 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-300 font-extrabold shadow-2xs border-slate-300 dark:border-slate-600',
-                    tabInactive: 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 border-transparent',
-                    pickerWrapper: 'bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl'
+                    container: 'bg-[#FFFBF0] border border-[#4D2A00]/25 text-[#4D2A00] font-["Inter"] rounded-2xl shadow-xs',
+                    labelSpan: 'text-[#4D2A00] font-extrabold',
+                    tabHeader: 'bg-[#FFF0BE] border-[#4D2A00]/20',
+                    tabActive: 'bg-[#4D2A00] text-[#F9E6A8] font-extrabold shadow-2xs border-[#4D2A00]',
+                    tabInactive: 'text-[#4D2A00]/70 hover:bg-[#FFE8A3] border-transparent',
+                    pickerWrapper: 'bg-[#FFFBF0] border border-[#4D2A00]/25 rounded-2xl'
                 };
             case 'winamp':
                 return {

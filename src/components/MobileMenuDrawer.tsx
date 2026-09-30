@@ -4,6 +4,7 @@ import { AppLogo } from './AppLogo';
 import { AppTheme } from '../types';
 import { UserRole } from '../types/admin';
 import { getCurrentUserRoleInfo } from '../utils/adminStorage';
+import { formatDisplayName } from './admin/AdminUserListTab';
 
 type PageTabType = 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing';
 
@@ -59,6 +60,8 @@ export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                         ? 'bg-[#1E1E1E] text-[#E0E0E0] border-t border-slate-700'
                         : currentTheme === 'vista'
                         ? 'bg-white/75 backdrop-blur-2xl text-slate-900 border-t border-white/80 shadow-2xl'
+                        : currentTheme === 'dashboard'
+                        ? 'bg-[#FFF5D0] text-[#4D2A00] border-t-2 border-[#4D2A00]/40'
                         : 'bg-white text-slate-900'
                 }`}
             >
@@ -94,19 +97,49 @@ export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                                 ? 'bg-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
                                 : currentTheme === 'winamp'
                                 ? 'bg-black border border-[#00FF00]/50 text-[#00FF00]'
+                                : currentTheme === 'dashboard'
+                                ? 'bg-[#FFF0BE] border border-[#4D2A00]/30 text-[#4D2A00]'
                                 : 'bg-current/5 border-current/10'
                         }`}
                     >
                         <div className="min-w-0 flex-1">
-                            <div className="text-xs font-bold truncate">{activeUserName}</div>
+                            <div className="text-xs font-bold truncate" title={activeUserName}>
+                                {formatDisplayName(activeUserName)}
+                            </div>
                             <div className="flex items-center gap-1 opacity-75 mt-0.5">
                                 <Fingerprint className="w-3 h-3 text-current/60" />
                                 <span className="text-[11px] font-mono font-bold tracking-wider">{activeUserNip}</span>
                             </div>
-                            <div className="mt-1 flex items-center">
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded font-mono uppercase tracking-wide border ${roleInfo.badgeColor}`}>
+                            {/* Baris Bawah: Indikator Role di Kiri & Tombol Dashboard di Sudut Kanan Bawah Sejajar */}
+                            <div className="mt-2 pt-1.5 border-t border-current/10 flex items-center justify-between gap-1 w-full min-w-0">
+                                <span
+                                    className={`text-[8.5px] font-bold px-1.5 py-0.5 rounded font-mono uppercase tracking-tight border truncate min-w-0 max-w-[55%] sidebar-user-badge ${
+                                        currentTheme === 'paperSketch' ? 'text-[7.5px] px-1 py-0 leading-tight border-[#2b2b2b]' : ''
+                                    } ${roleInfo.badgeColor}`}
+                                    title={roleInfo.authorityName}
+                                >
                                     {roleInfo.authorityName}
                                 </span>
+
+                                {canAccessAdmin && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onSelectTab('admin');
+                                            onClose();
+                                        }}
+                                        className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 text-[9px] font-bold rounded font-mono uppercase tracking-tight transition-all cursor-pointer border shrink-0 whitespace-nowrap sidebar-admin-btn ${
+                                            currentTheme === 'paperSketch' ? 'text-[8px] px-1.5 py-0.5 leading-tight border-[#2b2b2b]' : ''
+                                        } ${
+                                            pageTab === 'admin'
+                                                ? 'border-rose-400 bg-rose-600 text-white shadow-2xs'
+                                                : 'border-rose-500/40 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300'
+                                        }`}
+                                    >
+                                        <ShieldAlert className={`w-2.5 h-2.5 shrink-0 ${pageTab === 'admin' ? 'text-white' : 'text-rose-400'}`} />
+                                        <span className="whitespace-nowrap font-bold">Dasbor</span>
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -194,24 +227,6 @@ export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                             <Sparkles className="h-4 w-4 text-teal-300 shrink-0" />
                             <span>Landing Page (Ujicoba Onboarding)</span>
                         </button>
-
-                        {canAccessAdmin && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    onSelectTab('admin');
-                                    onClose();
-                                }}
-                                className={`col-span-2 flex items-center justify-center space-x-2 rounded-xl border p-2.5 text-center text-xs font-bold transition-all shadow-xs cursor-pointer ${
-                                    pageTab === 'admin'
-                                        ? 'border-rose-400 bg-rose-600 text-white ring-2 ring-rose-300/40'
-                                        : 'border-rose-500/40 bg-rose-950/60 hover:bg-rose-900/60 text-rose-200'
-                                }`}
-                            >
-                                <ShieldAlert className="h-4 w-4 text-rose-300 shrink-0" />
-                                <span>Dashboard Administrator Posko</span>
-                            </button>
-                        )}
                     </div>
                 </div>
             </div>

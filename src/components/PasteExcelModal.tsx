@@ -207,7 +207,23 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
     let matched: ShiftType | null = null;
 
     if (raw) {
-      if (EXCEL_SHIFT_MAPPING[raw]) {
+      if (raw === 'P' || raw === 'PM') {
+        matched = 'PM';
+      } else if (raw === 'G' || raw === 'GRAHA') {
+        matched = 'Graha';
+      } else if (raw === 'N' || raw === 'NPCT' || raw === 'NPCS') {
+        matched = 'NPCT';
+      } else if (raw === 'L' || raw === 'OFF' || raw === 'O' || raw === 'LIBUR' || raw === 'FREE') {
+        matched = 'OFF';
+      } else if (raw === 'TPSL' || raw === 'TP' || raw === 'T') {
+        matched = 'TPSL';
+      } else if (raw === 'SM' || raw === 'S2' || raw === 'S1') {
+        matched = 'SM';
+      } else if (raw === 'M' || raw === 'MALAM' || raw === 'MLM' || raw === '3') {
+        matched = 'Malam';
+      } else if (raw === 'CUTI' || raw === 'CT' || raw === 'C' || raw === 'CTI') {
+        matched = 'CUTI';
+      } else if (EXCEL_SHIFT_MAPPING[raw]) {
         matched = EXCEL_SHIFT_MAPPING[raw];
       } else {
         const found = SHIFT_OPTIONS.find((opt) => opt.toUpperCase() === raw);
@@ -605,6 +621,36 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
         tabIndicatorShadow: '2px 2px 0px #2b2b2b',
         tabTextActive: '#ffffff',
         tabTextInactive: '#2b2b2b',
+      };
+    }
+    if (isDashboard) {
+      return {
+        outerBg: '#4D2A00',
+        outerRadius: '18px',
+        outerShadow: '0px 8px 30px rgba(77, 42, 0, 0.25)',
+        innerBg: '#FFF5D0',
+        innerRadius: '16px',
+        headingColor: '#4D2A00',
+        subtextColor: 'rgba(77, 42, 0, 0.7)',
+        fieldBg: '#FFF0BE',
+        fieldBorder: '1px solid rgba(77, 42, 0, 0.25)',
+        fieldShadow: 'inset 1px 2px 6px rgba(77, 42, 0, 0.08)',
+        accentColor: '#4D2A00',
+        textColor: '#4D2A00',
+        btnCancelBg: '#FFF0BE',
+        btnCancelBorder: '1px solid rgba(77, 42, 0, 0.25)',
+        btnCancelText: '#4D2A00',
+        btnApplyBg: '#4D2A00',
+        btnApplyText: '#FFF9E6',
+        previewBorder: 'border-[#4D2A00]/25',
+        tabContainerBg: '#FFF0BE',
+        tabContainerBorder: '1px solid rgba(77, 42, 0, 0.25)',
+        tabIndicatorBg: '#4D2A00',
+        tabIndicatorRadius: '7px',
+        tabIndicatorBorder: 'none',
+        tabIndicatorShadow: '0px 2px 6px rgba(77, 42, 0, 0.2)',
+        tabTextActive: '#FFF9E6',
+        tabTextInactive: '#4D2A00',
       };
     }
     // Default light / teal theme (#F6F7F8 / #FFFFFF / #2EC4B6 / #011627)
