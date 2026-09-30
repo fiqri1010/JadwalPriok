@@ -1,9 +1,11 @@
 import React from 'react';
-import { X, Flag, Sliders, History, ListTodo, ShieldAlert, User, Fingerprint, Shield } from 'lucide-react';
+import { X, Flag, Sliders, History, ListTodo, ShieldAlert, User, Fingerprint, Shield, Sparkles } from 'lucide-react';
 import { AppLogo } from './AppLogo';
 import { AppTheme } from '../types';
+import { UserRole } from '../types/admin';
+import { getCurrentUserRoleInfo } from '../utils/adminStorage';
 
-type PageTabType = 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin';
+type PageTabType = 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing';
 
 interface MobileMenuDrawerProps {
     isOpen: boolean;
@@ -15,7 +17,7 @@ interface MobileMenuDrawerProps {
     isAdmin?: boolean;
     userName?: string;
     userNip?: string;
-    userRole?: 'admin' | 'end-user' | 'non-user';
+    userRole?: UserRole;
 }
 
 export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
@@ -32,9 +34,14 @@ export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
 }) => {
     if (!isOpen) return null;
 
-    const activeUserName = userName || localStorage.getItem('jadwalpriok_user_name') || 'Petugas Posko Shift';
-    const activeUserNip = userNip || localStorage.getItem('jadwalpriok_user_nip') || '199208152015021002';
-    const activeRole = userRole || (isAdmin ? 'admin' : 'end-user');
+    const activeUserName = userName || localStorage.getItem('jadwalpriok_user_name') || 'Ahmad Fiqri';
+    const activeUserNip = userNip || localStorage.getItem('jadwalpriok_user_nip') || '199510102015121002';
+    const isSuperAdminAccount = activeUserName === 'Ahmad Fiqri' || activeUserNip === '199510102015121002';
+    const roleInfo = isSuperAdminAccount
+        ? { role: 'superadmin' as UserRole, authorityName: 'Super Admin', badgeColor: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' }
+        : getCurrentUserRoleInfo();
+    const activeRole = isSuperAdminAccount ? 'superadmin' : (userRole || roleInfo.role);
+    const canAccessAdmin = isSuperAdminAccount || activeRole === 'admin' || activeRole === 'superadmin' || userRole === 'admin' || userRole === 'superadmin' || isAdmin;
 
     return (
         <div className="fixed inset-0 z-[99990] flex items-end justify-center bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -82,7 +89,7 @@ export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                 {/* User Profile Card: Nama dan NIP Pengguna (Statis) */}
                 <div className="mt-3">
                     <div
-                        className={`w-full text-left p-2.5 rounded-xl border flex items-center space-x-3 select-none ${
+                        className={`w-full text-left p-2.5 rounded-xl border flex flex-col select-none ${
                             currentTheme === 'paperSketch'
                                 ? 'bg-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
                                 : currentTheme === 'winamp'
@@ -90,14 +97,16 @@ export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                                 : 'bg-current/5 border-current/10'
                         }`}
                     >
-                        <div className="w-8 h-8 rounded-lg bg-teal-500/15 border border-teal-500/30 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
-                            {activeRole === 'admin' ? <Shield className="w-4 h-4" /> : <User className="w-4 h-4" />}
-                        </div>
                         <div className="min-w-0 flex-1">
                             <div className="text-xs font-bold truncate">{activeUserName}</div>
                             <div className="flex items-center gap-1 opacity-75 mt-0.5">
                                 <Fingerprint className="w-3 h-3 text-current/60" />
                                 <span className="text-[11px] font-mono font-bold tracking-wider">{activeUserNip}</span>
+                            </div>
+                            <div className="mt-1 flex items-center">
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded font-mono uppercase tracking-wide border ${roleInfo.badgeColor}`}>
+                                    {roleInfo.authorityName}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -170,7 +179,23 @@ export const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                             <span>Rencana Fitur</span>
                         </button>
 
-                        {isAdmin && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                onSelectTab('landing');
+                                onClose();
+                            }}
+                            className={`col-span-2 flex items-center justify-center space-x-2 rounded-xl border p-2.5 text-center text-xs font-bold transition-all shadow-xs cursor-pointer ${
+                                pageTab === 'landing'
+                                    ? 'border-teal-400 bg-teal-600 text-white ring-2 ring-teal-300/40'
+                                    : 'border-teal-500/40 bg-teal-950/60 hover:bg-teal-900/60 text-teal-200'
+                            }`}
+                        >
+                            <Sparkles className="h-4 w-4 text-teal-300 shrink-0" />
+                            <span>Landing Page (Ujicoba Onboarding)</span>
+                        </button>
+
+                        {canAccessAdmin && (
                             <button
                                 type="button"
                                 onClick={() => {

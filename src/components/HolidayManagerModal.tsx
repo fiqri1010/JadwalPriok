@@ -520,13 +520,6 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                         }`}>
                             Daftar Hari Libur
                         </h2>
-                        <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
-                            isIndustrial
-                                ? 'bg-[#0F1115] text-[#2DD4BF] border-[#2DD4BF]/40 font-mono'
-                                : 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200/60 dark:border-slate-700'
-                        }`}>
-                            {activeYear}
-                        </span>
                     </div>
                     <p className={`text-xs ${
                         isIndustrial
@@ -537,7 +530,7 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0 self-start sm:self-center">
+                <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 self-start sm:self-center">
                     {/* Modern & Searchable Year Selector Dropdown */}
                     <div className="relative" ref={yearDropdownRef}>
                         <button
@@ -573,13 +566,13 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
 
                         {/* Dropdown Popover */}
                         {isYearDropdownOpen && (
-                            <div className={`absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-[6px] shadow-2xl border p-3.5 z-50 animate-in fade-in zoom-in-95 duration-200 ${
+                            <div className={`absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-[6px] shadow-2xl border p-3 z-50 animate-in fade-in zoom-in-95 duration-200 ${
                                 isIndustrial
                                     ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.2)] text-[#E2E8F0]'
                                     : 'bg-white dark:bg-[#2a2f3b] border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100'
                             }`}>
                                 {/* Search input */}
-                                <div className="relative mb-2.5">
+                                <div className="relative mb-2">
                                     <Search className="w-3.5 h-3.5 opacity-50 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                                     <input
                                         type="text"
@@ -603,61 +596,6 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                                             <X className="w-3 h-3" />
                                         </button>
                                     )}
-                                </div>
-
-                                {/* Quick Shortcuts */}
-                                <div className={`flex items-center gap-1.5 pb-2.5 mb-2.5 border-b overflow-x-auto no-scrollbar text-[11px] ${
-                                    isIndustrial ? 'border-[rgba(226,232,240,0.12)]' : 'border-slate-100 dark:border-slate-800'
-                                }`}>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setActiveYear(currentRunningYear);
-                                            setIsYearDropdownOpen(false);
-                                            setYearSearchQuery('');
-                                        }}
-                                        className={`shrink-0 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                                            activeYear === currentRunningYear
-                                                ? isIndustrial
-                                                    ? 'bg-[#2DD4BF] text-[#0F1115] font-bold shadow-xs'
-                                                    : 'bg-teal-600 text-white font-medium shadow-xs'
-                                                : isIndustrial
-                                                ? 'bg-[#0F1115] text-[#E2E8F0]/80 hover:text-[#2DD4BF] hover:bg-[#2DD4BF]/10 border border-[rgba(226,232,240,0.1)]'
-                                                : 'bg-slate-100 dark:bg-slate-800 hover:bg-teal-50 text-slate-700 dark:text-slate-300'
-                                        }`}
-                                    >
-                                        Tahun Berjalan ({currentRunningYear})
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setActiveYear((prev) => prev - 1);
-                                            setIsYearDropdownOpen(false);
-                                            setYearSearchQuery('');
-                                        }}
-                                        className={`shrink-0 px-2 py-1 rounded-md transition-colors cursor-pointer ${
-                                            isIndustrial
-                                                ? 'bg-[#0F1115] hover:bg-white/10 text-[#E2E8F0] border border-[rgba(226,232,240,0.1)]'
-                                                : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300'
-                                        }`}
-                                    >
-                                        -1 Thn
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setActiveYear((prev) => prev + 1);
-                                            setIsYearDropdownOpen(false);
-                                            setYearSearchQuery('');
-                                        }}
-                                        className={`shrink-0 px-2 py-1 rounded-md transition-colors cursor-pointer ${
-                                            isIndustrial
-                                                ? 'bg-[#0F1115] hover:bg-white/10 text-[#E2E8F0] border border-[rgba(226,232,240,0.1)]'
-                                                : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300'
-                                        }`}
-                                    >
-                                        +1 Thn
-                                    </button>
                                 </div>
 
                                 {/* Direct Custom Year Option */}
@@ -727,6 +665,15 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                         )}
                     </div>
 
+                    {/* Indikator Jumlah Hari Libur di sebelah kanan selector tahun */}
+                    <span className={`text-xs font-semibold px-2.5 py-1.5 rounded-[5px] border shrink-0 ${
+                        isIndustrial
+                            ? 'bg-[#0F1115] text-[#2DD4BF] border-[#2DD4BF]/30 font-mono'
+                            : 'text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-[#2a2f3b] border-slate-200/80 dark:border-slate-700'
+                    }`}>
+                        {yearItems.length} hari
+                    </span>
+
                     {!isPageView && (
                         <button
                             type="button"
@@ -763,39 +710,7 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
             {/* 2-Column Responsive Layout: Left = Main Holiday List, Right = Sidebar (Tambah Libur & Auto-Terapkan) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 {/* Kolom Kiri / Utama (7 cols): Daftar Hari Libur Terdaftar */}
-                <div className="lg:col-span-7 space-y-4">
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${
-                        isIndustrial ? 'border-[rgba(226,232,240,0.12)]' : 'border-slate-100 dark:border-slate-800'
-                    }`}>
-                        <div className="flex items-center gap-2">
-                            <h3 className={`text-sm font-bold ${isIndustrial ? 'text-[#E2E8F0] font-[\'Syne\']' : 'text-slate-900 dark:text-slate-100'}`}>
-                                Daftar Hari Libur {activeYear}
-                            </h3>
-                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
-                                isIndustrial
-                                    ? 'bg-[#0F1115] text-[#2DD4BF] border-[#2DD4BF]/30 font-mono'
-                                    : 'text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800'
-                            }`}>
-                                {yearItems.length} hari
-                            </span>
-                        </div>
-
-                        {yearItems.some((h) => h.isSavedInCloud) && (
-                            <button
-                                type="button"
-                                disabled={isProcessing}
-                                onClick={() => {
-                                    setClearAllConfirmInput('');
-                                    setIsConfirmingClearAll(true);
-                                }}
-                                className="px-3 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors shadow-2xs"
-                            >
-                                <Trash2 className="h-3.5 w-3.5" />
-                                <span>Hapus Semua</span>
-                            </button>
-                        )}
-                    </div>
-
+                <div className="lg:col-span-7 space-y-3">
                     {yearItems.length === 0 ? (
                         <div className={`py-16 text-center text-xs font-medium rounded-xl border border-dashed ${
                             isIndustrial
@@ -805,9 +720,10 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                             Tidak ada hari libur tersimpan untuk tahun {activeYear}.
                         </div>
                     ) : (
-                        <div className={`divide-y max-h-[60vh] overflow-y-auto pr-1 ${
-                            isIndustrial ? 'divide-[rgba(226,232,240,0.08)]' : 'divide-slate-100 dark:divide-slate-800/80'
-                        }`}>
+                        <div className="space-y-3">
+                            <div className={`divide-y max-h-[60vh] overflow-y-auto pr-1 ${
+                                isIndustrial ? 'divide-[rgba(226,232,240,0.08)]' : 'divide-slate-100 dark:divide-slate-800/80'
+                            }`}>
                             {yearItems.map((item, idx) => {
                                 const catInfo = resolveHolidayCategory({
                                     keterangan: item.keterangan,
@@ -917,6 +833,26 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                                     </div>
                                 );
                             })}
+                            </div>
+
+                            {/* Footer: Hapus Libur Tahun Ini dengan efek Glitch */}
+                            <div className={`pt-3 border-t flex items-center justify-end ${
+                                isIndustrial ? 'border-[rgba(226,232,240,0.12)]' : 'border-slate-100 dark:border-slate-800'
+                            }`}>
+                                <button
+                                    type="button"
+                                    disabled={isProcessing}
+                                    onClick={() => {
+                                        setClearAllConfirmInput('');
+                                        setIsConfirmingClearAll(true);
+                                    }}
+                                    className="btn-glitch-delete px-3.5 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors flex items-center space-x-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+                                    data-text="Hapus Libur Tahun Ini"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5 shrink-0 relative z-10" />
+                                    <span className="relative z-10">Hapus Libur Tahun Ini</span>
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

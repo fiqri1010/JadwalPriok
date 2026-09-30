@@ -181,9 +181,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const modalContent = (
         <div className={s.cardOuter}>
             <div className={s.cardInner}>
-                {/* Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-slate-200/70 dark:border-slate-800">
-                    <div className="flex items-center space-x-3">
+                {/* Header with Integrated Submenu Tabs */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-4 border-b border-slate-200/70 dark:border-slate-800 gap-3">
+                    <div className="flex items-center space-x-3 shrink-0">
                         <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/50 text-indigo-600 dark:text-indigo-400 shrink-0">
                             <Sliders className="w-5 h-5" />
                         </div>
@@ -192,178 +192,180 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             <p className="text-xs opacity-60">Ekspor, Impor, & Cadangan Jadwal</p>
                         </div>
                     </div>
-                    {!isPageView && (
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-current/70 hover:text-current transition-colors cursor-pointer"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                    )}
-                </div>
 
-                {/* Modern Segmented Tab Container with Grid 3-Columns for Perfect Tab Alignment */}
-                <div className="flex justify-center my-3 sm:my-4">
-                    <div
-                        className={`relative p-[3px] rounded-[10px] grid grid-cols-3 items-center select-none w-full max-w-[360px] sm:max-w-[480px] ${
-                            isWinamp
-                                ? 'bg-black border border-zinc-700 rounded-none'
-                                : isDark
-                                ? 'bg-[#161616] border border-slate-800'
-                                : isVista
-                                ? 'bg-sky-100/70 border border-sky-200/80 backdrop-blur-xs'
-                                : isPaperSketch
-                                ? 'bg-[#fdfcf0] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
-                                : isIndustrial
-                                ? 'bg-[#0F1115] border border-[rgba(226,232,240,0.15)] font-["JetBrains_Mono"]'
-                                : isTechnical
-                                ? 'bg-[#F8F7F4] border-[1.5px] border-[#111113] font-["JetBrains_Mono"]'
-                                : isEditorial
-                                ? 'bg-[#fcfbf9] border border-slate-300 font-serif'
-                                : isDashboard
-                                ? 'bg-slate-100 border border-slate-200'
-                                : 'bg-[#dadadb]'
-                        }`}
-                    >
-                        {/* Animated Sliding Indicator Pill */}
+                    {/* Submenu Tabs + Close Button placed on the far right, vertically centered */}
+                    <div className="flex items-center gap-2.5 self-stretch sm:self-center justify-between sm:justify-end shrink-0">
+                        {/* Modern Segmented Tab Container */}
                         <div
-                            className={`absolute top-[3px] bottom-[3px] transition-transform duration-200 ease-out pointer-events-none z-0 ${
+                            className={`relative p-[2.5px] rounded-[8px] grid grid-cols-3 items-center select-none w-full sm:w-[280px] md:w-[310px] ${
                                 isWinamp
-                                    ? 'bg-[#00FF00] rounded-none'
+                                    ? 'bg-black border border-zinc-700 rounded-none'
                                     : isDark
-                                    ? 'bg-[#2a2f3b] border border-white/10 shadow-[0px_3px_8px_rgba(0,0,0,0.35)] rounded-[8px]'
+                                    ? 'bg-[#161616] border border-slate-800'
                                     : isVista
-                                    ? 'bg-white/95 border border-white/80 shadow-[0px_3px_8px_rgba(14,116,224,0.18)] rounded-[8px]'
+                                    ? 'bg-sky-100/70 border border-sky-200/80 backdrop-blur-xs'
                                     : isPaperSketch
-                                    ? 'bg-[#ff4747] border-2 border-[#2b2b2b] rounded-lg'
+                                    ? 'bg-[#fdfcf0] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
                                     : isIndustrial
-                                    ? 'bg-[#2DD4BF]/20 border border-[#2DD4BF]/40 rounded-[4px]'
+                                    ? 'bg-[#0F1115] border border-[rgba(226,232,240,0.15)] font-["JetBrains_Mono"]'
                                     : isTechnical
-                                    ? 'bg-[#111113] rounded-none'
+                                    ? 'bg-[#F8F7F4] border-[1.5px] border-[#111113] font-["JetBrains_Mono"]'
                                     : isEditorial
-                                    ? 'bg-[#2a7373] rounded-lg'
+                                    ? 'bg-[#fcfbf9] border border-slate-300 font-serif'
                                     : isDashboard
-                                    ? 'bg-[#297373] rounded-lg shadow-xs'
-                                    : 'bg-white border-[0.5px] border-black/5 shadow-[0px_3px_8px_rgba(0,0,0,0.12),0px_3px_1px_rgba(0,0,0,0.04)] rounded-[8px]'
+                                    ? 'bg-slate-100 border border-slate-200'
+                                    : 'bg-[#dadadb]'
                             }`}
-                            style={{
-                                left: '3px',
-                                width: 'calc((100% - 6px) / 3)',
-                                transform: `translateX(${
+                        >
+                            {/* Animated Sliding Indicator Pill */}
+                            <div
+                                className={`absolute top-[2.5px] bottom-[2.5px] transition-transform duration-200 ease-out pointer-events-none z-0 ${
+                                    isWinamp
+                                        ? 'bg-[#00FF00] rounded-none'
+                                        : isDark
+                                        ? 'bg-[#2a2f3b] border border-white/10 shadow-[0px_2px_6px_rgba(0,0,0,0.35)] rounded-[6px]'
+                                        : isVista
+                                        ? 'bg-white/95 border border-white/80 shadow-[0px_2px_6px_rgba(14,116,224,0.18)] rounded-[6px]'
+                                        : isPaperSketch
+                                        ? 'bg-[#ff4747] border-2 border-[#2b2b2b] rounded-lg'
+                                        : isIndustrial
+                                        ? 'bg-[#2DD4BF]/20 border border-[#2DD4BF]/40 rounded-[4px]'
+                                        : isTechnical
+                                        ? 'bg-[#111113] rounded-none'
+                                        : isEditorial
+                                        ? 'bg-[#2a7373] rounded-md'
+                                        : isDashboard
+                                        ? 'bg-[#297373] rounded-md shadow-xs'
+                                        : 'bg-white border-[0.5px] border-black/5 shadow-[0px_2px_6px_rgba(0,0,0,0.12)] rounded-[6px]'
+                                }`}
+                                style={{
+                                    left: '2.5px',
+                                    width: 'calc((100% - 5px) / 3)',
+                                    transform: `translateX(${
+                                        activeTab === 'account'
+                                            ? '0%'
+                                            : activeTab === 'shift'
+                                            ? '100%'
+                                            : '200%'
+                                    })`,
+                                }}
+                            />
+
+                            {/* Tab 1: Akun */}
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('account')}
+                                className={`relative z-10 w-full py-1.5 text-[10.5px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer whitespace-nowrap px-1 ${
                                     activeTab === 'account'
-                                        ? '0%'
-                                        : activeTab === 'shift'
-                                        ? '100%'
-                                        : '200%'
-                                })`,
-                            }}
-                        />
-
-                        {/* Tab 1: Akun */}
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('account')}
-                            className={`relative z-10 w-full py-2 text-[11px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer whitespace-nowrap px-1 ${
-                                activeTab === 'account'
-                                    ? isWinamp
-                                        ? 'text-black font-mono'
-                                        : isDark
-                                        ? 'text-white'
-                                        : isVista
-                                        ? 'text-sky-950'
+                                        ? isWinamp
+                                            ? 'text-black font-mono'
+                                            : isDark
+                                            ? 'text-white'
+                                            : isVista
+                                            ? 'text-sky-950'
+                                            : isPaperSketch
+                                            ? 'text-white font-["Gochi_Hand"] text-xs'
+                                            : isIndustrial
+                                            ? 'text-[#2DD4BF] font-["JetBrains_Mono"] uppercase'
+                                            : isTechnical
+                                            ? 'text-white font-["JetBrains_Mono"] uppercase'
+                                            : isEditorial
+                                            ? 'text-white'
+                                            : isDashboard
+                                            ? 'text-white'
+                                            : 'text-slate-900'
                                         : isPaperSketch
-                                        ? 'text-white font-["Gochi_Hand"] text-sm'
+                                        ? 'text-[#2b2b2b] font-["Gochi_Hand"] text-xs'
                                         : isIndustrial
-                                        ? 'text-[#2DD4BF] font-["JetBrains_Mono"] uppercase'
+                                        ? 'text-[#E2E8F0]/70 font-["JetBrains_Mono"] uppercase'
                                         : isTechnical
-                                        ? 'text-white font-["JetBrains_Mono"] uppercase'
-                                        : isEditorial
-                                        ? 'text-white'
-                                        : isDashboard
-                                        ? 'text-white'
-                                        : 'text-slate-900'
-                                    : isPaperSketch
-                                    ? 'text-[#2b2b2b] font-["Gochi_Hand"] text-sm'
-                                    : isIndustrial
-                                    ? 'text-[#E2E8F0]/70 font-["JetBrains_Mono"] uppercase'
-                                    : isTechnical
-                                    ? 'text-[#111113]/70 font-["JetBrains_Mono"] uppercase'
-                                    : 'opacity-60 hover:opacity-90'
-                            }`}
-                        >
-                            Akun
-                        </button>
+                                        ? 'text-[#111113]/70 font-["JetBrains_Mono"] uppercase'
+                                        : 'opacity-60 hover:opacity-90'
+                                }`}
+                            >
+                                Akun
+                            </button>
 
-                        {/* Tab 2: Shift */}
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('shift')}
-                            className={`relative z-10 w-full py-2 text-[11px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer whitespace-nowrap px-1 ${
-                                activeTab === 'shift'
-                                    ? isWinamp
-                                        ? 'text-black font-mono'
-                                        : isDark
-                                        ? 'text-white'
-                                        : isVista
-                                        ? 'text-sky-950'
+                            {/* Tab 2: Shift */}
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('shift')}
+                                className={`relative z-10 w-full py-1.5 text-[10.5px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer whitespace-nowrap px-1 ${
+                                    activeTab === 'shift'
+                                        ? isWinamp
+                                            ? 'text-black font-mono'
+                                            : isDark
+                                            ? 'text-white'
+                                            : isVista
+                                            ? 'text-sky-950'
+                                            : isPaperSketch
+                                            ? 'text-white font-["Gochi_Hand"] text-xs'
+                                            : isIndustrial
+                                            ? 'text-[#2DD4BF] font-["JetBrains_Mono"] uppercase'
+                                            : isTechnical
+                                            ? 'text-white font-["JetBrains_Mono"] uppercase'
+                                            : isEditorial
+                                            ? 'text-white'
+                                            : isDashboard
+                                            ? 'text-white'
+                                            : 'text-slate-900'
                                         : isPaperSketch
-                                        ? 'text-white font-["Gochi_Hand"] text-sm'
+                                        ? 'text-[#2b2b2b] font-["Gochi_Hand"] text-xs'
                                         : isIndustrial
-                                        ? 'text-[#2DD4BF] font-["JetBrains_Mono"] uppercase'
+                                        ? 'text-[#E2E8F0]/70 font-["JetBrains_Mono"] uppercase'
                                         : isTechnical
-                                        ? 'text-white font-["JetBrains_Mono"] uppercase'
-                                        : isEditorial
-                                        ? 'text-white'
-                                        : isDashboard
-                                        ? 'text-white'
-                                        : 'text-slate-900'
-                                    : isPaperSketch
-                                    ? 'text-[#2b2b2b] font-["Gochi_Hand"] text-sm'
-                                    : isIndustrial
-                                    ? 'text-[#E2E8F0]/70 font-["JetBrains_Mono"] uppercase'
-                                    : isTechnical
-                                    ? 'text-[#111113]/70 font-["JetBrains_Mono"] uppercase'
-                                    : 'opacity-60 hover:opacity-90'
-                            }`}
-                        >
-                            Shift
-                        </button>
+                                        ? 'text-[#111113]/70 font-["JetBrains_Mono"] uppercase'
+                                        : 'opacity-60 hover:opacity-90'
+                                }`}
+                            >
+                                Shift
+                            </button>
 
-                        {/* Tab 3: Impor & Reset (Digabung) */}
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab('import_reset')}
-                            className={`relative z-10 w-full py-2 text-[11px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer whitespace-nowrap px-1 ${
-                                activeTab === 'import_reset'
-                                    ? isWinamp
-                                        ? 'text-black font-mono'
-                                        : isDark
-                                        ? 'text-white'
-                                        : isVista
-                                        ? 'text-sky-950'
+                            {/* Tab 3: Impor & Reset (Digabung) */}
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('import_reset')}
+                                className={`relative z-10 w-full py-1.5 text-[10.5px] sm:text-xs font-bold text-center flex items-center justify-center transition-all duration-200 cursor-pointer whitespace-nowrap px-1 ${
+                                    activeTab === 'import_reset'
+                                        ? isWinamp
+                                            ? 'text-black font-mono'
+                                            : isDark
+                                            ? 'text-white'
+                                            : isVista
+                                            ? 'text-sky-950'
+                                            : isPaperSketch
+                                            ? 'text-white font-["Gochi_Hand"] text-xs'
+                                            : isIndustrial
+                                            ? 'text-[#2DD4BF] font-["JetBrains_Mono"] uppercase'
+                                            : isTechnical
+                                            ? 'text-white font-["JetBrains_Mono"] uppercase'
+                                            : isEditorial
+                                            ? 'text-white'
+                                            : isDashboard
+                                            ? 'text-white'
+                                            : 'text-slate-900'
                                         : isPaperSketch
-                                        ? 'text-white font-["Gochi_Hand"] text-sm'
+                                        ? 'text-[#2b2b2b] font-["Gochi_Hand"] text-xs'
                                         : isIndustrial
-                                        ? 'text-[#2DD4BF] font-["JetBrains_Mono"] uppercase'
+                                        ? 'text-[#E2E8F0]/70 font-["JetBrains_Mono"] uppercase'
                                         : isTechnical
-                                        ? 'text-white font-["JetBrains_Mono"] uppercase'
-                                        : isEditorial
-                                        ? 'text-white'
-                                        : isDashboard
-                                        ? 'text-white'
-                                        : 'text-slate-900'
-                                    : isPaperSketch
-                                    ? 'text-[#2b2b2b] font-["Gochi_Hand"] text-sm'
-                                    : isIndustrial
-                                    ? 'text-[#E2E8F0]/70 font-["JetBrains_Mono"] uppercase'
-                                    : isTechnical
-                                    ? 'text-[#111113]/70 font-["JetBrains_Mono"] uppercase'
-                                    : 'opacity-60 hover:opacity-90'
-                            }`}
-                        >
-                            Impor & Reset
-                        </button>
+                                        ? 'text-[#111113]/70 font-["JetBrains_Mono"] uppercase'
+                                        : 'opacity-60 hover:opacity-90'
+                                }`}
+                            >
+                                Impor & Reset
+                            </button>
+                        </div>
+
+                        {!isPageView && (
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-current/70 hover:text-current transition-colors cursor-pointer shrink-0"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        )}
                     </div>
                 </div>
 

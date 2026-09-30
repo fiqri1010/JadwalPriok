@@ -26,18 +26,78 @@ export interface VersionItem {
 
 export const VERSION_HISTORY: VersionItem[] = [
     {
-        version: '0.4.0',
-        releaseDate: '29 September 2026',
-        title: 'Pembaruan Struktur Penomoran Versi (0.4.0)',
+        version: '0.4.28',
+        releaseDate: '30 September 2026',
+        title: 'Penyempurnaan Tampilan Penuh Landing Page, Tombol Tutup X, & Eliminasi Navigasi Pengganggu',
         isLatest: true,
-        isMajor: true,
-        tag: 'Versioning Restructuring',
+        isMajor: false,
+        tag: 'Full-View Landing Page, Close Trigger & Clean Onboarding Experience',
         changes: [
-            'Pembaruan struktur penomoran versi menjadi 0.4.0 setelah 0.3.99, memastikan kesinambungan versi yang logis dan bersih untuk ke depannya.'
+            'Sembunyikan Sidebar & Header: Ketika Landing Page dibuka, sidebar dan header (navbar atas) serta navigasi bawah disembunyikan sepenuhnya untuk memberikan pengalaman onboarding yang terisolasi dan fokus.',
+            'Penegasan Kasus A & B: Kasus A (Akun Baru) langsung memuat form Buat Password Baru + Konfirmasi beserta deskripsi keamanan mandatori; Kasus B (Akun Terdaftar) memuat input Password dan tombol Pengajuan Reset Password ke Dashboard Admin.',
+            'Tombol Tutup (X): Menambahkan tombol "X" di pojok kanan atas kartu Landing Page sebagai pengaman akses langsung ke kalender kerja selama masa pengujian.',
+            'Pembersihan Antarmuka: Menghapus tombol lewati dan tombol pemilih contoh pegawai untuk tampilan yang lebih bersih, profesional, dan realistis.'
         ]
     },
     {
-        version: '0.3.100',
+        version: '0.4.27',
+        releaseDate: '30 September 2026',
+        title: 'Status Default Akun Tanpa Password & Pemicu Reset Pengosongan Password di Daftar Pengguna',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Default Passwordless Accounts & User List Password Clear Trigger',
+        changes: [
+            'Default Akun Tanpa Password: Menetapkan status bawaan seluruh user/pegawai (termasuk Super Admin dan seluruh staf posko) tanpa password awal (hasPassword: false).',
+            'Alur Onboarding & Login Adaptif: Pengguna pertama kali dapat langsung memasukkan NIP dan diarahkan ke form pembuatan password baru.',
+            'Pemicu Reset Pengosongan Password: Tombol Reset Password pada tabel Daftar Pengguna Posko berfungsi langsung sebagai pemicu untuk mengosongkan kata sandi (hasPassword: false), membersihkan cache sesi kata sandi lokal, dan otomatis menyetujui pengajuan reset yang tertunda di Dashboard Admin.'
+        ]
+    },
+    {
+        version: '0.4.26',
+        releaseDate: '30 September 2026',
+        title: 'Fitur Onboarding Landing Page, Otentikasi NIP, & Alur Pengajuan Reset Password',
+        isLatest: false,
+        isMajor: false,
+        tag: 'First-Run Onboarding Landing Page, NIP Password Auth & Admin Reset Notification',
+        changes: [
+            'Halaman Landing Page Onboarding Sekali Muncul: Menampilkan portal autentikasi NIP saat pertama kali aplikasi diinstal (atau dibuka sebelum status onboarding selesai), dan dapat diuji coba kapan saja melalui menu di Sidebar.',
+            'Alur Set Password Baru Pegawai: Pegawai baru yang memasukkan 18 digit NIP diminta mengatur password dengan deskripsi keamanan mandatori: "* Password ini digunakan untuk membatasi pengguna lain masuk ke akun Anda. * Jika Anda install di device lain/install ulang aplikasi, password ini akan dibutuhkan."',
+            'Form Login Akun Terdaftar: Jika akun terdeteksi sudah memiliki password di database, kolom isian password akan muncul secara otomatis di bawah NIP.',
+            'Integrasi Pengajuan Reset Password: Menyediakan tombol "Lupa / Reset Password?" pada Landing Page yang langsung mengirimkan notifikasi pengajuan ke Dashboard Administrator Posko (tab Persetujuan) untuk ditinjau.',
+            'Peralihan Cepat & Alat Ujicoba: Menyediakan menu popover pemilih contoh pegawai dan tombol mulai ulang alur onboarding untuk fleksibilitas pengujian pengembang.'
+        ]
+    },
+    {
+        version: '0.4.25',
+        releaseDate: '30 September 2026',
+        title: 'Penskalaan Tombol Header, Transisi Modal Salin Tanpa Kedip, & Sinkronisasi Super Admin',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Header Sizing, Smooth Bounce Transition & Role Persistence',
+        changes: [
+            'Penskalaan Tombol Header: Mengurangi tinggi tombol Ekspor dan tombol Pemilih Tema di Top Navbar sebesar ~12% (h-7 sm:h-8) untuk proporsi visual yang lebih rapi dan ringkas di seluruh tema.',
+            'Eliminasi Kedipan Modal Salin: Menghapus re-render ganda pada saat membuka modal Salin Jadwal & Presensi, menyempurnakan transisi spring bounce yang lembut, stabil, dan tidak berlebihan.',
+            'Sinkronisasi Mutlak Akun Super Admin: Memastikan profil pengguna utama (Ahmad Fiqri / 199510102015121002) tersimpan dan teridentifikasi secara permanen sebagai Super Admin baik di Dashboard Administrator, Pengaturan Akun, maupun di Sidebar & Mobile Drawer.',
+            'Klarifikasi Sekuensi Penomoran Versi: Menegaskan skema Semantic Versioning di mana rilis v0.3.99 dilanjutkan dengan kenaikan minor v0.4.0, disusul rilis patch berurutan v0.4.1 hingga v0.4.25.'
+        ]
+    },
+    {
+        version: '0.4.24',
+        releaseDate: '30 September 2026',
+        title: 'Optimalisasi Antarmuka Kalender, Penyatuan Sub Menu Pengaturan, & Efek Glitch',
+        isLatest: false,
+        isMajor: false,
+        tag: 'UI & Animation Refinement, Settings Integration & Glitch Effects',
+        changes: [
+            'Perbaikan Transisi Popover Salin: Menghilangkan kedipan ganda pada modal Salin Jadwal & Presensi dengan transisi spring bounce yang lembut, proporsional, dan stabil.',
+            'Penyatuan Sub Menu Pengaturan: Menempatkan navigasi tab Akun, Shift, dan Impor & Reset pada baris header yang sama dengan judul Pengaturan di sisi kanan secara vertikal presisi.',
+            'Restrukturisasi Halaman Hari Libur: Menghapus label judul di atas tabel libur, memindahkan indikator jumlah hari libur ke sisi kanan selektor tahun, dan menambahkan tombol "Hapus Libur Tahun Ini" di bagian footer data baris libur.',
+            'Efek Glitch Tombol Hapus: Mengintegrasikan efek hover glitch yang konsisten pada tombol Hapus Libur Tahun Ini dan Kirim Permintaan Hapus Akun.',
+            'Koreksi dan Standarisasi Penomoran Versi: Menyelaraskan seluruh urutan nomor versi secara sekuensial dan konsisten (0.4.22-beta -> 0.4.23 -> 0.4.24).'
+        ]
+    },
+    {
+        version: '0.4.23',
         releaseDate: '29 September 2026',
         title: 'Sinkronisasi Real-Time Nama Role Pengguna',
         isLatest: false,

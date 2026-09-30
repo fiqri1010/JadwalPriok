@@ -12,7 +12,7 @@ export const LOCAL_STORAGE_CURRENT_PASS_KEY = 'jadwalpriok_user_pass';
 export const DEFAULT_AUTHORITY_PROFILES: AuthorityProfile[] = [
     {
         id: 'prof-superadmin',
-        name: 'Super Admin & Koordinator Posko',
+        name: 'Super Admin',
         description: 'Akses penuh ke dashboard admin, manajemen seluruh user, reset password, dan broadcast salin jadwal posko.',
         roleType: 'admin',
         badgeColor: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30',
@@ -30,7 +30,7 @@ export const DEFAULT_AUTHORITY_PROFILES: AuthorityProfile[] = [
     },
     {
         id: 'prof-admin-shift',
-        name: 'Admin Shift & Supervisor',
+        name: 'Admin',
         description: 'Dapat mengelola user shift dan melihat log sesi perangkat seluruh petugas.',
         roleType: 'admin',
         badgeColor: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
@@ -48,7 +48,7 @@ export const DEFAULT_AUTHORITY_PROFILES: AuthorityProfile[] = [
     },
     {
         id: 'prof-petugas-posko',
-        name: 'Petugas Posko Graha & TPSL',
+        name: 'PPF',
         description: 'End-user posko reguler untuk mencatat jadwal mandiri, tukar shift, dan mengecek kalender piket.',
         roleType: 'end-user',
         badgeColor: 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30',
@@ -66,7 +66,7 @@ export const DEFAULT_AUTHORITY_PROFILES: AuthorityProfile[] = [
     },
     {
         id: 'prof-posko-luar',
-        name: 'Petugas Posko Luar / Non-Pengguna',
+        name: 'PPF non User',
         description: 'Personel posko di luar terminal (NPCT/TPS) yang jadwalnya disalin & diimpor secara terpusat untuk statistik.',
         roleType: 'end-user',
         badgeColor: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
@@ -92,16 +92,16 @@ const createStaffUser = (idNum: number, name: string, nip: string, unitPosko: st
     unitPosko,
     role: 'end-user',
     authorityProfileId: 'prof-petugas-posko',
-    authorityName: 'Petugas Posko Graha & TPSL',
+    authorityName: 'PPF',
     isActive: true,
-    hasPassword: true,
-    passwordValue: 'posko2026',
+    hasPassword: false,
+    passwordValue: '',
     isExternalNonAppUser: false,
     createdAt: '10 Jan 2026',
     lastActive: 'Aktif',
 });
 
-// Daftar User Bawaan (Admin & 120 Petugas Posko)
+// Daftar User Bawaan (Admin & 120 Petugas Posko) - Secara default seluruh user adalah tanpa password
 export const DEFAULT_USERS: UserAccount[] = [
     {
         id: 'usr-admin-01',
@@ -110,10 +110,10 @@ export const DEFAULT_USERS: UserAccount[] = [
         unitPosko: 'Posko Graha Segara Lt. 1',
         role: 'admin',
         authorityProfileId: 'prof-superadmin',
-        authorityName: 'Super Admin & Koordinator Posko',
+        authorityName: 'Super Admin',
         isActive: true,
-        hasPassword: true,
-        passwordValue: 'admin123',
+        hasPassword: false,
+        passwordValue: '',
         isExternalNonAppUser: false,
         createdAt: '10 Jan 2026',
         lastActive: 'Sedang Aktif (Admin)',
@@ -344,6 +344,34 @@ export function getAdminUsers(): UserAccount[] {
             // Clean up old "Afiqri" / "199208152015021002" if present in cached data
             parsed = parsed.filter((u) => u.nip !== '199208152015021002' && u.id !== 'usr-admin-01');
 
+            // Sinkronkan authorityName ke nama resmi default aplikasi dan pastikan user default tanpa password jika belum diatur manual
+            parsed = parsed.map((u) => {
+                let updatedUser = { ...u };
+                // Hapus password dummy template bawaan lama jika ada
+                if (updatedUser.passwordValue === 'posko2026' || (updatedUser.passwordValue === 'admin123' && updatedUser.nip === '199510102015121002' && !localStorage.getItem('jadwalpriok_user_pass'))) {
+                    updatedUser.hasPassword = false;
+                    updatedUser.passwordValue = '';
+                }
+
+                if (updatedUser.authorityProfileId === 'prof-superadmin' || updatedUser.authorityName === 'Super Admin & Koordinator Posko') {
+                    return { ...updatedUser, authorityProfileId: 'prof-superadmin', authorityName: 'Super Admin' };
+                }
+                if (updatedUser.authorityProfileId === 'prof-admin-shift' || updatedUser.authorityName === 'Admin Shift & Supervisor') {
+                    return { ...updatedUser, authorityProfileId: 'prof-admin-shift', authorityName: 'Admin' };
+                }
+                if (updatedUser.authorityProfileId === 'prof-petugas-posko' || updatedUser.authorityName === 'Petugas Posko Graha & TPSL') {
+                    return { ...updatedUser, authorityProfileId: 'prof-petugas-posko', authorityName: 'PPF' };
+                }
+                if (
+                    updatedUser.authorityProfileId === 'prof-posko-luar' ||
+                    updatedUser.authorityName === 'Petugas Posko Luar / Non-Pengguna' ||
+                    updatedUser.authorityName === 'Petugas Posko Luar / Non Pengguna'
+                ) {
+                    return { ...updatedUser, authorityProfileId: 'prof-posko-luar', authorityName: 'PPF non User' };
+                }
+                return updatedUser;
+            });
+
             const savedNips = new Set(parsed.map((u) => u.nip));
             const missingDefaultUsers = DEFAULT_USERS.filter((u) => !savedNips.has(u.nip));
             
@@ -352,6 +380,7 @@ export function getAdminUsers(): UserAccount[] {
                 saveAdminUsers(merged);
                 return merged;
             }
+            saveAdminUsers(parsed);
             return parsed;
         }
     } catch {}
@@ -368,12 +397,38 @@ export function saveAdminUsers(users: UserAccount[]): void {
 
 /**
  * Mengambil daftar profil otoritas
+ * Menjamin profil standar sistem selalu mengikuti nama default resmi aplikasi (Super Admin, Admin, PPF, PPF non User)
  */
 export function getAuthorityProfiles(): AuthorityProfile[] {
     try {
         const saved = localStorage.getItem(LOCAL_STORAGE_PROFILES_KEY);
-        if (saved) return JSON.parse(saved);
+        if (saved) {
+            const parsed: AuthorityProfile[] = JSON.parse(saved);
+            // Sinkronkan profil sistem standar dengan nama resmi bawaan aplikasi
+            const updated = parsed.map((p) => {
+                const defaultMatch = DEFAULT_AUTHORITY_PROFILES.find((d) => d.id === p.id);
+                if (defaultMatch) {
+                    return {
+                        ...p,
+                        name: defaultMatch.name,
+                        description: defaultMatch.description,
+                        roleType: defaultMatch.roleType,
+                        permissions: { ...p.permissions, ...defaultMatch.permissions },
+                        isSystemDefault: true,
+                    };
+                }
+                return p;
+            });
+
+            // Tambahkan jika ada profil default yang belum tersimpan
+            const existingIds = new Set(updated.map((p) => p.id));
+            const missing = DEFAULT_AUTHORITY_PROFILES.filter((d) => !existingIds.has(d.id));
+            const fullList = [...updated, ...missing];
+            saveAuthorityProfiles(fullList);
+            return fullList;
+        }
     } catch {}
+    saveAuthorityProfiles(DEFAULT_AUTHORITY_PROFILES);
     return DEFAULT_AUTHORITY_PROFILES;
 }
 
@@ -385,14 +440,99 @@ export function saveAuthorityProfiles(profiles: AuthorityProfile[]): void {
 }
 
 /**
- * Mengambil riwayat sesi seluruh user
+ * Mengambil riwayat sesi seluruh user yang tersinkronisasi penuh dengan sesi perangkat riil di Pengaturan
  */
 export function getAllUserSessions(): UserSessionRecord[] {
+    let list: UserSessionRecord[] = DEFAULT_USER_SESSIONS;
     try {
         const saved = localStorage.getItem(LOCAL_STORAGE_USER_SESSIONS_KEY);
-        if (saved) return JSON.parse(saved);
+        if (saved) {
+            list = JSON.parse(saved);
+        }
     } catch {}
-    return DEFAULT_USER_SESSIONS;
+
+    // Sinkronkan sesi perangkat riil milik pengguna yang sedang aktif (misalnya Ahmad Fiqri atau user login)
+    try {
+        const currentNip = localStorage.getItem(LOCAL_STORAGE_CURRENT_NIP_KEY) || '199510102015121002';
+        const currentName = localStorage.getItem(LOCAL_STORAGE_CURRENT_NAME_KEY) || 'Ahmad Fiqri';
+        const deviceSessionsRaw = localStorage.getItem('jadwalpriok_device_sessions');
+
+        if (deviceSessionsRaw) {
+            const parsedDeviceSessions = JSON.parse(deviceSessionsRaw);
+            if (Array.isArray(parsedDeviceSessions) && parsedDeviceSessions.length > 0) {
+                const currentSession = parsedDeviceSessions.find((s: any) => s.isCurrent) || parsedDeviceSessions[0];
+                if (currentSession) {
+                    const users = getAdminUsers();
+                    const matchedUser = users.find((u) => u.nip === currentNip);
+                    const unitPosko = matchedUser?.unitPosko || 'Posko Graha Segara Lt. 1';
+
+                    const syncedRecord: UserSessionRecord = {
+                        id: `sess-real-${currentNip}`,
+                        userNip: currentNip,
+                        userName: currentName,
+                        unitPosko,
+                        deviceName: currentSession.deviceName || 'Perangkat Pengguna',
+                        deviceType: (currentSession.deviceType as any) || 'desktop',
+                        browser: currentSession.browser || 'Google Chrome',
+                        os: currentSession.os || 'Windows 11',
+                        ipAddress: currentSession.ipAddress || '192.168.10.45',
+                        macAddress: currentSession.macAddress || '74:D4:35:E2:81:4A',
+                        location: currentSession.location || 'Tanjung Priok, Jakarta Utara',
+                        loginTime: currentSession.firstLogin || 'Hari Ini, 07:30 WIB',
+                        lastActive: currentSession.lastActive || 'Sedang Aktif',
+                        isOnline: true,
+                    };
+
+                    const others = list.filter((s) => s.userNip !== currentNip);
+                    const merged = [syncedRecord, ...others];
+                    localStorage.setItem(LOCAL_STORAGE_USER_SESSIONS_KEY, JSON.stringify(merged));
+                    return merged;
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Error synchronizing user session with settings:', e);
+    }
+
+    return list;
+}
+
+/**
+ * Sinkronisasi eksplisit dari Pengaturan Akun ke Sesi Admin
+ */
+export function syncDeviceSessionToAdminSessions(currentNip: string, currentName: string, deviceSession: any): void {
+    try {
+        let list: UserSessionRecord[] = DEFAULT_USER_SESSIONS;
+        try {
+            const saved = localStorage.getItem(LOCAL_STORAGE_USER_SESSIONS_KEY);
+            if (saved) list = JSON.parse(saved);
+        } catch {}
+
+        const users = getAdminUsers();
+        const matchedUser = users.find((u) => u.nip === currentNip);
+        const unitPosko = matchedUser?.unitPosko || 'Posko Graha Segara Lt. 1';
+
+        const syncedRecord: UserSessionRecord = {
+            id: `sess-real-${currentNip}`,
+            userNip: currentNip,
+            userName: currentName,
+            unitPosko,
+            deviceName: deviceSession.deviceName || 'Perangkat Pengguna',
+            deviceType: deviceSession.deviceType || 'desktop',
+            browser: deviceSession.browser || 'Google Chrome',
+            os: deviceSession.os || 'Windows 11',
+            ipAddress: deviceSession.ipAddress || '192.168.10.45',
+            macAddress: deviceSession.macAddress || '74:D4:35:E2:81:4A',
+            location: deviceSession.location || 'Tanjung Priok, Jakarta Utara',
+            loginTime: deviceSession.firstLogin || 'Hari Ini, 07:30 WIB',
+            lastActive: deviceSession.lastActive || 'Sedang Aktif',
+            isOnline: true,
+        };
+
+        const others = list.filter((s) => s.userNip !== currentNip);
+        const merged = [syncedRecord, ...others];
+        localStorage.setItem(LOCAL_STORAGE_USER_SESSIONS_KEY, JSON.stringify(merged));
+    } catch {}
 }
 
 /**
@@ -403,23 +543,80 @@ export function saveAllUserSessions(sessions: UserSessionRecord[]): void {
 }
 
 /**
- * Mengambil Role Pengguna Aktif Saat Ini ('admin' | 'end-user')
+ * Mengambil Role Pengguna Aktif Saat Ini ('superadmin' | 'admin' | 'end-user' | 'non-user')
  */
 export function getCurrentUserRole(): UserRole {
     try {
-        const saved = localStorage.getItem(LOCAL_STORAGE_CURRENT_ROLE_KEY);
-        if (saved === 'admin' || saved === 'end-user') {
-            return saved;
+        const currentName = localStorage.getItem(LOCAL_STORAGE_CURRENT_NAME_KEY) || 'Ahmad Fiqri';
+        const currentNip = localStorage.getItem(LOCAL_STORAGE_CURRENT_NIP_KEY) || '199510102015121002';
+
+        // Akun utama Ahmad Fiqri secara mutlak adalah Super Admin di aplikasi
+        if (currentName === 'Ahmad Fiqri' || currentNip === '199510102015121002') {
+            return 'superadmin';
         }
+
+        const saved = localStorage.getItem(LOCAL_STORAGE_CURRENT_ROLE_KEY);
+        if (saved === 'superadmin' || saved === 'admin' || saved === 'end-user' || saved === 'non-user') {
+            return saved as UserRole;
+        }
+
         // Cek apakah NIP yang aktif terdaftar sebagai role admin di list users
-        const currentNip = localStorage.getItem(LOCAL_STORAGE_CURRENT_NIP_KEY);
         const users = getAdminUsers();
         const found = users.find((u) => u.nip === currentNip);
         if (found) {
+            if (found.authorityProfileId === 'prof-superadmin' || found.nip === '199510102015121002') {
+                return 'superadmin';
+            }
             return found.role;
         }
     } catch {}
-    return 'admin'; // Default sebagai Admin untuk kemudahan demonstrasi
+    return 'superadmin'; // Default sebagai Super Admin untuk kemudahan pengelolaan awal
+}
+
+export function getCurrentUserRoleInfo(): { role: UserRole; authorityName: string; badgeColor: string } {
+    const currentName = typeof window !== 'undefined' ? (localStorage.getItem(LOCAL_STORAGE_CURRENT_NAME_KEY) || 'Ahmad Fiqri') : 'Ahmad Fiqri';
+    const currentNip = typeof window !== 'undefined' ? (localStorage.getItem(LOCAL_STORAGE_CURRENT_NIP_KEY) || '199510102015121002') : '199510102015121002';
+
+    if (currentName === 'Ahmad Fiqri' || currentNip === '199510102015121002') {
+        return {
+            role: 'superadmin',
+            authorityName: 'Super Admin',
+            badgeColor: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30',
+        };
+    }
+
+    const role = getCurrentUserRole();
+    const profiles = getAuthorityProfiles();
+    if (role === 'superadmin') {
+        const prof = profiles.find((p) => p.roleType === 'superadmin' || p.id === 'prof-superadmin');
+        return {
+            role: 'superadmin',
+            authorityName: prof?.name || 'Super Admin',
+            badgeColor: prof?.badgeColor || 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30',
+        };
+    }
+    if (role === 'admin') {
+        const prof = profiles.find((p) => p.roleType === 'admin');
+        return {
+            role: 'admin',
+            authorityName: prof?.name || 'Admin',
+            badgeColor: prof?.badgeColor || 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+        };
+    }
+    if (role === 'non-user') {
+        const prof = profiles.find((p) => p.name.toLowerCase().includes('non user'));
+        return {
+            role: 'non-user',
+            authorityName: prof?.name || 'PPF non User',
+            badgeColor: prof?.badgeColor || 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30',
+        };
+    }
+    const prof = profiles.find((p) => p.roleType === 'end-user');
+    return {
+        role: 'end-user',
+        authorityName: prof?.name || 'PPF',
+        badgeColor: prof?.badgeColor || 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30',
+    };
 }
 
 export const LOCAL_STORAGE_APPROVALS_KEY = 'jadwalpriok_admin_approval_requests';

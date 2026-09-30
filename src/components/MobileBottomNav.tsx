@@ -8,7 +8,7 @@ import {
 import { AppTheme } from '../types';
 import { ThemeConfig } from '../themeConfig';
 
-type PageTabType = 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin';
+type PageTabType = 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing';
 
 interface MobileBottomNavProps {
     pageTab: PageTabType;
@@ -26,7 +26,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 }) => {
     return (
         <nav
-            className={`fixed bottom-0 left-0 right-0 w-full z-50 md:hidden px-1.5 py-1.5 transition-all duration-300 ease-in-out ${
+            className={`fixed bottom-0 left-0 right-0 w-full z-50 md:hidden px-1.5 pt-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] transition-all duration-300 ease-in-out ${
                 theme === 'paperSketch'
                     ? 'bg-[#ffffff] border-t-[3px] border-[#2b2b2b] text-[#2b2b2b] shadow-[0_-4px_0px_#2b2b2b] font-[\'Gaegu\'] text-base'
                     : theme === 'winamp'

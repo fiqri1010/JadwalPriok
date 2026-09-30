@@ -280,7 +280,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             penugasanColors: themes.dashboard.penugasanColors,
 
             // 1. Kanvas Utama (Clean SaaS Dashboard: #F6F7F8 bg, #011627 ink, Inter font)
-            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#F6F7F8] text-[#011627] flex flex-col font-[\'Inter\'] relative selection:bg-[#297373] selection:text-white md:h-screen md:max-h-screen md:overflow-hidden',
+            wrapperClass: 'h-full min-h-full w-full flex-1 bg-[#F6F7F8] text-[#011627] flex flex-col font-[\'Inter\'] relative selection:bg-[#297373] selection:text-white overflow-hidden',
 
             // 2. Top Header / Navbar (Clean white 64px, subtle border)
             navbarClass: 'sticky top-0 z-50 bg-[#FFFFFF] text-[#011627] border-b border-[rgba(1,22,39,0.08)] shadow-none shrink-0 font-[\'Inter\']',
@@ -290,7 +290,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             subtitleClass: 'hidden sm:block text-[11px] text-[#011627]/60 font-[\'JetBrains_Mono\'] tracking-wider uppercase',
             supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#FFFFFF] px-2.5 py-1 text-xs border border-[rgba(1,22,39,0.08)] text-[#011627] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[6px]',
             holidayBtnClass: 'flex items-center space-x-1.5 bg-[#BE1A1A] hover:bg-[#a51515] px-3 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border border-[#BE1A1A]/30 font-[\'Inter\'] rounded-[6px]',
-            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] px-3 text-xs font-bold text-[#011627] transition-all duration-150 cursor-pointer border border-[rgba(1,22,39,0.08)] select-none font-[\'Inter\'] rounded-[6px] shadow-none',
+            themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-[#011627] transition-all duration-150 cursor-pointer border border-[rgba(1,22,39,0.08)] select-none font-[\'Inter\'] rounded-[6px] shadow-none',
             themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-64 bg-[#FFFFFF] p-2 flex flex-col gap-1 text-[#011627] border border-[rgba(1,22,39,0.08)] shadow-xl animate-in fade-in zoom-in-95 duration-150 font-[\'Inter\'] rounded-[8px]',
             settingsBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] px-2.5 py-1.5 text-xs font-bold text-[#011627] transition-all cursor-pointer border border-[rgba(1,22,39,0.08)] font-[\'Inter\'] rounded-[6px]',
             syncBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] px-2.5 py-1.5 text-xs font-bold text-[#011627] transition-all cursor-pointer border border-[rgba(1,22,39,0.08)] font-[\'Inter\'] rounded-[6px]',
@@ -369,7 +369,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             penugasanColors: themes.industrial.penugasanColors,
 
             // 1. Kanvas Utama (#0F1115 bg, #E2E8F0 ink, Inter & Syne typography)
-            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#0F1115] text-[#E2E8F0] flex flex-col font-[\'Inter\'] relative selection:bg-[#2DD4BF] selection:text-[#0F1115] md:h-screen md:max-h-screen md:overflow-hidden',
+            wrapperClass: 'h-full min-h-full w-full flex-1 bg-[#0F1115] text-[#E2E8F0] flex flex-col font-[\'Inter\'] relative selection:bg-[#2DD4BF] selection:text-[#0F1115] overflow-hidden',
 
             // 2. Top Header / Navbar
             navbarClass: 'sticky top-0 z-50 bg-[#0F1115]/90 backdrop-blur-md text-[#E2E8F0] border-b-[1.5px] border-[rgba(226,232,240,0.1)] shrink-0 font-[\'Inter\']',
@@ -379,7 +379,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             subtitleClass: 'hidden sm:block text-[10.5px] text-[#E2E8F0]/60 font-[\'JetBrains_Mono\'] tracking-wider uppercase',
             supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#1A1D23] px-2.5 py-1 text-xs border border-[rgba(226,232,240,0.1)] text-[#E2E8F0] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
             holidayBtnClass: 'flex items-center space-x-1.5 bg-[#BE1A1A] hover:bg-[#a51515] px-3 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border border-[#BE1A1A]/40 font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
-            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 bg-[#1A1D23] hover:bg-[#252932] px-3 text-xs font-bold text-[#E2E8F0] transition-all duration-150 cursor-pointer border border-[rgba(226,232,240,0.15)] select-none font-[\'JetBrains_Mono\'] uppercase tracking-wider shadow-none rounded-[4px]',
+            themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#1A1D23] hover:bg-[#252932] px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-[#E2E8F0] transition-all duration-150 cursor-pointer border border-[rgba(226,232,240,0.15)] select-none font-[\'JetBrains_Mono\'] uppercase tracking-wider shadow-none rounded-[4px]',
             themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-64 bg-[#1A1D23] p-2 flex flex-col gap-1 text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] shadow-2xl animate-in fade-in zoom-in-95 duration-150 font-[\'JetBrains_Mono\'] rounded-[4px]',
             settingsBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#1A1D23] hover:bg-[#252932] px-2.5 py-1.5 text-xs font-semibold text-[#E2E8F0] transition-all cursor-pointer border border-[rgba(226,232,240,0.15)] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
             syncBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#1A1D23] hover:bg-[#252932] px-2.5 py-1.5 text-xs font-semibold text-[#E2E8F0] transition-all cursor-pointer border border-[rgba(226,232,240,0.15)] font-[\'JetBrains_Mono\'] uppercase tracking-wider rounded-[4px]',
@@ -458,7 +458,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             penugasanColors: themes.editorial.penugasanColors,
 
             // 1. Kanvas Utama (Warm cream #fcfbf9, ink #1a1a1a, Geist font)
-            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#fcfbf9] text-[#1a1a1a] flex flex-col font-[\'Geist\'] relative selection:bg-[#2a7373] selection:text-white md:h-screen md:max-h-screen md:overflow-hidden',
+            wrapperClass: 'h-full min-h-full w-full flex-1 bg-[#fcfbf9] text-[#1a1a1a] flex flex-col font-[\'Geist\'] relative selection:bg-[#2a7373] selection:text-white overflow-hidden',
 
             // 2. Top Header / Navbar
             navbarClass: 'sticky top-0 z-50 bg-[#fcfbf9]/95 backdrop-blur-md text-[#1a1a1a] border-b border-[#1a1a1a]/10 shrink-0 font-[\'Geist\']',
@@ -468,7 +468,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             subtitleClass: 'hidden sm:block text-[10.5px] text-[#1a1a1a]/60 font-[\'Geist_Mono\'] tracking-widest uppercase',
             supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#ffffff] px-2.5 py-1 text-xs border border-[#1a1a1a]/10 text-[#1a1a1a] font-[\'Geist_Mono\'] uppercase tracking-wider',
             holidayBtnClass: 'flex items-center space-x-1.5 bg-[#cc3333] hover:bg-[#b02a2a] px-3 py-1.5 text-xs font-semibold text-white transition-all cursor-pointer border border-[#cc3333]/30 font-[\'Geist_Mono\'] uppercase tracking-wider',
-            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 bg-[#ffffff] hover:bg-[#fcfbf9] px-3 text-xs font-medium text-[#1a1a1a] transition-all duration-150 cursor-pointer border border-[#1a1a1a]/15 select-none font-[\'Geist_Mono\'] uppercase tracking-wider shadow-none',
+            themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#ffffff] hover:bg-[#fcfbf9] px-2.5 sm:px-3 text-[11px] sm:text-xs font-medium text-[#1a1a1a] transition-all duration-150 cursor-pointer border border-[#1a1a1a]/15 select-none font-[\'Geist_Mono\'] uppercase tracking-wider shadow-none',
             themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-64 bg-[#fcfbf9] p-2 flex flex-col gap-1 text-[#1a1a1a] border border-[#1a1a1a]/15 shadow-xl animate-in fade-in zoom-in-95 duration-150 font-[\'Geist_Mono\']',
             settingsBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#ffffff] hover:bg-[#1a1a1a]/[0.05] px-2.5 py-1.5 text-xs font-medium text-[#1a1a1a] transition-all cursor-pointer border border-[#1a1a1a]/15 font-[\'Geist_Mono\'] uppercase tracking-wider',
             syncBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#ffffff] hover:bg-[#1a1a1a]/[0.05] px-2.5 py-1.5 text-xs font-medium text-[#1a1a1a] transition-all cursor-pointer border border-[#1a1a1a]/15 font-[\'Geist_Mono\'] uppercase tracking-wider',
@@ -547,7 +547,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             penugasanColors: themes.technical.penugasanColors,
 
             // 1. Kanvas Utama (Systematic Technical #F8F7F4, Ink #111113, Inter font)
-            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#F8F7F4] text-[#111113] flex flex-col font-[\'Inter\'] relative selection:bg-[#0D9488] selection:text-white md:h-screen md:max-h-screen md:overflow-hidden',
+            wrapperClass: 'h-full min-h-full w-full flex-1 bg-[#F8F7F4] text-[#111113] flex flex-col font-[\'Inter\'] relative selection:bg-[#0D9488] selection:text-white overflow-hidden',
 
             // 2. Top Header / Navbar
             navbarClass: 'sticky top-0 z-50 bg-[#F8F7F4] text-[#111113] border-b-[1.5px] border-[#111113] shrink-0 font-[\'Inter\']',
@@ -557,7 +557,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             subtitleClass: 'hidden sm:block text-[11px] text-[#111113]/60 font-[\'JetBrains_Mono\'] tracking-wider uppercase',
             supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 bg-[#FFFFFF] px-2.5 py-1 text-xs border-[1.5px] border-[#111113] text-[#111113] font-[\'JetBrains_Mono\'] font-bold uppercase tracking-wider',
             holidayBtnClass: 'flex items-center space-x-1.5 bg-[#BE1A1A] hover:bg-[#a01515] px-3 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border-[1.5px] border-[#111113] font-[\'JetBrains_Mono\'] uppercase tracking-wider',
-            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] px-3 text-xs font-bold text-[#111113] transition-all duration-150 cursor-pointer border-[1.5px] border-[#111113] select-none font-[\'JetBrains_Mono\'] uppercase tracking-wider',
+            themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-[#111113] transition-all duration-150 cursor-pointer border-[1.5px] border-[#111113] select-none font-[\'JetBrains_Mono\'] uppercase tracking-wider',
             themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-64 bg-[#F8F7F4] p-2 flex flex-col gap-1 text-[#111113] border-[1.5px] border-[#111113] shadow-[4px_4px_0px_#111113] animate-in fade-in zoom-in-95 duration-150 font-[\'JetBrains_Mono\']',
             settingsBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] px-2.5 py-1.5 text-xs font-bold text-[#111113] transition-all cursor-pointer border-[1.5px] border-[#111113] font-[\'JetBrains_Mono\'] uppercase tracking-wider',
             syncBtnClass: 'flex items-center justify-center space-x-1.5 bg-[#FFFFFF] hover:bg-[#111113] hover:text-[#F8F7F4] px-2.5 py-1.5 text-xs font-bold text-[#111113] transition-all cursor-pointer border-[1.5px] border-[#111113] font-[\'JetBrains_Mono\'] uppercase tracking-wider',
@@ -636,7 +636,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             penugasanColors,
 
             // 1. Kanvas Utama (Paper sketch grid background, ink text)
-            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#f2efeb] text-[#2b2b2b] flex flex-col font-[\'Gaegu\'] font-bold relative selection:bg-[#2ec4b6] selection:text-[#2b2b2b] md:h-screen md:max-h-screen md:overflow-hidden',
+            wrapperClass: 'h-full min-h-full w-full flex-1 bg-[#f2efeb] text-[#2b2b2b] flex flex-col font-[\'Gaegu\'] font-bold relative selection:bg-[#2ec4b6] selection:text-[#2b2b2b] overflow-hidden',
 
             // 2. Top Header / Navbar: paper background, ink borders, Gochi Hand title & Space Mono build badge
             navbarClass: 'sticky top-0 z-50 bg-[#ffffff] text-[#2b2b2b] border-b-[3px] border-[#2b2b2b] shadow-[0_4px_0px_#2b2b2b] shrink-0 font-[\'Gaegu\']',
@@ -646,7 +646,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             subtitleClass: 'hidden sm:block text-xs text-[#2b2b2b]/70 font-mono tracking-wider line-clamp-1 uppercase',
             supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 rounded-lg bg-[#ffffff] px-2.5 py-1 text-xs border-2 border-[#2b2b2b] text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-mono',
             holidayBtnClass: 'flex items-center space-x-1.5 rounded-lg bg-[#ff4747] hover:bg-[#ff3333] px-2.5 py-1.5 text-sm font-bold text-white transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\'] tracking-wide',
-            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-3 text-sm font-bold text-[#2b2b2b] transition-all duration-150 cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] select-none font-[\'Gaegu\'] active:translate-x-0.5 active:translate-y-0.5',
+            themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-2.5 sm:px-3 text-xs sm:text-sm font-bold text-[#2b2b2b] transition-all duration-150 cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] select-none font-[\'Gaegu\'] active:translate-x-0.5 active:translate-y-0.5',
             themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-60 rounded-xl bg-[#ffffff] p-2 flex flex-col gap-1 text-[#2b2b2b] shadow-[5px_5px_0px_#2b2b2b] border-[2.5px] border-[#2b2b2b] animate-in fade-in zoom-in-95 duration-150 font-[\'Gaegu\'] font-bold',
             settingsBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-2.5 py-1.5 text-xs font-bold text-[#2b2b2b] transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\']',
             syncBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#ffffff] hover:bg-[#2ec4b6] px-2.5 py-1.5 text-xs font-bold text-[#2b2b2b] transition-all cursor-pointer border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5 font-[\'Gaegu\']',
@@ -725,7 +725,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             penugasanColors,
 
             // 1. Kanvas Utama: #121212 bg, #E0E0E0 text
-            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#121212] text-[#E0E0E0] flex flex-col font-sans relative selection:bg-slate-700 selection:text-white md:h-screen md:max-h-screen md:overflow-hidden',
+            wrapperClass: 'h-full min-h-full w-full flex-1 bg-[#121212] text-[#E0E0E0] flex flex-col font-sans relative selection:bg-slate-700 selection:text-white overflow-hidden',
 
             // 2. Top Header / Navbar: #1A1A1A, border #333333
             navbarClass: 'sticky top-0 z-50 bg-[#1A1A1A] text-[#E0E0E0] border-b border-[#333333] shadow-[0_4px_20px_rgba(0,0,0,0.8)] shrink-0',
@@ -735,7 +735,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             subtitleClass: 'hidden sm:block text-[10.5px] text-slate-400 font-medium line-clamp-1',
             supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 rounded-lg bg-[#252525] px-2.5 py-1 text-xs border border-[#444444] text-[#E0E0E0]',
             holidayBtnClass: 'flex items-center space-x-1.5 rounded-lg bg-[#991B1B] hover:bg-[#B91C1C] px-2.5 py-1.5 text-xs font-bold text-white transition-colors cursor-pointer border border-[#EF4444]/30 shadow-xs',
-            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 rounded-lg bg-[#2a2f3b] hover:bg-[#323741] px-3 text-xs font-bold text-white transition-all duration-200 cursor-pointer border border-[#3e4452] shadow-xs select-none',
+            themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg bg-[#2a2f3b] hover:bg-[#323741] px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-white transition-all duration-200 cursor-pointer border border-[#3e4452] shadow-xs select-none',
             themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-56 rounded-[5px] bg-[#2a2f3b] p-[5px] flex flex-col gap-1 text-white shadow-2xl ring-1 ring-white/10 border border-[#3e4452] animate-in fade-in zoom-in-95 duration-200',
             settingsBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#252525] hover:bg-[#333333] px-2.5 py-1.5 text-xs font-bold text-slate-100 transition-colors cursor-pointer border border-[#444444] shadow-xs',
             syncBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#252525] hover:bg-[#333333] px-2.5 py-1.5 text-xs font-bold text-slate-100 transition-colors cursor-pointer border border-[#444444] shadow-xs',
@@ -813,7 +813,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             penugasanColors,
 
             // 1. Kanvas Utama: Radial gradient aero glass
-            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-100 via-blue-200 to-indigo-100 text-[#0F172A] flex flex-col font-sans relative selection:bg-sky-200 selection:text-sky-900 md:h-screen md:max-h-screen md:overflow-hidden',
+            wrapperClass: 'h-full min-h-full w-full flex-1 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-100 via-blue-200 to-indigo-100 text-[#0F172A] flex flex-col font-sans relative selection:bg-sky-200 selection:text-sky-900 overflow-hidden',
 
             // 2. Top Header / Navbar: Translucent Aero Glass
             navbarClass: 'sticky top-0 z-50 bg-sky-950/45 backdrop-blur-xl text-white border-b border-white/25 shadow-lg shrink-0',
@@ -823,7 +823,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             subtitleClass: 'hidden sm:block text-[10.5px] text-sky-100/90 font-medium line-clamp-1',
             supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 rounded-lg bg-white/10 backdrop-blur-xs px-2.5 py-1 text-xs border border-white/20 text-white',
             holidayBtnClass: 'flex items-center space-x-1.5 rounded-lg bg-rose-600/85 hover:bg-rose-700 px-2.5 py-1.5 text-xs font-bold text-white transition-colors cursor-pointer border border-rose-300/40 shadow-xs backdrop-blur-xs',
-            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 rounded-lg bg-white/70 hover:bg-white px-3 text-xs font-bold text-slate-900 transition-all duration-200 cursor-pointer border border-sky-300 backdrop-blur-md shadow-xs select-none',
+            themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg bg-white/70 hover:bg-white px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-slate-900 transition-all duration-200 cursor-pointer border border-sky-300 backdrop-blur-md shadow-xs select-none',
             themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-56 rounded-[5px] bg-white/95 backdrop-blur-2xl p-[5px] flex flex-col gap-1 text-[#0F172A] shadow-2xl ring-1 ring-sky-300/40 border border-sky-200 animate-in fade-in zoom-in-95 duration-200',
             settingsBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-white/15 hover:bg-white/25 px-2.5 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border border-white/30 backdrop-blur-xs shadow-xs',
             syncBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-white/15 hover:bg-white/25 px-2.5 py-1.5 text-xs font-bold text-white transition-all cursor-pointer border border-white/30 backdrop-blur-xs shadow-xs',
@@ -901,7 +901,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             penugasanColors,
 
             // 1. Kanvas Utama: #2C2E3B, text #00FF00, font-mono, rounded-none!
-            wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#2C2E3B] text-[#00FF00] flex flex-col font-mono relative rounded-none selection:bg-[#00FF00] selection:text-black md:h-screen md:max-h-screen md:overflow-hidden',
+            wrapperClass: 'h-full min-h-full w-full flex-1 bg-[#2C2E3B] text-[#00FF00] flex flex-col font-mono relative rounded-none selection:bg-[#00FF00] selection:text-black overflow-hidden',
 
             // 2. Top Header / Navbar: Gradient #4A4D64 -> #2D2E40, border #000000
             navbarClass: 'sticky top-0 z-50 bg-gradient-to-b from-[#4A4D64] to-[#2D2E40] text-[#FACC15] border-b-2 border-[#000000] font-mono shadow-none shrink-0',
@@ -911,7 +911,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
             subtitleClass: 'hidden sm:block text-[10.5px] text-slate-300 font-mono line-clamp-1',
             supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 rounded-none bg-[#000000] px-2.5 py-1 text-xs border border-[#00FF00]/60 text-[#00FF00] font-mono',
             holidayBtnClass: 'flex items-center space-x-1.5 rounded-none bg-[#FF3366] hover:bg-rose-700 px-2.5 py-1.5 text-xs font-bold text-white transition-colors cursor-pointer border border-black font-mono shadow-none',
-            themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 rounded-none bg-[#000000] hover:bg-[#00FF00] hover:text-black px-3 text-xs font-bold text-[#00FF00] transition-all duration-200 cursor-pointer border border-[#00FF00] font-mono shadow-none select-none',
+            themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 rounded-none bg-[#000000] hover:bg-[#00FF00] hover:text-black px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-[#00FF00] transition-all duration-200 cursor-pointer border border-[#00FF00] font-mono shadow-none select-none',
             themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-56 rounded-none bg-[#1C1C1E] p-[5px] flex flex-col gap-1 text-[#00FF00] shadow-none border-2 border-[#00FF00] font-mono animate-in fade-in duration-75',
             settingsBtnClass: 'flex items-center justify-center space-x-1.5 rounded-none bg-[#000000] hover:bg-[#00FF00] hover:text-black px-2.5 py-1.5 text-xs font-bold text-[#00FF00] transition-colors cursor-pointer border border-[#00FF00] font-mono shadow-none',
             syncBtnClass: 'flex items-center justify-center space-x-1.5 rounded-none bg-[#000000] hover:bg-[#00FF00] hover:text-black px-2.5 py-1.5 text-xs font-bold text-[#00FF00] transition-colors cursor-pointer shadow-none border border-[#00FF00] font-mono',
@@ -990,7 +990,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
         penugasanColors,
 
         // 1. Kanvas Utama: #F6F7F8 bg, #011627 text
-        wrapperClass: 'min-h-screen min-h-[100dvh] w-full bg-[#F6F7F8] text-[#011627] flex flex-col font-sans relative selection:bg-[#2EC4B6]/30 selection:text-[#011627] md:h-screen md:max-h-screen md:overflow-hidden',
+        wrapperClass: 'h-full min-h-full w-full flex-1 bg-[#F6F7F8] text-[#011627] flex flex-col font-sans relative selection:bg-[#2EC4B6]/30 selection:text-[#011627] overflow-hidden',
 
         // 2. Top Header / Navbar: Light clean #FFFFFF, soft elevated drop shadow without static bottom border
         navbarClass: 'sticky top-0 z-50 bg-white/95 backdrop-blur-md text-[#011627] shadow-[0_1px_4px_rgba(0,0,0,0.08)] shrink-0',
@@ -1000,7 +1000,7 @@ export function getThemeConfig(theme: AppTheme): ThemeConfig {
         subtitleClass: 'hidden sm:block text-[10.5px] text-[#666666] font-medium line-clamp-1',
         supabaseBadgeClass: 'hidden lg:flex items-center space-x-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs border border-slate-200 text-[#011627]',
         holidayBtnClass: 'flex items-center space-x-1.5 rounded-lg bg-[#FF3366] hover:bg-[#e02555] px-2.5 py-1.5 text-xs font-bold text-white transition-colors cursor-pointer border border-[#FF3366]/40 shadow-xs',
-        themeDropdownBtnClass: 'h-8 sm:h-9 flex items-center justify-center gap-2 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] px-3 text-xs font-bold text-[#011627] transition-all duration-200 cursor-pointer border border-[#CBD5E1] shadow-2xs select-none',
+        themeDropdownBtnClass: 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-[#011627] transition-all duration-200 cursor-pointer border border-[#CBD5E1] shadow-2xs select-none',
         themeDropdownMenuClass: 'absolute right-[-3rem] sm:right-0 mt-1.5 z-50 w-56 rounded-[5px] bg-[#FFFFFF] p-[5px] flex flex-col gap-1 text-[#011627] shadow-2xl ring-1 ring-black/10 border border-[#CBD5E1] animate-in fade-in zoom-in-95 duration-200',
         settingsBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#F6F7F8] hover:bg-[#E2E8F0] px-3 py-1.5 text-xs font-bold text-[#011627] transition-all cursor-pointer border border-[#E2E8F0] shadow-2xs',
         syncBtnClass: 'flex items-center justify-center space-x-1.5 rounded-lg bg-[#F6F7F8] hover:bg-[#E2E8F0] px-3 py-1.5 text-xs font-bold text-[#011627] transition-all cursor-pointer border border-[#E2E8F0] shadow-2xs',

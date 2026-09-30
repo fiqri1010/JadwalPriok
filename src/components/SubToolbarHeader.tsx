@@ -135,12 +135,12 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
         }
         // Default Clean Light Mode
         return {
-            wrapper: 'bg-transparent border-b border-slate-200/90 py-1.5 px-1',
-            title: 'text-slate-900 font-bold text-sm sm:text-base tracking-tight',
+            wrapper: 'bg-transparent border-b border-slate-200/90 py-1 px-1',
+            title: 'text-slate-900 font-bold text-xs sm:text-sm tracking-tight',
             dot: 'w-2 h-2 rounded-full bg-teal-500 shrink-0 shadow-[0_0_6px_rgba(20,184,166,0.4)]',
-            navArrowBtn: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200 rounded-full p-1.5 transition-colors active:scale-95',
-            monthTextBtn: 'text-slate-900 hover:text-teal-700 hover:bg-slate-100/80 rounded-md text-xs sm:text-sm font-bold px-2.5 py-1 transition-colors',
-            todayBtn: 'bg-teal-500/10 text-teal-700 border border-teal-500/25 hover:bg-teal-500/15 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all active:scale-95',
+            navArrowBtn: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200 rounded-full p-1 transition-colors active:scale-95',
+            monthTextBtn: 'text-slate-900 hover:text-teal-700 hover:bg-slate-100/80 rounded-md text-xs sm:text-[13px] font-bold px-2 py-0.5 transition-colors',
+            todayBtn: 'bg-teal-500/10 text-teal-700 border border-teal-500/25 hover:bg-teal-500/15 rounded-lg px-2 py-0.5 text-[11px] sm:text-xs font-semibold transition-all active:scale-95',
         };
     };
 
@@ -200,10 +200,10 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
                                     <button
                                         type="button"
                                         onClick={onOpenMonthPicker}
-                                        className={`flex items-center space-x-1.5 cursor-pointer ${styles.monthTextBtn}`}
+                                        className={`flex items-center justify-center space-x-1.5 cursor-pointer w-[130px] min-[380px]:w-[145px] sm:w-[165px] shrink-0 text-center ${styles.monthTextBtn}`}
                                     >
                                         <CalendarDays className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                                        <span className="truncate whitespace-nowrap">
+                                        <span className="truncate whitespace-nowrap text-center">
                                             {MONTH_NAMES[selectedMonth - 1]} {selectedYear}
                                         </span>
                                     </button>

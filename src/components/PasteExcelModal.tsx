@@ -38,12 +38,6 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<PasteTab>(initialTab);
 
-  useEffect(() => {
-    if (isOpen && initialTab) {
-      setActiveTab(initialTab);
-    }
-  }, [isOpen, initialTab]);
-
   const [spreadsheetShifts, setSpreadsheetShifts] = useState<MatchedDayShift[]>([]);
   const [spreadsheetValidCount, setSpreadsheetValidCount] = useState<number>(0);
 
@@ -649,9 +643,13 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
   const modalContent = (
     <AnimatePresence>
       {/* Backdrop (Latar Belakang Gelap / Buram) */}
-      <div
+      <motion.div
         key="paste-excel-modal-backdrop"
-        className="fixed inset-0 sm:top-7 z-[99998] bg-black/75 backdrop-blur-sm select-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 sm:top-7 z-[99998] bg-black/75 backdrop-blur-sm select-none pointer-events-auto"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -662,12 +660,17 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
         className="fixed inset-0 sm:top-7 z-[99999] flex items-center justify-center p-3 sm:p-5 pointer-events-none select-none"
         data-theme={theme}
       >
-        {/* .form-card1 Outer Gradient Glowing Shell */}
+        {/* .form-card1 Outer Gradient Glowing Shell with Soft Subtle Spring Bounce */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          initial={{ opacity: 0, scale: 0.96, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          exit={{ opacity: 0, scale: 0.97, y: 8 }}
+          transition={{
+            type: 'spring',
+            damping: 26,
+            stiffness: 360,
+            mass: 0.7,
+          }}
           onClick={(e) => e.stopPropagation()}
           onContextMenu={handleModalContextMenu}
           style={{
@@ -675,7 +678,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
             borderRadius: currentStyle.outerRadius,
             boxShadow: currentStyle.outerShadow,
           }}
-          className="p-[2px] w-full max-w-xl sm:max-w-2xl transition-all duration-300 max-h-[92vh] flex flex-col pointer-events-auto relative z-[99999]"
+          className="p-[2px] w-full max-w-xl sm:max-w-2xl max-h-[92vh] flex flex-col pointer-events-auto relative z-[99999]"
         >
           {/* .form-card2 Inner Form Container */}
           <div
@@ -686,7 +689,7 @@ export const PasteExcelModal: React.FC<PasteExcelModalProps> = ({
               color: currentStyle.textColor,
               ...(isVista ? { backdropFilter: 'blur(24px) saturate(200%)', WebkitBackdropFilter: 'blur(24px) saturate(200%)' } : {})
             }}
-            className={`flex flex-col p-3.5 sm:p-5 overflow-hidden max-h-[calc(92vh-4px)] transition-all duration-200 relative ${
+            className={`flex flex-col p-3.5 sm:p-5 overflow-hidden max-h-[calc(92vh-4px)] relative ${
               isWinamp ? 'font-mono' : ''
             }`}
           >

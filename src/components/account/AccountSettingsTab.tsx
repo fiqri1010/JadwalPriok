@@ -25,7 +25,7 @@ import {
     getSimpleOS,
     getDeviceMacAddress,
 } from '../../utils/deviceDetector';
-import { addApprovalRequest } from '../../utils/adminStorage';
+import { addApprovalRequest, syncDeviceSessionToAdminSessions, getCurrentUserRoleInfo, getAdminUsers, saveAdminUsers } from '../../utils/adminStorage';
 
 interface AccountSettingsTabProps {
     theme?: AppTheme;
@@ -58,9 +58,6 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
-
-    // Form Profile Edit
-    const [isEditingProfile, setIsEditingProfile] = useState(false);
 
     // Delete Account Request Modal State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -150,6 +147,8 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                 };
                 const updated = [currentSession, ...existingNonCurrent];
                 localStorage.setItem(LOCAL_STORAGE_SESSIONS_KEY, JSON.stringify(updated));
+                // Sinkronkan ke sesi admin agar selalu identik
+                syncDeviceSessionToAdminSessions(nip, namaPegawai, currentSession);
                 return updated;
             });
 
@@ -206,17 +205,23 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
         setHasPassword(true);
         setNewPassword('');
         setConfirmPassword('');
+
+        // Sinkronkan ke daftar database pengguna di aplikasi
+        try {
+            const adminUsers = getAdminUsers();
+            const target = adminUsers.find((u) => u.nip === nip);
+            if (target) {
+                target.hasPassword = true;
+                target.passwordValue = trimmed;
+                saveAdminUsers(adminUsers);
+            }
+        } catch {}
+
         setPasswordSuccess('Password berhasil disimpan dan diterapkan untuk akun Anda.');
         onShowToast('Password akun berhasil diperbarui tanpa perlu password lama.');
     };
 
-    const handleSaveProfile = (e: React.FormEvent) => {
-        e.preventDefault();
-        localStorage.setItem(LOCAL_STORAGE_NIP_KEY, nip);
-        localStorage.setItem(LOCAL_STORAGE_NAME_KEY, namaPegawai);
-        setIsEditingProfile(false);
-        onShowToast('Informasi NIP dan identitas pegawai berhasil disimpan.');
-    };
+    const roleInfo = getCurrentUserRoleInfo();
 
     const handleSendDeleteRequest = (e: React.FormEvent) => {
         e.preventDefault();
@@ -240,7 +245,7 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
 
     return (
         <div className="space-y-5 animate-in fade-in duration-200">
-            {/* 1. PALING ATAS: Header Informasi Akun & Pengaturan Tampilan Nama/NIP */}
+            {/* 1. PALING ATAS: Header Informasi Akun & Role */}
             <div className={`p-4 rounded-xl border ${
                 isIndustrial
                     ? 'bg-[#0F1115] border-[rgba(226,232,240,0.15)] text-[#E2E8F0]'
@@ -267,8 +272,11 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                             <User className="w-6 h-6 opacity-70" />
                         </div>
                         <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <h3 className="text-sm sm:text-base font-extrabold">{namaPegawai}</h3>
+                                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase border ${roleInfo.badgeColor}`}>
+                                    Role: {roleInfo.authorityName}
+                                </span>
                                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase ${
                                     hasPassword
                                         ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
@@ -283,56 +291,7 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                             </div>
                         </div>
                     </div>
-
-                    <button
-                        type="button"
-                        onClick={() => setIsEditingProfile(!isEditingProfile)}
-                        className={`self-start sm:self-center px-3 py-1.5 text-xs font-bold rounded-lg border cursor-pointer transition-colors ${
-                            isIndustrial
-                                ? 'border-[#2DD4BF]/40 text-[#2DD4BF] hover:bg-[#2DD4BF]/10'
-                                : 'border-current/20 hover:bg-current/5'
-                        }`}
-                    >
-                        {isEditingProfile ? 'Batal Edit' : 'Ubah Tampilan Nama & NIP'}
-                    </button>
                 </div>
-
-                {/* Form Edit NIP & Nama Pegawai */}
-                {isEditingProfile && (
-                    <form onSubmit={handleSaveProfile} className="mt-4 pt-4 border-t border-current/15 space-y-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label className="text-xs font-bold block mb-1">Nama Pegawai:</label>
-                                <input
-                                    type="text"
-                                    value={namaPegawai}
-                                    onChange={(e) => setNamaPegawai(e.target.value)}
-                                    placeholder="Nama Pegawai / Posko..."
-                                    className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-bold outline-none focus:border-teal-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold block mb-1">NIP Pegawai (18 Digit):</label>
-                                <input
-                                    type="text"
-                                    value={nip}
-                                    onChange={(e) => setNip(e.target.value)}
-                                    placeholder="Masukkan 18 digit NIP..."
-                                    className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-mono font-bold outline-none focus:border-teal-500"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-end">
-                            <button
-                                type="submit"
-                                className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white cursor-pointer shadow-xs flex items-center gap-1.5"
-                            >
-                                <Save className="w-3.5 h-3.5" />
-                                <span>Simpan Tampilan Nama</span>
-                            </button>
-                        </div>
-                    </form>
-                )}
             </div>
 
             {/* 2. DIBAWAHNYA: Pengaturan Ubah / Reset Password */}
@@ -607,10 +566,11 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                                 setDeleteConfirmInput('');
                                 setIsDeleteModalOpen(true);
                             }}
-                            className="px-3.5 py-2 text-xs font-bold rounded-lg border border-rose-500/50 bg-rose-600 hover:bg-rose-700 text-white cursor-pointer shadow-xs transition-all active:scale-95 flex items-center gap-1.5 self-start sm:self-center"
+                            className="btn-glitch-delete px-3.5 py-2 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white cursor-pointer shadow-xs transition-all flex items-center gap-1.5 self-start sm:self-center"
+                            data-text="Kirim Permintaan Hapus"
                         >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>Kirim Permintaan Hapus</span>
+                            <Trash2 className="w-3.5 h-3.5 shrink-0 relative z-10" />
+                            <span className="relative z-10">Kirim Permintaan Hapus</span>
                         </button>
                     </div>
                 </div>
@@ -670,14 +630,15 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                                 <button
                                     type="submit"
                                     disabled={deleteConfirmInput !== 'HAPUS'}
-                                    className={`px-4 py-2 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all ${
+                                    className={`btn-glitch-delete px-4 py-2 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all ${
                                         deleteConfirmInput === 'HAPUS'
-                                            ? 'bg-rose-600 hover:bg-rose-700 text-white cursor-pointer shadow-xs active:scale-95'
-                                            : 'bg-rose-600/40 text-white/60 cursor-not-allowed'
+                                            ? 'bg-rose-600 hover:bg-rose-700 text-white cursor-pointer shadow-xs'
+                                            : 'bg-rose-600/40 text-white/60 cursor-not-allowed pointer-events-none'
                                     }`}
+                                    data-text="Kirim Permintaan Hapus"
                                 >
-                                    <Trash2 className="w-4 h-4" />
-                                    <span>Kirim Permintaan Hapus</span>
+                                    <Trash2 className="w-4 h-4 shrink-0 relative z-10" />
+                                    <span className="relative z-10">Kirim Permintaan Hapus</span>
                                 </button>
                             </div>
                         </form>

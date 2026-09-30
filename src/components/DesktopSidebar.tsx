@@ -10,9 +10,12 @@ import {
     User,
     Fingerprint,
     Shield,
+    Sparkles,
 } from 'lucide-react';
 import { ThemeConfig } from '../themeConfig';
 import { AppTheme } from '../types';
+import { UserRole } from '../types/admin';
+import { getCurrentUserRoleInfo } from '../utils/adminStorage';
 import { Tooltip } from './Tooltip';
 import { AppLogo } from './AppLogo';
 import { APP_VERSION } from '../version';
@@ -43,14 +46,14 @@ const StyledSidebarWrapper = styled.div`
 
 interface DesktopSidebarProps {
     isOpen: boolean;
-    pageTab: 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin';
-    setPageTab: (tab: 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin') => void;
+    pageTab: 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing';
+    setPageTab: (tab: 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing') => void;
     themeConfig: ThemeConfig;
     currentTheme?: AppTheme;
     isAdmin?: boolean;
     userName?: string;
     userNip?: string;
-    userRole?: 'admin' | 'end-user' | 'non-user';
+    userRole?: UserRole;
 }
 
 export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
@@ -65,9 +68,14 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
     userRole,
 }) => {
     // Dynamic Fallback from localStorage
-    const activeUserName = userName || localStorage.getItem('jadwalpriok_user_name') || 'Petugas Posko Shift';
-    const activeUserNip = userNip || localStorage.getItem('jadwalpriok_user_nip') || '199208152015021002';
-    const activeRole = userRole || (isAdmin ? 'admin' : 'end-user');
+    const activeUserName = userName || localStorage.getItem('jadwalpriok_user_name') || 'Ahmad Fiqri';
+    const activeUserNip = userNip || localStorage.getItem('jadwalpriok_user_nip') || '199510102015121002';
+    const isSuperAdminAccount = activeUserName === 'Ahmad Fiqri' || activeUserNip === '199510102015121002';
+    const roleInfo = isSuperAdminAccount
+        ? { role: 'superadmin' as UserRole, authorityName: 'Super Admin', badgeColor: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' }
+        : getCurrentUserRoleInfo();
+    const activeRole = isSuperAdminAccount ? 'superadmin' : (userRole || roleInfo.role);
+    const canAccessAdmin = isSuperAdminAccount || activeRole === 'admin' || activeRole === 'superadmin' || userRole === 'admin' || userRole === 'superadmin' || isAdmin;
 
     return (
         <aside
@@ -89,46 +97,46 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
             }`}>
                 <div className="flex flex-col">
                     {/* 1. Top Brand Header: Logo dan Nama Aplikasi di paling atas Sidebar - Terbuka utuh menyatu sampai atas */}
-                    <div className="flex items-center min-h-[48px] sm:min-h-[52px] px-3.5 lg:px-4 pt-2.5 pb-1 shrink-0">
+                    <div className="flex items-center min-h-[40px] sm:min-h-[44px] px-3.5 lg:px-4 py-1 shrink-0">
                         <div className="flex items-center space-x-2.5 min-w-0 flex-1">
-                            <div className={`${themeConfig.isIndustrial ? 'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-[6px] bg-[#1A1D23] text-[#2DD4BF] border border-[#2DD4BF]/40' : themeConfig.logoContainerClass} shrink-0 self-center`}>
-                                <AppLogo className={themeConfig.isIndustrial ? "h-4.5 w-4.5 sm:h-5 sm:w-5 text-[#2DD4BF]" : "h-6 w-6 lg:h-7 lg:w-7"} />
+                            <div className={`${themeConfig.isIndustrial ? 'flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-[6px] bg-[#1A1D23] text-[#2DD4BF] border border-[#2DD4BF]/40' : themeConfig.logoContainerClass} shrink-0 self-center`}>
+                                <AppLogo className={themeConfig.isIndustrial ? "h-4 w-4 sm:h-4.5 sm:w-4.5 text-[#2DD4BF]" : "h-5 w-5 lg:h-6 lg:w-6"} />
                             </div>
                             <div className="min-w-0 flex flex-col justify-center">
                                 {themeConfig.isTechnical && (
-                                    <span className="text-[9px] font-['JetBrains_Mono'] font-bold text-[#111113]/70 uppercase tracking-widest leading-none mb-0.5">
+                                    <span className="text-[8px] font-['JetBrains_Mono'] font-bold text-[#111113]/70 uppercase tracking-widest leading-none mb-0.5">
                                         v{APP_VERSION}
                                     </span>
                                 )}
                                 {themeConfig.isEditorial && (
-                                    <span className="text-[9px] font-['Geist_Mono'] font-medium text-[#1a1a1a]/60 uppercase tracking-widest leading-none mb-0.5">
+                                    <span className="text-[8px] font-['Geist_Mono'] font-medium text-[#1a1a1a]/60 uppercase tracking-widest leading-none mb-0.5">
                                         v{APP_VERSION}
                                     </span>
                                 )}
                                 {themeConfig.isIndustrial && (
-                                    <span className="text-[9px] font-['JetBrains_Mono'] font-bold text-[#2DD4BF]/80 uppercase tracking-widest leading-none mb-0.5">
+                                    <span className="text-[8px] font-['JetBrains_Mono'] font-bold text-[#2DD4BF]/80 uppercase tracking-widest leading-none mb-0.5">
                                         v{APP_VERSION}
                                     </span>
                                 )}
                                 {themeConfig.isDashboard && (
-                                    <span className="text-[9px] font-['JetBrains_Mono'] font-bold text-[#297373] uppercase tracking-widest leading-none mb-0.5">
+                                    <span className="text-[8px] font-['JetBrains_Mono'] font-bold text-[#297373] uppercase tracking-widest leading-none mb-0.5">
                                         v{APP_VERSION}
                                     </span>
                                 )}
-                                <h1 className={`${themeConfig.titleClass} font-black leading-tight truncate`}>
+                                <h1 className={`${themeConfig.titleClass} font-black leading-tight truncate text-xs sm:text-[13px] lg:text-[14px]`}>
                                     JadwalPriok
                                 </h1>
-                                <p className={`${themeConfig.subtitleClass} leading-tight truncate opacity-75`}>
+                                <p className={`${themeConfig.subtitleClass} leading-tight truncate opacity-75 text-[10px]`}>
                                     Kalender Kerja
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* 2. Informasi Nama dan NIP Pengguna Aktif (Di bawah Judul & Logo, di atas Menu Utama) - Komponen Statis */}
-                    <div className="px-2.5 lg:px-3 pt-1 pb-1.5">
+                    {/* 2. Informasi Nama dan NIP Pengguna Aktif (Tanpa SVG Profil Samping) */}
+                    <div className="px-2.5 lg:px-3 pt-0.5 pb-1">
                         <div
-                            className={`w-full text-left p-2 rounded-lg border flex items-center space-x-2.5 select-none ${
+                            className={`w-full text-left p-2 rounded-lg border flex flex-col select-none ${
                                 themeConfig.isIndustrial
                                     ? 'bg-[#1A1D23]/90 border-[rgba(226,232,240,0.12)] text-[#E2E8F0]'
                                     : themeConfig.isPaperSketch
@@ -142,21 +150,6 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
                                     : 'bg-slate-50/90 dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700/60 text-slate-900 dark:text-slate-100'
                             }`}
                         >
-                            <div className={`w-7 h-7 lg:w-8 lg:h-8 rounded-md flex items-center justify-center shrink-0 border ${
-                                themeConfig.isIndustrial
-                                    ? 'bg-[#0F1115] border-[#2DD4BF]/40 text-[#2DD4BF]'
-                                    : themeConfig.isPaperSketch
-                                    ? 'bg-[#ffeedd] border border-[#2b2b2b] text-[#2b2b2b]'
-                                    : currentTheme === 'winamp'
-                                    ? 'bg-zinc-900 border-[#00FF00] text-[#00FF00]'
-                                    : 'bg-teal-500/15 border-teal-500/30 text-teal-600 dark:text-teal-400'
-                            }`}>
-                                {activeRole === 'admin' ? (
-                                    <Shield className="w-4 h-4" />
-                                ) : (
-                                    <User className="w-4 h-4" />
-                                )}
-                            </div>
                             <div className="min-w-0 flex-1 overflow-hidden">
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-xs font-black truncate block leading-tight">
@@ -167,6 +160,11 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
                                     <Fingerprint className="w-3 h-3 shrink-0 text-current/60" />
                                     <span className="text-[10px] lg:text-[10.5px] font-mono font-bold tracking-tight truncate leading-none">
                                         {activeUserNip}
+                                    </span>
+                                </div>
+                                <div className="mt-1.5 flex items-center">
+                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded font-mono uppercase tracking-wide border ${roleInfo.badgeColor}`}>
+                                        {roleInfo.authorityName}
                                     </span>
                                 </div>
                             </div>
@@ -293,8 +291,29 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
                             </button>
                         </Tooltip>
 
-                        {/* 6. Dashboard Administrator (Khusus Admin) */}
-                        {isAdmin && (
+                        {/* 6. Landing Page (Ujicoba Onboarding & Otentikasi) */}
+                        <Tooltip
+                            content={<span>Buka <strong>Landing Page & Otentikasi NIP</strong></span>}
+                            placement="right"
+                            containerClassName="w-full"
+                        >
+                            <button
+                                type="button"
+                                id="side-menu-landing"
+                                onClick={() => setPageTab('landing')}
+                                className={`w-full flex items-center space-x-2.5 px-3 py-2 text-xs lg:text-[13px] xl:text-sm font-bold rounded-[5px] lg:rounded-[7px] transition-all cursor-pointer ${
+                                    pageTab === 'landing'
+                                        ? themeConfig.sidebarItemActiveClass
+                                        : themeConfig.sidebarItemInactiveClass
+                                }`}
+                            >
+                                <Sparkles className="h-4 w-4 lg:h-[18px] lg:w-[18px] text-teal-500 shrink-0" />
+                                <span className="truncate flex-1 text-left">Landing Page</span>
+                            </button>
+                        </Tooltip>
+
+                        {/* 7. Dashboard Administrator (Khusus Admin & Super Admin) */}
+                        {canAccessAdmin && (
                             <Tooltip
                                 content={<span>Akses <strong>Dashboard Administrator Posko</strong></span>}
                                 placement="right"

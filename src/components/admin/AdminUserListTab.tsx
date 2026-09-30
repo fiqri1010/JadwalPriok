@@ -17,10 +17,14 @@ import {
     Unlock,
     Building2,
     X,
+    ArrowUpDown,
+    ArrowUp,
+    ArrowDown,
 } from 'lucide-react';
-import { UserAccount, AuthorityProfile, UserRole } from '../../types/admin';
+import { UserAccount, AuthorityProfile, UserRole, UserSessionRecord } from '../../types/admin';
 import { AppTheme } from '../../types';
 import { Checkbox } from '../ui/Checkbox';
+import { getAllUserSessions, getApprovalRequests, saveApprovalRequests, LOCAL_STORAGE_CURRENT_NIP_KEY, LOCAL_STORAGE_CURRENT_PASS_KEY } from '../../utils/adminStorage';
 
 export const POSKO_OPTIONS = [
     'Posko Graha Lt. 1',
@@ -33,23 +37,47 @@ export const POSKO_OPTIONS = [
 interface AdminUserListTabProps {
     users: UserAccount[];
     authorityProfiles: AuthorityProfile[];
+    sessions?: UserSessionRecord[];
     onUpdateUsers: (users: UserAccount[]) => void;
     onShowToast: (msg: string) => void;
     theme?: AppTheme;
+    currentRole?: UserRole;
 }
 
 export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     users,
     authorityProfiles,
+    sessions,
     onUpdateUsers,
     onShowToast,
     theme = 'default',
+    currentRole = 'superadmin',
 }) => {
     const isIndustrial = theme === 'industrial';
     const isPaperSketch = theme === 'paperSketch';
     const isTechnical = theme === 'technical';
     const isWinamp = theme === 'winamp';
     const isDark = theme === 'dark';
+
+    // Daftar sesi aktif yang tersinkronisasi penuh dengan Pengaturan Akun
+    const activeSessions = useMemo(() => {
+        return sessions && sessions.length > 0 ? sessions : getAllUserSessions();
+    }, [sessions]);
+
+    // Helper untuk mengecek apakah akun pengguna adalah Super Admin
+    const isSuperAdminUser = (u: UserAccount) => {
+        return (
+            u.authorityProfileId === 'prof-superadmin' ||
+            u.nip === '199510102015121002' ||
+            (Boolean(u.authorityName) && u.authorityName.toLowerCase().includes('super admin'))
+        );
+    };
+
+    // Akses dibekukan jika akun target adalah Super Admin DAN operator yang aktif bukan Super Admin
+    // (role admin serta role dibawahnya dibekukan aksesnya ke akun super admin)
+    const isAccountFrozen = (u: UserAccount) => {
+        return isSuperAdminUser(u) && currentRole !== 'superadmin';
+    };
 
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState<'all' | UserRole | 'external'>('all');
@@ -94,6 +122,10 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     };
 
     const openEditModal = (user: UserAccount) => {
+        if (isAccountFrozen(user)) {
+            onShowToast('Akses edit ke akun Super Admin dibekukan untuk role Admin.');
+            return;
+        }
         setEditingUser(user);
         setFormNip(user.nip);
         setFormName(user.name);
@@ -138,13 +170,18 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     const handleSaveEdit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingUser) return;
+        if (isAccountFrozen(editingUser)) {
+            onShowToast('Akses edit ke akun Super Admin dibekukan untuk role Admin.');
+            setEditingUser(null);
+            return;
+        }
         if (!formName.trim()) {
             onShowToast('Nama pengguna tidak boleh kosong.');
             return;
         }
 
         const selectedProfile = authorityProfiles.find((p) => p.id === formProfileId) || authorityProfiles[0];
-        const isSuperAdmin = editingUser.authorityProfileId === 'prof-superadmin' || editingUser.nip === '199510102015121002';
+        const isSuperAdmin = isSuperAdminUser(editingUser);
         const finalActive = isSuperAdmin ? true : formIsActive;
 
         const updated = users.map((u) => {
@@ -171,7 +208,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
 
     // Toggle Aktif via Checkbox
     const handleToggleCheckbox = (user: UserAccount) => {
-        const isSuperAdmin = user.authorityProfileId === 'prof-superadmin' || user.nip === '199510102015121002';
+        const isSuperAdmin = isSuperAdminUser(user);
         if (isSuperAdmin) {
             onShowToast('Akun Utama Super Admin tidak dapat dinonaktifkan.');
             return;
@@ -185,6 +222,11 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     // Eksekusi Reset Password (langsung mengosongkan password)
     const handleExecuteResetPassword = () => {
         if (!resettingUser) return;
+        if (isAccountFrozen(resettingUser)) {
+            onShowToast('Reset password akun Super Admin dibekukan untuk role Admin.');
+            setResettingUser(null);
+            return;
+        }
         const updated = users.map((u) => {
             if (u.id === resettingUser.id) {
                 return {
@@ -196,6 +238,33 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
             return u;
         });
         onUpdateUsers(updated);
+
+        // Jika user yang direset sedang aktif di perangkat lokal, bersihkan password sesi
+        try {
+            const currentNip = localStorage.getItem(LOCAL_STORAGE_CURRENT_NIP_KEY);
+            if (currentNip === resettingUser.nip) {
+                localStorage.removeItem(LOCAL_STORAGE_CURRENT_PASS_KEY);
+            }
+        } catch {}
+
+        // Otomatis tandai selesai pengajuan reset password di antrean persetujuan jika ada
+        try {
+            const pendingReqs = getApprovalRequests();
+            const hasPending = pendingReqs.some(
+                (r) => r.userNip === resettingUser.nip && r.requestType === 'reset_password' && r.status === 'pending'
+            );
+            if (hasPending) {
+                const nowStr = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+                const resolved = pendingReqs.map((r) => {
+                    if (r.userNip === resettingUser.nip && r.requestType === 'reset_password' && r.status === 'pending') {
+                        return { ...r, status: 'approved' as const, processedAt: nowStr, processedBy: 'Admin (Daftar Pengguna)' };
+                    }
+                    return r;
+                });
+                saveApprovalRequests(resolved);
+            }
+        } catch {}
+
         setResettingUser(null);
         onShowToast(`Password pengguna ${resettingUser.name} (NIP: ${resettingUser.nip}) berhasil direset & dikosongkan.`);
     };
@@ -203,6 +272,11 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     // Eksekusi Hapus User
     const handleExecuteDelete = () => {
         if (!deletingUser) return;
+        if (isSuperAdminUser(deletingUser)) {
+            onShowToast('Akun Super Admin tidak dapat dihapus.');
+            setDeletingUser(null);
+            return;
+        }
         const updated = users.filter((u) => u.id !== deletingUser.id);
         onUpdateUsers(updated);
         setDeletingUser(null);
@@ -231,6 +305,76 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
         return matchesSearch && matchesRole && matchesStatus && matchesPosko;
     });
 
+    // Sorting State
+    type SortField = 'no' | 'name' | 'nip' | 'unitPosko' | 'session' | 'isActive' | 'hasPassword' | 'edit' | 'delete';
+    type SortDirection = 'asc' | 'desc';
+
+    const [sortField, setSortField] = useState<SortField>('no');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
+
+    const sortedUsers = useMemo(() => {
+        const list = [...filteredUsers];
+        if (sortField === 'no') {
+            return sortDirection === 'asc' ? list : list.reverse();
+        }
+        list.sort((a, b) => {
+            let valA: any = '';
+            let valB: any = '';
+            if (sortField === 'name') {
+                valA = a.name.toLowerCase();
+                valB = b.name.toLowerCase();
+            } else if (sortField === 'nip') {
+                valA = a.nip;
+                valB = b.nip;
+            } else if (sortField === 'unitPosko') {
+                valA = a.unitPosko.toLowerCase();
+                valB = b.unitPosko.toLowerCase();
+            } else if (sortField === 'session') {
+                const sessA = activeSessions.find((s) => s.userNip === a.nip);
+                const sessB = activeSessions.find((s) => s.userNip === b.nip);
+                valA = sessA ? (sessA.isOnline ? 2 : 1) : 0;
+                valB = sessB ? (sessB.isOnline ? 2 : 1) : 0;
+            } else if (sortField === 'isActive') {
+                valA = a.isActive ? 1 : 0;
+                valB = b.isActive ? 1 : 0;
+            } else if (sortField === 'hasPassword') {
+                valA = a.hasPassword ? 1 : 0;
+                valB = b.hasPassword ? 1 : 0;
+            } else if (sortField === 'edit') {
+                valA = (a.authorityName || a.role).toLowerCase();
+                valB = (b.authorityName || b.role).toLowerCase();
+            } else if (sortField === 'delete') {
+                valA = isSuperAdminUser(a) ? 0 : 1;
+                valB = isSuperAdminUser(b) ? 0 : 1;
+            }
+
+            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+        return list;
+    }, [filteredUsers, sortField, sortDirection, activeSessions]);
+
+    const renderSortIcon = (field: SortField) => {
+        if (sortField !== field) {
+            return <ArrowUpDown className="w-3 h-3 opacity-30 ml-1 inline-block shrink-0 transition-opacity group-hover:opacity-75" />;
+        }
+        return sortDirection === 'asc' ? (
+            <ArrowUp className="w-3 h-3 text-teal-600 dark:text-teal-400 ml-1 inline-block shrink-0" />
+        ) : (
+            <ArrowDown className="w-3 h-3 text-teal-600 dark:text-teal-400 ml-1 inline-block shrink-0" />
+        );
+    };
+
     return (
         <div className="space-y-4">
             {/* Action Bar Header */}
@@ -242,14 +386,14 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                     <div>
                         <div className="flex items-center gap-2">
                             <h3 className="text-sm sm:text-base font-extrabold uppercase tracking-wide">
-                                Daftar Pengguna Posko
+                                Akun Pengguna
                             </h3>
                             <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30">
                                 {users.length} Total Pegawai
                             </span>
                         </div>
                         <p className="text-xs opacity-70">
-                            Kelola akun, status aktif akun, reset password, dan perizinan akses petugas
+                            Kelola akun, status aktif akun, sesi perangkat, reset password, dan perizinan petugas
                         </p>
                     </div>
                 </div>
@@ -342,23 +486,143 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                     ? 'bg-[#161616] border-slate-800'
                     : 'bg-white border-slate-200'
             }`}>
-                <div className="overflow-x-auto select-none no-scrollbar max-h-[340px] overflow-y-auto">
-                    <table className="w-full border-collapse text-xs">
+                <div className="overflow-x-auto select-none no-scrollbar max-h-[520px] lg:max-h-[580px] overflow-y-auto">
+                    <table className="w-full min-w-[720px] border-collapse text-xs">
                         <thead>
-                            <tr className="bg-current/5 border-b border-current/15 text-left font-bold text-[10.5px] uppercase tracking-wider sticky top-0 bg-slate-200/90 dark:bg-[#161616]/95 backdrop-blur-xs z-10">
-                                <th className="py-2 px-2.5 text-center w-10 min-w-[36px]">No.</th>
-                                <th className="py-2 px-2.5 min-w-[160px]">Nama</th>
-                                <th className="py-2 px-2.5 min-w-[110px]">NIP</th>
-                                <th className="py-2 px-2.5 min-w-[140px]">Posko</th>
-                                <th className="py-2 px-2.5 text-center min-w-[85px]">Aktif</th>
-                                <th className="py-2 px-2.5 text-center min-w-[100px]">Reset Pass</th>
-                                <th className="py-2 px-2.5 text-center min-w-[70px]">Edit</th>
-                                <th className="py-2 px-2.5 text-center min-w-[70px]">Hapus</th>
+                            <tr className="bg-current/5 border-b border-current/15 text-center font-bold text-[10.5px] uppercase tracking-wider sticky top-0 bg-slate-200/90 dark:bg-[#161616]/95 backdrop-blur-xs z-10">
+                                {/* 1. No */}
+                                <th
+                                    onClick={() => handleSort('no')}
+                                    className={`py-2 px-1.5 text-center w-12 min-w-[38px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                        sortField === 'no' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
+                                    }`}
+                                    title="Klik untuk mengurutkan No. Urut"
+                                >
+                                    <div className="inline-flex items-center justify-center gap-0.5 w-full mx-auto text-center">
+                                        <span>No.</span>
+                                        {renderSortIcon('no')}
+                                    </div>
+                                </th>
+
+                                {/* 2. Nama */}
+                                <th
+                                    onClick={() => handleSort('name')}
+                                    className={`py-2 px-2 text-center min-w-[140px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                        sortField === 'name' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
+                                    }`}
+                                    title="Klik untuk mengurutkan Nama Pengguna"
+                                >
+                                    <div className="inline-flex items-center justify-center gap-1 w-full mx-auto text-center">
+                                        <span>Nama</span>
+                                        {renderSortIcon('name')}
+                                    </div>
+                                </th>
+
+                                {/* 3. NIP */}
+                                <th
+                                    onClick={() => handleSort('nip')}
+                                    className={`py-2 px-2 text-center min-w-[105px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                        sortField === 'nip' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
+                                    }`}
+                                    title="Klik untuk mengurutkan NIP"
+                                >
+                                    <div className="inline-flex items-center justify-center gap-1 w-full mx-auto text-center">
+                                        <span>NIP</span>
+                                        {renderSortIcon('nip')}
+                                    </div>
+                                </th>
+
+                                {/* 4. Posko */}
+                                <th
+                                    onClick={() => handleSort('unitPosko')}
+                                    className={`py-2 px-2 text-center min-w-[125px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                        sortField === 'unitPosko' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
+                                    }`}
+                                    title="Klik untuk mengurutkan Posko"
+                                >
+                                    <div className="inline-flex items-center justify-center gap-1 w-full mx-auto text-center">
+                                        <span>Posko</span>
+                                        {renderSortIcon('unitPosko')}
+                                    </div>
+                                </th>
+
+                                {/* 5. Sesi */}
+                                <th
+                                    onClick={() => handleSort('session')}
+                                    className={`py-2 px-2 text-center min-w-[125px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                        sortField === 'session' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
+                                    }`}
+                                    title="Klik untuk mengurutkan status Sesi Perangkat"
+                                >
+                                    <div className="inline-flex items-center justify-center gap-1 w-full mx-auto text-center">
+                                        <span>Sesi</span>
+                                        {renderSortIcon('session')}
+                                    </div>
+                                </th>
+
+                                {/* 6. Aktif */}
+                                <th
+                                    onClick={() => handleSort('isActive')}
+                                    className={`py-2 px-1 text-center min-w-[70px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                        sortField === 'isActive' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
+                                    }`}
+                                    title="Klik untuk mengurutkan Status Aktif"
+                                >
+                                    <div className="inline-flex items-center justify-center gap-0.5 w-full mx-auto text-center">
+                                        <span>Aktif</span>
+                                        {renderSortIcon('isActive')}
+                                    </div>
+                                </th>
+
+                                {/* 7. Reset Pass - Diperkecil & Autoscale */}
+                                <th
+                                    onClick={() => handleSort('hasPassword')}
+                                    className={`py-2 px-0.5 sm:px-1 text-center w-14 sm:w-16 min-w-[48px] sm:min-w-[56px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                        sortField === 'hasPassword' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
+                                    }`}
+                                    title="Klik untuk mengurutkan status password"
+                                >
+                                    <div className="inline-flex items-center justify-center gap-0.5 w-full mx-auto text-center">
+                                        <span className="truncate">Reset</span>
+                                        {renderSortIcon('hasPassword')}
+                                    </div>
+                                </th>
+
+                                {/* 8. Edit */}
+                                <th
+                                    onClick={() => handleSort('edit')}
+                                    className={`py-2 px-0.5 sm:px-1 text-center w-14 min-w-[48px] sm:min-w-[54px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                        sortField === 'edit' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
+                                    }`}
+                                    title="Klik untuk mengurutkan izin edit"
+                                >
+                                    <div className="inline-flex items-center justify-center gap-0.5 w-full mx-auto text-center">
+                                        <span>Edit</span>
+                                        {renderSortIcon('edit')}
+                                    </div>
+                                </th>
+
+                                {/* 9. Hapus */}
+                                <th
+                                    onClick={() => handleSort('delete')}
+                                    className={`py-2 px-0.5 sm:px-1 text-center w-14 min-w-[52px] sm:min-w-[58px] cursor-pointer hover:bg-current/10 transition-colors select-none group ${
+                                        sortField === 'delete' ? 'text-teal-600 dark:text-teal-400 bg-current/5' : ''
+                                    }`}
+                                    title="Klik untuk mengurutkan akun yang dapat dihapus"
+                                >
+                                    <div className="inline-flex items-center justify-center gap-0.5 w-full mx-auto text-center">
+                                        <span>Hapus</span>
+                                        {renderSortIcon('delete')}
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-current/10 font-sans">
-                            {filteredUsers.map((u, idx) => {
+                            {sortedUsers.map((u, idx) => {
                                 const prof = authorityProfiles.find((p) => p.id === u.authorityProfileId);
+                                const userSession = activeSessions.find((s) => s.userNip === u.nip);
+                                const isSuperAdmin = isSuperAdminUser(u);
+                                const isFrozen = isAccountFrozen(u);
 
                                 return (
                                     <tr
@@ -368,21 +632,21 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                         }`}
                                     >
                                         {/* 1. No. */}
-                                        <td className="py-2 px-2.5 text-center font-mono font-bold opacity-70">
+                                        <td className="py-2 px-1.5 text-center font-mono font-bold opacity-70">
                                             {idx + 1}
                                         </td>
 
                                         {/* 2. Nama */}
-                                        <td className="py-2 px-2.5 font-bold">
+                                        <td className="py-2 px-2 font-bold">
                                             <div className="truncate text-xs font-extrabold">{u.name}</div>
-                                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                                                <span className={`text-[9.5px] font-mono px-1.5 py-0.5 rounded font-bold uppercase border ${
+                                            <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                                <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold uppercase border ${
                                                     prof?.badgeColor || (u.role === 'admin' ? 'bg-teal-500/15 text-teal-600 border-teal-500/30' : 'bg-slate-500/15 text-slate-600 border-slate-500/30')
                                                 }`}>
-                                                    {prof?.name || u.authorityName || (u.role === 'admin' ? 'ADMIN' : 'END-USER')}
+                                                    {prof?.name || u.authorityName || (u.role === 'admin' ? 'ADMIN' : 'PPF')}
                                                 </span>
                                                 {u.isExternalNonAppUser && (
-                                                    <span className="text-[9.5px] font-mono px-1.5 py-0.5 rounded font-bold bg-indigo-500/15 text-indigo-600 border border-indigo-500/30">
+                                                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded font-bold bg-indigo-500/15 text-indigo-600 border border-indigo-500/30">
                                                         Luar
                                                     </span>
                                                 )}
@@ -390,26 +654,62 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                         </td>
 
                                         {/* 3. NIP */}
-                                        <td className="py-2 px-2.5 font-mono font-bold opacity-85 tracking-wide">
+                                        <td className="py-2 px-2 font-mono font-bold opacity-85 tracking-wide text-center">
                                             {u.nip}
                                         </td>
 
                                         {/* 4. Posko */}
-                                        <td className="py-2 px-2.5 opacity-80">
-                                            <div className="flex items-center gap-1.5">
+                                        <td className="py-2 px-2 opacity-80">
+                                            <div className="flex items-center gap-1">
                                                 <Building2 className="w-3.5 h-3.5 opacity-60 shrink-0" />
                                                 <span className="truncate">{u.unitPosko}</span>
                                             </div>
                                         </td>
 
-                                        {/* 5. Checkbox Aktif (Untuk mengaktifkan akun) */}
-                                        <td className="py-2 px-2.5 text-center">
+                                        {/* 5. Sesi (Online / Offline & Perangkat Riil Tersinkronisasi) */}
+                                        <td className="py-2 px-2 text-center min-w-[125px]">
+                                            {userSession ? (
+                                                <div className="inline-flex flex-col items-center justify-center text-center mx-auto max-w-[125px]">
+                                                    <div className="flex items-center justify-center gap-1.5">
+                                                        <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${
+                                                            userSession.isOnline
+                                                                ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)] animate-pulse'
+                                                                : 'bg-slate-400'
+                                                        }`} />
+                                                        <span className={`text-[10px] font-extrabold ${
+                                                            userSession.isOnline
+                                                                ? 'text-emerald-600 dark:text-emerald-400'
+                                                                : 'opacity-55'
+                                                        }`}>
+                                                            {userSession.isOnline ? 'Online' : 'Offline'}
+                                                        </span>
+                                                    </div>
+                                                    <div
+                                                        className="text-[9.5px] font-mono opacity-75 truncate max-w-[120px] mt-0.5 font-bold"
+                                                        title={`${userSession.deviceName} (${userSession.ipAddress}) • ${userSession.browser} / ${userSession.os}`}
+                                                    >
+                                                        {userSession.ipAddress || userSession.deviceName}
+                                                    </div>
+                                                    <div className="text-[9px] opacity-55 truncate max-w-[120px]">
+                                                        {userSession.lastActive}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="inline-flex items-center justify-center gap-1 text-[10px] opacity-40 font-mono">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400/50" />
+                                                    <span>Belum Login</span>
+                                                </div>
+                                            )}
+                                        </td>
+
+                                        {/* 6. Checkbox Aktif (Untuk mengaktifkan akun) */}
+                                        <td className="py-2 px-1 text-center">
                                             <Checkbox
                                                 id={`status-chk-${u.id}`}
                                                 theme={theme}
                                                 size="12px"
                                                 checked={u.isActive}
-                                                disabled={u.authorityProfileId === 'prof-superadmin' || u.nip === '199510102015121002'}
+                                                disabled={isSuperAdmin}
                                                 onChange={() => handleToggleCheckbox(u)}
                                                 label={
                                                     <span className={`text-[10px] font-bold ${
@@ -421,44 +721,73 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                             />
                                         </td>
 
-                                        {/* 6. Tombol Reset Pass */}
-                                        <td className="py-2 px-2.5 text-center">
-                                            <button
-                                                type="button"
-                                                onClick={() => setResettingUser(u)}
-                                                className="px-2 py-0.5 text-[10px] font-bold rounded border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 cursor-pointer inline-flex items-center gap-1 transition-all"
-                                                title="Reset dan kosongkan password akun ini"
-                                            >
-                                                <KeyRound className="w-3 h-3" />
-                                                <span>Reset Pass</span>
-                                            </button>
+                                        {/* 7. Tombol Reset Pass - Kompak, Autoscale & Dibekukan jika Super Admin */}
+                                        <td className="py-2 px-0.5 sm:px-1 text-center w-14 sm:w-16 min-w-[48px] sm:min-w-[56px]">
+                                            {isFrozen ? (
+                                                <button
+                                                    type="button"
+                                                    disabled
+                                                    onClick={() => onShowToast('Reset password akun Super Admin dibekukan untuk role Admin.')}
+                                                    className="w-full max-w-[52px] mx-auto py-1 px-0.5 text-[9px] font-bold rounded border border-current/15 bg-current/5 opacity-40 cursor-not-allowed inline-flex items-center justify-center gap-0.5 select-none"
+                                                    title="Reset password dibekukan: Hanya Super Admin yang dapat mereset akun Super Admin"
+                                                >
+                                                    <Lock className="w-2.5 h-2.5 shrink-0" />
+                                                    <span className="text-[8.5px]">Beku</span>
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setResettingUser(u)}
+                                                    className="w-full max-w-[52px] mx-auto py-1 px-0.5 text-[9px] font-bold rounded border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-0.5 transition-all"
+                                                    title="Reset dan kosongkan password akun ini"
+                                                >
+                                                    <KeyRound className="w-2.5 h-2.5 shrink-0" />
+                                                    <span>Reset</span>
+                                                </button>
+                                            )}
                                         </td>
 
-                                        {/* 7. Tombol Edit */}
-                                        <td className="py-2 px-2.5 text-center">
-                                            <button
-                                                type="button"
-                                                onClick={() => openEditModal(u)}
-                                                className="px-2 py-0.5 text-[10px] font-bold rounded border border-current/20 hover:bg-current/10 cursor-pointer inline-flex items-center gap-1 transition-all"
-                                                title="Edit Akun Pengguna"
-                                            >
-                                                <Edit3 className="w-3 h-3 text-teal-600" />
-                                                <span>Edit</span>
-                                            </button>
+                                        {/* 8. Tombol Edit - Dibekukan untuk Super Admin jika operator Admin */}
+                                        <td className="py-2 px-0.5 sm:px-1 text-center w-14 min-w-[48px] sm:min-w-[54px]">
+                                            {isFrozen ? (
+                                                <button
+                                                    type="button"
+                                                    disabled
+                                                    onClick={() => onShowToast('Akses edit ke akun Super Admin dibekukan untuk role Admin.')}
+                                                    className="w-full max-w-[50px] mx-auto py-1 px-0.5 text-[9px] font-bold rounded border border-current/15 bg-current/5 opacity-40 cursor-not-allowed inline-flex items-center justify-center gap-0.5 select-none"
+                                                    title="Akses edit dibekukan: Hanya Super Admin yang dapat mengubah akun Super Admin"
+                                                >
+                                                    <Lock className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                                                    <span className="text-[8.5px]">Beku</span>
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openEditModal(u)}
+                                                    className="w-full max-w-[50px] mx-auto py-1 px-0.5 text-[9.5px] font-bold rounded border border-current/20 hover:bg-current/10 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-0.5 transition-all"
+                                                    title="Edit Akun Pengguna"
+                                                >
+                                                    <Edit3 className="w-2.5 h-2.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                                                    <span>Edit</span>
+                                                </button>
+                                            )}
                                         </td>
 
-                                        {/* 8. Tombol Hapus */}
-                                        <td className="py-2 px-2.5 text-center">
-                                            {u.authorityProfileId === 'prof-superadmin' || u.nip === '199510102015121002' ? (
-                                                <span className="text-[10px] opacity-50 select-none font-bold">Admin Utama</span>
+                                        {/* 9. Tombol Hapus */}
+                                        <td className="py-2 px-0.5 sm:px-1 text-center w-14 min-w-[52px] sm:min-w-[58px]">
+                                            {isSuperAdmin ? (
+                                                <span className="text-[9px] opacity-40 select-none font-bold uppercase tracking-wider inline-flex items-center justify-center gap-0.5 text-center w-full">
+                                                    <Lock className="w-2.5 h-2.5 shrink-0" />
+                                                    <span>Admin</span>
+                                                </span>
                                             ) : (
                                                 <button
                                                     type="button"
                                                     onClick={() => setDeletingUser(u)}
-                                                    className="px-2 py-0.5 text-[10px] font-bold rounded border border-rose-500/40 text-rose-600 hover:bg-rose-500/10 cursor-pointer inline-flex items-center gap-1 transition-all"
+                                                    className="w-full max-w-[52px] mx-auto py-1 px-0.5 text-[9.5px] font-bold rounded border border-rose-500/40 text-rose-600 hover:bg-rose-500/10 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-0.5 transition-all"
                                                     title="Hapus Akun Pengguna"
                                                 >
-                                                    <Trash2 className="w-3 h-3" />
+                                                    <Trash2 className="w-2.5 h-2.5 shrink-0" />
                                                     <span>Hapus</span>
                                                 </button>
                                             )}
@@ -679,7 +1008,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                     theme={theme}
                                     checked={formIsExternal}
                                     onChange={(e) => setFormIsExternal(e.target.checked)}
-                                    label="Petugas Posko Luar (Data jadwal disalin terpusat untuk statistik)"
+                                    label="PPF non User (Data jadwal disalin terpusat untuk statistik)"
                                 />
                             </div>
 
@@ -802,7 +1131,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                     theme={theme}
                                     checked={formIsExternal}
                                     onChange={(e) => setFormIsExternal(e.target.checked)}
-                                    label="Petugas Posko Luar (Non-User)"
+                                    label="PPF non User"
                                 />
                             </div>
 

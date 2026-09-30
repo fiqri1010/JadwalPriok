@@ -30,7 +30,7 @@ interface TopNavbarProps {
     themeConfig: ThemeConfig;
     onOpenMobileMenu?: () => void;
     exportAction?: React.ReactNode;
-    pageTab?: 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin';
+    pageTab?: 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing';
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
@@ -70,8 +70,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     };
 
     return (
-        <header className={`${themeConfig.navbarClass} min-h-[48px] sm:min-h-[52px] flex items-center`}>
-            <div className="flex items-center justify-between py-1.5 sm:py-2 px-2.5 sm:px-4 md:px-5 w-full">
+        <header className={`${themeConfig.navbarClass} min-h-[40px] sm:min-h-[44px] flex items-center`}>
+            <div className="flex items-center justify-between py-1 sm:py-1.5 px-2.5 sm:px-4 md:px-5 w-full">
                 <div className="flex items-center min-w-0">
                     {/* Tombol Hamburger di Header (Desktop) - Selalu ada di Header dan bertransisi menjadi X saat Sidebar Terbuka */}
                     {!isMobile && (
@@ -80,22 +80,22 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                             isOpen={isDesktopSidebarOpen}
                             onToggle={handleToggle}
                             theme={currentTheme}
-                            className="hidden md:flex shrink-0 self-center mr-4"
+                            className="hidden md:flex shrink-0 self-center mr-3.5"
                             title={isDesktopSidebarOpen ? 'Sembunyikan Menu Samping' : 'Tampilkan Menu Samping'}
                         />
                     )}
 
                     {/* Logo & App Title: Tampil di Navbar pada mode Mobile atau saat Desktop Sidebar tertutup dengan jarak tepat 16px dari hamburger */}
                     {(isMobile || !isDesktopSidebarOpen) && (
-                        <div className="flex items-center space-x-2.5 min-w-0 transition-opacity duration-200 animate-in fade-in">
+                        <div className="flex items-center space-x-2 min-w-0 transition-opacity duration-200 animate-in fade-in">
                             <div className={`${themeConfig.logoContainerClass} shrink-0 self-center`}>
-                                <AppLogo className="h-6 w-6 sm:h-7 sm:w-7" />
+                                <AppLogo className="h-5 w-5 sm:h-6 sm:w-6" />
                             </div>
                             <div className="min-w-0 flex flex-col justify-center">
-                                <h1 className={`${themeConfig.titleClass} ${themeConfig.isIndustrial ? '' : 'text-sm sm:text-base lg:text-lg'} font-black leading-tight truncate`}>
+                                <h1 className={`${themeConfig.titleClass} ${themeConfig.isIndustrial ? '' : 'text-xs sm:text-[13px] lg:text-[14px]'} font-black leading-tight truncate`}>
                                     JadwalPriok
                                 </h1>
-                                <p className={`${themeConfig.subtitleClass} hidden sm:block text-[11px] lg:text-[12px] leading-normal truncate`}>
+                                <p className={`${themeConfig.subtitleClass} hidden sm:block text-[10px] lg:text-[11px] leading-tight truncate`}>
                                     Kalender Kerja & Jadwal Shift
                                 </p>
                             </div>
@@ -104,7 +104,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
                     {/* Ketika Desktop Sidebar Terbuka: Tampilkan nama halaman / breadcrumb aktif di samping tombol X */}
                     {!isMobile && isDesktopSidebarOpen && (
-                        <div className="flex items-center space-x-2 text-xs lg:text-[13px] font-bold select-none truncate transition-opacity duration-200 animate-in fade-in">
+                        <div className="flex items-center space-x-2 text-[11px] lg:text-xs font-bold select-none truncate transition-opacity duration-200 animate-in fade-in">
                             <span className="opacity-45 hidden lg:inline">Workspace</span>
                             <span className="opacity-30 hidden lg:inline">/</span>
                             <span className="opacity-90 font-extrabold tracking-tight truncate">
@@ -114,6 +114,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                 {pageTab === 'version' && 'Catatan Riwayat Versi'}
                                 {pageTab === 'roadmap' && 'Rencana Fitur & Roadmap'}
                                 {pageTab === 'admin' && 'Dashboard Administrator Posko'}
+                                {pageTab === 'landing' && 'Landing Page & Otentikasi NIP'}
                             </span>
                         </div>
                     )}
@@ -138,8 +139,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                 className={themeConfig.themeDropdownBtnClass}
                                 aria-label="Pilih Tema Tampilan"
                             >
-                                <Palette className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-current opacity-90" />
-                                <span className="hidden sm:inline text-xs font-bold">{getThemeDisplayName(currentTheme)}</span>
+                                <Palette className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-current opacity-90" />
+                                <span className="hidden sm:inline text-[11px] sm:text-xs font-bold">{getThemeDisplayName(currentTheme)}</span>
                             </button>
                         </Tooltip>
 

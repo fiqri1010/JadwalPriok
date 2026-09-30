@@ -490,7 +490,7 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className={buttonClass || 'h-8 sm:h-9 flex items-center justify-center gap-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs'}
+                    className={buttonClass || 'h-7 sm:h-8 flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold transition-all cursor-pointer shadow-xs'}
                     aria-label="Menu Ekspor Data"
                     aria-expanded={isOpen}
                 >

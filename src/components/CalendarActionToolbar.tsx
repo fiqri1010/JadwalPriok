@@ -54,21 +54,30 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
     const getContainerStyles = () => {
         if (compact) {
             if (isPaperSketch) {
-                return 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] rounded-lg shadow-[2px_2px_0px_#2b2b2b] p-1 sm:p-1.5';
+                return 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] rounded-lg shadow-[2px_2px_0px_#2b2b2b] p-1.5 sm:p-2';
             }
             if (isWinamp) {
-                return 'bg-[#191919] border border-[#00FF00]/60 font-mono text-[#00FF00] rounded-none p-1 sm:p-1.5 shadow-[1px_1px_0_#000]';
+                return 'bg-[#191919] border border-[#00FF00]/60 font-mono text-[#00FF00] rounded-none p-1.5 sm:p-2 shadow-[1px_1px_0_#000]';
             }
             if (isVista) {
-                return 'bg-white/80 backdrop-blur-md border border-sky-300/40 text-slate-900 rounded-lg shadow-xs p-1 sm:p-1.5';
+                return 'bg-white/80 backdrop-blur-md border border-sky-300/40 text-slate-900 rounded-lg shadow-xs p-1.5 sm:p-2';
             }
             if (isIndustrial) {
-                return 'bg-[#1A1D23] border border-[rgba(226,232,240,0.15)] text-[#E2E8F0] font-[\'JetBrains_Mono\'] rounded-[6px] p-1 sm:p-1.5';
+                return 'bg-[#1A1D23] border border-[rgba(226,232,240,0.15)] text-[#E2E8F0] font-[\'JetBrains_Mono\'] rounded-[6px] p-1.5 sm:p-2';
+            }
+            if (isTechnical) {
+                return 'bg-white border border-[#111113]/15 text-[#111113] font-[\'JetBrains_Mono\'] rounded-[4px] p-1.5 sm:p-2';
+            }
+            if (isEditorial) {
+                return 'bg-[#fcfbf9] border border-[#1a1a1a]/15 text-[#1a1a1a] font-[\'Geist\'] rounded-md p-1.5 sm:p-2';
+            }
+            if (isDashboard) {
+                return 'bg-white border border-[rgba(1,22,39,0.08)] text-[#011627] font-[\'Inter\'] rounded-lg shadow-2xs p-1.5 sm:p-2';
             }
             if (isDark) {
-                return 'bg-[#1E1E1E]/90 border border-slate-800 text-slate-100 rounded-lg shadow-xs p-1 sm:p-1.5';
+                return 'bg-[#1E1E1E]/90 border border-slate-800 text-slate-100 rounded-lg shadow-xs p-1.5 sm:p-2';
             }
-            return 'bg-white/90 border border-slate-200 text-slate-900 rounded-lg shadow-2xs p-1 sm:p-1.5';
+            return 'bg-white/90 border border-slate-200 text-slate-900 rounded-lg shadow-2xs p-1.5 sm:p-2';
         }
 
         if (isPaperSketch) {
@@ -83,6 +92,15 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
         if (isIndustrial) {
             return 'bg-[#1A1D23] border border-[rgba(226,232,240,0.15)] text-[#E2E8F0] font-[\'JetBrains_Mono\'] rounded-[6px] shadow-md p-2 sm:p-2.5 lg:p-3';
         }
+        if (isTechnical) {
+            return 'bg-white border border-[#111113]/15 text-[#111113] font-[\'JetBrains_Mono\'] rounded-[4px] shadow-sm p-2 sm:p-2.5 lg:p-3';
+        }
+        if (isEditorial) {
+            return 'bg-[#fcfbf9] border border-[#1a1a1a]/15 text-[#1a1a1a] font-[\'Geist\'] rounded-md shadow-sm p-2 sm:p-2.5 lg:p-3';
+        }
+        if (isDashboard) {
+            return 'bg-white border border-[rgba(1,22,39,0.08)] text-[#011627] font-[\'Inter\'] rounded-lg shadow-sm p-2 sm:p-2.5 lg:p-3';
+        }
         if (isDark) {
             return 'bg-[#1E1E1E] border border-slate-800 text-slate-100 rounded-lg sm:rounded-xl shadow-xs p-2 sm:p-2.5 lg:p-3';
         }
@@ -90,7 +108,7 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
     };
 
     return (
-        <div className={`w-full select-none relative z-40 overflow-visible ${getContainerStyles()}`}>
+        <div className={`w-full min-w-0 select-none relative z-40 overflow-visible ${getContainerStyles()}`}>
             {/* Header Sidebar Kontrol (Hanya muncul jika bukan compact) */}
             {!compact && (
                 <div className="flex items-center justify-between pb-1 sm:pb-1.5 lg:pb-2 mb-1.5 sm:mb-2 border-b border-current/10">
@@ -101,18 +119,22 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                 </div>
             )}
 
-            {/* Grid 4 Tombol Aksi */}
-            <div className="grid grid-cols-4 gap-1.5 lg:gap-2">
+            {/* Grid 4 Tombol Aksi - Responsif: 2 kolom di layar sangat sempit / mobile portrait (<480px), 4 kolom di layar lebar */}
+            <div className={`grid ${compact ? 'grid-cols-2 min-[480px]:grid-cols-4' : 'grid-cols-4'} gap-1.5 sm:gap-2 w-full min-w-0`}>
                 {/* 1. Tempel / Salin */}
                 <Tooltip
                     content={<span><strong>Salin Jadwal</strong> (Paste dari Excel & Presensi)</span>}
                     placement="bottom"
-                    containerClassName="w-full"
+                    containerClassName="w-full min-w-0"
                 >
                     <button
                         type="button"
                         onClick={onTempelJadwal}
-                        className={`w-full flex ${compact ? 'flex-row items-center justify-center gap-1 sm:gap-1.5 py-1 sm:py-1.5 px-1.5' : 'flex-col items-center justify-center py-1 sm:py-1.5 lg:py-2 px-1'} rounded-md sm:rounded-lg border transition-all cursor-pointer ${
+                        className={`w-full flex ${
+                            compact
+                                ? 'flex-row items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2'
+                                : 'flex-col items-center justify-center py-2 sm:py-2.5 lg:py-3 px-1.5'
+                        } min-w-0 rounded-md sm:rounded-lg border transition-all cursor-pointer ${
                             isPaperSketch
                                 ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] hover:bg-[#2ec4b6] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5'
                                 : isWinamp
@@ -121,13 +143,19 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                                 ? 'bg-white/80 border-sky-200 text-teal-700 hover:bg-teal-50'
                                 : isIndustrial
                                 ? 'bg-[#0F1115] border-[rgba(226,232,240,0.15)] text-[#2DD4BF] hover:bg-[#2DD4BF]/15 font-[\'JetBrains_Mono\']'
+                                : isTechnical
+                                ? 'bg-white border-[#111113]/15 text-[#0D9488] hover:bg-[#0D9488]/10 font-[\'JetBrains_Mono\']'
+                                : isEditorial
+                                ? 'bg-white border-[#1a1a1a]/15 text-[#2a7373] hover:bg-[#2a7373]/10'
+                                : isDashboard
+                                ? 'bg-[#f8fafc] border-slate-200 text-[#297373] hover:bg-[#297373]/10'
                                 : isDark
                                 ? 'bg-white/5 border-white/10 text-teal-300 hover:bg-white/10'
                                 : 'bg-slate-50 border-slate-200 text-teal-700 hover:bg-teal-50'
                         }`}
                     >
-                        <ClipboardPaste className={`${compact ? 'w-3 h-3 sm:w-3.5 sm:h-3.5' : 'w-4 h-4 lg:w-4.5 lg:h-4.5 mb-1'} shrink-0`} />
-                        <span className={`${compact ? 'text-[9.5px] sm:text-[10.5px]' : 'text-[10.5px] lg:text-[11.5px] xl:text-xs'} font-bold leading-none whitespace-nowrap shrink-0`}>Salin</span>
+                        <ClipboardPaste className={`${compact ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4 h-4 lg:w-4.5 lg:h-4.5 mb-1'} shrink-0`} />
+                        <span className={`${compact ? 'text-[10.5px] sm:text-xs' : 'text-[10.5px] lg:text-[11.5px] xl:text-xs'} font-bold leading-none truncate select-none`}>Salin</span>
                     </button>
                 </Tooltip>
 
@@ -143,13 +171,17 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                         </span>
                     }
                     placement="bottom"
-                    containerClassName="w-full"
+                    containerClassName="w-full min-w-0"
                 >
                     <button
                         type="button"
                         onClick={onUndoReset}
                         disabled={!canUndo}
-                        className={`w-full flex ${compact ? 'flex-row items-center justify-center gap-1 sm:gap-1.5 py-1 sm:py-1.5 px-1.5' : 'flex-col items-center justify-center py-2 sm:py-2.5 lg:py-3 px-1.5'} rounded-md sm:rounded-lg border transition-all cursor-pointer ${
+                        className={`w-full flex ${
+                            compact
+                                ? 'flex-row items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2'
+                                : 'flex-col items-center justify-center py-2 sm:py-2.5 lg:py-3 px-1.5'
+                        } min-w-0 rounded-md sm:rounded-lg border transition-all cursor-pointer ${
                             !canUndo
                                 ? 'opacity-30 cursor-not-allowed pointer-events-none border-transparent'
                                 : isPaperSketch
@@ -160,13 +192,19 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                                 ? 'bg-white/80 border-sky-200 text-sky-700 hover:bg-sky-50'
                                 : isIndustrial
                                 ? 'bg-[#0F1115] border-[rgba(226,232,240,0.15)] text-[#E2E8F0] hover:bg-white/10 font-[\'JetBrains_Mono\']'
+                                : isTechnical
+                                ? 'bg-white border-[#111113]/15 text-[#111113] hover:bg-black/5 font-[\'JetBrains_Mono\']'
+                                : isEditorial
+                                ? 'bg-white border-[#1a1a1a]/15 text-[#1a1a1a] hover:bg-black/5'
+                                : isDashboard
+                                ? 'bg-[#f8fafc] border-slate-200 text-slate-700 hover:bg-slate-100'
                                 : isDark
                                 ? 'bg-white/5 border-white/10 text-sky-300 hover:bg-white/10'
                                 : 'bg-slate-50 border-slate-200 text-sky-700 hover:bg-sky-50'
                         }`}
                     >
-                        <Undo2 className={`${compact ? 'w-3 h-3 sm:w-3.5 sm:h-3.5' : 'w-4 h-4 lg:w-4.5 lg:h-4.5 mb-1'} shrink-0`} />
-                        <span className={`${compact ? 'text-[9.5px] sm:text-[10.5px]' : 'text-[10.5px] lg:text-[11.5px] xl:text-xs'} font-bold leading-none whitespace-nowrap shrink-0`}>Undo</span>
+                        <Undo2 className={`${compact ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4 h-4 lg:w-4.5 lg:h-4.5 mb-1'} shrink-0`} />
+                        <span className={`${compact ? 'text-[10.5px] sm:text-xs' : 'text-[10.5px] lg:text-[11.5px] xl:text-xs'} font-bold leading-none truncate select-none`}>Undo</span>
                     </button>
                 </Tooltip>
 
@@ -180,13 +218,17 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                         </span>
                     }
                     placement="bottom"
-                    containerClassName="w-full"
+                    containerClassName="w-full min-w-0"
                 >
                     <button
                         type="button"
                         onClick={onResetCalendar}
                         disabled={areAllLocked}
-                        className={`w-full flex ${compact ? 'flex-row items-center justify-center gap-1 sm:gap-1.5 py-1 sm:py-1.5 px-1.5' : 'flex-col items-center justify-center py-2 sm:py-2.5 lg:py-3 px-1.5'} rounded-md sm:rounded-lg border transition-all cursor-pointer ${
+                        className={`w-full flex ${
+                            compact
+                                ? 'flex-row items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2'
+                                : 'flex-col items-center justify-center py-2 sm:py-2.5 lg:py-3 px-1.5'
+                        } min-w-0 rounded-md sm:rounded-lg border transition-all cursor-pointer ${
                             areAllLocked
                                 ? 'opacity-30 cursor-not-allowed pointer-events-none border-transparent'
                                 : isPaperSketch
@@ -197,13 +239,19 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                                 ? 'bg-white/80 border-sky-200 text-rose-600 hover:bg-rose-50'
                                 : isIndustrial
                                 ? 'bg-[#0F1115] border-[#BE1A1A]/40 text-[#BE1A1A] hover:bg-[#BE1A1A] hover:text-white font-[\'JetBrains_Mono\']'
+                                : isTechnical
+                                ? 'bg-white border-rose-300 text-rose-600 hover:bg-rose-50 font-[\'JetBrains_Mono\']'
+                                : isEditorial
+                                ? 'bg-white border-rose-300 text-rose-700 hover:bg-rose-50'
+                                : isDashboard
+                                ? 'bg-[#f8fafc] border-slate-200 text-rose-600 hover:bg-rose-50'
                                 : isDark
                                 ? 'bg-white/5 border-white/10 text-rose-400 hover:bg-white/10'
                                 : 'bg-slate-50 border-slate-200 text-rose-600 hover:bg-rose-50'
                         }`}
                     >
-                        <RotateCcw className={`${compact ? 'w-3 h-3 sm:w-3.5 sm:h-3.5' : 'w-4 h-4 lg:w-4.5 lg:h-4.5 mb-1'} shrink-0`} />
-                        <span className={`${compact ? 'text-[9.5px] sm:text-[10.5px]' : 'text-[10.5px] lg:text-[11.5px] xl:text-xs'} font-bold leading-none whitespace-nowrap shrink-0`}>Reset</span>
+                        <RotateCcw className={`${compact ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4 h-4 lg:w-4.5 lg:h-4.5 mb-1'} shrink-0`} />
+                        <span className={`${compact ? 'text-[10.5px] sm:text-xs' : 'text-[10.5px] lg:text-[11.5px] xl:text-xs'} font-bold leading-none truncate select-none`}>Reset</span>
                     </button>
                 </Tooltip>
 
@@ -217,15 +265,29 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                         </span>
                     }
                     placement="bottom"
-                    containerClassName="w-full"
+                    containerClassName="w-full min-w-0"
                 >
                     <button
                         type="button"
                         onClick={onToggleAllLock}
-                        className={`w-full flex ${compact ? 'flex-row items-center justify-center gap-1 sm:gap-1.5 py-1 sm:py-1.5 px-1.5' : 'flex-col items-center justify-center py-2 sm:py-2.5 lg:py-3 px-1.5'} rounded-md sm:rounded-lg border transition-all cursor-pointer ${
+                        className={`w-full flex ${
+                            compact
+                                ? 'flex-row items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2'
+                                : 'flex-col items-center justify-center py-2 sm:py-2.5 lg:py-3 px-1.5'
+                        } min-w-0 rounded-md sm:rounded-lg border transition-all cursor-pointer ${
                             areAllLocked
                                 ? isPaperSketch
                                     ? 'bg-[#ff4747] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-bold'
+                                    : isWinamp
+                                    ? 'bg-rose-950/80 text-rose-400 border border-rose-700 font-bold'
+                                    : isIndustrial
+                                    ? 'bg-[#BE1A1A]/20 text-rose-400 border border-[#BE1A1A]/60 font-bold font-[\'JetBrains_Mono\']'
+                                    : isTechnical
+                                    ? 'bg-[#111113]/10 text-[#111113] border border-[#111113]/30 font-bold font-[\'JetBrains_Mono\']'
+                                    : isEditorial
+                                    ? 'bg-[#1a1a1a]/10 text-[#1a1a1a] border border-[#1a1a1a]/30 font-bold'
+                                    : isDashboard
+                                    ? 'bg-amber-500/15 text-amber-700 border border-amber-500/30 font-bold'
                                     : 'bg-amber-500/20 text-amber-500 border-amber-500/50 font-bold'
                                 : isPaperSketch
                                 ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] hover:bg-[#2ec4b6] shadow-[2px_2px_0px_#2b2b2b] active:translate-x-0.5 active:translate-y-0.5'
@@ -235,17 +297,23 @@ export const CalendarActionToolbar = React.memo<CalendarActionToolbarProps>(({
                                 ? 'bg-white/80 border-sky-200 text-slate-700 hover:bg-slate-100'
                                 : isIndustrial
                                 ? 'bg-[#0F1115] border-[rgba(226,232,240,0.15)] text-[#E2E8F0] hover:bg-[#2DD4BF] hover:text-[#0F1115] font-[\'JetBrains_Mono\']'
+                                : isTechnical
+                                ? 'bg-white border-[#111113]/15 text-[#111113] hover:bg-[#0D9488] hover:text-white font-[\'JetBrains_Mono\']'
+                                : isEditorial
+                                ? 'bg-white border-[#1a1a1a]/15 text-[#1a1a1a] hover:bg-[#2a7373] hover:text-white'
+                                : isDashboard
+                                ? 'bg-[#f8fafc] border-slate-200 text-slate-700 hover:bg-slate-100'
                                 : isDark
                                 ? 'bg-white/5 border-white/10 text-slate-200 hover:bg-white/10'
                                 : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                         }`}
                     >
                         {areAllLocked ? (
-                            <Lock className={`${compact ? 'w-3 h-3 sm:w-3.5 sm:h-3.5' : 'w-4 h-4 lg:w-4.5 lg:h-4.5 mb-1'} shrink-0`} />
+                            <Lock className={`${compact ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4 h-4 lg:w-4.5 lg:h-4.5 mb-1'} shrink-0`} />
                         ) : (
-                            <Unlock className={`${compact ? 'w-3 h-3 sm:w-3.5 sm:h-3.5' : 'w-4 h-4 lg:w-4.5 lg:h-4.5 mb-1'} shrink-0`} />
+                            <Unlock className={`${compact ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4 h-4 lg:w-4.5 lg:h-4.5 mb-1'} shrink-0`} />
                         )}
-                        <span className={`${compact ? 'text-[9.5px] sm:text-[10.5px]' : 'text-[10.5px] lg:text-[11.5px] xl:text-xs'} font-bold leading-none whitespace-nowrap shrink-0`}>
+                        <span className={`${compact ? 'text-[10.5px] sm:text-xs' : 'text-[10.5px] lg:text-[11.5px] xl:text-xs'} font-bold leading-none truncate select-none`}>
                             {areAllLocked ? 'Kunci' : 'Buka'}
                         </span>
                     </button>

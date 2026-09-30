@@ -23,6 +23,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { MonthlyHolidaySegment } from './components/MonthlyHolidaySegment';
 import { MonthlyPiketSummarySegment } from './components/MonthlyPiketSummarySegment';
 import { AdminDashboardView } from './components/admin/AdminDashboardView';
+import { LandingPageView, LOCAL_STORAGE_ONBOARDING_DONE_KEY } from './components/LandingPageView';
 import { getCurrentUserRole, setCurrentUserRole } from './utils/adminStorage';
 import { UserRole } from './types/admin';
 import { calculatePiketMatches } from './utils/piket';
@@ -56,25 +57,29 @@ export const App: React.FC = () => {
     const [selectedYear, setSelectedYear] = useState<number>(() => today.getFullYear());
     const [selectedMonth, setSelectedMonth] = useState<number>(() => today.getMonth() + 1);
 
-    // Active page tab (Layar utama: Kalender Kerja)
-    const [pageTab, setPageTab] = useState<'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin'>('calendar');
+    // Active page tab (Layar utama: Kalender Kerja atau Landing Page jika baru pertama diinstal)
+    const [pageTab, setPageTab] = useState<'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing'>(() => {
+        const isDone = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_ONBOARDING_DONE_KEY) : 'true';
+        if (!isDone) return 'landing';
+        return 'calendar';
+    });
 
     // User & Admin Role State
     const [currentRole, setCurrentRole] = useState<UserRole>(() => getCurrentUserRole());
     const [userName, setUserName] = useState<string>(() => localStorage.getItem('jadwalpriok_user_name') || 'Ahmad Fiqri');
     const [userNip, setUserNip] = useState<string>(() => localStorage.getItem('jadwalpriok_user_nip') || '199510102015121002');
 
-    // Migrasi sesi admin lama "Afiqri" ke "Ahmad Fiqri"
+    // Inisialisasi akun Ahmad Fiqri sebagai Super Admin mutlak
     useEffect(() => {
         const savedNip = localStorage.getItem('jadwalpriok_user_nip');
-        if (savedNip === '199208152015021002' || !savedNip) {
+        if (!savedNip || savedNip === '199208152015021002' || savedNip === '199510102015121002') {
             localStorage.setItem('jadwalpriok_user_name', 'Ahmad Fiqri');
             localStorage.setItem('jadwalpriok_user_nip', '199510102015121002');
-            localStorage.setItem('jadwalpriok_current_user_role', 'admin');
+            localStorage.setItem('jadwalpriok_current_user_role', 'superadmin');
             // Force state refresh
             setUserName('Ahmad Fiqri');
             setUserNip('199510102015121002');
-            setCurrentRole('admin');
+            setCurrentRole('superadmin');
         }
     }, []);
 
@@ -887,7 +892,7 @@ export const App: React.FC = () => {
     return (
         <div
             data-theme={currentTheme}
-            className={`min-h-screen min-h-[100dvh] w-full flex flex-col ${themeConfig.wrapperClass} ${
+            className={`h-full h-[100dvh] max-h-[100dvh] w-full flex flex-col overflow-hidden ${themeConfig.wrapperClass} ${
                 currentTheme === 'paperSketch' ? "font-['Gaegu']" : 'font-sans'
             } selection:bg-teal-500 selection:text-white`}
         >
@@ -902,48 +907,54 @@ export const App: React.FC = () => {
 
             {/* Main Workspace Layout with Sidebar reaching the top boundary of header */}
             <div className="flex-1 flex min-h-0 overflow-hidden relative">
-                {/* Desktop Sidebar (Tampil sampai ke batas atas header di sebelah kiri) */}
-                <DesktopSidebar
-                    isOpen={isSidebarOpen}
-                    pageTab={pageTab}
-                    setPageTab={setPageTab}
-                    themeConfig={themeConfig}
-                    currentTheme={currentTheme}
-                    isAdmin={currentRole === 'admin'}
-                    userName={userName}
-                    userNip={userNip}
-                    userRole={currentRole}
-                />
-
-                {/* Right Container: Header (lebar menyesuaikan ruang konten di sebelah sidebar) & Main Content Area */}
-                <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-                    {/* Top Navbar */}
-                    <TopNavbar
-                        isMobile={isMobile}
-                        isDesktopSidebarOpen={isSidebarOpen}
-                        onToggleDesktopSidebar={() => setIsSidebarOpen((prev) => !prev)}
-                        currentTheme={currentTheme}
-                        onThemeChange={setCurrentTheme}
-                        isThemeDropdownOpen={isThemeDropdownOpen}
-                        setIsThemeDropdownOpen={setIsThemeDropdownOpen}
-                        themeConfig={themeConfig}
-                        onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+                {/* Desktop Sidebar (Disembunyikan ketika berada di halaman Landing Page) */}
+                {pageTab !== 'landing' && (
+                    <DesktopSidebar
+                        isOpen={isSidebarOpen}
                         pageTab={pageTab}
-                        exportAction={
-                            <ExportDropdown
-                                daysState={daysState}
-                                selectedYear={selectedYear}
-                                selectedMonth={selectedMonth}
-                                daftarLibur={daftarLibur}
-                                currentTheme={currentTheme}
-                                onShowToast={showToast}
-                                buttonClass={themeConfig.themeDropdownBtnClass}
-                            />
-                        }
+                        setPageTab={setPageTab}
+                        themeConfig={themeConfig}
+                        currentTheme={currentTheme}
+                        isAdmin={currentRole === 'admin'}
+                        userName={userName}
+                        userNip={userNip}
+                        userRole={currentRole}
                     />
+                )}
+
+                {/* Right Container: Header & Main Content Area */}
+                <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
+                    {/* Top Navbar (Disembunyikan ketika berada di halaman Landing Page) */}
+                    {pageTab !== 'landing' && (
+                        <TopNavbar
+                            isMobile={isMobile}
+                            isDesktopSidebarOpen={isSidebarOpen}
+                            onToggleDesktopSidebar={() => setIsSidebarOpen((prev) => !prev)}
+                            currentTheme={currentTheme}
+                            onThemeChange={setCurrentTheme}
+                            isThemeDropdownOpen={isThemeDropdownOpen}
+                            setIsThemeDropdownOpen={setIsThemeDropdownOpen}
+                            themeConfig={themeConfig}
+                            onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+                            pageTab={pageTab}
+                            exportAction={
+                                <ExportDropdown
+                                    daysState={daysState}
+                                    selectedYear={selectedYear}
+                                    selectedMonth={selectedMonth}
+                                    daftarLibur={daftarLibur}
+                                    currentTheme={currentTheme}
+                                    onShowToast={showToast}
+                                    buttonClass={themeConfig.themeDropdownBtnClass}
+                                />
+                            }
+                        />
+                    )}
 
                     {/* Main Content Area */}
-                    <main id="app-main-content" className="flex-1 flex flex-col overflow-y-auto min-w-0 pb-14 md:pb-2">
+                    <main id="app-main-content" className={`flex-1 flex flex-col overflow-y-auto min-w-0 ${
+                        pageTab === 'landing' ? 'p-0 pb-4' : 'pb-20 sm:pb-24 md:pb-8'
+                    }`}>
                     {pageTab === 'calendar' && (
                         <div
                             className="p-2 sm:p-2.5 lg:p-2.5 max-w-[1490px] w-full mx-auto touch-pan-y"
@@ -968,7 +979,7 @@ export const App: React.FC = () => {
                                     />
 
                                      {/* Mobile/Compact View: Kontrol Kalender diletakkan di atas kalender dalam mode ramping */}
-                                    <div className="block lg:hidden mb-1 sm:mb-1.5">
+                                    <div className="block lg:hidden mb-1 sm:mb-1.5 w-full min-w-0">
                                         <CalendarActionToolbar
                                             selectedMonth={selectedMonth}
                                             selectedYear={selectedYear}
@@ -1255,18 +1266,32 @@ export const App: React.FC = () => {
                             />
                         </div>
                     )}
+
+                    {pageTab === 'landing' && (
+                        <div className="p-2 sm:p-4 max-w-[1490px] w-full mx-auto flex-1 flex items-center justify-center min-h-0">
+                            <LandingPageView
+                                theme={currentTheme}
+                                onComplete={() => setPageTab('calendar')}
+                                onClose={() => setPageTab('calendar')}
+                                onShowToast={showToast}
+                                onNavigateToTab={(tab) => setPageTab(tab)}
+                            />
+                        </div>
+                    )}
                 </main>
                 </div>
             </div>
 
-            {/* Mobile Bottom Navigation */}
-            <MobileBottomNav
-                pageTab={pageTab}
-                onTabChange={setPageTab}
-                onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
-                theme={currentTheme}
-                themeConfig={themeConfig}
-            />
+            {/* Mobile Bottom Navigation (Disembunyikan saat Landing Page aktif) */}
+            {pageTab !== 'landing' && (
+                <MobileBottomNav
+                    pageTab={pageTab}
+                    onTabChange={setPageTab}
+                    onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+                    theme={currentTheme}
+                    themeConfig={themeConfig}
+                />
+            )}
 
             {/* Mobile Menu Drawer */}
             <MobileMenuDrawer
