@@ -1,6 +1,7 @@
 import React from 'react';
 import {
     Calendar as CalendarIcon,
+    Users,
     Flag,
     Sliders,
     History,
@@ -11,11 +12,13 @@ import { ThemeConfig } from '../themeConfig';
 import { getCurrentUserRoleInfo, getCurrentUserPermissions } from '../utils/adminStorage';
 import { UserRole } from '../types/admin';
 
-type PageTabType = 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing';
+type PageTabType = 'calendar' | 'team-schedule' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing';
 
 interface MobileBottomNavProps {
     pageTab: PageTabType;
     onTabChange: (tab: PageTabType) => void;
+    onCalendarTabClick?: () => void;
+    calendarViewMode?: 'grid' | 'list';
     onOpenMobileMenu?: () => void;
     theme: AppTheme;
     themeConfig: ThemeConfig;
@@ -24,6 +27,8 @@ interface MobileBottomNavProps {
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     pageTab,
     onTabChange,
+    onCalendarTabClick,
+    calendarViewMode = 'grid',
     theme,
     themeConfig,
 }) => {
@@ -34,7 +39,9 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         ? { role: 'superadmin' as UserRole, authorityName: 'Super Admin' }
         : getCurrentUserRoleInfo();
     const permissions = getCurrentUserPermissions();
-    const canAccessAdmin = isSuperAdminAccount || roleInfo.role === 'admin' || roleInfo.role === 'superadmin' || permissions.canAccessAdminDashboard;
+    const canAccessAdmin = isSuperAdminAccount || permissions.canAccessAdminDashboard;
+    const isPPFNonUser = roleInfo.authorityName === 'PPF non User';
+    const canAccessTeamSchedule = isSuperAdminAccount || (!isPPFNonUser);
 
     return (
         <nav
@@ -55,16 +62,42 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <div className="flex items-center justify-between gap-1 max-w-md mx-auto">
                 <button
                     type="button"
-                    onClick={() => onTabChange('calendar')}
-                    className={`flex flex-col items-center justify-center flex-1 py-1.5 px-1 transition-all duration-200 cursor-pointer ${
+                    onClick={() => {
+                        if (onCalendarTabClick) {
+                            onCalendarTabClick();
+                        } else {
+                            onTabChange('calendar');
+                        }
+                    }}
+                    className={`flex flex-col items-center justify-center flex-1 py-1.5 px-1 transition-all duration-200 cursor-pointer relative ${
                         pageTab === 'calendar'
                             ? themeConfig.mobileNavItemActiveClass
                             : themeConfig.mobileNavItemInactiveClass
                     }`}
                 >
                     <CalendarIcon className={`h-4 w-4 ${pageTab === 'calendar' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-                    <span className="text-[9.5px] mt-0.5 tracking-tight font-bold">Kalender</span>
+                    <span className="text-[9.5px] mt-0.5 tracking-tight font-bold flex items-center gap-0.5">
+                        <span>Kalender</span>
+                        {pageTab === 'calendar' && (
+                            <span className="text-[8px] opacity-80 uppercase font-mono">({calendarViewMode})</span>
+                        )}
+                    </span>
                 </button>
+
+                {canAccessTeamSchedule && (
+                    <button
+                        type="button"
+                        onClick={() => onTabChange('team-schedule')}
+                        className={`flex flex-col items-center justify-center flex-1 py-1.5 px-1 transition-all duration-200 cursor-pointer ${
+                            pageTab === 'team-schedule'
+                                ? themeConfig.mobileNavItemActiveClass
+                                : themeConfig.mobileNavItemInactiveClass
+                        }`}
+                    >
+                        <Users className={`h-4 w-4 ${pageTab === 'team-schedule' ? 'stroke-[2.5]' : 'stroke-2'}`} />
+                        <span className="text-[9.5px] mt-0.5 tracking-tight font-bold">Rekan</span>
+                    </button>
+                )}
 
                 <button
                     type="button"

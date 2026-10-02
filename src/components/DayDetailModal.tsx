@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DayData, normalizeShift, LiburNasional, isPiketShift } from '../types';
 import { PiketMatchInfo, OffMatchInfo } from '../utils/piket';
 import { Clock, X, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -26,6 +26,7 @@ export interface DayDetailModalProps {
     onRequestTimePick?: (field: 'jamMasuk' | 'jamPulang' | 'absenCeisa', title: string, currentValue: string) => void;
     piketMatchInfo?: PiketMatchInfo;
     offMatchInfo?: OffMatchInfo;
+    initialSubTab?: 'shift' | 'geser_off' | 'st' | 'leave';
 }
 
 export const DayDetailModal: React.FC<DayDetailModalProps> = ({
@@ -45,7 +46,24 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     onRequestTimePick,
     piketMatchInfo,
     offMatchInfo,
+    initialSubTab = 'shift',
 }) => {
+    const [activeSubTab, setActiveSubTab] = useState<'shift' | 'geser_off' | 'st' | 'leave'>(initialSubTab);
+
+    useEffect(() => {
+        if (initialSubTab) {
+            setActiveSubTab(initialSubTab);
+        }
+    }, [initialSubTab, dayNumber]);
+    const [geserSourceDate, setGeserSourceDate] = useState(data?.geserOffInfo?.sourceDate || '');
+    const [geserEarnedDays, setGeserEarnedDays] = useState<number>(data?.geserOffInfo?.earnedDays || 1);
+
+    const [stCat, setStCat] = useState<string>(data?.stInfo?.stType || 'Pemeriksaan Luar Kawasan Pabean');
+    const [stTentative, setStTentative] = useState<boolean>(data?.stInfo?.isTentative ?? false);
+    const [stReward, setStReward] = useState<'Cuti Bersama' | 'Off Pengganti' | 'None'>(data?.stInfo?.rewardType || 'Off Pengganti');
+
+    const [leaveCat, setLeaveCat] = useState<string>(data?.leaveInfo?.leaveType || 'Cuti Tahunan');
+    const [halfDay, setHalfDay] = useState<'pagi' | 'siang'>(data?.leaveInfo?.halfDayType || 'pagi');
     const dateObj = new Date(year, month - 1, dayNumber);
     const dayOfWeek = dateObj.getDay(); // 0 = Sun, 6 = Sat
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
@@ -384,29 +402,224 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                         </span>
                     </div>
 
-                    {/* Dropdown Menu Pemilihan Shift */}
-                    <div className="space-y-1 relative z-30">
-                        <label className={`text-[9.5px] font-bold uppercase tracking-wider block ${
-                            isWinamp
-                                ? 'text-[#00FF00]/70'
-                                : isDark
-                                ? 'text-slate-400'
-                                : isVista
-                                ? 'text-sky-900/80'
-                                : isDashboard
-                                ? 'text-[#4D2A00]/70'
-                                : 'text-slate-500'
-                        }`}>
-                            Shift Kerja
-                        </label>
-                        <ShiftDropdown
-                            value={normalizedShift}
-                            disabled={isLocked}
-                            theme={theme}
-                            onChange={(val) => onUpdate({ shift: val })}
-                            align="left"
-                        />
+                    {/* Sub-Tabs Navigation for Advanced Features */}
+                    <div className="grid grid-cols-4 gap-1 relative z-30 mb-1">
+                        <button
+                            type="button"
+                            onClick={() => setActiveSubTab('shift')}
+                            className={`py-1 text-[10px] font-bold rounded-[6px] border transition-all cursor-pointer ${
+                                activeSubTab === 'shift'
+                                    ? 'bg-sky-500 text-white border-sky-600 shadow-xs'
+                                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                            }`}
+                        >
+                            Shift
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveSubTab('geser_off')}
+                            className={`py-1 text-[10px] font-bold rounded-[6px] border transition-all cursor-pointer ${
+                                activeSubTab === 'geser_off'
+                                    ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
+                                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                            }`}
+                        >
+                            Geser Off
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveSubTab('st')}
+                            className={`py-1 text-[10px] font-bold rounded-[6px] border transition-all cursor-pointer ${
+                                activeSubTab === 'st'
+                                    ? 'bg-amber-600 text-white border-amber-700 shadow-xs'
+                                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                            }`}
+                        >
+                            ST (Tugas)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveSubTab('leave')}
+                            className={`py-1 text-[10px] font-bold rounded-[6px] border transition-all cursor-pointer ${
+                                activeSubTab === 'leave'
+                                    ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs'
+                                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                            }`}
+                        >
+                            Cuti
+                        </button>
                     </div>
+
+                    {/* Conditional Panel based on activeSubTab */}
+                    {activeSubTab === 'shift' && (
+                        <div className="space-y-1 relative z-30">
+                            <label className={`text-[9.5px] font-bold uppercase tracking-wider block ${
+                                isWinamp
+                                    ? 'text-[#00FF00]/70'
+                                    : isDark
+                                    ? 'text-slate-400'
+                                    : isVista
+                                    ? 'text-sky-900/80'
+                                    : isDashboard
+                                    ? 'text-[#4D2A00]/70'
+                                    : 'text-slate-500'
+                            }`}>
+                                Shift Kerja
+                            </label>
+                            <ShiftDropdown
+                                value={normalizedShift}
+                                disabled={isLocked}
+                                theme={theme}
+                                onChange={(val) => onUpdate({ shift: val })}
+                                align="left"
+                            />
+                        </div>
+                    )}
+
+                    {activeSubTab === 'geser_off' && (
+                        <div className="p-2 rounded-[8px] bg-emerald-500/10 border border-emerald-500/30 space-y-2 relative z-30">
+                            <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                                🔄 Atur Geser Off (Tabungan Piket)
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[9.5px] font-semibold text-slate-600 dark:text-slate-400 block">
+                                    Tanggal Asal Piket (YYYY-MM-DD):
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Contoh: 2026-05-12"
+                                    value={geserSourceDate}
+                                    onChange={(e) => {
+                                        setGeserSourceDate(e.target.value);
+                                        onUpdate({
+                                            shift: 'OFF',
+                                            geserOffInfo: {
+                                                isGeserOff: true,
+                                                sourceDate: e.target.value,
+                                                earnedDays: geserEarnedDays,
+                                            },
+                                        });
+                                    }}
+                                    className="w-full py-1 px-2 text-xs font-mono rounded border border-emerald-300 bg-white dark:bg-slate-900 dark:text-white"
+                                />
+                            </div>
+                            <div className="flex items-center justify-between text-[10px]">
+                                <span className="text-slate-600 dark:text-slate-400">Jatah Hari Off:</span>
+                                <div className="space-x-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setGeserEarnedDays(1);
+                                            onUpdate({
+                                                shift: 'OFF',
+                                                geserOffInfo: { isGeserOff: true, sourceDate: geserSourceDate, earnedDays: 1 },
+                                            });
+                                        }}
+                                        className={`px-2 py-0.5 rounded font-bold ${geserEarnedDays === 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}
+                                    >
+                                        1 Hari
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setGeserEarnedDays(2);
+                                            onUpdate({
+                                                shift: 'OFF',
+                                                geserOffInfo: { isGeserOff: true, sourceDate: geserSourceDate, earnedDays: 2 },
+                                            });
+                                        }}
+                                        className={`px-2 py-0.5 rounded font-bold ${geserEarnedDays === 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}
+                                    >
+                                        2 Hari (PM Libur/Wknd)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeSubTab === 'st' && (
+                        <div className="p-2 rounded-[8px] bg-amber-500/10 border border-amber-500/30 space-y-2 relative z-30">
+                            <div className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                                📋 Penugasan / Surat Tugas (ST)
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[9.5px] font-semibold text-slate-600 dark:text-slate-400 block">
+                                    Pilih Jenis ST:
+                                </label>
+                                <select
+                                    value={stCat}
+                                    onChange={(e) => {
+                                        setStCat(e.target.value);
+                                        onUpdate({
+                                            stInfo: {
+                                                isSt: true,
+                                                stType: e.target.value,
+                                                isTentative: stTentative,
+                                                rewardType: stReward,
+                                            },
+                                        });
+                                    }}
+                                    className="w-full py-1 px-2 text-xs rounded border border-amber-300 bg-white dark:bg-slate-900 dark:text-white"
+                                >
+                                    <option value="Pemeriksaan Luar Kawasan Pabean">ST Pemeriksaan Luar Kawasan Pabean</option>
+                                    <option value="Pemeriksaan Barang di Lokasi">ST Pemeriksaan Barang di Lokasi</option>
+                                    <option value="Pemeriksaan ATA Carnet">ST Pemeriksaan ATA Carnet</option>
+                                    <option value="Piket">ST Piket</option>
+                                    <option value="Dinas Luar">ST Dinas Luar</option>
+                                    <option value="Lainnya">ST Lainnya</option>
+                                </select>
+                            </div>
+                            <div className="flex items-center justify-between text-[10px]">
+                                <label className="flex items-center space-x-1.5 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={stTentative}
+                                        onChange={(e) => {
+                                            setStTentative(e.target.checked);
+                                            onUpdate({
+                                                stInfo: { isSt: true, stType: stCat, isTentative: e.target.checked, rewardType: stReward },
+                                            });
+                                        }}
+                                        className="rounded border-amber-400 text-amber-600"
+                                    />
+                                    <span className="text-slate-700 dark:text-slate-300 font-semibold">ST Belum Terbit (Tentative)</span>
+                                </label>
+                            </div>
+                        </div>
+                    )}
+
+{activeSubTab === 'leave' && (
+                        <div className="p-2 rounded-[8px] bg-indigo-500/10 border border-indigo-500/30 space-y-2 relative z-30">
+                            <div className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">
+                                🌴 Cuti Perubahan (Setelah Jadwal Terbit)
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[9.5px] font-semibold text-slate-600 dark:text-slate-400 block">
+                                    Pilih Jenis Cuti:
+                                </label>
+                                <select
+                                    value={leaveCat}
+                                    onChange={(e) => {
+                                        setLeaveCat(e.target.value);
+                                        onUpdate({
+                                            shift: 'CUTI',
+                                            leaveInfo: { isLeave: true, leaveType: e.target.value, halfDayType: e.target.value.includes('Setengah') || e.target.value.includes('Pagi') || e.target.value.includes('Siang') ? halfDay : undefined },
+                                        });
+                                    }}
+                                    className="w-full py-1 px-2 text-xs rounded border border-indigo-300 bg-white dark:bg-slate-900 dark:text-white"
+                                >
+                                    <option value="Cuti Pagi">Cuti Pagi (Masuk maks 12.30 s.d. pulang min 17.00)</option>
+                                    <option value="Cuti Siang">Cuti Siang (Masuk maks 07.30 s.d. pulang min 11.30)</option>
+                                    <option value="Cuti Tahunan">Cuti Tahunan</option>
+                                    <option value="Cuti Besar">Cuti Besar</option>
+                                    <option value="Cuti Sakit">Cuti Sakit</option>
+                                    <option value="Cuti CAP">Cuti Karena Alasan Penting (CAP)</option>
+                                    <option value="Cuti Bersama ST">Cuti Bersama (dari ST)</option>
+                                    <option value="Cuti Luar Tanggungan Negara">Cuti Luar Tanggungan Negara</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Separator Line */}
                     <div

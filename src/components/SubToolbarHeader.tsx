@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarCheck2, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
+import { CalendarCheck2, ChevronLeft, ChevronRight, CalendarDays, LayoutGrid, List } from 'lucide-react';
 import { ThemeConfig } from '../themeConfig';
 import { Tooltip } from './Tooltip';
 
@@ -19,6 +19,8 @@ interface SubToolbarHeaderProps {
     onPrevMonth?: () => void;
     onNextMonth?: () => void;
     onOpenMonthPicker?: () => void;
+    viewMode?: 'grid' | 'list';
+    onViewModeChange?: (mode: 'grid' | 'list') => void;
     rightContent?: React.ReactNode;
 }
 
@@ -33,6 +35,8 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
     onPrevMonth,
     onNextMonth,
     onOpenMonthPicker,
+    viewMode = 'grid',
+    onViewModeChange,
     rightContent,
 }) => {
     const isWinamp = themeConfig.theme === 'winamp';
@@ -85,12 +89,12 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
         }
         if (isDashboard) {
             return {
-                wrapper: 'bg-transparent border-b border-[rgba(1,22,39,0.08)] py-1.5 px-1 font-[\'Inter\']',
-                title: 'text-[#011627] font-bold text-sm sm:text-base font-[\'Inter\'] tracking-tight',
-                dot: 'w-2 h-2 rounded-full bg-[#297373] shrink-0',
-                navArrowBtn: 'text-[#011627]/70 hover:text-[#297373] hover:bg-black/5 rounded-md p-1.5 transition-colors',
-                monthTextBtn: 'text-[#011627] hover:text-[#297373] hover:bg-black/5 rounded-md text-xs sm:text-sm font-bold px-2.5 py-1 transition-colors',
-                todayBtn: 'bg-[#297373]/10 text-[#297373] border border-[#297373]/25 hover:bg-[#297373]/20 rounded-md px-2.5 py-1 text-xs font-bold transition-all',
+                wrapper: 'bg-transparent border-b border-[#4D2A00]/15 py-1.5 px-1 font-[\'Inter\']',
+                title: 'text-[#4D2A00] font-bold text-sm sm:text-base font-[\'Inter\'] tracking-tight',
+                dot: 'w-2 h-2 rounded-full bg-[#78350F] shrink-0',
+                navArrowBtn: 'text-[#4D2A00]/70 hover:text-[#4D2A00] hover:bg-[#4D2A00]/10 rounded-md p-1.5 transition-colors',
+                monthTextBtn: 'text-[#4D2A00] hover:text-[#78350F] hover:bg-[#4D2A00]/10 rounded-md text-xs sm:text-sm font-bold px-2.5 py-1 transition-colors',
+                todayBtn: 'bg-[#78350F]/15 text-[#78350F] border border-[#78350F]/25 hover:bg-[#78350F]/25 rounded-md px-2.5 py-1 text-xs font-bold transition-all',
             };
         }
         if (isPaperSketch) {
@@ -223,6 +227,59 @@ export const SubToolbarHeader = React.memo<SubToolbarHeaderProps>(({
                                 </Tooltip>
                             )}
                         </div>
+                    </div>
+                )}
+
+                {/* Switch Model Tampilan Kalender (Grid / List) */}
+                {onViewModeChange && (
+                    <div className="flex items-center p-0.5 rounded-lg border border-current/15 bg-current/5 shrink-0 select-none">
+                        <Tooltip content={<span>Tampilan <strong>Grid (Kalender)</strong></span>} placement="bottom">
+                            <button
+                                type="button"
+                                onClick={() => onViewModeChange('grid')}
+                                className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-bold font-mono transition-all cursor-pointer ${
+                                    viewMode === 'grid'
+                                        ? isIndustrial
+                                            ? 'bg-[#2DD4BF]/20 text-[#2DD4BF] border border-[#2DD4BF]/40 shadow-xs'
+                                            : isPaperSketch
+                                            ? 'bg-[#ff4747] text-white shadow-[1px_1px_0px_#2b2b2b]'
+                                            : isTechnical
+                                            ? 'bg-[#111113] text-[#F8F7F4]'
+                                            : isWinamp
+                                            ? 'bg-[#00FF00] text-black'
+                                            : 'bg-teal-500 text-white shadow-xs'
+                                        : 'opacity-60 hover:opacity-100'
+                                }`}
+                                aria-label="Tampilan Grid Kalender"
+                            >
+                                <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
+                                <span className="hidden sm:inline">Grid</span>
+                            </button>
+                        </Tooltip>
+
+                        <Tooltip content={<span>Tampilan <strong>List (Daftar / Agenda)</strong></span>} placement="bottom">
+                            <button
+                                type="button"
+                                onClick={() => onViewModeChange('list')}
+                                className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-bold font-mono transition-all cursor-pointer ${
+                                    viewMode === 'list'
+                                        ? isIndustrial
+                                            ? 'bg-[#2DD4BF]/20 text-[#2DD4BF] border border-[#2DD4BF]/40 shadow-xs'
+                                            : isPaperSketch
+                                            ? 'bg-[#ff4747] text-white shadow-[1px_1px_0px_#2b2b2b]'
+                                            : isTechnical
+                                            ? 'bg-[#111113] text-[#F8F7F4]'
+                                            : isWinamp
+                                            ? 'bg-[#00FF00] text-black'
+                                            : 'bg-teal-500 text-white shadow-xs'
+                                        : 'opacity-60 hover:opacity-100'
+                                }`}
+                                aria-label="Tampilan List Agenda"
+                            >
+                                <List className="w-3.5 h-3.5 shrink-0" />
+                                <span className="hidden sm:inline">List</span>
+                            </button>
+                        </Tooltip>
                     </div>
                 )}
 

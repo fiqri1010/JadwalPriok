@@ -44,6 +44,20 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
     console.error('RootErrorBoundary caught an error:', error, errorInfo);
   }
 
+  componentDidMount() {
+    window.addEventListener('error', (event) => {
+      if (!this.state.hasError && event.error) {
+        this.setState({ hasError: true, error: event.error });
+      }
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+      if (!this.state.hasError && event.reason) {
+        const err = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
+        this.setState({ hasError: true, error: err });
+      }
+    });
+  }
+
   handleReload = () => {
     this.setState({ hasError: false, error: null });
     window.location.reload();
@@ -51,7 +65,7 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
 
   handleResetAndReload = () => {
     try {
-      localStorage.removeItem('jadwalpriok_ui_zoom_level');
+      localStorage.clear();
     } catch {}
     this.setState({ hasError: false, error: null });
     window.location.reload();

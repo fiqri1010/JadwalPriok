@@ -240,6 +240,7 @@ export interface LiburNasional {
     kategori?: HolidayCategory | string;
     isCutiBersama?: boolean;
     isDisabled?: boolean;
+    isCustom?: boolean;
 }
 
 export function resolveHolidayCategory(item: { keterangan?: string; kategori?: string; isCutiBersama?: boolean }): {
@@ -282,6 +283,55 @@ export interface DayData {
     absenCeisa: string; // HH:mm or 'YA' / time
     isManualHoliday?: boolean;
     updated_at?: string;
+    geserOffInfo?: GeserOffInfo;
+    stInfo?: StInfo;
+    leaveInfo?: LeaveInfo;
+}
+
+export type StCategory =
+    | 'Pemeriksaan Luar Kawasan Pabean'
+    | 'Pemeriksaan Barang di Lokasi'
+    | 'Pemeriksaan ATA Carnet'
+    | 'Piket'
+    | 'Dinas Luar'
+    | 'Lainnya';
+
+export type LeaveCategory =
+    | 'Cuti Pagi'
+    | 'Cuti Siang'
+    | 'Cuti Tahunan'
+    | 'Cuti Besar'
+    | 'Cuti Sakit'
+    | 'Cuti CAP'
+    | 'Cuti Bersama ST'
+    | 'Cuti Luar Tanggungan Negara';
+
+export interface GeserOffInfo {
+    isGeserOff: boolean;
+    sourceDate?: string; // YYYY-MM-DD where piket was worked
+    originalShift?: string; // Original shift from schedule
+    isExpired?: boolean;
+    earnedDays?: number; // 1 or 2
+}
+
+export interface StInfo {
+    isSt: boolean;
+    stType: StCategory | string;
+    stNumber?: string;
+    isTentative?: boolean;
+    rewardType?: 'Cuti Bersama' | 'Off Pengganti' | 'None';
+    startDate?: string;
+    endDate?: string;
+    rewardStartMonth?: string;
+    rewardEndMonth?: string;
+}
+
+export interface LeaveInfo {
+    isLeave: boolean;
+    leaveType: LeaveCategory | string;
+    halfDayType?: 'pagi' | 'siang';
+    startDate?: string;
+    endDate?: string;
 }
 
 export function isDayDataFilled(data: DayData | null | undefined): boolean {

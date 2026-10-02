@@ -32,6 +32,7 @@ import {
 import { AuthorityProfile, UserRole, UserAccount } from '../../types/admin';
 import { AppTheme } from '../../types';
 import { Checkbox } from '../ui/Checkbox';
+import { getCurrentUserPermissions } from '../../utils/adminStorage';
 
 interface AdminAuthorityProfilesTabProps {
     profiles: AuthorityProfile[];
@@ -56,6 +57,8 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
     const isWinamp = theme === 'winamp';
     const isDark = theme === 'dark';
     const isDashboard = theme === 'dashboard';
+
+    const permissions = getCurrentUserPermissions();
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -91,6 +94,10 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
     const [canEditSomeShifts, setCanEditSomeShifts] = useState(false);
 
     const openAddModal = () => {
+        if (!permissions.canEditAuthorities) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin menambah role/otoritas baru (canEditAuthorities).');
+            return;
+        }
         setName('');
         setRoleType('end-user');
         setDescription('');
@@ -114,6 +121,10 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
     };
 
     const openEditModal = (prof: AuthorityProfile) => {
+        if (!permissions.canEditAuthorities) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin mengedit role/otoritas (canEditAuthorities).');
+            return;
+        }
         setActiveProfile(prof);
         setName(prof.name);
         setRoleType(prof.roleType);
@@ -138,6 +149,10 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
     };
 
     const openDeleteModal = (prof: AuthorityProfile) => {
+        if (!permissions.canEditAuthorities || !permissions.canDeleteAdminAuthority) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin menghapus role/otoritas (canDeleteAdminAuthority).');
+            return;
+        }
         setActiveProfile(prof);
         setIsDeleteModalOpen(true);
     };
@@ -298,6 +313,12 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
     const handleDeleteProfileSubmit = () => {
         if (!activeProfile) return;
 
+        if (activeProfile.roleType === 'admin' && !permissions.canDeleteAdminAuthority) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin menghapus role/otoritas admin (canDeleteAdminAuthority).');
+            setIsDeleteModalOpen(false);
+            return;
+        }
+
         // Check if any user is currently assigned to this profile
         const assignedCount = users.filter((u) => u.authorityProfileId === activeProfile.id).length;
         if (assignedCount > 0) {
@@ -313,6 +334,10 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
     };
 
     const handleAssignUserRole = (userNip: string, targetProfile: AuthorityProfile) => {
+        if (!permissions.canEditAuthorities) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin mengubah role pengguna.');
+            return;
+        }
         const updatedUsers = users.map((u) => {
             if (u.nip === userNip) {
                 return {
@@ -344,6 +369,10 @@ export const AdminAuthorityProfilesTab: React.FC<AdminAuthorityProfilesTabProps>
         });
 
         const handleMassApplyRole = (targetProfile: AuthorityProfile) => {
+            if (!permissions.canEditAuthorities) {
+                onShowToast('Akses dibatasi: Role Anda tidak memiliki izin menerapkan role massal.');
+                return;
+            }
             const affectedNips = new Set(filteredUsers.map((u) => u.nip));
             const updatedUsers = users.map((u) => {
                 if (affectedNips.has(u.nip)) {

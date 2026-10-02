@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { handleApiRequest } from './server/apiRouter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,7 +24,12 @@ app.get(['/healthz', '/_health', '/health', '/api/health'], (req, res) => {
   res.status(200).send('OK');
 });
 
-// 2. Serve static assets with caching headers
+// 2. Local Server API endpoints for Data Management (Users 120 staff, 5 poskos, schedules)
+app.use('/api', (req, res, next) => {
+  handleApiRequest(req, res, next);
+});
+
+// 3. Serve static assets with caching headers
 app.use(express.static(staticDir, {
   maxAge: '1d',
   setHeaders: (res, filePath) => {

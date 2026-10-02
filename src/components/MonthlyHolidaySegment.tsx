@@ -150,6 +150,15 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
     };
 
     const getDateBoxStyles = (category: HolidayCategory) => {
+        if (isDashboard) {
+            if (category === 'cuti_bersama') {
+                return 'bg-[#78350F]/15 text-[#78350F] border border-[#78350F]/30';
+            }
+            if (category === 'lainnya') {
+                return 'bg-[#4D2A00]/15 text-[#4D2A00] border border-[#4D2A00]/30';
+            }
+            return 'bg-[#78350F]/20 text-[#4D2A00] border border-[#78350F]/35';
+        }
         if (isPaperSketch) {
             return 'bg-[#ff4747] text-white border border-[#2b2b2b] shadow-[1px_1px_0px_#2b2b2b]';
         }
@@ -173,6 +182,15 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
     };
 
     const getIndicatorBadgeStyle = (category: HolidayCategory) => {
+        if (isDashboard) {
+            if (category === 'cuti_bersama') {
+                return 'bg-[#78350F]/15 text-[#78350F] border border-[#78350F]/30';
+            }
+            if (category === 'lainnya') {
+                return 'bg-[#4D2A00]/15 text-[#4D2A00] border border-[#4D2A00]/30';
+            }
+            return 'bg-[#4D2A00]/15 text-[#4D2A00] border border-[#4D2A00]/25';
+        }
         if (isWinamp) {
             return 'bg-[#00FF00]/15 text-[#00FF00] border border-[#00FF00]/30';
         }
@@ -205,6 +223,8 @@ export const MonthlyHolidaySegment = React.memo<MonthlyHolidaySegmentProps>(({
                             ? 'bg-[#00FF00] text-black'
                             : isVista
                             ? 'bg-rose-100 text-rose-700'
+                            : isDashboard
+                            ? 'bg-[#78350F]/20 text-[#78350F] border border-[#78350F]/30'
                             : isDark
                             ? 'bg-white/10 text-slate-300'
                             : 'bg-slate-100 text-slate-600'

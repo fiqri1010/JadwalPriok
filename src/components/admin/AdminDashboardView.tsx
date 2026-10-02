@@ -27,7 +27,9 @@ import {
     getApprovalRequests,
     getCurrentUserRole,
     setCurrentUserRole,
+    getCurrentUserPermissions,
 } from '../../utils/adminStorage';
+import { fetchServerUsers, saveServerUsers } from '../../utils/serverSync';
 import { AdminUserListTab } from './AdminUserListTab';
 import { AdminScheduleBroadcastTab } from './AdminScheduleBroadcastTab';
 import { AdminAuthorityProfilesTab } from './AdminAuthorityProfilesTab';
@@ -59,6 +61,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
     const isEditorial = theme === 'editorial';
     const isDashboard = theme === 'dashboard';
 
+    const permissions = getCurrentUserPermissions();
+
     const [activeSubMenu, setActiveSubMenu] = useState<AdminSubMenu>('users');
 
     // Data states
@@ -67,50 +71,81 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
     const [sessions, setSessions] = useState<UserSessionRecord[]>(() => getAllUserSessions());
     const [approvals, setApprovals] = useState<UserApprovalRequest[]>(() => getApprovalRequests());
 
+    // Dynamic Sub-menus based on permissions
+    const subMenus = React.useMemo(() => {
+        const list: { id: AdminSubMenu; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+            {
+                id: 'users',
+                label: 'Data Akun',
+                icon: Users,
+            },
+        ];
+
+        if (permissions.canBroadcastSchedule) {
+            list.push({
+                id: 'broadcast',
+                label: 'Impor Jadwal',
+                icon: FileSpreadsheet,
+            });
+        }
+
+        if (permissions.canEditAuthorities) {
+            list.push({
+                id: 'authorities',
+                label: 'Role',
+                icon: Shield,
+            });
+        }
+
+        if (permissions.canAccessApprovals) {
+            list.push({
+                id: 'approvals',
+                label: 'Persetujuan',
+                icon: ClipboardCheck,
+            });
+        }
+
+        return list;
+    }, [permissions.canBroadcastSchedule, permissions.canEditAuthorities, permissions.canAccessApprovals]);
+
+    // If current activeSubMenu is not in allowed subMenus, fallback immediately
+    useEffect(() => {
+        if (!subMenus.some((m) => m.id === activeSubMenu)) {
+            setActiveSubMenu(subMenus[0]?.id || 'users');
+        }
+    }, [subMenus, activeSubMenu]);
+
     // Refresh sesi saat dashboard dibuka agar selalu sinkron dengan Pengaturan
     useEffect(() => {
         setSessions(getAllUserSessions());
     }, [activeSubMenu]);
 
+    // Sinkronkan daftar pengguna dari backend server lokal saat pertama kali dibuka
+    useEffect(() => {
+        fetchServerUsers().then((serverUsers) => {
+            if (serverUsers && serverUsers.length >= 120) {
+                setUsers(serverUsers);
+            }
+        }).catch(() => {});
+    }, []);
+
     const handleUpdateUsers = (newUsers: UserAccount[]) => {
         setUsers(newUsers);
         saveAdminUsers(newUsers);
+        saveServerUsers(newUsers).catch(() => {});
+        const activeNip = localStorage.getItem('jadwalpriok_user_nip');
+        const updatedActive = newUsers.find((u) => u.nip === activeNip);
+        if (updatedActive) {
+            localStorage.setItem('jadwalpriok_current_user_role', updatedActive.role);
+            localStorage.setItem('jadwalpriok_user_name', updatedActive.name);
+        }
+        window.dispatchEvent(new Event('storage'));
     };
 
     const handleUpdateProfiles = (newProfiles: AuthorityProfile[]) => {
         setProfiles(newProfiles);
         saveAuthorityProfiles(newProfiles);
     };
-
-    // Check if current user has permission to approve delete account or reset password
-    const canViewApprovals = currentRole === 'admin' || currentRole === 'superadmin';
-
-    const subMenus = [
-        {
-            id: 'users' as AdminSubMenu,
-            label: 'Data Akun',
-            icon: Users,
-        },
-        {
-            id: 'broadcast' as AdminSubMenu,
-            label: 'Impor Jadwal',
-            icon: FileSpreadsheet,
-        },
-        {
-            id: 'authorities' as AdminSubMenu,
-            label: 'Role',
-            icon: Shield,
-        },
-        ...(canViewApprovals
-            ? [
-                  {
-                      id: 'approvals' as AdminSubMenu,
-                      label: 'Persetujuan',
-                      icon: ClipboardCheck,
-                  },
-              ]
-            : []),
-    ];
 
     const activeIndex = Math.max(0, subMenus.findIndex((m) => m.id === activeSubMenu));
 
@@ -160,11 +195,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                     {/* Sisi Kanan: Sub-menu Navigation Bar (Paling Kanan Header, tanpa pemotongan teks) */}
                     <div className="w-full lg:w-auto overflow-x-auto no-scrollbar shrink-0 pb-1 lg:pb-0">
                         <div
-                            className={`relative p-[2.5px] rounded-[8px] grid ${
-                                subMenus.length === 4
-                                    ? 'grid-cols-4 min-w-[390px] sm:min-w-[440px] md:min-w-[480px] lg:min-w-[500px]'
-                                    : 'grid-cols-3 min-w-[300px] sm:min-w-[340px] md:min-w-[370px] lg:min-w-[390px]'
-                            } items-center select-none ${
+                            className={`relative p-[2.5px] rounded-[8px] grid items-center select-none ${
                                 isWinamp
                                     ? 'bg-black border border-zinc-700 rounded-none'
                                     : isDark
@@ -183,6 +214,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                                     ? 'bg-[#FFF0BE] border border-[#4D2A00]/25'
                                     : 'bg-[#dadadb]'
                             }`}
+                            style={{
+                                gridTemplateColumns: `repeat(${subMenus.length}, minmax(0, 1fr))`,
+                                minWidth: subMenus.length === 4 ? '390px' : subMenus.length === 3 ? '300px' : subMenus.length === 2 ? '210px' : '120px',
+                            }}
                         >
                             {/* Animated Sliding Indicator Pill */}
                             <div
@@ -288,11 +323,12 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                         onShowToast={onShowToast}
                         theme={theme}
                         currentRole={currentRole}
+                        permissions={permissions}
                     />
                 )}
 
                 {/* 2. Sub Menu: Impor Jadwal Pengguna (Grid 150x40) */}
-                {activeSubMenu === 'broadcast' && (
+                {activeSubMenu === 'broadcast' && permissions.canBroadcastSchedule && (
                     <AdminScheduleBroadcastTab
                         users={users}
                         daysState={daysState}
@@ -302,7 +338,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                 )}
 
                 {/* 3. Sub Menu: Role Otoritas */}
-                {activeSubMenu === 'authorities' && (
+                {activeSubMenu === 'authorities' && permissions.canEditAuthorities && (
                     <AdminAuthorityProfilesTab
                         profiles={profiles}
                         users={users}
@@ -313,8 +349,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                     />
                 )}
 
-                {/* 5. Sub Menu: Halaman Persetujuan (Hapus Akun & Reset Password) */}
-                {activeSubMenu === 'approvals' && (
+                {/* 4. Sub Menu: Halaman Persetujuan (Hapus Akun & Reset Password) */}
+                {activeSubMenu === 'approvals' && permissions.canAccessApprovals && (
                     <AdminApprovalsTab
                         users={users}
                         onUpdateUsers={handleUpdateUsers}

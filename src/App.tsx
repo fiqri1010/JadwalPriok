@@ -1,7 +1,19 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import {
+    ChevronLeft,
+    ChevronRight,
+    ClipboardPaste,
+    Lock,
+    Unlock,
+    RotateCcw,
+    Briefcase,
+    Flag
+} from 'lucide-react';
 import { DayData, LiburNasional, AppTheme } from './types';
 import { getThemeConfig } from './themeConfig';
+import { Tooltip } from './components/Tooltip';
 import { DayCell } from './components/DayCell';
+import { CalendarListView } from './components/CalendarListView';
 import { DayDetailModal } from './components/DayDetailModal';
 import { TimePickerModal } from './components/TimePickerModal';
 import { MonthYearPickerModal } from './components/MonthYearPickerModal';
@@ -23,8 +35,10 @@ import { SettingsModal } from './components/SettingsModal';
 import { MonthlyHolidaySegment } from './components/MonthlyHolidaySegment';
 import { MonthlyPiketSummarySegment } from './components/MonthlyPiketSummarySegment';
 import { AdminDashboardView } from './components/admin/AdminDashboardView';
+import { TeamScheduleView } from './components/team/TeamScheduleView';
 import { LandingPageView, LOCAL_STORAGE_ONBOARDING_DONE_KEY } from './components/LandingPageView';
 import { getCurrentUserRole, setCurrentUserRole, getCurrentUserRoleInfo, getCurrentUserPermissions } from './utils/adminStorage';
+import { fetchServerUsers } from './utils/serverSync';
 import { UserRole } from './types/admin';
 import { calculatePiketMatches } from './utils/piket';
 import { FULL_APP_TITLE, APP_VERSION } from './version';
@@ -51,6 +65,8 @@ const DEFAULT_DAY_DATA: DayData = Object.freeze({
 const LOCAL_STORAGE_DAYS_KEY = 'jadwalpriok_days_data_v2';
 const LOCAL_STORAGE_THEME_KEY = 'jadwalpriok_theme';
 const LOCAL_STORAGE_HOLIDAYS_KEY = 'jadwalpriok_custom_holidays';
+const LOCAL_STORAGE_CALENDAR_VIEW_MODE = 'jadwalpriok_calendar_view_mode';
+const LOCAL_STORAGE_RIGHT_SIDEBAR_MINIMIZED = 'jadwalpriok_right_sidebar_minimized';
 
 export const App: React.FC = () => {
     const today = useMemo(() => new Date(), []);
@@ -58,11 +74,32 @@ export const App: React.FC = () => {
     const [selectedMonth, setSelectedMonth] = useState<number>(() => today.getMonth() + 1);
 
     // Active page tab (Layar utama: Kalender Kerja atau Landing Page jika baru pertama diinstal)
-    const [pageTab, setPageTab] = useState<'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing'>(() => {
+    const [pageTab, setPageTab] = useState<'calendar' | 'team-schedule' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing'>(() => {
         const isDone = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_ONBOARDING_DONE_KEY) : 'true';
         if (!isDone) return 'landing';
         return 'calendar';
     });
+
+    // Switch Model Tampilan Kalender Kerja ('grid' | 'list')
+    const [calendarViewMode, setCalendarViewMode] = useState<'grid' | 'list'>(() => {
+        const saved = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_CALENDAR_VIEW_MODE) : null;
+        return (saved === 'list' || saved === 'grid') ? saved : 'grid';
+    });
+
+    // State Sidebar Kanan Diminimalkan (persisten)
+    const [isRightSidebarMinimized, setIsRightSidebarMinimized] = useState<boolean>(() => {
+        const saved = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_RIGHT_SIDEBAR_MINIMIZED) : null;
+        return saved === 'true';
+    });
+
+    // Simpan mode tampilan kalender dan status minimize ke localStorage
+    useEffect(() => {
+        localStorage.setItem(LOCAL_STORAGE_CALENDAR_VIEW_MODE, calendarViewMode);
+    }, [calendarViewMode]);
+
+    useEffect(() => {
+        localStorage.setItem(LOCAL_STORAGE_RIGHT_SIDEBAR_MINIMIZED, String(isRightSidebarMinimized));
+    }, [isRightSidebarMinimized]);
 
     // User & Admin Role State
     const [currentRole, setCurrentRole] = useState<UserRole>(() => getCurrentUserRole());
@@ -81,6 +118,9 @@ export const App: React.FC = () => {
             setUserNip('199510102015121002');
             setCurrentRole('superadmin');
         }
+
+        // Sinkronkan data 120 personel di 5 posko resmi dari backend server lokal
+        fetchServerUsers().catch(() => {});
     }, []);
 
     // Sync user data & role when changed in localStorage
@@ -106,7 +146,7 @@ export const App: React.FC = () => {
         setSelectedYear(now.getFullYear());
     }, [pageTab]);
 
-    // Block admin tab if user lacks access permission
+    // Block admin tab if user lacks access permission, or team-schedule if user is PPF non User
     useEffect(() => {
         if (pageTab === 'admin') {
             const isSuperAdminAccount = userName === 'Ahmad Fiqri' || userNip === '199510102015121002';
@@ -116,8 +156,15 @@ export const App: React.FC = () => {
             if (!canAccessAdmin) {
                 setPageTab('calendar');
             }
+        } else if (pageTab === 'team-schedule') {
+            const isSuperAdminAccount = userName === 'Ahmad Fiqri' || userNip === '199510102015121002';
+            const roleInfo = getCurrentUserRoleInfo();
+            const isPPFNonUser = roleInfo.authorityName === 'PPF non User' || currentRole === 'non-user';
+            if (isPPFNonUser && !isSuperAdminAccount) {
+                setPageTab('calendar');
+            }
         }
-    }, [pageTab, userName, userNip]);
+    }, [pageTab, userName, userNip, currentRole]);
 
     // Theme state
     const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => {
@@ -360,6 +407,7 @@ export const App: React.FC = () => {
 
     // Modals
     const [activeModalDay, setActiveModalDay] = useState<number | null>(null);
+    const [modalSubTab, setModalSubTab] = useState<'shift' | 'geser_off' | 'st' | 'leave'>('shift');
     const [expandedDesktopDay, setExpandedDesktopDay] = useState<number | null>(null);
     const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
     const [pasteModalTab, setPasteModalTab] = useState<'excel_grid' | 'schedule' | 'absen'>('excel_grid');
@@ -385,12 +433,30 @@ export const App: React.FC = () => {
     }, []);
 
     const handleOpenDetail = useCallback((dayNum: number) => {
-        if (window.innerWidth < 768) {
-            setActiveModalDay(dayNum);
-        } else {
-            setExpandedDesktopDay((prev) => (prev === dayNum ? null : dayNum));
-        }
+        setModalSubTab('shift');
+        setActiveModalDay(dayNum);
     }, []);
+
+    const handleOpenGeserOff = useCallback((targetDay?: number) => {
+        const day = targetDay || (selectedYear === today.getFullYear() && selectedMonth === today.getMonth() + 1 ? today.getDate() : 1);
+        setModalSubTab('geser_off');
+        setActiveModalDay(day);
+        setPageTab('calendar');
+    }, [selectedYear, selectedMonth, today]);
+
+    const handleOpenSt = useCallback((targetDay?: number) => {
+        const day = targetDay || (selectedYear === today.getFullYear() && selectedMonth === today.getMonth() + 1 ? today.getDate() : 1);
+        setModalSubTab('st');
+        setActiveModalDay(day);
+        setPageTab('calendar');
+    }, [selectedYear, selectedMonth, today]);
+
+    const handleOpenCuti = useCallback((targetDay?: number) => {
+        const day = targetDay || (selectedYear === today.getFullYear() && selectedMonth === today.getMonth() + 1 ? today.getDate() : 1);
+        setModalSubTab('leave');
+        setActiveModalDay(day);
+        setPageTab('calendar');
+    }, [selectedYear, selectedMonth, today]);
 
     // Holiday list state
     const [daftarLibur, setDaftarLibur] = useState<LiburNasional[]>(() => {
@@ -640,8 +706,28 @@ export const App: React.FC = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [handlePrevMonth, handleNextMonth, activeModalDay, expandedDesktopDay, isPasteModalOpen, isMonthYearPickerOpen, isResetConfirmOpen, timePickerTarget]);
 
+    // Route Guard for admin dashboard
+    useEffect(() => {
+        if (pageTab === 'admin') {
+            const perms = getCurrentUserPermissions();
+            const activeUserName = localStorage.getItem('jadwalpriok_user_name') || 'Ahmad Fiqri';
+            const activeUserNip = localStorage.getItem('jadwalpriok_user_nip') || '199510102015121002';
+            const isSuperAdminAccount = activeUserName === 'Ahmad Fiqri' || activeUserNip === '199510102015121002';
+            if (!isSuperAdminAccount && !perms.canAccessAdminDashboard) {
+                setPageTab('calendar');
+                showToast('Akses dibatasi: Role Anda tidak memiliki izin mengakses Dashboard Admin (canAccessAdminDashboard).');
+            }
+        }
+    }, [pageTab]);
+
     // Update single day data
     const handleUpdateDay = useCallback((dateKey: string, partial: Partial<DayData>) => {
+        const perms = getCurrentUserPermissions();
+        if (perms.canEditOwnSchedule === false && (partial.shift !== undefined || partial.isMasuk !== undefined || partial.jamMasuk !== undefined || partial.jamPulang !== undefined)) {
+            showToast('Akses dibatasi: Role Anda tidak memiliki izin mengubah jadwal kalender (canEditOwnSchedule).');
+            return;
+        }
+
         setDaysState((prev) => {
             const existing = prev[dateKey] || {
                 shift: '',
@@ -681,6 +767,11 @@ export const App: React.FC = () => {
     }, [selectedYear, selectedMonth, daysState]);
 
     const handleToggleLockMonth = () => {
+        const perms = getCurrentUserPermissions();
+        if (perms.canEditOwnSchedule === false) {
+            showToast('Akses dibatasi: Role Anda tidak memiliki izin mengunci/membuka jadwal kalender (canEditOwnSchedule).');
+            return;
+        }
         const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
         const newLockState = !isMonthFullyLocked;
 
@@ -711,6 +802,12 @@ export const App: React.FC = () => {
 
     // Reset Current Month
     const handleConfirmResetMonth = () => {
+        const perms = getCurrentUserPermissions();
+        if (perms.canEditOwnSchedule === false) {
+            showToast('Akses dibatasi: Role Anda tidak memiliki izin mereset jadwal kalender (canEditOwnSchedule).');
+            setIsResetConfirmOpen(false);
+            return;
+        }
         const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
         const backupData: Record<string, DayData> = {};
 
@@ -941,6 +1038,24 @@ export const App: React.FC = () => {
     const firstDayOffset = (firstDayOfMonthRaw + 6) % 7;
     const isCurrentMonthAndYear = selectedYear === today.getFullYear() && selectedMonth === today.getMonth() + 1;
 
+    // Handler Klik Menu Kalender Kerja (Jika diklik lagi saat sudah aktif, switch ke mode List / Grid & minimalkan sidebar kanan)
+    const handleCalendarMenuClick = useCallback(() => {
+        if (pageTab !== 'calendar') {
+            setPageTab('calendar');
+        } else {
+            setCalendarViewMode((prev) => {
+                const nextMode = prev === 'grid' ? 'list' : 'grid';
+                if (nextMode === 'list') {
+                    setIsRightSidebarMinimized(true);
+                    showToast('Tampilan Kalender berganti ke Mode List (Daftar).');
+                } else {
+                    showToast('Tampilan Kalender berganti ke Mode Grid (Kalender).');
+                }
+                return nextMode;
+            });
+        }
+    }, [pageTab, showToast]);
+
     // Keyboard arrow navigation for expanded folded card on desktop
     useEffect(() => {
         if (isMobile || expandedDesktopDay === null) return;
@@ -1048,6 +1163,8 @@ export const App: React.FC = () => {
                         userName={userName}
                         userNip={userNip}
                         userRole={currentRole}
+                        calendarViewMode={calendarViewMode}
+                        onCalendarMenuClick={handleCalendarMenuClick}
                     />
                 )}
 
@@ -1088,15 +1205,15 @@ export const App: React.FC = () => {
                         <div
                             className={`touch-pan-y ${
                                 currentTheme === 'dashboard'
-                                    ? 'p-1.5 sm:p-2 lg:p-2.5 w-full max-w-none'
-                                    : 'p-2 sm:p-2.5 lg:p-2.5 max-w-[1490px] w-full mx-auto'
+                                    ? 'p-1 sm:p-1.5 lg:p-2 w-full max-w-none'
+                                    : 'p-1.5 sm:p-2 lg:p-2 max-w-[1490px] w-full mx-auto'
                             }`}
                             onTouchStart={handleTouchStart}
                             onTouchEnd={handleTouchEnd}
                         >
-                            <div className="flex flex-col lg:flex-row gap-2.5 xl:gap-3 items-start">
+                            <div className="flex flex-col lg:flex-row gap-2 xl:gap-2.5 items-start">
                                 {/* Left/Main Column: Calendar & Controls */}
-                                <div className="flex-1 min-w-0 w-full space-y-1.5 sm:space-y-2">
+                                <div className="flex-1 min-w-0 w-full space-y-1 sm:space-y-1">
                                     {/* Calendar Header Toolbar */}
                                     <SubToolbarHeader
                                         title="Jadwal Kerja"
@@ -1109,6 +1226,13 @@ export const App: React.FC = () => {
                                         onPrevMonth={handlePrevMonth}
                                         onNextMonth={handleNextMonth}
                                         onOpenMonthPicker={() => setIsMonthYearPickerOpen(true)}
+                                        viewMode={calendarViewMode}
+                                        onViewModeChange={(mode) => {
+                                            setCalendarViewMode(mode);
+                                            if (mode === 'list') {
+                                                setIsRightSidebarMinimized(true);
+                                            }
+                                        }}
                                     />
 
                                      {/* Mobile/Compact View: Kontrol Kalender diletakkan di atas kalender dalam mode ramping */}
@@ -1128,171 +1252,188 @@ export const App: React.FC = () => {
                                         />
                                     </div>
 
-                                    {/* Calendar Day of Week Headers */}
-                                    <div className={themeConfig.dayNamesHeaderClass}>
-                                        {INDONESIAN_DAYS.map((dayName, idx) => {
-                                            const isWeekend = idx === 5 || idx === 6;
-                                            return (
-                                                <div
-                                                    key={`weekday-header-${dayName}-${idx}`}
-                                                    className={`${isWeekend ? themeConfig.weekendNameTextClass : themeConfig.weekdayNameTextClass} ${
-                                                        currentTheme === 'dashboard' ? 'border-r border-[#4D2A00]/25 last:border-r-0' : ''
-                                                    }`}
-                                                >
-                                                    {dayName}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Calendar Days Grid */}
-                                    {(() => {
-                                        const totalCells = firstDayOffset + daysInCurrentMonth;
-                                        const totalRows = Math.ceil(totalCells / 7);
-
-                                        // Dynamic autoscale aspect ratio and minimum height based on viewport and total rows
-                                        const getGridAspectStyle = (rows: number): React.CSSProperties => {
-                                            if (currentTheme === 'dashboard') {
-                                                if (isMobile) {
-                                                    return {
-                                                        aspectRatio: '1 / 1',
-                                                        minHeight: 'clamp(58px, 13.5vw, 88px)',
-                                                    };
-                                                }
-                                                if (rows >= 6) {
-                                                    return {
-                                                        aspectRatio: '1.28 / 1',
-                                                        minHeight: 'clamp(96px, 13vh, 142px)',
-                                                    };
-                                                }
-                                                if (rows === 5) {
-                                                    return {
-                                                        aspectRatio: '1.24 / 1',
-                                                        minHeight: 'clamp(104px, 14.5vh, 156px)',
-                                                    };
-                                                }
-                                                return {
-                                                    aspectRatio: '1.18 / 1',
-                                                    minHeight: 'clamp(114px, 16vh, 172px)',
-                                                };
-                                            }
-                                            if (isMobile) {
-                                                return {
-                                                    aspectRatio: '1 / 1',
-                                                    minHeight: 'clamp(54px, 12.5vw, 80px)',
-                                                };
-                                            }
-                                            if (rows >= 6) {
-                                                return {
-                                                    aspectRatio: '1.2 / 1',
-                                                    minHeight: 'clamp(84px, 11vh, 120px)',
-                                                };
-                                            }
-                                            if (rows === 5) {
-                                                return {
-                                                    aspectRatio: '1.18 / 1',
-                                                    minHeight: 'clamp(88px, 12vh, 130px)',
-                                                };
-                                            }
-                                            return {
-                                                aspectRatio: '1.12 / 1',
-                                                minHeight: 'clamp(94px, 13vh, 140px)',
-                                            };
-                                        };
-
-                                        const cellAspectStyle = getGridAspectStyle(totalRows);
-                                        const isDashboard = currentTheme === 'dashboard';
-
-                                        return (
-                                            <div 
-                                                className={`grid grid-cols-7 relative w-full ${
-                                                    isDashboard
-                                                        ? 'gap-0 border-t border-l border-[#4D2A00]/30 bg-[#FFF4CE]'
-                                                        : 'gap-1 sm:gap-1.5'
-                                                }`}
-                                            >
-                                                {/* Empty prefix cells to align Day 1 with its correct day of the week */}
-                                                {Array.from({ length: firstDayOffset }).map((_, emptyIdx) => (
-                                                    <div
-                                                        key={`empty-prefix-${emptyIdx}`}
-                                                        style={cellAspectStyle}
-                                                        className={`w-full ${
-                                                            isDashboard
-                                                                ? 'bg-[#F9E6A8]/50 border-r border-b border-[#4D2A00]/30 pointer-events-none'
-                                                                : 'opacity-0 pointer-events-none'
-                                                        }`}
-                                                        aria-hidden="true"
-                                                    />
-                                                ))}
-
-                                                {Array.from({ length: daysInCurrentMonth }).map((_, idx) => {
-                                                    const dayNumber = idx + 1;
-                                                    const cellIndex = firstDayOffset + idx;
-                                                    const colIndex = cellIndex % 7;
-                                                    const rowIndex = Math.floor(cellIndex / 7);
-                                                    const isRightEdge = colIndex >= 6;
-                                                    const isBottomEdge = rowIndex >= totalRows - 1;
-
-                                                    const dateKey = `${selectedYear}-${selectedMonth}-${dayNumber}`;
-                                                    const dayData = daysState[dateKey] || {
-                                                        shift: '',
-                                                        isLocked: true,
-                                                        note: '',
-                                                        isMasuk: false,
-                                                        jamMasuk: '',
-                                                        jamPulang: '',
-                                                        absenCeisa: '',
-                                                        isManualHoliday: false,
-                                                    };
-
-                                                    const paddedD = String(dayNumber).padStart(2, '0');
-                                                    const paddedM = String(selectedMonth).padStart(2, '0');
-                                                    const isoDate = `${selectedYear}-${paddedM}-${paddedD}`;
-                                                    const holiday = holidayMap.get(isoDate) || holidayMap.get(dateKey);
-
-                                                    const nextDayPaddedD = String(dayNumber + 1).padStart(2, '0');
-                                                    const nextDateKey = `${selectedYear}-${paddedM}-${nextDayPaddedD}`;
-                                                    const nextDayData = daysState[nextDateKey];
-
+                                    {/* TAMPILAN MODE LIST ATAU GRID KALENDER */}
+                                    {calendarViewMode === 'list' ? (
+                                        <CalendarListView
+                                            selectedYear={selectedYear}
+                                            selectedMonth={selectedMonth}
+                                            daysState={daysState}
+                                            holidayMap={holidayMap}
+                                            currentTheme={currentTheme}
+                                            piketCalculation={piketCalculation}
+                                            onUpdateDay={handleUpdateDay}
+                                            onOpenDetail={handleOpenDetail}
+                                            onRequestTimePick={handleOpenTimePicker}
+                                        />
+                                    ) : (
+                                        <>
+                                            {/* Calendar Day of Week Headers */}
+                                            <div className={themeConfig.dayNamesHeaderClass}>
+                                                {INDONESIAN_DAYS.map((dayName, idx) => {
+                                                    const isWeekend = idx === 5 || idx === 6;
                                                     return (
                                                         <div
-                                                            key={dateKey}
-                                                            style={cellAspectStyle}
-                                                            className={`relative w-full ${
-                                                                isDashboard ? 'border-r border-b border-[#4D2A00]/30' : ''
+                                                            key={`weekday-header-${dayName}-${idx}`}
+                                                            className={`${isWeekend ? themeConfig.weekendNameTextClass : themeConfig.weekdayNameTextClass} ${
+                                                                currentTheme === 'dashboard' ? 'border-r border-[#4D2A00]/25 last:border-r-0' : ''
                                                             }`}
                                                         >
-                                                            <DayCell
-                                                                dateKey={dateKey}
-                                                                year={selectedYear}
-                                                                month={selectedMonth}
-                                                                dayNumber={dayNumber}
-                                                                data={dayData}
-                                                                nextDayData={nextDayData}
-                                                                isLocked={dayData.isLocked ?? true}
-                                                                holiday={holiday}
-                                                                theme={currentTheme}
-                                                                isSelected={selectedDays.includes(dayNumber)}
-                                                                onSelectDay={handleSelectDay}
-                                                                isExpandedDesktop={!isMobile && expandedDesktopDay === dayNumber}
-                                                                isRightEdge={isRightEdge}
-                                                                isBottomEdge={isBottomEdge}
-                                                                onToggleExpandDesktop={handleToggleExpandDesktop}
-                                                                onCloseExpandDesktop={handleCloseExpandDesktop}
-                                                                onUpdate={(partial) => handleUpdateDay(dateKey, partial)}
-                                                                onRequestTimePick={(field, title, currentVal) =>
-                                                                    handleOpenTimePicker(field, title, currentVal, dateKey)
-                                                                }
-                                                                onOpenDetail={handleOpenDetail}
-                                                                piketMatchInfo={piketCalculation.piketByDateKey[dateKey]}
-                                                                offMatchInfo={piketCalculation.offMatches[dateKey]}
-                                                            />
+                                                            {dayName}
                                                         </div>
                                                     );
                                                 })}
                                             </div>
-                                        );
-                                    })()}
+
+                                            {/* Calendar Days Grid */}
+                                            {(() => {
+                                                const totalCells = firstDayOffset + daysInCurrentMonth;
+                                                const totalRows = Math.ceil(totalCells / 7);
+
+                                                // Dynamic autoscale aspect ratio and minimum height based on viewport and total rows
+                                                const getGridAspectStyle = (rows: number): React.CSSProperties => {
+                                                    if (currentTheme === 'dashboard') {
+                                                        if (isMobile) {
+                                                            return {
+                                                                aspectRatio: '1 / 1',
+                                                                minHeight: 'clamp(58px, 13.5vw, 88px)',
+                                                            };
+                                                        }
+                                                        if (rows >= 6) {
+                                                            return {
+                                                                aspectRatio: '1.28 / 1',
+                                                                minHeight: 'clamp(96px, 13vh, 142px)',
+                                                            };
+                                                        }
+                                                        if (rows === 5) {
+                                                            return {
+                                                                aspectRatio: '1.24 / 1',
+                                                                minHeight: 'clamp(104px, 14.5vh, 156px)',
+                                                            };
+                                                        }
+                                                        return {
+                                                            aspectRatio: '1.18 / 1',
+                                                            minHeight: 'clamp(114px, 16vh, 172px)',
+                                                        };
+                                                    }
+                                                    if (isMobile) {
+                                                        return {
+                                                            aspectRatio: '1 / 1',
+                                                            minHeight: 'clamp(54px, 12.5vw, 80px)',
+                                                        };
+                                                    }
+                                                    if (rows >= 6) {
+                                                        return {
+                                                            aspectRatio: '1.2 / 1',
+                                                            minHeight: 'clamp(84px, 11vh, 120px)',
+                                                        };
+                                                    }
+                                                    if (rows === 5) {
+                                                        return {
+                                                            aspectRatio: '1.18 / 1',
+                                                            minHeight: 'clamp(88px, 12vh, 130px)',
+                                                        };
+                                                    }
+                                                    return {
+                                                        aspectRatio: '1.12 / 1',
+                                                        minHeight: 'clamp(94px, 13vh, 140px)',
+                                                    };
+                                                };
+
+                                                const cellAspectStyle = getGridAspectStyle(totalRows);
+                                                const isDashboard = currentTheme === 'dashboard';
+
+                                                return (
+                                                    <div 
+                                                        className={`grid grid-cols-7 relative w-full ${
+                                                            isDashboard
+                                                                ? 'gap-0 border-t border-l border-[#4D2A00]/30 bg-[#FFF4CE]'
+                                                                : 'gap-1 sm:gap-1.5'
+                                                        }`}
+                                                    >
+                                                        {/* Empty prefix cells to align Day 1 with its correct day of the week */}
+                                                        {Array.from({ length: firstDayOffset }).map((_, emptyIdx) => (
+                                                            <div
+                                                                key={`empty-prefix-${emptyIdx}`}
+                                                                style={cellAspectStyle}
+                                                                className={`w-full ${
+                                                                    isDashboard
+                                                                        ? 'bg-[#F9E6A8]/50 border-r border-b border-[#4D2A00]/30 pointer-events-none'
+                                                                        : 'opacity-0 pointer-events-none'
+                                                                }`}
+                                                                aria-hidden="true"
+                                                            />
+                                                        ))}
+
+                                                        {Array.from({ length: daysInCurrentMonth }).map((_, idx) => {
+                                                            const dayNumber = idx + 1;
+                                                            const cellIndex = firstDayOffset + idx;
+                                                            const colIndex = cellIndex % 7;
+                                                            const rowIndex = Math.floor(cellIndex / 7);
+                                                            const isRightEdge = colIndex >= 6;
+                                                            const isBottomEdge = rowIndex >= totalRows - 1;
+
+                                                            const dateKey = `${selectedYear}-${selectedMonth}-${dayNumber}`;
+                                                            const dayData = daysState[dateKey] || {
+                                                                shift: '',
+                                                                isLocked: true,
+                                                                note: '',
+                                                                isMasuk: false,
+                                                                jamMasuk: '',
+                                                                jamPulang: '',
+                                                                absenCeisa: '',
+                                                                isManualHoliday: false,
+                                                            };
+
+                                                            const paddedD = String(dayNumber).padStart(2, '0');
+                                                            const paddedM = String(selectedMonth).padStart(2, '0');
+                                                            const isoDate = `${selectedYear}-${paddedM}-${paddedD}`;
+                                                            const holiday = holidayMap.get(isoDate) || holidayMap.get(dateKey);
+
+                                                            const nextDayPaddedD = String(dayNumber + 1).padStart(2, '0');
+                                                            const nextDateKey = `${selectedYear}-${paddedM}-${nextDayPaddedD}`;
+                                                            const nextDayData = daysState[nextDateKey];
+
+                                                            return (
+                                                                <div
+                                                                    key={dateKey}
+                                                                    style={cellAspectStyle}
+                                                                    className={`relative w-full ${
+                                                                        isDashboard ? 'border-r border-b border-[#4D2A00]/30' : ''
+                                                                    }`}
+                                                                >
+                                                                    <DayCell
+                                                                        dateKey={dateKey}
+                                                                        year={selectedYear}
+                                                                        month={selectedMonth}
+                                                                        dayNumber={dayNumber}
+                                                                        data={dayData}
+                                                                        nextDayData={nextDayData}
+                                                                        isLocked={dayData.isLocked ?? true}
+                                                                        holiday={holiday}
+                                                                        theme={currentTheme}
+                                                                        isSelected={selectedDays.includes(dayNumber)}
+                                                                        onSelectDay={handleSelectDay}
+                                                                        isExpandedDesktop={!isMobile && expandedDesktopDay === dayNumber}
+                                                                        isRightEdge={isRightEdge}
+                                                                        isBottomEdge={isBottomEdge}
+                                                                        onToggleExpandDesktop={handleToggleExpandDesktop}
+                                                                        onCloseExpandDesktop={handleCloseExpandDesktop}
+                                                                        onUpdate={(partial) => handleUpdateDay(dateKey, partial)}
+                                                                        onRequestTimePick={(field, title, currentVal) =>
+                                                                            handleOpenTimePicker(field, title, currentVal, dateKey)
+                                                                        }
+                                                                        onOpenDetail={handleOpenDetail}
+                                                                        piketMatchInfo={piketCalculation.piketByDateKey[dateKey]}
+                                                                        offMatchInfo={piketCalculation.offMatches[dateKey]}
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                );
+                                            })()}
+                                        </>
+                                    )}
 
                                      {/* Mobile View: Libur Nasional di Atas & Ringkasan Piket di Bawah Kalender */}
                                     <div className="block lg:hidden pt-2 space-y-3">
@@ -1327,52 +1468,175 @@ export const App: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Desktop View: Right Sidebar with Controls at Very Top & Holiday List */}
-                                <aside className="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-2 space-y-3 relative z-20">
-                                    <CalendarActionToolbar
-                                        selectedMonth={selectedMonth}
-                                        selectedYear={selectedYear}
-                                        currentTheme={currentTheme}
-                                        areAllLocked={isMonthFullyLocked}
-                                        lastResetBackupState={undoBackup ? { year: undoBackup.year, month: undoBackup.month } : null}
-                                        
-                                        onTempelJadwal={() => setIsPasteModalOpen(true)}
-                                        onUndoReset={handleUndoReset}
-                                        onResetCalendar={() => setIsResetConfirmOpen(true)}
-                                        onToggleAllLock={handleToggleLockMonth}
-                                    />
+                                {/* Desktop View: Right Sidebar (Dapat diminimalkan dan tetap ada) */}
+                                <aside className={`hidden lg:flex flex-col shrink-0 sticky top-2 transition-all duration-200 relative z-20 ${
+                                    isRightSidebarMinimized ? 'w-14' : 'w-72 xl:w-80'
+                                }`}>
+                                    {isRightSidebarMinimized ? (
+                                        /* Minimized Right Sidebar: Vertical icon toolbar with tooltips & expand toggle */
+                                        <div className={`w-full flex flex-col items-center py-2 px-1 rounded-xl border gap-2 shadow-sm select-none ${
+                                            currentTheme === 'industrial'
+                                                ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.15)] text-[#E2E8F0]'
+                                                : currentTheme === 'paperSketch'
+                                                ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                                : currentTheme === 'technical'
+                                                ? 'bg-[#FFFFFF] dark:bg-[#0D1117] border-[1.5px] border-[#111113] text-[#111113] dark:text-slate-100 font-[\'JetBrains_Mono\']'
+                                                : currentTheme === 'editorial'
+                                                ? 'bg-white border border-[#1a1a1a]/20 text-[#1a1a1a]'
+                                                : currentTheme === 'dashboard'
+                                                ? 'bg-[#FFF5D0] border border-[#4D2A00]/30 text-[#4D2A00]'
+                                                : currentTheme === 'winamp'
+                                                ? 'bg-black border border-[#00FF00] text-[#00FF00]'
+                                                : currentTheme === 'dark'
+                                                ? 'bg-[#1E1E1E] border-slate-800 text-slate-100'
+                                                : 'bg-white border-slate-200 text-slate-900 shadow-2xs'
+                                        }`}>
+                                            {/* Expand Toggle Button */}
+                                            <Tooltip content={<span>Perluas <strong>Sidebar Kanan</strong></span>} placement="left">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsRightSidebarMinimized(false)}
+                                                    className="p-1.5 rounded-lg border border-current/20 hover:bg-current/10 transition-all cursor-pointer"
+                                                    aria-label="Perluas Sidebar Kanan"
+                                                >
+                                                    <ChevronLeft className="w-4 h-4" />
+                                                </button>
+                                            </Tooltip>
 
-                                    <MonthlyPiketSummarySegment
-                                        selectedMonth={selectedMonth}
-                                        selectedYear={selectedYear}
-                                        piketCalculation={piketCalculation}
-                                        theme={currentTheme}
-                                        layout="sidebar"
-                                        onSelectDate={(dayNum) => {
-                                            if (isMobile) {
-                                                setActiveModalDay(dayNum);
-                                            } else {
-                                                setExpandedDesktopDay(dayNum);
-                                            }
-                                        }}
-                                    />
+                                            <div className="w-8 border-b border-current/15" />
 
-                                    <MonthlyHolidaySegment
-                                        selectedMonth={selectedMonth}
-                                        selectedYear={selectedYear}
-                                        daftarLibur={daftarLibur}
-                                        theme={currentTheme}
-                                        onSelectDate={(dayNum) => {
-                                            if (isMobile) {
-                                                setActiveModalDay(dayNum);
-                                            } else {
-                                                setExpandedDesktopDay(dayNum);
-                                            }
-                                        }}
-                                    />
+                                            {/* Quick Actions */}
+                                            <Tooltip content={<span>Tempel Jadwal / Excel</span>} placement="left">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsPasteModalOpen(true)}
+                                                    className="p-2 rounded-lg bg-teal-500/15 text-teal-600 dark:text-teal-400 hover:bg-teal-500/25 transition-all cursor-pointer"
+                                                    aria-label="Tempel Jadwal"
+                                                >
+                                                    <ClipboardPaste className="w-4 h-4" />
+                                                </button>
+                                            </Tooltip>
+
+                                            <Tooltip content={<span>{isMonthFullyLocked ? 'Buka Kunci Bulan' : 'Kunci Semua Hari'}</span>} placement="left">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleToggleLockMonth}
+                                                    className={`p-2 rounded-lg transition-all cursor-pointer ${
+                                                        isMonthFullyLocked
+                                                            ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                                                            : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                                    }`}
+                                                    aria-label="Kunci / Buka Kunci Bulan"
+                                                >
+                                                    {isMonthFullyLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                                                </button>
+                                            </Tooltip>
+
+                                            <Tooltip content={<span>Reset Jadwal Bulan Ini</span>} placement="left">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsResetConfirmOpen(true)}
+                                                    className="p-2 rounded-lg bg-rose-500/15 text-rose-600 dark:text-rose-400 hover:bg-rose-500/25 transition-all cursor-pointer"
+                                                    aria-label="Reset Jadwal"
+                                                >
+                                                    <RotateCcw className="w-4 h-4" />
+                                                </button>
+                                            </Tooltip>
+
+                                            <div className="w-8 border-b border-current/15" />
+
+                                            {/* Quick Stats Badges */}
+                                            <Tooltip content={<span>Total <strong>{piketCalculation.piketMatches.length} Hari Piket</strong></span>} placement="left">
+                                                <div className="flex flex-col items-center justify-center p-1 rounded bg-blue-500/15 text-blue-600 dark:text-blue-400 font-mono text-[10px] font-bold w-10 cursor-default">
+                                                    <Briefcase className="w-3.5 h-3.5 mb-0.5" />
+                                                    <span>{piketCalculation.piketMatches.length}</span>
+                                                </div>
+                                            </Tooltip>
+
+                                            <Tooltip content={<span>Total <strong>{daftarLibur.length} Hari Libur Terdaftar</strong></span>} placement="left">
+                                                <div className="flex flex-col items-center justify-center p-1 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono text-[10px] font-bold w-10 cursor-default">
+                                                    <Flag className="w-3.5 h-3.5 mb-0.5" />
+                                                    <span>{daftarLibur.length}</span>
+                                                </div>
+                                            </Tooltip>
+                                        </div>
+                                    ) : (
+                                        /* Expanded Right Sidebar */
+                                        <div className="space-y-3 w-full">
+                                            <div className="flex items-center justify-between px-1">
+                                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider opacity-60">
+                                                    Panel Ringkasan
+                                                </span>
+                                                <Tooltip content={<span>Minimalkan <strong>Sidebar Kanan</strong></span>} placement="left">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setIsRightSidebarMinimized(true)}
+                                                        className="p-1 text-xs rounded border border-current/15 hover:bg-current/10 transition-all cursor-pointer flex items-center gap-1 opacity-70 hover:opacity-100"
+                                                    >
+                                                        <ChevronRight className="w-3.5 h-3.5" />
+                                                        <span className="text-[10px] font-mono">Kecilkan</span>
+                                                    </button>
+                                                </Tooltip>
+                                            </div>
+
+                                            <CalendarActionToolbar
+                                                selectedMonth={selectedMonth}
+                                                selectedYear={selectedYear}
+                                                currentTheme={currentTheme}
+                                                areAllLocked={isMonthFullyLocked}
+                                                lastResetBackupState={undoBackup ? { year: undoBackup.year, month: undoBackup.month } : null}
+                                                onTempelJadwal={() => setIsPasteModalOpen(true)}
+                                                onUndoReset={handleUndoReset}
+                                                onResetCalendar={() => setIsResetConfirmOpen(true)}
+                                                onToggleAllLock={handleToggleLockMonth}
+                                            />
+
+                                            <MonthlyPiketSummarySegment
+                                                selectedMonth={selectedMonth}
+                                                selectedYear={selectedYear}
+                                                piketCalculation={piketCalculation}
+                                                theme={currentTheme}
+                                                layout="sidebar"
+                                                onSelectDate={(dayNum) => {
+                                                    if (isMobile) {
+                                                        setActiveModalDay(dayNum);
+                                                    } else {
+                                                        setExpandedDesktopDay(dayNum);
+                                                    }
+                                                }}
+                                            />
+
+                                            <MonthlyHolidaySegment
+                                                selectedMonth={selectedMonth}
+                                                selectedYear={selectedYear}
+                                                daftarLibur={daftarLibur}
+                                                theme={currentTheme}
+                                                onSelectDate={(dayNum) => {
+                                                    if (isMobile) {
+                                                        setActiveModalDay(dayNum);
+                                                    } else {
+                                                        setExpandedDesktopDay(dayNum);
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    )}
                                 </aside>
                             </div>
                         </div>
+                    )}
+
+                    {pageTab === 'team-schedule' && (
+                        <TeamScheduleView
+                            theme={currentTheme}
+                            themeConfig={themeConfig}
+                            currentUserName={userName}
+                            currentUserNip={userNip}
+                            currentUserRole={currentRole}
+                            daysState={daysState}
+                            onShowToast={showToast}
+                            onNavigateToTab={(tab) => setPageTab(tab)}
+                        />
                     )}
 
                     {pageTab === 'holiday' && (
@@ -1459,6 +1723,8 @@ export const App: React.FC = () => {
                 <MobileBottomNav
                     pageTab={pageTab}
                     onTabChange={setPageTab}
+                    onCalendarTabClick={handleCalendarMenuClick}
+                    calendarViewMode={calendarViewMode}
                     onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
                     theme={currentTheme}
                     themeConfig={themeConfig}
@@ -1543,8 +1809,8 @@ export const App: React.FC = () => {
                 />
             )}
 
-            {/* Day Detail Popup Modal with Swipe Gesture Navigation (Mobile Only) */}
-            {isMobile && activeModalDay !== null && (
+            {/* Day Detail Popup Modal */}
+            {activeModalDay !== null && (
                 (() => {
                     const dateKey = `${selectedYear}-${selectedMonth}-${activeModalDay}`;
                     const dayData = daysState[dateKey] || {
@@ -1567,7 +1833,7 @@ export const App: React.FC = () => {
 
                     return (
                         <DayDetailModal
-                            isOpen={activeModalDay !== null && isMobile}
+                            isOpen={activeModalDay !== null}
                             dayNumber={activeModalDay}
                             year={selectedYear}
                             month={selectedMonth}
@@ -1585,6 +1851,7 @@ export const App: React.FC = () => {
                             }
                             piketMatchInfo={piketCalculation.piketByDateKey[dateKey]}
                             offMatchInfo={piketCalculation.offMatches[dateKey]}
+                            initialSubTab={modalSubTab}
                         />
                     );
                 })()

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { UserAccount, UserApprovalRequest } from '../../types/admin';
 import { AppTheme } from '../../types';
-import { getApprovalRequests, saveApprovalRequests, purgeUserDataCompletely } from '../../utils/adminStorage';
+import { getApprovalRequests, saveApprovalRequests, purgeUserDataCompletely, getCurrentUserPermissions } from '../../utils/adminStorage';
 
 interface AdminApprovalsTabProps {
     users: UserAccount[];
@@ -40,6 +40,8 @@ export const AdminApprovalsTab: React.FC<AdminApprovalsTabProps> = ({
     const isEditorial = theme === 'editorial';
     const isDashboard = theme === 'dashboard';
 
+    const permissions = getCurrentUserPermissions();
+
     const [requests, setRequests] = useState<UserApprovalRequest[]>(() => getApprovalRequests());
     const [viewMode, setViewMode] = useState<'pending' | 'archive'>('pending');
     const [typeFilter, setTypeFilter] = useState<'all' | 'delete_account' | 'reset_password' | 'change_role_ppf'>('all');
@@ -47,6 +49,18 @@ export const AdminApprovalsTab: React.FC<AdminApprovalsTabProps> = ({
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleApprove = (req: UserApprovalRequest) => {
+        if (!permissions.canAccessApprovals) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin memproses persetujuan (canAccessApprovals).');
+            return;
+        }
+        if (req.requestType === 'delete_account' && !permissions.canManageUsers) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin kelola/hapus akun pengguna (canManageUsers).');
+            return;
+        }
+        if (req.requestType === 'reset_password' && !permissions.canResetUserPassword) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin reset password pengguna (canResetUserPassword).');
+            return;
+        }
         const nowStr = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 
         if (req.requestType === 'delete_account') {
@@ -106,6 +120,18 @@ export const AdminApprovalsTab: React.FC<AdminApprovalsTabProps> = ({
     };
 
     const handleReject = (req: UserApprovalRequest) => {
+        if (!permissions.canAccessApprovals) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin memproses persetujuan (canAccessApprovals).');
+            return;
+        }
+        if (req.requestType === 'delete_account' && !permissions.canManageUsers) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin memproses penghapusan akun (canManageUsers).');
+            return;
+        }
+        if (req.requestType === 'reset_password' && !permissions.canResetUserPassword) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin memproses reset password (canResetUserPassword).');
+            return;
+        }
         const nowStr = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 
         const updatedRequests = requests.map((r) => {

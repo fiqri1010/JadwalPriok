@@ -26,10 +26,133 @@ export interface VersionItem {
 
 export const VERSION_HISTORY: VersionItem[] = [
     {
+        version: '0.5.8',
+        releaseDate: '1 Oktober 2026',
+        title: 'Integrasi Lipatan Seamless "Perubahan" pada Kartu Tanggal Desktop',
+        isLatest: true,
+        isMajor: false,
+        tag: 'Seamless Folded Date Card, In-Card Cuti ST & Geser Off, Clean Minimalist UI',
+        changes: [
+            'Penghapusan Tombol Akses Cepat Eksternal: Menghapus bar tombol akses cepat di atas kalender dan di sidebar sesuai instruksi agar antarmuka kerja tetap bersih dan rapi.',
+            'Ekspansi Seamless "Perubahan" pada Kartu Desktop: Pada kartu tanggal mode expanded (desktop), ditambahkan tombol "Perubahan" di bawah form jam kerja yang ketika dibuka mengekspansi bagian kartu secara menyatu (seamless) tanpa garis pembatas kasar.',
+            'Input Cuti, ST, dan Geser Off Terintegrasi: Bagian folded menyediakan 3 sub-pilihan terpadu untuk pengaturan jenis Cuti (termasuk setengah hari), Surat Tugas/ST dinas (termasuk kepastian & kompensasi), dan Geser Off (tanggal asal piket & jatah hari) yang langsung tersimpan secara instan.'
+        ]
+    },
+    {
+        version: '0.5.7',
+        releaseDate: '1 Oktober 2026',
+        title: 'Penataan Posisi Toggle Tanpa Password & Form Authentication',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Login UX Enhancements, Landing Page Clean Architecture',
+        changes: [
+            'Penataan Posisi Toggle Masuk Tanpa Password: Memindahkan switch toggle ke bagian atas sebelum form password pada Landing Page. Saat diaktifkan, form password disembunyikan secara otomatis, aturan wajib password ditiadakan, muncul kotak peringatan risiko keamanan, dan disediakan tombol aksi masuk langsung ke kalender.'
+        ]
+    },
+    {
+        version: '0.5.6',
+        releaseDate: '1 Oktober 2026',
+        title: 'Perbaikan Skema Tema Warm pada Segmen Libur & Ringkasan Piket',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Warm Theme Complete Fidelity, Sidebar Cards Alignment',
+        changes: [
+            'Penyelarasan Warna Segmen Libur Nasional (`MonthlyHolidaySegment`): Mengganti warna badge tanggal dan chip kategori dari warna mawar/merah dingin menjadi skema cokelat/krem hangat khas Tema Warm (`#78350F`, `#4D2A00`).',
+            'Penyelarasan Ringkasan Piket (`MonthlyPiketSummarySegment`): Menyelaraskan seluruh 4 kartu status piket (Piket-Off, Piket-no OFF, Off Ready, Off Delay) dan badge jumlah piket agar serasi dengan Tema Warm.',
+            'Penyelarasan Modal Pengelola Libur (`HolidayManagerModal`): Menyelaraskan ikon Flag header dan badge kategori libur saat Tema Warm diaktifkan.'
+        ]
+    },
+    {
+        version: '0.5.5',
+        releaseDate: '1 Oktober 2026',
+        title: 'Penyempurnaan Kalender Mode List, Tombol Detail, dan Performa Menu Samping',
+        isLatest: false,
+        isMajor: false,
+        tag: 'List Mode Clean UI, Detail Modal Restored, Sidebar Speed Optimization',
+        changes: [
+            'Filter Kalender Mode List: Memastikan opsi filter di Kalender Kerja mode list bersih dengan kategori Utama (Semua, Piket, Off, CUTI).',
+            'Pembersihan Keterangan Teks Samping Badge Shift: Menyembunyikan blok teks tanggal/hari di sebelah kiri badge shift sehingga tampilan baris mode list menjadi rapi dan fokus.',
+            'Restorasi Tombol Detail: Memperbaiki tombol Detail pada mode list & desktop agar selalu membuka modal dialog popup detail hari secara langsung dan interaktif.',
+            'Optimalisasi Performa & Respon Menu Samping: Mememoisasi pembacaan preferensi pengguna dan mengoptimalkan transisi CSS menu samping serta tombol Dasbor agar pembukaan menu berlangsung cepat tanpa glitch.'
+        ]
+    },
+    {
+        version: '0.5.4',
+        releaseDate: '1 Oktober 2026',
+        title: 'Penyesuaian Rentang Tampilan Jadwal Rekan (Mode 3 Hari Operasional)',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Team Schedule 3-Day Scope, Mobile UX Optimization',
+        changes: [
+            'Pembaruan Rentang Tampilan Ringkas: Mengubah opsi filter rentang tampilan cepat dari sebelumnya "2 Hari" menjadi "3 Hari" (Hari ini s.d. Lusa) pada matriks jadwal rekan.',
+            'Optimalisasi Tampilan Mobile & Tablet: Memfasilitasi petugas posko untuk meninjau proyeksi shift 3 hari berturut-turut secara kompak dan responsif di layar ponsel tanpa scroll horizontal berlebih.',
+            'Sinkronisasi Navigasi Tanggal: Menyelaraskan pemotongan tanggal dinamis (visible dates) agar selalu mencakup 3 hari aktif berturut-turut dari tanggal hari ini.'
+        ]
+    },
+    {
+        version: '0.5.3',
+        releaseDate: '1 Oktober 2026',
+        title: 'Pengelolaan Data Server Lokal & Pemulihan Mandiri 5 Posko Resmi (120 Staf)',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Local Server Data Store, 5 Poskos Restored, Self-Healing Cache',
+        changes: [
+            'Pengelolaan Data Server Backend Lokal: Menjadikan komputer lokal ini sebagai server data utama aplikasi dengan penyimpanan persisten di `/data/users.json` dan `/data/poskos.json` serta endpoint API `/api/users`, `/api/poskos`, dan `/api/schedules` agar data tidak lagi bergantung semata pada cache peramban.',
+            'Pemulihan Mandiri (Self-Healing) 5 Posko Resmi: Memastikan seluruh 5 posko Pelabuhan Tanjung Priok (Graha Segara Lt. 1: 26 pegawai, Graha Ground: 28 pegawai, CDC: 20 pegawai, NPCT: 22 pegawai, dan Koja: 24 pegawai = tepat 120 personel) selalu terdistribusi lengkap dan tidak akan pernah kosong atau tertimpa.',
+            'Tombol Aksi Sinkron Server di Matriks Jadwal Rekan: Menyediakan tombol status dan pembaruan instan "Server Lokal (120 Staf)" pada bilah atas Jadwal Rekan untuk sinkronisasi data master secara langsung kapan saja.',
+            'Sinkronisasi Otomatis Aplikasi: Aplikasi langsung memuat data master 120 staf posko resmi dari server backend lokal saat pertama kali diinisialisasi.'
+        ]
+    },
+    {
+        version: '0.5.2',
+        releaseDate: '1 Oktober 2026',
+        title: 'Restorasi & Sinkronisasi 5 Posko Resmi Tanjung Priok (Tepat 120 Pegawai)',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Official 120 Personnel, 5 Real Poskos Sync, Team Matrix',
+        changes: [
+            'Sinkronisasi 5 Unit Posko Resmi: Menyelaraskan 120 pegawai resmi ke dalam 5 posko utama Bea Cukai Tanjung Priok (Graha Segara Lt. 1: 26 pegawai, Graha Ground: 28 pegawai, CDC: 20 pegawai, NPCT: 22 pegawai, dan Koja: 24 pegawai) agar tidak lagi terkunci ke default "Graha Segara Lt. 1".',
+            'Penegakan Batas Data 120 Pegawai Resmi: Membersihkan data dan posko di luar 5 posko resmi, memastikan daftar rekan kerja murni memuat 120 personel resmi tanpa data tambahan.',
+            'Filter Posko Sesuai Roster: Dropdown filter pada Matriks Jadwal Rekan kini memuat tepat 5 posko resmi Pelabuhan Tanjung Priok.'
+        ]
+    },
+    {
+        version: '0.5.1',
+        releaseDate: '1 Oktober 2026',
+        title: 'Penyertaan Data PPF non User pada Matriks Jadwal Rekan & Lencana Posko Luar',
+        isLatest: false,
+        isMajor: false,
+        tag: 'PPF non User Data Inclusion, External Post Badge, Team Matrix',
+        changes: [
+            'Inklusi Lengkap Data PPF non User: Menampilkan seluruh data shift rekan kerja berstatus PPF non User (personel posko luar / data terpusat) ke dalam spreadsheet matriks Jadwal Rekan agar sebaran dinas seluruh personel posko tetap transparan dan dapat dipantau.',
+            'Lencana Status Posko Luar: Menyematkan lencana khusus "PPF non User" bergradasi lembut pada baris nama dan kartu detail modal untuk memperjelas status kepemilikan akun pegawai bersangkutan.'
+        ]
+    },
+    {
+        version: '0.5.0',
+        releaseDate: '1 Oktober 2026',
+        title: 'Halaman Baru "Jadwal Rekan": Spreadsheet Matriks Shift Tim, Freeze Panes, Filter Posko, Pin Rekan Favorit, Alur Tukar Shift, & Ekspor Excel/PDF',
+        isLatest: false,
+        isMajor: false,
+        tag: 'Team Schedule Matrix, Freeze Panes, Shift Swap, Excel & PDF Export, Mobile Responsive',
+        changes: [
+            'Halaman Baru "Jadwal Rekan" (Matriks Shift Tim): Menghadirkan halaman baru berformat spreadsheet matriks (Gantt/Grid Calendar) di bawah menu Kalender Kerja pada sidebar dan navigasi mobile untuk memantau sebaran dinas seluruh rekan posko.',
+            'Struktur Grid Spreadsheet (Sumbu X & Y): Sumbu Y menyajikan daftar nama pegawai lengkap dengan NIP dan unit posko; Sumbu X memuat tanggal 1 sampai akhir bulan berjalan beserta inisial hari (Sen, Sel, Rab, Kam, Jum, Sab, Min).',
+            'Ergonomi Spreadsheet Freeze Panes: Mengunci kolom nama pegawai (sticky left) dan baris tanggal/hari (sticky top) saat digulir, dilengkapi aksen penanda vertikal "Hari Ini" serta pembeda visual lembut untuk akhir pekan dan hari libur nasional.',
+            'Badge Shift Ringkas & Kompatibilitas Tema: Menampilkan kode shift ringkas (G, SM, M, L, N, OFF, CUTI) dengan palet visual dinamis yang mematuhi tema aktif (Industrial, PaperSketch, Technical, Editorial, Winamp, Dashboard, Light, Dark).',
+            'Filter Posko & Search Bar Instan: Memfasilitasi filter unit posko (Graha Segara Lt. 1, Graha Ground, CDC, dsb) serta kolom pencarian real-time berdasarkan nama atau NIP rekan kerja.',
+            'Pin Rekan Favorit / Partner Kerja: Fitur bintang semat (⭐) yang tersimpan otomatis di localStorage untuk menempatkan rekan kerja langganan tim di baris teratas matriks.',
+            'Detail Shift & Formulir Pengajuan Tukar Shift: Klik pada sel mana saja untuk memunculkan modal popover rincian jam kerja, posko, dan tombol "Ajak Tukar Shift" untuk mengirimkan permohonan pertukaran dinas terstruktur.',
+            'Ekspor Spreadsheet (.xlsx) & Cetak / PDF Landscape: Dukungan unduh instan ke format Excel SheetJS dengan penataan kolom rapi serta opsi cetak print-ready landscape untuk papan pengumuman ruang jaga.',
+            'Solusi UX Layar Ponsel: Fitur segmented switch (2 Hari / 7 Hari / 1 Bulan) dan horizontal smooth swipe dengan indikator geser agar tabel tidak berdesakan di layar HP.',
+            'Pengaturan Hak Akses (Access Control): Halaman terbuka untuk semua pengguna (End-User, Admin, Super Admin), serta dilindungi dari akun PPF non User.'
+        ]
+    },
+    {
         version: '0.4.60',
         releaseDate: '30 September 2026',
         title: 'Auto-Apply Libur Nasional Pegawai, Default Tahun Berjalan, Penyelarasan Title Bar Seamless, & Navigasi Scroll Keyboard',
-        isLatest: true,
+        isLatest: false,
         isMajor: false,
         tag: 'Auto-Apply Holidays, Keyboard Scroll Tables, Clean Window Title Bar',
         changes: [

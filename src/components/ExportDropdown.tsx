@@ -22,6 +22,7 @@ import { generateSchedulePdf } from '../lib/pdfExport';
 import { Tooltip } from './Tooltip';
 import { CustomDropdown } from './common/CustomDropdown';
 import { CustomDatePicker } from './CustomDatePicker';
+import { GoogleCalendarExportModal } from './GoogleCalendarExportModal';
 
 const MONTH_NAMES = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -80,6 +81,7 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
     // Export Action State
     const [exportLoading, setExportLoading] = useState<string | null>(null);
     const [exportSuccess, setExportSuccess] = useState<string | null>(null);
+    const [isGoogleCalendarModalOpen, setIsGoogleCalendarModalOpen] = useState(false);
 
     // Sync when props change
     useEffect(() => {
@@ -444,14 +446,14 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
     const getTabClass = (tab: 'date_range' | 'period_range') => {
         const isActive = activeTab === tab;
         if (isActive) {
-            if (isPaperSketch) return 'bg-[#ff4747] text-white font-bold rounded-lg shadow-[2px_2px_0px_#2b2b2b] border border-[#2b2b2b] font-[\'Gaegu\'] text-sm';
+            if (isPaperSketch) return 'bg-[#ff4747] text-white font-bold rounded-lg shadow-[2px_2px_0px_#2b2b2b] border border-[#2b2b2b] font-[\'Gaegu\'] text-base';
             if (isWinamp) return 'bg-[#00FF00] text-black font-black rounded-none';
             if (isVista) return 'bg-sky-600 text-white font-black shadow-xs';
             if (isIndustrial) return 'bg-[#2DD4BF] text-[#0F1115] font-extrabold uppercase tracking-wider rounded-[4px]';
             if (isDashboard) return 'bg-[#4D2A00] text-[#F9E6A8] font-bold rounded-md';
             return 'bg-teal-600 text-white font-black shadow-xs';
         }
-        return isPaperSketch ? 'opacity-80 hover:opacity-100 font-[\'Gaegu\'] text-sm text-[#2b2b2b]' : 'opacity-70 hover:opacity-100';
+        return isPaperSketch ? 'opacity-80 hover:opacity-100 font-[\'Gaegu\'] text-base text-[#2b2b2b]' : 'opacity-70 hover:opacity-100';
     };
 
     const getGridBtnClass = (mode: PeriodMode) => {
@@ -1034,16 +1036,71 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
                                 <Download className="h-3 w-3 opacity-60 shrink-0" />
                             )}
                         </button>
+
+                        {/* Kotak 5: Ekspor ke Google Calendar */}
+                        <button
+                            type="button"
+                            disabled={exportLoading !== null}
+                            onClick={() => {
+                                setIsGoogleCalendarModalOpen(true);
+                                setIsOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between p-1 sm:p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 text-left min-w-0 border ${
+                                isPaperSketch
+                                    ? 'bg-[#fdfcf0] hover:bg-blue-100/80 text-[#2b2b2b] border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b] font-["Gaegu"] text-sm'
+                                    : isIndustrial
+                                    ? 'bg-[#0F1115] hover:bg-blue-500/20 text-[#E2E8F0] border border-[rgba(226,232,240,0.15)] rounded-[4px]'
+                                    : isWinamp
+                                    ? 'bg-black hover:bg-[#00FF00]/10 text-[#00FF00] border-[#00FF00] rounded-none'
+                                    : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-800 dark:text-blue-300 border-blue-500/20'
+                            }`}
+                        >
+                            <div className="flex items-center space-x-2 min-w-0 flex-1 pr-1">
+                                <div className={`p-1 rounded-md shrink-0 ${
+                                    isPaperSketch
+                                        ? 'bg-[#2b2b2b] text-white'
+                                        : isWinamp
+                                        ? 'bg-transparent text-[#00FF00]'
+                                        : 'bg-blue-500/20 text-blue-600 dark:text-blue-400'
+                                }`}>
+                                    <Calendar className="h-3 w-3" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="font-extrabold text-[10px] sm:text-[11px] leading-tight truncate">
+                                            Ekspor ke Google Calendar
+                                        </span>
+                                        <span className="text-[8px] font-mono font-bold px-1 py-0.2 rounded bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30">
+                                            Cloud Sync
+                                        </span>
+                                    </div>
+                                    <span className="text-[8.5px] sm:text-[9px] opacity-75 block font-medium leading-tight truncate">
+                                        Sinkronkan shift langsung ke Google Calendar
+                                    </span>
+                                </div>
+                            </div>
+                            <CalendarDays className="h-3 w-3 opacity-70 text-blue-500 shrink-0" />
+                        </button>
                     </div>
 
                     {/* Footer Tip */}
                     <div className="pt-2 mt-2 border-t border-current/10 text-center">
                         <span className="text-[9px] opacity-60 font-medium">
-                            📁 File disimpan langsung ke sistem Anda menggunakan dialog penyimpanan resmi.
+                            📁 File disimpan langsung atau disinkronkan ke kalender online Anda.
                         </span>
                     </div>
                 </div>
             )}
+
+            {/* Google Calendar Export Confirmation & Sync Modal */}
+            <GoogleCalendarExportModal
+                isOpen={isGoogleCalendarModalOpen}
+                onClose={() => setIsGoogleCalendarModalOpen(false)}
+                filteredEntries={filteredEntries}
+                rangeLabel={rangeLabel}
+                currentTheme={currentTheme}
+                onShowToast={onShowToast}
+            />
         </div>
     );
 };

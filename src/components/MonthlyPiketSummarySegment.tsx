@@ -181,7 +181,11 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                         JADWAL PIKET {INDONESIAN_MONTH_NAMES[selectedMonth - 1].toUpperCase()}
                     </span>
                 </div>
-                <span className="text-[11px] sm:text-[11.5px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 whitespace-nowrap shrink-0">
+                <span className={`text-[11px] sm:text-[11.5px] font-black px-2 py-0.5 rounded-full border whitespace-nowrap shrink-0 ${
+                    isDashboard
+                        ? 'bg-[#78350F]/20 text-[#78350F] border-[#78350F]/30'
+                        : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                }`}>
                     {totalPiket} Piket
                 </span>
             </div>
@@ -199,13 +203,17 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     {/* Box 1: Piket-Off */}
                     <Tooltip content="Piket dengan libur pengganti." containerClassName="w-full">
                         <div
-                            className="py-1.5 px-2 rounded-md border bg-indigo-500/10 border-indigo-500/15 text-indigo-700 dark:text-indigo-400 flex flex-col items-center justify-center min-h-[42px] min-w-0 hover:bg-indigo-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className={`py-1.5 px-2 rounded-md border flex flex-col items-center justify-center min-h-[42px] min-w-0 cursor-help transition-all shadow-3xs w-full ${
+                                isDashboard
+                                    ? 'bg-[#78350F]/15 border-[#78350F]/25 text-[#78350F] hover:bg-[#78350F]/20'
+                                    : 'bg-indigo-500/10 border-indigo-500/15 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/15'
+                            }`}
                         >
                             <div className="text-[9px] lg:text-[10px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
-                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0 animate-pulse" />
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 animate-pulse ${isDashboard ? 'bg-[#78350F]' : 'bg-indigo-500'}`} />
                                 <span className="truncate font-sans font-extrabold">Piket-Off</span>
                             </div>
-                            <div className="text-[11px] lg:text-xs font-black text-indigo-600 dark:text-indigo-300 w-full truncate mt-1 leading-none">
+                            <div className={`text-[11px] lg:text-xs font-black w-full truncate mt-1 leading-none ${isDashboard ? 'text-[#78350F]' : 'text-indigo-600 dark:text-indigo-300'}`}>
                                 {piketWithOffCount} Hari
                             </div>
                         </div>
@@ -214,13 +222,17 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     {/* Box 2: Piket-no OFF */}
                     <Tooltip content="Piket tanpa libur pengganti." containerClassName="w-full">
                         <div
-                            className="py-1.5 px-2 rounded-md border bg-slate-500/10 border-slate-500/15 text-slate-700 dark:text-slate-400 flex flex-col items-center justify-center min-h-[42px] min-w-0 hover:bg-slate-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className={`py-1.5 px-2 rounded-md border flex flex-col items-center justify-center min-h-[42px] min-w-0 cursor-help transition-all shadow-3xs w-full ${
+                                isDashboard
+                                    ? 'bg-[#4D2A00]/10 border-[#4D2A00]/20 text-[#4D2A00] hover:bg-[#4D2A00]/15'
+                                    : 'bg-slate-500/10 border-slate-500/15 text-slate-700 dark:text-slate-400 hover:bg-slate-500/15'
+                            }`}
                         >
                             <div className="text-[9px] lg:text-[10px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isDashboard ? 'bg-[#4D2A00]' : 'bg-slate-400'}`} />
                                 <span className="truncate font-sans font-extrabold">Piket-no OFF</span>
                             </div>
-                            <div className="text-[11px] lg:text-xs font-black text-slate-600 dark:text-slate-300 w-full truncate mt-1 leading-none">
+                            <div className={`text-[11px] lg:text-xs font-black w-full truncate mt-1 leading-none ${isDashboard ? 'text-[#4D2A00]' : 'text-slate-600 dark:text-slate-300'}`}>
                                 {piketWithoutOffCount} Hari
                             </div>
                         </div>
@@ -229,13 +241,17 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     {/* Box 3: Off Ready */}
                     <Tooltip content="Jatah libur pengganti yang sudah terjadwal di kalender." containerClassName="w-full">
                         <div
-                            className="py-1.5 px-2 rounded-md border bg-emerald-500/10 border-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex flex-col items-center justify-center min-h-[42px] min-w-0 hover:bg-emerald-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className={`py-1.5 px-2 rounded-md border flex flex-col items-center justify-center min-h-[42px] min-w-0 cursor-help transition-all shadow-3xs w-full ${
+                                isDashboard
+                                    ? 'bg-emerald-700/15 border-emerald-700/25 text-emerald-800 hover:bg-emerald-700/20'
+                                    : 'bg-emerald-500/10 border-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/15'
+                            }`}
                         >
                             <div className="text-[9px] lg:text-[10px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
-                                <CheckCircle2 className="w-2.5 h-2.5 shrink-0 text-emerald-500" />
+                                <CheckCircle2 className={`w-2.5 h-2.5 shrink-0 ${isDashboard ? 'text-emerald-700' : 'text-emerald-500'}`} />
                                 <span className="truncate font-sans font-extrabold">Off Ready</span>
                             </div>
-                            <div className="text-[11px] lg:text-xs font-black text-emerald-600 dark:text-emerald-300 w-full truncate mt-1 leading-none">
+                            <div className={`text-[11px] lg:text-xs font-black w-full truncate mt-1 leading-none ${isDashboard ? 'text-emerald-800' : 'text-emerald-600 dark:text-emerald-300'}`}>
                                 {matchedPiketCount} Hari
                             </div>
                         </div>
@@ -244,13 +260,17 @@ export const MonthlyPiketSummarySegment = React.memo<MonthlyPiketSummarySegmentP
                     {/* Box 4: Off Delay */}
                     <Tooltip content="Jatah libur pengganti yang belum dijadwalkan." containerClassName="w-full">
                         <div
-                            className="py-1.5 px-2 rounded-md border bg-amber-500/10 border-amber-500/15 text-amber-700 dark:text-amber-400 flex flex-col items-center justify-center min-h-[42px] min-w-0 hover:bg-amber-500/15 cursor-help transition-all shadow-3xs w-full"
+                            className={`py-1.5 px-2 rounded-md border flex flex-col items-center justify-center min-h-[42px] min-w-0 cursor-help transition-all shadow-3xs w-full ${
+                                isDashboard
+                                    ? 'bg-[#78350F]/20 border-[#78350F]/30 text-[#78350F] hover:bg-[#78350F]/25'
+                                    : 'bg-amber-500/10 border-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/15'
+                            }`}
                         >
                             <div className="text-[9px] lg:text-[10px] font-black uppercase tracking-tight opacity-90 truncate w-full flex items-center justify-center gap-0.5 leading-none">
-                                <Clock className="w-2.5 h-2.5 shrink-0 text-amber-500" />
+                                <Clock className={`w-2.5 h-2.5 shrink-0 ${isDashboard ? 'text-[#78350F]' : 'text-amber-500'}`} />
                                 <span className="truncate font-sans font-extrabold">Off Delay</span>
                             </div>
-                            <div className="text-[11px] lg:text-xs font-black text-amber-600 dark:text-amber-300 w-full truncate mt-1 leading-none">
+                            <div className={`text-[11px] lg:text-xs font-black w-full truncate mt-1 leading-none ${isDashboard ? 'text-[#78350F]' : 'text-amber-600 dark:text-amber-300'}`}>
                                 {pendingPiketCount} Hari
                             </div>
                         </div>

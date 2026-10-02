@@ -99,6 +99,15 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
     setMinute(initM);
     setHourInput(String(initH).padStart(2, '0'));
     setMinuteInput(String(initM).padStart(2, '0'));
+
+    const formatted = `${String(initH).padStart(2, '0')}:${String(initM).padStart(2, '0')}`;
+    if (activeTarget === 'jamMasuk') {
+      setJamMasukVal(valStr || formatted);
+    } else if (activeTarget === 'jamPulang') {
+      setJamPulangVal(valStr || formatted);
+    } else if (activeTarget === 'absenCeisa') {
+      setAbsenCeisaVal(valStr || formatted);
+    }
   }, []);
 
   // Initialize values when modal opens or props change
@@ -290,14 +299,42 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
       setShowWarningFeedback(true);
       return;
     }
+    let finalH = hour;
+    let finalM = minute;
+    if (hourInput !== '') {
+      const parsedH = parseInt(hourInput, 10);
+      if (!isNaN(parsedH) && parsedH >= 0 && parsedH <= 23) {
+        finalH = parsedH;
+      }
+    }
+    if (minuteInput !== '') {
+      const parsedM = parseInt(minuteInput, 10);
+      if (!isNaN(parsedM) && parsedM >= 0 && parsedM <= 59) {
+        finalM = parsedM;
+      }
+    }
+    const currentFormatted = `${String(finalH).padStart(2, '0')}:${String(finalM).padStart(2, '0')}`;
+    let finalMasuk = jamMasukVal;
+    let finalPulang = jamPulangVal;
+    let finalCeisa = absenCeisaVal;
+
+    if (activeTab === 'jamMasuk' || field === 'jamMasuk') {
+      finalMasuk = currentFormatted;
+    } else if (activeTab === 'jamPulang' || field === 'jamPulang') {
+      finalPulang = currentFormatted;
+    } else if (activeTab === 'absenCeisa' || field === 'absenCeisa') {
+      finalCeisa = currentFormatted;
+    }
+
     if (onApplyUnified) {
       onApplyUnified({
-        jamMasuk: jamMasukVal,
-        jamPulang: jamPulangVal,
-        absenCeisa: absenCeisaVal,
+        jamMasuk: finalMasuk,
+        jamPulang: finalPulang,
+        absenCeisa: finalCeisa,
       });
-    } else if (onSelect) {
-      onSelect(`${formatHour}:${formatMinute}`);
+    }
+    if (onSelect) {
+      onSelect(currentFormatted);
     }
     onClose();
   };
@@ -371,6 +408,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
 
     setHour(finalVal);
     setHourInput(raw.length === 1 ? raw : String(finalVal).padStart(2, '0'));
+    updateActiveTabValue(finalVal, minute);
 
     // Auto-advance ke input menit jika sudah 2 digit atau jika angka awal >= 3
     if (raw.length >= 2 || val >= 3) {
@@ -422,6 +460,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
 
     setMinute(finalVal);
     setMinuteInput(raw.length === 1 ? raw : String(finalVal).padStart(2, '0'));
+    updateActiveTabValue(hour, finalVal);
   };
 
   const handleMinuteKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

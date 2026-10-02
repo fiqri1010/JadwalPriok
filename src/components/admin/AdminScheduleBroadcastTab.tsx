@@ -29,6 +29,7 @@ import {
 import { UserAccount, ScheduleCopyTarget } from '../../types/admin';
 import { DayData, AppTheme, ShiftType, SHIFT_COLORS, EXCEL_SHIFT_MAPPING, SHIFT_OPTIONS } from '../../types';
 import { SYSTEM_DEFAULT_EXCEL_MAP } from '../../data/excelMappings';
+import { getCurrentUserPermissions } from '../../utils/adminStorage';
 import {
     loadSavedExcelColorMap,
     saveExcelColorMap,
@@ -913,6 +914,11 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
     };
 
     const handleExecuteImport = () => {
+        const permissions = getCurrentUserPermissions();
+        if (!permissions.canBroadcastSchedule) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin broadcast / impor jadwal pengguna (canBroadcastSchedule).');
+            return;
+        }
         const selectedCount = targets.filter((t) => t.selected).length;
         if (selectedCount === 0) {
             onShowToast('Pilih minimal satu target pengguna/posko untuk mengimpor jadwal.');

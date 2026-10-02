@@ -325,16 +325,18 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                     return (
                         <div
                             key={`shift-list-${s.id}-${idx}`}
-                            className={`flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:px-3.5 sm:py-2.5 gap-2 sm:gap-4 transition-colors ${
+                            className={`flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:px-3.5 sm:py-3 gap-2.5 sm:gap-3 transition-colors ${
                                 s.isVisibleInDropdown
-                                    ? 'hover:bg-slate-50/70 dark:hover:bg-zinc-800/40'
-                                    : 'bg-slate-50/50 dark:bg-zinc-900/50 opacity-60'
+                                    ? isDashboard
+                                        ? 'hover:bg-[#FFF5D0]/80'
+                                        : 'hover:bg-slate-50/70 dark:hover:bg-zinc-800/40'
+                                    : 'bg-black/5 dark:bg-white/5 opacity-60'
                             }`}
                         >
-                            {/* Kolom 1: Badge visual (lebar tetap/fixed width) dan Nama + ID shift */}
-                            <div className="flex items-center space-x-3 min-w-0 sm:w-2/5">
-                                {/* Fixed Width Container untuk Badge agar perataan kiri teks nama shift seragam */}
-                                <div className="w-18 sm:w-20 shrink-0 flex items-center justify-center">
+                            {/* Kolom 1: Badge visual & Informasi Nama + Tag + ID Shift */}
+                            <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                {/* Fixed Width Container untuk Badge */}
+                                <div className="w-16 sm:w-20 shrink-0 flex items-center justify-center">
                                     <div
                                         className="relative overflow-hidden w-full text-center py-1 px-1 rounded-md font-black text-xs shadow-2xs border flex items-center justify-center space-x-1"
                                         style={{
@@ -351,39 +353,59 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                                     </div>
                                 </div>
 
-                                {/* Area Teks - Rata kiri presisi dan menampilkan ID shift */}
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-center space-x-1.5 flex-wrap gap-y-0.5">
-                                        <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                                {/* Area Teks Nama, Status Piket, ID & Sublabel */}
+                                <div className="min-w-0 flex-1 space-y-0.5">
+                                    <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                                        <h4 className="text-xs sm:text-sm font-bold truncate">
                                             {s.naming.fullName}
                                         </h4>
                                         {s.isPiket && (
-                                            <span className="px-1.5 py-0.2 rounded-md bg-teal-500/15 text-teal-700 dark:text-teal-400 text-[9px] font-bold shrink-0">
+                                            <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-bold shrink-0 ${
+                                                isDashboard
+                                                    ? 'bg-[#78350F]/20 text-[#78350F]'
+                                                    : 'bg-teal-500/15 text-teal-700 dark:text-teal-400'
+                                            }`}>
                                                 Piket
                                             </span>
                                         )}
-                                    </div>
-                                    <div className="flex items-center space-x-2 text-[10px] text-slate-500 dark:text-zinc-400 mt-0.5">
-                                        <span className="font-mono text-[9.5px] px-1 py-0.2 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-semibold border border-slate-200 dark:border-zinc-700 shrink-0">
+                                        {/* ID Shift sebagai Chip Ringkas di Sebelah Nama / Subteks */}
+                                        <span
+                                            className={`font-mono text-[9.5px] px-1.5 py-0.2 rounded font-semibold border shrink-0 select-all tracking-tight ${
+                                                isIndustrial
+                                                    ? 'bg-[#111317] text-[#2DD4BF] border-[rgba(226,232,240,0.15)]'
+                                                    : isDashboard
+                                                    ? 'bg-[#FFF0BE] text-[#4D2A00] border-[#4D2A00]/30'
+                                                    : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 border-slate-200 dark:border-zinc-700'
+                                            }`}
+                                            title={`ID Shift: ${s.id}`}
+                                        >
                                             ID: {s.id}
                                         </span>
-                                        <span className="truncate">
-                                            {s.naming.dropdownSublabel || 'Tanpa sublabel'}
+                                    </div>
+
+                                    <div className="flex items-center space-x-2 text-[10.5px] opacity-70 flex-wrap gap-x-2 gap-y-0.5">
+                                        {s.naming.dropdownSublabel && (
+                                            <span>{s.naming.dropdownSublabel}</span>
+                                        )}
+                                        <span className="font-mono text-[10px]">
+                                            Salin: &apos;{s.naming.copyCode}&apos;
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Kolom 2: Jam Kerja */}
-                            <div className="flex items-center space-x-1.5 text-[11px] text-slate-600 dark:text-zinc-300 sm:w-1/4">
+                            <div className="flex items-center space-x-1.5 text-xs shrink-0 sm:w-40">
                                 <Clock className="w-3.5 h-3.5 opacity-60 shrink-0" />
                                 {isOffOrCuti ? (
-                                    <span className="text-[11px] font-medium text-slate-500">Non-Dinas / Libur</span>
+                                    <span className="font-medium opacity-65">Non-Dinas / Libur</span>
                                 ) : (
                                     <span className="font-mono font-medium">
                                         {s.workTime.jamMasukDasar} – {s.workTime.jamPulangDasar}
                                         {s.workTime.isOvernight && (
-                                            <span className="font-bold text-[9.5px] ml-1 text-teal-600 dark:text-teal-400 font-sans">
+                                            <span className={`font-bold text-[9.5px] ml-1 font-sans ${
+                                                isDashboard ? 'text-[#78350F]' : 'text-teal-600 dark:text-teal-400'
+                                            }`}>
                                                 (+1)
                                             </span>
                                         )}
@@ -391,19 +413,16 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                                 )}
                             </div>
 
-                            {/* Kolom 3: Kode Salin */}
-                            <div className="hidden md:flex items-center text-[10.5px] text-slate-500 dark:text-zinc-400 font-mono sm:w-1/6">
-                                <span>Salin: &apos;{s.naming.copyCode}&apos;</span>
-                            </div>
-
-                            {/* Kolom 4: Aksi Tombol List */}
+                            {/* Kolom 3: Aksi Tombol List (Eye, Edit, Delete) - Presisi tanpa overflow */}
                             <div className="flex items-center justify-end space-x-1.5 shrink-0 self-end sm:self-auto">
                                 <button
                                     type="button"
                                     onClick={() => onToggleVisibility(s.id)}
                                     className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                                         s.isVisibleInDropdown
-                                            ? 'text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/30'
+                                            ? isDashboard
+                                                ? 'text-[#78350F] bg-[#FFF0BE] hover:bg-[#FFE8A3]'
+                                                : 'text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/30'
                                             : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
                                     }`}
                                     title={s.isVisibleInDropdown ? 'Tampil di Dropdown' : 'Disembunyikan'}
@@ -414,7 +433,13 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => onEditShift(s)}
-                                    className="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:text-teal-700 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-zinc-800 flex items-center space-x-1 cursor-pointer transition-colors border border-slate-200 dark:border-zinc-700 shadow-2xs"
+                                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1 cursor-pointer transition-colors border shadow-2xs ${
+                                        isIndustrial
+                                            ? 'bg-[#111317] hover:bg-white/10 text-[#2DD4BF] border-[rgba(226,232,240,0.15)]'
+                                            : isDashboard
+                                            ? 'bg-[#FFF0BE] hover:bg-[#FFE8A3] text-[#4D2A00] border-[#4D2A00]/30'
+                                            : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 hover:text-teal-700 dark:hover:text-teal-400 border-slate-200 dark:border-zinc-700'
+                                    }`}
                                     title="Edit rincian shift"
                                 >
                                     <Edit3 className="w-3.5 h-3.5" />
@@ -425,7 +450,11 @@ export const ShiftListView: React.FC<ShiftListViewProps> = ({
                                     <button
                                         type="button"
                                         onClick={() => onDeleteShift(s)}
-                                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer transition-colors"
+                                        className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
+                                            isDashboard
+                                                ? 'text-[#4D2A00]/60 hover:text-rose-700 hover:bg-rose-500/15'
+                                                : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30'
+                                        }`}
                                         title="Hapus shift"
                                     >
                                         <Trash2 className="w-3.5 h-3.5" />

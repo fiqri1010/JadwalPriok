@@ -21,6 +21,7 @@ interface ToastNotificationProps {
 
 interface ToastCardProps {
     toast: ToastItem;
+    index: number;
     theme: AppTheme;
     lastResetBackupState?: { year: number; month: number } | null;
     areAllLocked?: boolean;
@@ -30,24 +31,29 @@ interface ToastCardProps {
 
 const ToastCard: React.FC<ToastCardProps> = ({
     toast,
+    index,
     theme,
     lastResetBackupState,
     areAllLocked = false,
     onUndoReset,
     onClose,
 }) => {
-    // Aturan notifikasi hilang setelah 3 detik sejak pertama kali muncul
+    // Aturan notifikasi:
+    // - Notifikasi pertama otomatis tertutup setelah 2 detik.
+    // - Jika ada lebih dari 1 notifikasi muncul bersamaan, tiap notifikasi berikutnya tertutup 1 detik setelah notifikasi sebelumnya tertutup (2000ms + index * 1000ms).
     useEffect(() => {
+        const autoCloseDelay = 2000 + index * 1000;
         const timer = setTimeout(() => {
             onClose(toast.id);
-        }, 3000);
+        }, autoCloseDelay);
         return () => clearTimeout(timer);
-    }, [toast.id, onClose]);
+    }, [toast.id, index, onClose]);
 
     const isWinamp = theme === 'winamp';
     const isDark = theme === 'dark';
     const isVista = theme === 'vista';
     const isPaperSketch = theme === 'paperSketch';
+    const isDashboard = theme === 'dashboard';
 
     // Helper styling berdasarkan tema aktif
     const getCardThemeClasses = () => {
@@ -62,6 +68,9 @@ const ToastCard: React.FC<ToastCardProps> = ({
         }
         if (isDark) {
             return 'bg-[#232531] border border-slate-700/80 shadow-2xl rounded-lg text-white';
+        }
+        if (isDashboard) {
+            return 'bg-[#FFF5D0] border border-[#4D2A00]/30 shadow-xl rounded-xl text-[#4D2A00]';
         }
         // Default light theme
         return 'bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-xl rounded-xl text-slate-900';
@@ -80,6 +89,9 @@ const ToastCard: React.FC<ToastCardProps> = ({
         if (isDark) {
             return 'text-[#2b9875] bg-white/5 backdrop-blur-xl border border-white/5 rounded-lg';
         }
+        if (isDashboard) {
+            return 'text-[#78350F] bg-[#FFF0BE] border border-[#4D2A00]/25 rounded-lg';
+        }
         // Default
         return 'text-[#2b9875] bg-emerald-50 border border-emerald-200/70 rounded-lg';
     };
@@ -89,6 +101,7 @@ const ToastCard: React.FC<ToastCardProps> = ({
         if (isWinamp) return 'text-[#00FF00] font-bold tracking-wide font-mono';
         if (isVista) return 'text-slate-900 font-bold';
         if (isDark) return 'text-white font-bold';
+        if (isDashboard) return 'text-[#4D2A00] font-bold';
         return 'text-slate-900 font-bold';
     };
 
@@ -97,6 +110,7 @@ const ToastCard: React.FC<ToastCardProps> = ({
         if (isWinamp) return 'text-[#00FF00]/70 font-mono';
         if (isVista) return 'text-slate-600';
         if (isDark) return 'text-gray-400';
+        if (isDashboard) return 'text-[#4D2A00]/70';
         return 'text-slate-500';
     };
 
@@ -105,6 +119,7 @@ const ToastCard: React.FC<ToastCardProps> = ({
         if (isWinamp) return 'text-[#00FF00]/60 hover:bg-[#00FF00]/20 hover:text-[#00FF00] rounded-none';
         if (isVista) return 'text-slate-500 hover:bg-white/40 hover:text-slate-900 rounded-md';
         if (isDark) return 'text-gray-400 hover:bg-white/5 hover:text-white rounded-md';
+        if (isDashboard) return 'text-[#4D2A00]/60 hover:bg-[#4D2A00]/10 hover:text-[#4D2A00] rounded-md';
         return 'text-slate-400 hover:bg-slate-100 hover:text-slate-700 rounded-md';
     };
 
@@ -203,7 +218,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
             aria-live="polite"
         >
             <AnimatePresence mode="popLayout" initial={false}>
-                {toasts.map((toast) => (
+                {toasts.map((toast, index) => (
                     <motion.div
                         key={toast.id}
                         layout
@@ -220,6 +235,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
                     >
                         <ToastCard
                             toast={toast}
+                            index={index}
                             theme={theme}
                             lastResetBackupState={lastResetBackupState}
                             areAllLocked={areAllLocked}

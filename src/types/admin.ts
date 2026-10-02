@@ -36,6 +36,7 @@ export interface UserAccount {
     isActive: boolean;
     hasPassword: boolean;
     passwordValue?: string;
+    email?: string;
     isExternalNonAppUser?: boolean; // Petugas Posko Luar yang belum punya akun aplikasi
     assignedSquad?: 'Regu A' | 'Regu B' | 'Regu C' | 'Regu D' | 'Non-Regu';
     createdAt: string;

@@ -30,7 +30,7 @@ interface TopNavbarProps {
     themeConfig: ThemeConfig;
     onOpenMobileMenu?: () => void;
     exportAction?: React.ReactNode;
-    pageTab?: 'calendar' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing';
+    pageTab?: 'calendar' | 'team-schedule' | 'holiday' | 'settings' | 'version' | 'roadmap' | 'admin' | 'landing';
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
@@ -46,6 +46,16 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     exportAction,
     pageTab = 'calendar',
 }) => {
+    const generalSettings = React.useMemo(() => {
+        try {
+            const saved = localStorage.getItem('jadwalpriok_general_settings');
+            if (saved) return JSON.parse(saved);
+        } catch {}
+        return { showThemeButton: true, showExportButton: true };
+    }, []);
+
+    const showThemeBtn = generalSettings.showThemeButton ?? true;
+    const showExportBtn = generalSettings.showExportButton ?? true;
     const handleToggle = () => {
         if (isMobile && onOpenMobileMenu) {
             onOpenMobileMenu();
@@ -92,7 +102,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                 <AppLogo className="h-5 w-5 sm:h-6 sm:w-6" />
                             </div>
                             <div className="min-w-0 flex flex-col justify-center">
-                                <h1 className={`${themeConfig.titleClass} ${themeConfig.isIndustrial ? '' : 'text-xs sm:text-[13px] lg:text-[14px]'} font-black leading-tight truncate`}>
+                                <h1 className={`${themeConfig.titleClass} ${themeConfig.isIndustrial ? '' : themeConfig.isPaperSketch ? 'text-base sm:text-lg lg:text-xl' : 'text-xs sm:text-[13px] lg:text-[14px]'} font-black leading-tight truncate`}>
                                     JadwalPriok
                                 </h1>
                                 <p className={`${themeConfig.subtitleClass} hidden sm:block text-[10px] lg:text-[11px] leading-tight truncate`}>
@@ -109,6 +119,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                             <span className="opacity-30 hidden lg:inline">/</span>
                             <span className="opacity-90 font-extrabold tracking-tight truncate">
                                 {pageTab === 'calendar' && 'Kalender Kerja & Shift'}
+                                {pageTab === 'team-schedule' && 'Jadwal Rekan (Matriks Shift Tim)'}
                                 {pageTab === 'holiday' && 'Daftar Libur Nasional & Cuti'}
                                 {pageTab === 'settings' && 'Pengaturan Aplikasi'}
                                 {pageTab === 'version' && 'Catatan Riwayat Versi'}
@@ -122,40 +133,41 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
                 {/* Top Actions: Export Button (to the left of Theme Selector) & Theme Selector */}
                 <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0 relative z-30">
-                    {exportAction && (
+                    {showExportBtn && exportAction && (
                         <div className="flex items-center relative">
                             {exportAction}
                         </div>
                     )}
 
-                    <div className="relative">
-                        <Tooltip
-                            content={<span><strong>Pilih Tema</strong> Tampilan</span>}
-                            placement="bottom"
-                        >
-                            <button
-                                type="button"
-                                onClick={() => setIsThemeDropdownOpen(!isThemeDropdownOpen)}
-                                className={themeConfig.themeDropdownBtnClass}
-                                aria-label="Pilih Tema Tampilan"
+                    {showThemeBtn && (
+                        <div className="relative">
+                            <Tooltip
+                                content={<span><strong>Pilih Tema</strong> Tampilan</span>}
+                                placement="bottom"
                             >
-                                <Palette className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-current opacity-90" />
-                                <span className="hidden sm:inline text-[11px] sm:text-xs font-bold">{getThemeDisplayName(currentTheme)}</span>
-                            </button>
-                        </Tooltip>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsThemeDropdownOpen(!isThemeDropdownOpen)}
+                                    className={themeConfig.themeDropdownBtnClass}
+                                    aria-label="Pilih Tema Tampilan"
+                                >
+                                    <Palette className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-current opacity-90" />
+                                    <span className="hidden sm:inline text-[11px] sm:text-xs font-bold">{getThemeDisplayName(currentTheme)}</span>
+                                </button>
+                            </Tooltip>
 
-                        {/* Dropdown Popup */}
-                        {isThemeDropdownOpen && (
-                            <>
-                                <div
-                                    className="fixed inset-0 z-50"
-                                    onClick={() => setIsThemeDropdownOpen(false)}
-                                />
-                                <div className={themeConfig.themeDropdownMenuClass}>
-                                    {/* 1. Kelompok Tema Final Release */}
-                                    <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-wider opacity-60 border-b border-current/10 mb-1">
-                                        Tema Final Release
-                                    </div>
+                            {/* Dropdown Popup */}
+                            {isThemeDropdownOpen && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-50"
+                                        onClick={() => setIsThemeDropdownOpen(false)}
+                                    />
+                                    <div className={themeConfig.themeDropdownMenuClass}>
+                                        {/* 1. Kelompok Tema Final Release */}
+                                        <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-wider opacity-60 border-b border-current/10 mb-1">
+                                            Tema Final Release
+                                        </div>
 
                                     {/* Terang */}
                                     <button
@@ -363,7 +375,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                                 </div>
                             </>
                         )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </header>

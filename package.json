@@ -1,15 +1,12 @@
 {
   "name": "jadwal-priok",
   "private": true,
-  "version": "0.4.60",
+  "version": "0.5.8",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "gcp-build": "vite build && rm -rf build && cp -r dist build",
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "vite build && rm -rf build && cp -r dist build",
+    "build": "vite build",
     "preview": "vite preview",
-    "clean": "rm -rf dist build",
     "lint": "tsc --noEmit",
     "release:patch": "node scripts/bump-version.js patch && git add . && git commit -m \"chore: bump version patch\" && git push",
     "release:minor": "node scripts/bump-version.js minor && git add . && git commit -m \"chore: bump version minor\" && git push",

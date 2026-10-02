@@ -11,6 +11,9 @@ import {
     Save,
     RefreshCw,
     Trash2,
+    Mail,
+    Shield,
+    Sliders,
 } from 'lucide-react';
 import { AppTheme } from '../../types';
 import {
@@ -25,7 +28,16 @@ import {
     getSimpleOS,
     getDeviceMacAddress,
 } from '../../utils/deviceDetector';
-import { addApprovalRequest, syncDeviceSessionToAdminSessions, getCurrentUserRoleInfo, getAdminUsers, saveAdminUsers } from '../../utils/adminStorage';
+import {
+    addApprovalRequest,
+    syncDeviceSessionToAdminSessions,
+    getCurrentUserRoleInfo,
+    getAdminUsers,
+    saveAdminUsers,
+    getSuperAdminEmail,
+    saveSuperAdminEmail,
+} from '../../utils/adminStorage';
+import { saveServerUsers } from '../../utils/serverSync';
 
 interface AccountSettingsTabProps {
     theme?: AppTheme;
@@ -215,6 +227,8 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                 target.hasPassword = true;
                 target.passwordValue = trimmed;
                 saveAdminUsers(adminUsers);
+                saveServerUsers(adminUsers).catch(() => {});
+                window.dispatchEvent(new Event('storage'));
             }
         } catch {}
 
@@ -223,6 +237,26 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
     };
 
     const roleInfo = getCurrentUserRoleInfo();
+    const isSuperAdmin = nip === '199510102015121002' || namaPegawai === 'Ahmad Fiqri' || roleInfo.role === 'superadmin';
+    const [superAdminEmail, setSuperAdminEmail] = useState(() => getSuperAdminEmail());
+    const [emailInput, setEmailInput] = useState(superAdminEmail);
+    const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
+    const [emailError, setEmailError] = useState<string | null>(null);
+
+    const handleSaveEmail = (e: React.FormEvent) => {
+        e.preventDefault();
+        setEmailError(null);
+        setEmailSuccess(null);
+        const clean = emailInput.trim();
+        if (!clean || !clean.includes('@') || !clean.includes('.')) {
+            setEmailError('Harap masukkan format alamat email yang valid.');
+            return;
+        }
+        saveSuperAdminEmail(clean);
+        setSuperAdminEmail(clean);
+        setEmailSuccess(`Alamat email pemulihan Super Admin (${clean}) berhasil disimpan.`);
+        onShowToast('Email pemulihan Super Admin berhasil diperbarui.');
+    };
 
     const handleSendDeleteRequest = (e: React.FormEvent) => {
         e.preventDefault();
@@ -242,6 +276,48 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
         setIsDeleteModalOpen(false);
         setDeleteConfirmInput('');
         onShowToast(`Permintaan hapus akun untuk NIP ${nip} (${namaPegawai}) berhasil dikirimkan ke Admin untuk diverifikasi.`);
+    };
+
+    const [generalSettings, setGeneralSettings] = useState(() => {
+        try {
+            const saved = localStorage.getItem('jadwalpriok_general_settings');
+            if (saved) return JSON.parse(saved);
+        } catch {}
+        return {
+            syncSchedulePersonalToTeam: true,
+            syncScheduleChangesToTeam: true,
+            saveSettingsToServer: true,
+            noPasswordLanding: false,
+            showThemeButton: true,
+            showExportButton: true,
+            showSidebar: true,
+            gridShiftOnly: false,
+            syncWorkDataToServer: true,
+            disableAnimations: false,
+        };
+    });
+
+    const updateGeneralSetting = (key: string, val: boolean) => {
+        const updated = { ...generalSettings, [key]: val };
+        setGeneralSettings(updated);
+        localStorage.setItem('jadwalpriok_general_settings', JSON.stringify(updated));
+
+        if (val && (key === 'syncSchedulePersonalToTeam' || key === 'syncScheduleChangesToTeam' || key === 'syncWorkDataToServer')) {
+            try {
+                const rawDays = localStorage.getItem('jadwalpriok_days_state');
+                if (rawDays) {
+                    const daysParsed = JSON.parse(rawDays);
+                    if (key.includes('Team')) {
+                        const teamSchedules = JSON.parse(localStorage.getItem('jadwalpriok_team_schedules') || '{}');
+                        teamSchedules[nip] = daysParsed;
+                        localStorage.setItem('jadwalpriok_team_schedules', JSON.stringify(teamSchedules));
+                    }
+                }
+            } catch {}
+            onShowToast('Sinkronisasi Ulang (Force Sync) Berhasil: Seluruh data masa lalu telah disinkronkan.');
+        } else {
+            onShowToast('Pengaturan UMUM diperbarui.');
+        }
     };
 
     return (
@@ -296,6 +372,82 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                     </div>
                 </div>
             </div>
+
+            {/* 1.5 KHUSUS SUPER ADMIN: Pengaturan Alamat Email Pemulihan */}
+            {isSuperAdmin && (
+                <div className={`p-4 rounded-xl border space-y-3.5 ${
+                    isIndustrial
+                        ? 'bg-[#0F1115] border-[rgba(226,232,240,0.15)] text-[#E2E8F0]'
+                        : isPaperSketch
+                        ? 'bg-[#ffffff] border-2 border-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b]'
+                        : isTechnical
+                        ? 'bg-[#F8F7F4] dark:bg-[#0D1117] border-[1.5px] border-[#111113] dark:border-slate-700'
+                        : isWinamp
+                        ? 'bg-black border border-[#00FF00] text-[#00FF00]'
+                        : isDark
+                        ? 'bg-[#161616] border-slate-800 text-slate-100'
+                        : isDashboard
+                        ? 'bg-[#FFF5D0] border border-[#4D2A00]/25 text-[#4D2A00]'
+                        : 'bg-white border-slate-200 text-slate-900'
+                }`}>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                            <div className="p-1.5 rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30">
+                                <Mail className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <h4 className="text-xs sm:text-sm font-extrabold uppercase tracking-wide">
+                                    Email Pemulihan Sandi Super Admin
+                                </h4>
+                                <p className="text-[11px] opacity-70">
+                                    Instruksi atau token pemulihan akan dikirim ke email ini jika lupa kata sandi
+                                </p>
+                            </div>
+                        </div>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30">
+                            Super Admin
+                        </span>
+                    </div>
+
+                    <form onSubmit={handleSaveEmail} className="space-y-3 pt-1">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold block">Alamat Email Penerima Pemulihan:</label>
+                            <input
+                                type="email"
+                                value={emailInput}
+                                onChange={(e) => setEmailInput(e.target.value)}
+                                placeholder="contoh: afiqri22@gmail.com"
+                                required
+                                className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 outline-none focus:border-purple-500 font-mono"
+                            />
+                        </div>
+
+                        {emailError && (
+                            <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs flex items-center space-x-2">
+                                <AlertCircle className="w-4 h-4 shrink-0" />
+                                <span>{emailError}</span>
+                            </div>
+                        )}
+
+                        {emailSuccess && (
+                            <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs flex items-center space-x-2">
+                                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                                <span>{emailSuccess}</span>
+                            </div>
+                        )}
+
+                        <div className="flex justify-end pt-1">
+                            <button
+                                type="submit"
+                                className="px-4 py-2 text-xs font-bold rounded-lg bg-purple-600 hover:bg-purple-700 text-white cursor-pointer shadow-xs transition-all active:scale-95 flex items-center gap-1.5"
+                            >
+                                <Save className="w-3.5 h-3.5" />
+                                <span>Simpan Email Pemulihan</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
 
             {/* 2. DIBAWAHNYA: Pengaturan Ubah / Reset Password */}
             <div className={`p-4 rounded-xl border space-y-3.5 ${
@@ -389,6 +541,162 @@ export const AccountSettingsTab: React.FC<AccountSettingsTabProps> = ({
                         </button>
                     </div>
                 </form>
+            </div>
+
+            {/* 2.5 SECTION UMUM: Pengaturan & Sinkronisasi Toggles */}
+            <div className={`p-4 rounded-xl border space-y-4 ${
+                isIndustrial
+                    ? 'bg-[#0F1115] border-[rgba(226,232,240,0.15)] text-[#E2E8F0]'
+                    : isPaperSketch
+                    ? 'bg-[#ffffff] border-2 border-[#2b2b2b] shadow-[3px_3px_0px_#2b2b2b]'
+                    : isTechnical
+                    ? 'bg-[#F8F7F4] dark:bg-[#0D1117] border-[1.5px] border-[#111113] dark:border-slate-700'
+                    : isWinamp
+                    ? 'bg-black border border-[#00FF00] text-[#00FF00]'
+                    : isDark
+                    ? 'bg-[#161616] border-slate-800 text-slate-100'
+                    : isDashboard
+                    ? 'bg-[#FFF5D0] border border-[#4D2A00]/25 text-[#4D2A00]'
+                    : 'bg-white border-slate-200 text-slate-900'
+            }`}>
+                <div className="flex items-center space-x-2 border-b border-current/10 pb-2.5">
+                    <Sliders className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                    <h4 className="text-xs sm:text-sm font-extrabold uppercase tracking-wide">
+                        UMUM (Pengaturan & Sinkronisasi)
+                    </h4>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
+                    <div className="flex items-center justify-between p-2.5 rounded-lg border border-current/10 bg-current/5">
+                        <span className="font-medium pr-2">Sinkronisasi jadwal, timpa jadwal personal yang diinput user di kalender kerja ke jadwal rekan.</span>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={generalSettings.syncSchedulePersonalToTeam}
+                                onChange={(e) => updateGeneralSetting('syncSchedulePersonalToTeam', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-lg border border-current/10 bg-current/5">
+                        <span className="font-medium pr-2">Sinkronisasi jadwal, masukkan perubahan jadwal personal user (cuti, st, geser off, tukar/beri/ambil piket) ke data Jadwal Rekan.</span>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={generalSettings.syncScheduleChangesToTeam}
+                                onChange={(e) => updateGeneralSetting('syncScheduleChangesToTeam', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-lg border border-current/10 bg-current/5">
+                        <span className="font-medium pr-2">Sinkronisasi, Simpan Pengaturan ke Server (jika ubah/login di device lain maka peraturan langsung diterapkan).</span>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={generalSettings.saveSettingsToServer}
+                                onChange={(e) => updateGeneralSetting('saveSettingsToServer', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-lg border border-current/10 bg-current/5">
+                        <span className="font-medium pr-2">Tidak memerlukan password (user secara sukarela membiarkan akun terbuka / masuk landing page tanpa password).</span>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={generalSettings.noPasswordLanding}
+                                onChange={(e) => updateGeneralSetting('noPasswordLanding', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-lg border border-current/10 bg-current/5">
+                        <span className="font-medium pr-2">Tampilkan / Sembunyikan tombol tema.</span>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={generalSettings.showThemeButton}
+                                onChange={(e) => updateGeneralSetting('showThemeButton', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-lg border border-current/10 bg-current/5">
+                        <span className="font-medium pr-2">Tampilkan / Sembunyikan tombol ekspor.</span>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={generalSettings.showExportButton}
+                                onChange={(e) => updateGeneralSetting('showExportButton', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-lg border border-current/10 bg-current/5">
+                        <span className="font-medium pr-2">Tampilkan / Sembunyikan sidebar.</span>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={generalSettings.showSidebar}
+                                onChange={(e) => updateGeneralSetting('showSidebar', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-lg border border-current/10 bg-current/5">
+                        <span className="font-medium pr-2">Tampilan grid hanya shift dan tanggal (kartu tanggal ringkas tanpa jam/catatan di luar).</span>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={generalSettings.gridShiftOnly}
+                                onChange={(e) => updateGeneralSetting('gridShiftOnly', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-lg border border-current/10 bg-current/5">
+                        <span className="font-medium pr-2">Sinkronisasi, data inputan user di kalender kerja ke server (jam pulang-masuk, catatan, dll).</span>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={generalSettings.syncWorkDataToServer}
+                                onChange={(e) => updateGeneralSetting('syncWorkDataToServer', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-lg border border-current/10 bg-current/5">
+                        <span className="font-medium pr-2 text-teal-600 dark:text-teal-400 font-bold">Matikan UX dan Animasi lainnya (Nonaktifkan transisi berat).</span>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={generalSettings.disableAnimations}
+                                onChange={(e) => updateGeneralSetting('disableAnimations', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             {/* 3. DIBAWAHNYA: Deteksi Perangkat & Lokasi Aktif (Teks Biasa) */}

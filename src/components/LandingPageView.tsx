@@ -28,6 +28,7 @@ import {
     LOCAL_STORAGE_CURRENT_ROLE_KEY,
     LOCAL_STORAGE_CURRENT_PASS_KEY
 } from '../utils/adminStorage';
+import { fetchServerUsers, saveServerUsers } from '../utils/serverSync';
 import { APP_VERSION } from '../version';
 
 export const LOCAL_STORAGE_ONBOARDING_DONE_KEY = 'jadwalpriok_onboarding_completed';
@@ -78,9 +79,75 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
     // Users Database
     const [usersList, setUsersList] = useState<UserAccount[]>(() => getAdminUsers());
 
+    const [noPasswordEnabled, setNoPasswordEnabled] = useState<boolean>(() => {
+        try {
+            const saved = localStorage.getItem('jadwalpriok_general_settings');
+            if (saved) return Boolean(JSON.parse(saved).noPasswordLanding);
+        } catch {}
+        return false;
+    });
+
+    const [isSecurityModalOpen, setIsSecurityModalOpen] = useState<boolean>(false);
+
+    const handleToggleNoPassword = (nextVal: boolean) => {
+        if (nextVal) {
+            setIsSecurityModalOpen(true);
+        } else {
+            setNoPasswordEnabled(false);
+            try {
+                const saved = JSON.parse(localStorage.getItem('jadwalpriok_general_settings') || '{}');
+                saved.noPasswordLanding = false;
+                localStorage.setItem('jadwalpriok_general_settings', JSON.stringify(saved));
+            } catch {}
+            onShowToast('Proteksi password diaktifkan kembali.');
+        }
+    };
+
+    const confirmEnableNoPassword = () => {
+        setNoPasswordEnabled(true);
+        try {
+            const saved = JSON.parse(localStorage.getItem('jadwalpriok_general_settings') || '{}');
+            saved.noPasswordLanding = true;
+            localStorage.setItem('jadwalpriok_general_settings', JSON.stringify(saved));
+        } catch {}
+        setIsSecurityModalOpen(false);
+        onShowToast('Mode Masuk Tanpa Password diaktifkan.');
+    };
+
+    const handleQuickLoginNoPassword = () => {
+        if (!cleanNip || cleanNip.length < 8) {
+            setErrorMsg('Harap masukkan NIP pegawai terlebih dahulu.');
+            return;
+        }
+        const currentUsers = getAdminUsers();
+        const activeUser = currentUsers.find((u) => u.nip === cleanNip) || detectedUser;
+        const activeName = activeUser?.name || 'Ahmad Fiqri';
+        const activeRole: UserRole = (cleanNip === '199510102015121002' || activeUser?.authorityProfileId === 'prof-superadmin')
+            ? 'superadmin'
+            : (activeUser?.role || 'end-user');
+
+        localStorage.setItem(LOCAL_STORAGE_CURRENT_NIP_KEY, cleanNip);
+        localStorage.setItem(LOCAL_STORAGE_CURRENT_NAME_KEY, activeName);
+        localStorage.setItem(LOCAL_STORAGE_CURRENT_ROLE_KEY, activeRole);
+        localStorage.setItem(LOCAL_STORAGE_CURRENT_PASS_KEY, activeUser?.passwordValue || '');
+        localStorage.setItem(LOCAL_STORAGE_ONBOARDING_DONE_KEY, 'true');
+        onShowToast(`Berhasil masuk cepat tanpa password sebagai ${activeName}.`);
+        onComplete();
+    };
+
     const refreshUsers = () => {
         setUsersList(getAdminUsers());
     };
+
+    // Sinkronkan daftar pengguna dari server lokal saat Landing Page dimuat agar perubahan role admin selalu up-to-date
+    useEffect(() => {
+        setUsersList(getAdminUsers());
+        fetchServerUsers().then((serverData) => {
+            if (serverData && serverData.length > 0) {
+                setUsersList(getAdminUsers());
+            }
+        }).catch(() => {});
+    }, []);
 
     // Detected user record based on entered NIP
     const cleanNip = nipInput.replace(/\D/g, '');
@@ -134,17 +201,21 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             return;
         }
 
-        // Set active session
-        const activeName = detectedUser?.name || 'Ahmad Fiqri';
-        const activeRole: UserRole = (detectedUser?.nip === '199510102015121002' || detectedUser?.authorityProfileId === 'prof-superadmin')
+        // Ambil data user terkini dari database untuk memastikan role akurat
+        const currentUsers = getAdminUsers();
+        const activeUser = currentUsers.find((u) => u.nip === cleanNip) || detectedUser;
+        const activeName = activeUser?.name || 'Ahmad Fiqri';
+        const activeRole: UserRole = (cleanNip === '199510102015121002' || activeUser?.authorityProfileId === 'prof-superadmin')
             ? 'superadmin'
-            : (detectedUser?.role || 'end-user');
+            : (activeUser?.role || 'end-user');
 
         localStorage.setItem(LOCAL_STORAGE_CURRENT_NIP_KEY, cleanNip);
         localStorage.setItem(LOCAL_STORAGE_CURRENT_NAME_KEY, activeName);
         localStorage.setItem(LOCAL_STORAGE_CURRENT_ROLE_KEY, activeRole);
         localStorage.setItem(LOCAL_STORAGE_CURRENT_PASS_KEY, passwordInput);
         localStorage.setItem(LOCAL_STORAGE_ONBOARDING_DONE_KEY, 'true');
+
+        window.dispatchEvent(new Event('storage'));
 
         setSuccessMsg(`Login berhasil! Selamat datang kembali, ${activeName}.`);
         onShowToast(`Selamat datang kembali, ${activeName}!`);
@@ -178,13 +249,16 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
         const currentUsers = getAdminUsers();
         let targetUser = currentUsers.find((u) => u.nip === cleanNip);
 
-        const activeRole: UserRole = (cleanNip === '199510102015121002') ? 'superadmin' : (targetUser?.role || 'end-user');
+        const activeRole: UserRole = (cleanNip === '199510102015121002' || targetUser?.authorityProfileId === 'prof-superadmin')
+            ? 'superadmin'
+            : (targetUser?.role || 'end-user');
         const activeName = targetUser?.name || (cleanNip === '199510102015121002' ? 'Ahmad Fiqri' : `Petugas Posko (${cleanNip})`);
 
         if (targetUser) {
             targetUser.hasPassword = true;
             targetUser.passwordValue = trimmedPass;
             saveAdminUsers(currentUsers);
+            saveServerUsers(currentUsers).catch(() => {});
         } else {
             // Buat record user baru jika NIP belum ada di database
             const newUser: UserAccount = {
@@ -193,8 +267,8 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
                 name: activeName,
                 unitPosko: 'Graha Segara Lt. 1',
                 role: activeRole,
-                authorityProfileId: cleanNip === '199510102015121002' ? 'prof-superadmin' : 'prof-petugas-posko',
-                authorityName: cleanNip === '199510102015121002' ? 'Super Admin' : 'PPF',
+                authorityProfileId: cleanNip === '199510102015121002' ? 'prof-superadmin' : (activeRole === 'admin' ? 'prof-admin-shift' : 'prof-petugas-posko'),
+                authorityName: cleanNip === '199510102015121002' ? 'Super Admin' : (activeRole === 'admin' ? 'Admin' : 'PPF'),
                 isActive: true,
                 hasPassword: true,
                 passwordValue: trimmedPass,
@@ -202,6 +276,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
                 lastActive: 'Baru saja diaktifkan',
             };
             saveAdminUsers([newUser, ...currentUsers]);
+            saveServerUsers([newUser, ...currentUsers]).catch(() => {});
         }
 
         // Simpan sesi aktif
@@ -210,6 +285,8 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
         localStorage.setItem(LOCAL_STORAGE_CURRENT_ROLE_KEY, activeRole);
         localStorage.setItem(LOCAL_STORAGE_CURRENT_PASS_KEY, trimmedPass);
         localStorage.setItem(LOCAL_STORAGE_ONBOARDING_DONE_KEY, 'true');
+
+        window.dispatchEvent(new Event('storage'));
 
         refreshUsers();
         setSuccessMsg(`Password berhasil disimpan! Selamat datang di JadwalPriok, ${activeName}.`);
@@ -443,6 +520,27 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
                     )}
 
                     {/* ========================================================================= */}
+                    {/* TOGGLE MASUK TANPA PASSWORD (Diletakkan SEBELUM Form Password)            */}
+                    {/* ========================================================================= */}
+                    {!isNonUserAccount && (
+                        <div className="flex items-center justify-between p-2 rounded-lg border border-current/10 bg-current/5">
+                            <div className="space-y-0.5 pr-2">
+                                <span className="text-[11px] font-bold block">Masuk Tanpa Password</span>
+                                <span className="text-[9px] opacity-65 block">Akses langsung tanpa verifikasi sandi</span>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input
+                                    type="checkbox"
+                                    checked={noPasswordEnabled}
+                                    onChange={(e) => handleToggleNoPassword(e.target.checked)}
+                                    className="sr-only peer"
+                                />
+                                <div className="w-9 h-5 bg-slate-300 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-teal-600"></div>
+                            </label>
+                        </div>
+                    )}
+
+                    {/* ========================================================================= */}
                     {/* BLOKIR AKSES BAGI PPF NON USER                                             */}
                     {/* ========================================================================= */}
                     {isNonUserAccount ? (
@@ -484,6 +582,46 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    ) : noPasswordEnabled ? (
+                        /* ========================================================================= */
+                        /* MODE TANPA PASSWORD: FORM PASSWORD DISEMBUNYIKAN & MUNCUL PERINGATAN RISIKO */
+                        /* ========================================================================= */
+                        <div className="space-y-2.5 pt-1 animate-in fade-in">
+                            <div className="p-2.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300 text-xs space-y-1">
+                                <div className="flex items-center gap-1.5 font-bold">
+                                    <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-500" />
+                                    <span>Peringatan Risiko Keamanan</span>
+                                </div>
+                                <p className="text-[10px] leading-relaxed opacity-90">
+                                    Fitur masuk tanpa password aktif. Form password dinonaktifkan sehingga siapa pun yang menggunakan perangkat ini dapat langsung mengakses kalender dengan NIP Anda tanpa verifikasi sandi.
+                                </p>
+                            </div>
+
+                            {errorMsg && (
+                                <div className="p-1.5 px-2 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[11px] font-semibold flex items-center gap-1.5">
+                                    <AlertCircle className="w-3 h-3 shrink-0" />
+                                    <span>{errorMsg}</span>
+                                </div>
+                            )}
+
+                            <button
+                                type="button"
+                                onClick={handleQuickLoginNoPassword}
+                                className={`w-full py-2.5 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-98 ${
+                                    isIndustrial
+                                        ? 'bg-[#2DD4BF] hover:bg-[#26b8a5] text-[#0F1115]'
+                                        : isPaperSketch
+                                        ? 'bg-[#2ec4b6] hover:bg-[#25a99c] text-white border-2 border-[#2b2b2b] shadow-[2px_2px_0px_#2b2b2b]'
+                                        : isWinamp
+                                        ? 'bg-[#00FF00] hover:bg-[#00DD00] text-black font-mono'
+                                        : 'bg-teal-600 hover:bg-teal-700 text-white'
+                                }`}
+                            >
+                                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                                <span>Masuk ke Kalender (Tanpa Password)</span>
+                                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                            </button>
                         </div>
                     ) : !userHasPassword ? (
                         <form onSubmit={handleSetNewPassword} className="space-y-2 pt-0.5 animate-in fade-in">
@@ -678,6 +816,39 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
                     </button>
                 </div>
             </div>
+
+            {/* SECURITY WARNING MODAL */}
+            {isSecurityModalOpen && (
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs select-none animate-in fade-in duration-150">
+                    <div className="w-full max-w-sm p-5 rounded-2xl bg-white dark:bg-[#1A1D23] border border-rose-500/30 text-slate-900 dark:text-slate-100 shadow-2xl space-y-4">
+                        <div className="flex items-center space-x-2 text-rose-600 dark:text-rose-400">
+                            <ShieldAlert className="w-6 h-6 shrink-0 animate-bounce" />
+                            <h3 className="text-sm font-extrabold uppercase tracking-wide">
+                                Peringatan Risiko Keamanan!
+                            </h3>
+                        </div>
+                        <p className="text-xs leading-relaxed opacity-85">
+                            Mengaktifkan fitur <strong>"Masuk Tanpa Password"</strong> berarti siapa saja yang memegang atau membuka perangkat ini dapat langsung mengakses akun dan jadwal Anda tanpa verifikasi kata sandi. Pastikan perangkat Anda aman.
+                        </p>
+                        <div className="flex items-center justify-end space-x-2 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setIsSecurityModalOpen(false)}
+                                className="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-700 dark:text-slate-300 cursor-pointer"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={confirmEnableNoPassword}
+                                className="px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white cursor-pointer shadow-xs"
+                            >
+                                Saya Mengerti & Aktifkan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ========================================================================= */}
             {/* MODAL PENGAJUAN RESET PASSWORD KE DASHBOARD ADMINISTRATOR                 */}

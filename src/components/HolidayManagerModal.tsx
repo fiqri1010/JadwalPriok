@@ -18,10 +18,12 @@ import {
     Eye,
     EyeOff,
     Flag,
+    Lock,
 } from 'lucide-react';
 import { getIndonesianHoliday } from '../data/holidays';
 import { AppTheme, LiburNasional, HolidayCategory, resolveHolidayCategory } from '../types';
 import { CustomDatePicker } from './CustomDatePicker';
+import { getCurrentUserPermissions } from '../utils/adminStorage';
 
 const MONTH_NAMES = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -75,6 +77,9 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
     const isTechnical = theme === 'technical';
     const isEditorial = theme === 'editorial';
     const isDashboard = theme === 'dashboard';
+
+    const permissions = getCurrentUserPermissions();
+    const canEditHolidays = permissions.canEditHolidays !== false;
 
     // Current running year (tahun berjalan secara otomatis)
     const currentRunningYear = useMemo(() => new Date().getFullYear(), []);
@@ -233,6 +238,11 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
 
     // Auto-Terapkan semua libur resmi sepanjang tahun ke daftarLibur
     const handleApplyAllOfficial = async () => {
+        if (!canEditHolidays) {
+            setImportStatusMessage({ text: 'Akses dibatasi: Role Anda tidak memiliki izin mengelola hari libur (canEditHolidays).', isError: true });
+            setTimeout(() => setImportStatusMessage(null), 4000);
+            return;
+        }
         setIsProcessing(true);
         let count = 0;
         for (let m = 1; m <= 12; m++) {
@@ -265,6 +275,11 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
     // Tambah Libur Tunggal
     const handleAddCustom = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!canEditHolidays) {
+            setImportStatusMessage({ text: 'Akses dibatasi: Role Anda tidak memiliki izin menambah hari libur (canEditHolidays).', isError: true });
+            setTimeout(() => setImportStatusMessage(null), 4000);
+            return;
+        }
         if (!customDate) return;
 
         setIsProcessing(true);
@@ -295,6 +310,12 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
     // Hapus Libur secara absolut setelah konfirmasi
     const handleConfirmDeleteItem = async () => {
         if (!itemToDelete) return;
+        if (!canEditHolidays) {
+            setImportStatusMessage({ text: 'Akses dibatasi: Role Anda tidak memiliki izin menghapus hari libur (canEditHolidays).', isError: true });
+            setTimeout(() => setImportStatusMessage(null), 4000);
+            setItemToDelete(null);
+            return;
+        }
         const { tanggal, keterangan } = itemToDelete;
         setItemToDelete(null);
         setIsProcessing(true);
@@ -310,6 +331,13 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
 
     // Hapus semua libur tahun ini dari daftarLibur setelah konfirmasi pengetikan HAPUS
     const handleConfirmClearYearHolidays = async () => {
+        if (!canEditHolidays) {
+            setImportStatusMessage({ text: 'Akses dibatasi: Role Anda tidak memiliki izin menghapus hari libur (canEditHolidays).', isError: true });
+            setTimeout(() => setImportStatusMessage(null), 4000);
+            setIsConfirmingClearAll(false);
+            setClearAllConfirmInput('');
+            return;
+        }
         if (yearItems.length === 0 || clearAllConfirmInput.trim() !== 'HAPUS') {
             setIsConfirmingClearAll(false);
             setClearAllConfirmInput('');
@@ -452,6 +480,15 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
             }
             return 'bg-[#BE1A1A]/15 text-[#FF6B6B] border border-[#BE1A1A]/40 rounded-[3px] font-mono';
         }
+        if (isDashboard) {
+            if (categoryInfo.category === 'cuti_bersama') {
+                return 'bg-[#78350F]/15 text-[#78350F] border border-[#78350F]/30 font-bold';
+            }
+            if (categoryInfo.category === 'lainnya' || categoryInfo.isCustom) {
+                return 'bg-[#4D2A00]/15 text-[#4D2A00] border border-[#4D2A00]/30 font-bold';
+            }
+            return 'bg-[#78350F]/20 text-[#4D2A00] border border-[#78350F]/35 font-bold';
+        }
         if (isPaperSketch) {
             if (categoryInfo.category === 'cuti_bersama') {
                 return 'bg-amber-100 text-[#2b2b2b] border border-[#2b2b2b] rounded-md font-bold';
@@ -512,9 +549,11 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                         <div className={`p-2 rounded-lg shrink-0 ${
                             isIndustrial
                                 ? 'bg-[#0F1115] text-[#2DD4BF] border border-[#2DD4BF]/40'
+                                : isDashboard
+                                ? 'bg-[#78350F]/15 text-[#78350F] border border-[#78350F]/25'
                                 : 'bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/50 text-rose-500'
                         }`}>
-                            <Flag className={`h-5 w-5 ${isIndustrial ? 'text-[#2DD4BF]' : 'fill-rose-500 text-rose-500'}`} />
+                            <Flag className={`h-5 w-5 ${isIndustrial ? 'text-[#2DD4BF]' : isDashboard ? 'fill-[#78350F] text-[#78350F]' : 'fill-rose-500 text-rose-500'}`} />
                         </div>
                         <h2 className={`text-lg sm:text-xl font-bold tracking-tight ${
                             isIndustrial
@@ -817,7 +856,7 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
 
                                         {/* Kolom 3: Action Buttons (Toggle Nonaktifkan + Hapus) */}
                                         <div className="flex items-center space-x-1 shrink-0 ml-2">
-                                            {onToggleDisableLibur && (
+                                            {onToggleDisableLibur && canEditHolidays && (
                                                 <button
                                                     type="button"
                                                     disabled={isProcessing}
@@ -842,20 +881,22 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                                                 </button>
                                             )}
 
-                                            <button
-                                                type="button"
-                                                disabled={isProcessing}
-                                                onClick={() => setItemToDelete({ tanggal: item.tanggalIso, keterangan: item.keterangan })}
-                                                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                                                    isIndustrial
-                                                        ? 'text-[#FF6B6B] hover:bg-[#BE1A1A]/20'
-                                                        : 'text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50'
-                                                }`}
-                                                title="Hapus hari libur ini secara permanen"
-                                                aria-label="Hapus Hari Libur"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
+                                            {canEditHolidays && (
+                                                <button
+                                                    type="button"
+                                                    disabled={isProcessing}
+                                                    onClick={() => setItemToDelete({ tanggal: item.tanggalIso, keterangan: item.keterangan })}
+                                                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                                                        isIndustrial
+                                                            ? 'text-[#FF6B6B] hover:bg-[#BE1A1A]/20'
+                                                            : 'text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50'
+                                                    }`}
+                                                    title="Hapus hari libur ini secara permanen"
+                                                    aria-label="Hapus Hari Libur"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -863,32 +904,34 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                             </div>
 
                             {/* Footer: Tombol Hapus Libur Tahun Ini & di Samping Kanannya Tombol Terapkan Semua */}
-                            <div className={`pt-3 border-t flex flex-wrap items-center justify-end gap-2.5 ${
-                                isIndustrial ? 'border-[rgba(226,232,240,0.12)]' : 'border-slate-100 dark:border-slate-800'
-                            }`}>
-                                <button
-                                    type="button"
-                                    disabled={isProcessing}
-                                    onClick={() => {
-                                        setClearAllConfirmInput('');
-                                        setIsConfirmingClearAll(true);
-                                    }}
-                                    className="btn-glitch-delete px-3.5 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors flex items-center space-x-1.5 cursor-pointer shadow-xs disabled:opacity-50"
-                                    data-text="Hapus Libur Tahun Ini"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5 shrink-0 relative z-10" />
-                                    <span className="relative z-10">Hapus Libur Tahun Ini</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={isProcessing}
-                                    onClick={handleApplyAllOfficial}
-                                    className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98] ${getAccentButtonClass()}`}
-                                >
-                                    <Check className="h-3.5 w-3.5" />
-                                    <span>Terapkan Semua</span>
-                                </button>
-                            </div>
+                            {canEditHolidays && (
+                                <div className={`pt-3 border-t flex flex-wrap items-center justify-end gap-2.5 ${
+                                    isIndustrial ? 'border-[rgba(226,232,240,0.12)]' : 'border-slate-100 dark:border-slate-800'
+                                }`}>
+                                    <button
+                                        type="button"
+                                        disabled={isProcessing}
+                                        onClick={() => {
+                                            setClearAllConfirmInput('');
+                                            setIsConfirmingClearAll(true);
+                                        }}
+                                        className="btn-glitch-delete px-3.5 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors flex items-center space-x-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+                                        data-text="Hapus Libur Tahun Ini"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5 shrink-0 relative z-10" />
+                                        <span className="relative z-10">Hapus Libur Tahun Ini</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={isProcessing}
+                                        onClick={handleApplyAllOfficial}
+                                        className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer disabled:opacity-50 active:scale-[0.98] ${getAccentButtonClass()}`}
+                                    >
+                                        <Check className="h-3.5 w-3.5" />
+                                        <span>Terapkan Semua</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -897,10 +940,26 @@ export const HolidayManagerModal: React.FC<HolidayManagerModalProps> = ({
                 <div className={`lg:col-span-5 space-y-6 lg:border-l lg:pl-6 ${
                     isIndustrial ? 'lg:border-[rgba(226,232,240,0.12)]' : 'lg:border-slate-200/70 lg:dark:border-slate-800'
                 }`}>
-                    {/* A. Tambah Hari Libur Manual */}
-                    <form onSubmit={handleAddCustom} className={`space-y-3.5 pb-6 border-b ${
-                        isIndustrial ? 'border-[rgba(226,232,240,0.12)]' : 'border-slate-200/70 dark:border-slate-800'
-                    }`}>
+                    {!canEditHolidays ? (
+                        <div className={`p-4 rounded-xl border ${
+                            isIndustrial
+                                ? 'bg-[#0F1115] border-[#F59E0B]/30 text-[#F59E0B] font-["JetBrains_Mono"]'
+                                : 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300'
+                        } space-y-2`}>
+                            <div className="flex items-center gap-2 font-bold text-xs">
+                                <Lock className="w-4 h-4 shrink-0" />
+                                <span>Mode Hanya Lihat (Read-Only)</span>
+                            </div>
+                            <p className="text-[11px] opacity-85 leading-relaxed">
+                                Role Anda tidak memiliki izin untuk mengedit atau menambahkan hari libur (canEditHolidays: false). Anda tetap dapat melihat seluruh kalender dan daftar libur resmi.
+                            </p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* A. Tambah Hari Libur Manual */}
+                            <form onSubmit={handleAddCustom} className={`space-y-3.5 pb-6 border-b ${
+                                isIndustrial ? 'border-[rgba(226,232,240,0.12)]' : 'border-slate-200/70 dark:border-slate-800'
+                            }`}>
                         <div className="space-y-0.5">
                             <h3 className={`text-sm font-bold flex items-center gap-1.5 ${
                                 isIndustrial ? 'text-[#E2E8F0] font-[\'Syne\']' : 'text-slate-900 dark:text-slate-100'
@@ -1195,6 +1254,8 @@ ${activeYear}-08-17,Kemerdekaan RI,Libur Nasional`}
                             </div>
                         )}
                     </div>
+                        </>
+                    )}
                 </div>
             </div>
 

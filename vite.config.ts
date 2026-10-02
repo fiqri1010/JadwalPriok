@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'fs';
 import { defineConfig } from 'vite';
+import { handleApiRequest } from './server/apiRouter.js';
 
 // Baca versi package.json dan buat timestamp build YYYYMMDD.HHmm
 const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'));
@@ -18,9 +19,21 @@ function getBuildTimestamp(): string {
     return `${yyyy}${mm}${dd}.${hh}${min}`;
 }
 
+// Plugin lokal untuk melayani API manajemen data 120 staf & 5 posko langsung dari dev server lokal
+function localApiServerPlugin() {
+    return {
+        name: 'local-api-server-plugin',
+        configureServer(server: any) {
+            server.middlewares.use('/api', (req: any, res: any, next: any) => {
+                handleApiRequest(req, res, next);
+            });
+        },
+    };
+}
+
 export default defineConfig(() => {
     return {
-        plugins: [react(), tailwindcss()],
+        plugins: [localApiServerPlugin(), react(), tailwindcss()],
         define: {
             '__APP_VERSION__': JSON.stringify(pkg.version),
             '__BUILD_TIMESTAMP__': JSON.stringify(getBuildTimestamp()),

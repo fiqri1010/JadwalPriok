@@ -1,0 +1,41 @@
+{
+  "poskos": [
+    {
+      "id": "graha-segara-1",
+      "name": "Graha Segara Lt. 1",
+      "category": "Graha & Operasional",
+      "staffCount": 26,
+      "location": "Gedung Graha Segara Lt. 1, Pelabuhan Tanjung Priok"
+    },
+    {
+      "id": "graha-ground",
+      "name": "Graha Ground",
+      "category": "Graha & Operasional",
+      "staffCount": 28,
+      "location": "Gedung Graha Lantai Dasar (Ground), Pelabuhan Tanjung Priok"
+    },
+    {
+      "id": "cdc",
+      "name": "CDC",
+      "category": "Terminal Lini 2",
+      "staffCount": 20,
+      "location": "Container Distribution Center (CDC) Banda, Pelabuhan Tanjung Priok"
+    },
+    {
+      "id": "npct",
+      "name": "NPCT",
+      "category": "Terminal Petikemas Internasional",
+      "staffCount": 22,
+      "location": "New Priok Container Terminal One (NPCT1), Kalibaru"
+    },
+    {
+      "id": "koja",
+      "name": "Koja",
+      "category": "Terminal Petikemas",
+      "staffCount": 24,
+      "location": "Terminal Petikemas Koja (TPK Koja), Pelabuhan Tanjung Priok"
+    }
+  ],
+  "totalStaff": 120,
+  "lastSyncedAt": "2026-10-01T12:00:00.000Z"
+}

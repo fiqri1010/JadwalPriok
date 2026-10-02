@@ -484,6 +484,7 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
   const isDark = theme === 'dark';
   const isVista = theme === 'vista';
   const isPaperSketch = theme === 'paperSketch';
+  const isDashboard = theme === 'dashboard';
   const isLightMode = !isDark && !isWinamp;
 
   // Inisialisasi grid tepat 35 sel murni: 5 baris x 7 kolom
@@ -1301,6 +1302,7 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
     if (isWinamp) return 'border border-[#00FF00]/45';
     if (isDark) return 'border border-slate-700';
     if (isVista) return 'border border-sky-300/90';
+    if (isDashboard) return 'border border-[#4D2A00]/25';
     return 'border border-slate-300 dark:border-slate-600';
   };
 
@@ -1317,11 +1319,13 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
                 ? 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6] shadow-[2px_2px_0px_#2b2b2b]'
                 : isWinamp
                 ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
+                : isDashboard
+                ? 'bg-[#FFF0BE] text-[#4D2A00] border-[#4D2A00]/30 hover:bg-[#FFE8A3]'
                 : 'bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/60'
             }`}
             title="Tempel jadwal/tabel Excel langsung dari clipboard (Ctrl + V)"
           >
-            <ClipboardPaste className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+            <ClipboardPaste className={`w-3.5 h-3.5 ${isDashboard ? 'text-[#78350F]' : 'text-teal-600 dark:text-teal-400'}`} />
             <span className="text-[11px]">Tempel Clipboard (Ctrl+V)</span>
           </button>
 
@@ -1333,6 +1337,8 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
                 ? 'bg-white text-[#2b2b2b] border-2 border-[#2b2b2b] hover:bg-[#2ec4b6] shadow-[2px_2px_0px_#2b2b2b]'
                 : isWinamp
                 ? 'bg-black text-[#00FF00] border-zinc-700 hover:border-[#00FF00]'
+                : isDashboard
+                ? 'bg-[#FFF0BE] text-[#4D2A00] border-[#4D2A00]/30 hover:bg-[#FFE8A3]'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
             }`}
             title="Muat contoh format jadwal Excel"
@@ -1349,6 +1355,8 @@ export const ExcelSpreadsheet = forwardRef<ExcelSpreadsheetRef, ExcelSpreadsheet
                 ? 'bg-white text-[#ff4747] border-2 border-[#2b2b2b] hover:bg-[#ff4747] hover:text-white shadow-[2px_2px_0px_#2b2b2b]'
                 : isWinamp
                 ? 'bg-black text-rose-500 border-zinc-800 hover:border-rose-500'
+                : isDashboard
+                ? 'bg-[#FFF0BE] text-rose-700 border-[#4D2A00]/30 hover:bg-rose-100'
                 : 'bg-slate-100 dark:bg-slate-800 text-rose-600 dark:text-rose-400 border-slate-200 dark:border-slate-700 hover:bg-rose-50 dark:hover:bg-rose-950/30'
             }`}
             title="Reset grid ke awal"

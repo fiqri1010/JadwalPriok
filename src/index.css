@@ -6,6 +6,12 @@
 @import "@fontsource/dseg7-classic/700.css";
 
 /* Digital-7 Bold Font Utility for Attendance Time Badges & Pickers */
+.disable-animations *,
+.disable-animations *::before,
+.disable-animations *::after {
+    transition: none !important;
+    animation: none !important;
+}
 .font-digital-7,
 .font-digital-regular,
 .font-digital-mono7,
@@ -543,6 +549,7 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
         background-size: 30px 30px !important;
         color: #2b2b2b !important;
         font-family: 'Gaegu', 'Gochi Hand', cursive, sans-serif !important;
+        font-size: 16.5px;
         font-weight: 700;
         letter-spacing: 0.015em;
     }
@@ -576,29 +583,33 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
         letter-spacing: 0.02em;
     }
 
-    /* Typographic Scale Calibration: Gaegu glyphs are visually lighter, so bump sizes for crisp readability */
+    /* Typographic Scale Calibration: Gaegu glyphs are visually lighter, so bump sizes for crisp readability and component proportions */
+    [data-theme="paperSketch"] .text-\[6\.5px\],
+    [data-theme="paperSketch"] .text-\[6\.8px\],
     [data-theme="paperSketch"] .text-\[7px\],
     [data-theme="paperSketch"] .text-\[7\.5px\],
     [data-theme="paperSketch"] .text-\[8px\],
     [data-theme="paperSketch"] .text-\[8\.5px\] {
-        font-size: 11.5px !important;
+        font-size: 12.5px !important;
+        line-height: 1.15 !important;
         font-weight: 700 !important;
     }
 
-    /* Pastikan indikator role / super admin dan tombol admin di card user sidebar muat di lebar div pada tema paperSketch */
+    /* Indikator role / super admin dan tombol admin di card user sidebar */
     [data-theme="paperSketch"] .sidebar-user-badge {
-        font-size: 8.5px !important;
-        line-height: 1.15 !important;
-        letter-spacing: -0.02em !important;
-        padding: 2px 4px !important;
+        font-size: 11.5px !important;
+        line-height: 19.6333px !important;
+        text-align: justify !important;
+        letter-spacing: -0.01em !important;
+        padding: 2.5px 6px !important;
         box-sizing: border-box !important;
     }
 
     [data-theme="paperSketch"] .sidebar-admin-btn {
-        font-size: 9px !important;
-        line-height: 1.15 !important;
-        letter-spacing: -0.02em !important;
-        padding: 2px 5px !important;
+        font-size: 11.5px !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.01em !important;
+        padding: 2.5px 7px !important;
         box-sizing: border-box !important;
         white-space: nowrap !important;
     }
@@ -609,36 +620,53 @@ button, [role="button"], a, label[for], input[type="checkbox"], input[type="radi
     [data-theme="paperSketch"] .text-\[10\.5px\],
     [data-theme="paperSketch"] .text-\[11px\],
     [data-theme="paperSketch"] .text-\[11\.5px\] {
-        font-size: 13px !important;
-        font-weight: 700 !important;
-    }
-
-    [data-theme="paperSketch"] .text-xs {
         font-size: 14.5px !important;
         line-height: 1.25rem !important;
         font-weight: 700 !important;
     }
 
-    [data-theme="paperSketch"] .text-sm {
-        font-size: 16px !important;
+    [data-theme="paperSketch"] .text-\[12px\],
+    [data-theme="paperSketch"] .text-\[12\.5px\],
+    [data-theme="paperSketch"] .text-\[13px\],
+    [data-theme="paperSketch"] .text-\[13\.5px\],
+    [data-theme="paperSketch"] .text-\[14px\],
+    [data-theme="paperSketch"] .text-\[15px\] {
+        font-size: 16.5px !important;
         line-height: 1.35rem !important;
         font-weight: 700 !important;
     }
 
-    [data-theme="paperSketch"] .text-base {
-        font-size: 18px !important;
+    [data-theme="paperSketch"] .text-xs {
+        font-size: 15.5px !important;
+        line-height: 1.35rem !important;
+        font-weight: 700 !important;
+    }
+
+    [data-theme="paperSketch"] .text-sm {
+        font-size: 17.5px !important;
         line-height: 1.45rem !important;
         font-weight: 700 !important;
     }
 
-    [data-theme="paperSketch"] .text-lg {
-        font-size: 21px !important;
+    [data-theme="paperSketch"] .text-base {
+        font-size: 19.5px !important;
         line-height: 1.55rem !important;
+        font-weight: 700 !important;
+    }
+
+    [data-theme="paperSketch"] .text-lg {
+        font-size: 22.5px !important;
+        line-height: 1.65rem !important;
     }
 
     [data-theme="paperSketch"] .text-xl {
-        font-size: 24px !important;
-        line-height: 1.65rem !important;
+        font-size: 26px !important;
+        line-height: 1.75rem !important;
+    }
+
+    [data-theme="paperSketch"] .text-2xl {
+        font-size: 30px !important;
+        line-height: 1.85rem !important;
     }
 
     [data-theme="paperSketch"] .sketch-border {

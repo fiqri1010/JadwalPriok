@@ -36,6 +36,7 @@ import {
     getApprovalRequests,
     saveApprovalRequests,
     purgeUserDataCompletely,
+    getCurrentUserPermissions,
     LOCAL_STORAGE_CURRENT_NIP_KEY,
     LOCAL_STORAGE_CURRENT_PASS_KEY,
 } from '../../utils/adminStorage';
@@ -91,6 +92,7 @@ interface AdminUserListTabProps {
     onShowToast: (msg: string) => void;
     theme?: AppTheme;
     currentRole?: UserRole;
+    permissions?: ReturnType<typeof getCurrentUserPermissions>;
 }
 
 export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
@@ -101,6 +103,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     onShowToast,
     theme = 'default',
     currentRole = 'superadmin',
+    permissions,
 }) => {
     const isIndustrial = theme === 'industrial';
     const isPaperSketch = theme === 'paperSketch';
@@ -108,6 +111,8 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     const isWinamp = theme === 'winamp';
     const isDark = theme === 'dark';
     const isDashboard = theme === 'dashboard';
+
+    const userPermissions = permissions || getCurrentUserPermissions();
 
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -232,10 +237,17 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     const [formIsActive, setFormIsActive] = useState(true);
 
     const openAddModal = () => {
+        if (!userPermissions.canManageUsers) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin menambah pengguna (canManageUsers).');
+            return;
+        }
         setFormNip('');
         setFormName('');
         setFormUnit('Graha Segara Lt. 1');
-        setFormProfileId(authorityProfiles.find(p => p.roleType === 'end-user')?.id || authorityProfiles[0]?.id || '');
+        const defaultProfId = userPermissions.canEditAuthorities
+            ? (authorityProfiles.find(p => p.roleType === 'end-user')?.id || authorityProfiles[0]?.id || '')
+            : (authorityProfiles.find(p => p.roleType === 'end-user')?.id || 'prof-petugas-posko');
+        setFormProfileId(defaultProfId);
         setFormSquad('Regu A');
         setFormIsExternal(false);
         setFormIsActive(true);
@@ -243,6 +255,10 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     };
 
     const openEditModal = (user: UserAccount) => {
+        if (!userPermissions.canManageUsers) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin mengedit data pengguna (canManageUsers).');
+            return;
+        }
         if (isAccountFrozen(user)) {
             onShowToast('Akses edit ke akun Super Admin dibekukan untuk role Admin.');
             return;
@@ -259,12 +275,20 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
 
     const handleSaveAdd = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!userPermissions.canManageUsers) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin menambah pengguna.');
+            return;
+        }
         if (!formNip.trim() || !formName.trim()) {
             onShowToast('NIP dan Nama Pengguna wajib diisi.');
             return;
         }
 
-        const selectedProfile = authorityProfiles.find((p) => p.id === formProfileId) || authorityProfiles[0];
+        const canEditAuthorities = userPermissions.canEditAuthorities;
+        const selectedProfile = canEditAuthorities
+            ? (authorityProfiles.find((p) => p.id === formProfileId) || authorityProfiles[0])
+            : (authorityProfiles.find((p) => p.roleType === 'end-user') || authorityProfiles[0]);
+
         const newUser: UserAccount = {
             id: `usr-${Date.now()}`,
             nip: formNip.trim(),
@@ -291,6 +315,11 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     const handleSaveEdit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingUser) return;
+        if (!userPermissions.canManageUsers) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin mengedit data pengguna.');
+            setEditingUser(null);
+            return;
+        }
         if (isAccountFrozen(editingUser)) {
             onShowToast('Akses edit ke akun Super Admin dibekukan untuk role Admin.');
             setEditingUser(null);
@@ -301,7 +330,10 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
             return;
         }
 
-        const selectedProfile = authorityProfiles.find((p) => p.id === formProfileId) || authorityProfiles[0];
+        const canEditAuthorities = userPermissions.canEditAuthorities;
+        const selectedProfile = canEditAuthorities
+            ? (authorityProfiles.find((p) => p.id === formProfileId) || authorityProfiles[0])
+            : (authorityProfiles.find((p) => p.id === editingUser.authorityProfileId) || authorityProfiles.find(p => p.roleType === editingUser.role));
         const isSuperAdmin = isSuperAdminUser(editingUser);
         const finalActive = isSuperAdmin ? true : formIsActive;
 
@@ -311,9 +343,9 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                     ...u,
                     name: formName.trim(),
                     unitPosko: cleanPoskoName(formUnit.trim()) || cleanPoskoName(u.unitPosko),
-                    role: selectedProfile?.roleType || u.role,
-                    authorityProfileId: selectedProfile?.id || u.authorityProfileId,
-                    authorityName: selectedProfile?.name || u.authorityName,
+                    role: canEditAuthorities ? (selectedProfile?.roleType || u.role) : u.role,
+                    authorityProfileId: canEditAuthorities ? (selectedProfile?.id || u.authorityProfileId) : u.authorityProfileId,
+                    authorityName: canEditAuthorities ? (selectedProfile?.name || u.authorityName) : u.authorityName,
                     assignedSquad: formSquad,
                     isExternalNonAppUser: formIsExternal,
                     isActive: finalActive,
@@ -329,6 +361,10 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
 
     // Toggle Aktif via Checkbox
     const handleToggleCheckbox = (user: UserAccount) => {
+        if (!userPermissions.canManageUsers) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin mengubah status aktif pengguna (canManageUsers).');
+            return;
+        }
         const isSuperAdmin = isSuperAdminUser(user);
         if (isSuperAdmin) {
             onShowToast('Akun Utama Super Admin tidak dapat dinonaktifkan.');
@@ -343,6 +379,11 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     // Eksekusi Reset Password (langsung mengosongkan password)
     const handleExecuteResetPassword = () => {
         if (!resettingUser) return;
+        if (!userPermissions.canResetUserPassword) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin reset password pengguna (canResetUserPassword).');
+            setResettingUser(null);
+            return;
+        }
         if (isAccountFrozen(resettingUser)) {
             onShowToast('Reset password akun Super Admin dibekukan untuk role Admin.');
             setResettingUser(null);
@@ -393,6 +434,11 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
     // Eksekusi Hapus User
     const handleExecuteDelete = () => {
         if (!deletingUser) return;
+        if (!userPermissions.canManageUsers) {
+            onShowToast('Akses dibatasi: Role Anda tidak memiliki izin menghapus pengguna (canManageUsers).');
+            setDeletingUser(null);
+            return;
+        }
         if (isSuperAdminUser(deletingUser)) {
             onShowToast('Akun Super Admin tidak dapat dihapus.');
             setDeletingUser(null);
@@ -519,14 +565,16 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                     </div>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={openAddModal}
-                    className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs cursor-pointer flex items-center justify-center space-x-2 active:scale-95 transition-all self-start sm:self-center"
-                >
-                    <UserPlus className="w-4 h-4" />
-                    <span>Tambah Pengguna Baru</span>
-                </button>
+                {userPermissions.canManageUsers && (
+                    <button
+                        type="button"
+                        onClick={openAddModal}
+                        className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs cursor-pointer flex items-center justify-center space-x-2 active:scale-95 transition-all self-start sm:self-center"
+                    >
+                        <UserPlus className="w-4 h-4" />
+                        <span>Tambah Pengguna Baru</span>
+                    </button>
+                )}
             </div>
 
             {/* Filter & Search Bar */}
@@ -800,9 +848,15 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                         <td className="py-2 px-1 text-center whitespace-nowrap w-1">
                                             <button
                                                 type="button"
-                                                onClick={() => setSessionModalData({ user: u, session: userSession || null })}
+                                                onClick={() => {
+                                                    if (!userPermissions.canViewAllSessions && currentRole !== 'superadmin') {
+                                                        onShowToast('Akses dibatasi: Role Anda tidak memiliki izin melihat spesifikasi sesi perangkat (canViewAllSessions).');
+                                                        return;
+                                                    }
+                                                    setSessionModalData({ user: u, session: userSession || null });
+                                                }}
                                                 className="inline-block p-1 rounded-md hover:bg-current/10 active:scale-95 transition-all cursor-pointer text-center group"
-                                                title="Klik untuk melihat spesifikasi detail perangkat & sesi riil"
+                                                title={userPermissions.canViewAllSessions ? "Klik untuk melihat spesifikasi detail perangkat & sesi riil" : "Izin melihat sesi perangkat tidak aktif"}
                                             >
                                                 {userSession ? (
                                                     <div className="inline-flex flex-col items-center justify-center text-center mx-auto">
@@ -816,19 +870,19 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                                                 userSession.isOnline
                                                                     ? 'text-emerald-600 dark:text-emerald-400'
                                                                     : 'opacity-55'
-                                                            }`}>
-                                                                {userSession.isOnline ? 'Online' : 'Offline'}
-                                                            </span>
-                                                        </div>
-                                                        <div
-                                                            className="text-[9.5px] font-mono opacity-75 whitespace-nowrap mt-0.5 font-bold group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors leading-tight"
-                                                        >
-                                                            {userSession.ipAddress || userSession.deviceName}
-                                                        </div>
-                                                        <div className="text-[8.5px] opacity-50 whitespace-nowrap leading-tight">
-                                                            {userSession.lastActive}
-                                                        </div>
-                                                    </div>
+                             }`}>
+                                                                 {userSession.isOnline ? 'Online' : 'Offline'}
+                                                             </span>
+                                                         </div>
+                                                         <div
+                                                             className="text-[9.5px] font-mono opacity-75 whitespace-nowrap mt-0.5 font-bold group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors leading-tight"
+                                                         >
+                                                             {userPermissions.canViewAllSessions ? (userSession.ipAddress || userSession.deviceName) : '••••••••'}
+                                                         </div>
+                                                         <div className="text-[8.5px] opacity-50 whitespace-nowrap leading-tight">
+                                                             {userSession.lastActive}
+                                                         </div>
+                                                     </div>
                                                 ) : (
                                                     <div className="inline-flex items-center justify-center gap-1 text-[10px] opacity-40 font-mono group-hover:opacity-75 whitespace-nowrap">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-slate-400/50" />
@@ -845,7 +899,7 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                                 theme={theme}
                                                 size="13px"
                                                 checked={u.isActive}
-                                                disabled={isSuperAdmin}
+                                                disabled={isSuperAdmin || !userPermissions.canManageUsers}
                                                 onChange={() => handleToggleCheckbox(u)}
                                                 label={
                                                     <span className={`text-[10.5px] sm:text-xs font-bold ${
@@ -869,6 +923,17 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                                 >
                                                     <Lock className="w-2.5 h-2.5 shrink-0" />
                                                     <span>Beku</span>
+                                                </button>
+                                            ) : !userPermissions.canResetUserPassword ? (
+                                                <button
+                                                    type="button"
+                                                    disabled
+                                                    onClick={() => onShowToast('Akses dibatasi: Izin Reset Password tidak aktif pada role Anda.')}
+                                                    className="py-1 px-2 text-[10px] sm:text-xs font-bold rounded border border-current/15 bg-current/5 opacity-40 cursor-not-allowed inline-flex items-center justify-center gap-0.5 select-none text-current"
+                                                    title="Izin Reset Password tidak aktif (canResetUserPassword: false)"
+                                                >
+                                                    <Lock className="w-2.5 h-2.5 shrink-0 opacity-40" />
+                                                    <span>Reset</span>
                                                 </button>
                                             ) : isPasswordEmpty ? (
                                                 <button
@@ -906,6 +971,17 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                                     <Lock className="w-2.5 h-2.5 text-slate-400 shrink-0" />
                                                     <span>Beku</span>
                                                 </button>
+                                            ) : !userPermissions.canManageUsers ? (
+                                                <button
+                                                    type="button"
+                                                    disabled
+                                                    onClick={() => onShowToast('Akses dibatasi: Izin Kelola Pengguna tidak aktif pada role Anda.')}
+                                                    className="py-1 px-2 text-[10px] sm:text-xs font-bold rounded border border-current/15 bg-current/5 opacity-40 cursor-not-allowed inline-flex items-center justify-center gap-0.5 select-none"
+                                                    title="Izin Kelola Pengguna tidak aktif (canManageUsers: false)"
+                                                >
+                                                    <Lock className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                                                    <span>Edit</span>
+                                                </button>
                                             ) : (
                                                 <button
                                                     type="button"
@@ -926,6 +1002,17 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                                                     <Lock className="w-2.5 h-2.5 shrink-0" />
                                                     <span>Admin</span>
                                                 </span>
+                                            ) : !userPermissions.canManageUsers ? (
+                                                <button
+                                                    type="button"
+                                                    disabled
+                                                    onClick={() => onShowToast('Akses dibatasi: Izin Kelola Pengguna tidak aktif pada role Anda.')}
+                                                    className="py-0.5 px-1.5 text-[8.5px] font-bold rounded border border-current/15 bg-current/5 opacity-40 cursor-not-allowed inline-flex items-center justify-center gap-0.5 select-none text-current"
+                                                    title="Izin Kelola Pengguna tidak aktif (canManageUsers: false)"
+                                                >
+                                                    <Lock className="w-2.5 h-2.5 shrink-0 opacity-40" />
+                                                    <span>Hapus</span>
+                                                </button>
                                             ) : (
                                                 <button
                                                     type="button"
@@ -1128,11 +1215,23 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                             </div>
 
                             <div>
-                                <label className="text-xs font-bold block mb-1">Role Otoritas:</label>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className="text-xs font-bold block">Role Otoritas:</label>
+                                    {!userPermissions.canEditAuthorities && (
+                                        <span className="text-[10px] font-mono text-amber-500 flex items-center gap-1 font-bold">
+                                            <Lock className="w-3 h-3" /> Memerlukan Izin Kelola Role
+                                        </span>
+                                    )}
+                                </div>
                                 <select
                                     value={formProfileId}
+                                    disabled={!userPermissions.canEditAuthorities}
                                     onChange={(e) => setFormProfileId(e.target.value)}
-                                    className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer focus:border-teal-500"
+                                    className={`w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-bold outline-none ${
+                                        !userPermissions.canEditAuthorities
+                                            ? 'opacity-60 cursor-not-allowed bg-current/10'
+                                            : 'cursor-pointer focus:border-teal-500'
+                                    }`}
                                 >
                                     {authorityProfiles.map((p) => (
                                         <option key={p.id} value={p.id}>
@@ -1250,11 +1349,23 @@ export const AdminUserListTab: React.FC<AdminUserListTabProps> = ({
                             </div>
 
                             <div>
-                                <label className="text-xs font-bold block mb-1">Role Otoritas:</label>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className="text-xs font-bold block">Role Otoritas:</label>
+                                    {!userPermissions.canEditAuthorities && (
+                                        <span className="text-[10px] font-mono text-amber-500 flex items-center gap-1 font-bold">
+                                            <Lock className="w-3 h-3" /> Memerlukan Izin Kelola Role
+                                        </span>
+                                    )}
+                                </div>
                                 <select
                                     value={formProfileId}
+                                    disabled={!userPermissions.canEditAuthorities}
                                     onChange={(e) => setFormProfileId(e.target.value)}
-                                    className="w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-bold outline-none cursor-pointer focus:border-teal-500"
+                                    className={`w-full p-2 text-xs rounded-lg border border-current/20 bg-current/5 font-bold outline-none ${
+                                        !userPermissions.canEditAuthorities
+                                            ? 'opacity-60 cursor-not-allowed bg-current/10'
+                                            : 'cursor-pointer focus:border-teal-500'
+                                    }`}
                                 >
                                     {authorityProfiles.map((p) => (
                                         <option key={p.id} value={p.id}>

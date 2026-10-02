@@ -14,6 +14,8 @@ import {
     X,
     Clock,
     Check,
+    ChevronDown,
+    Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ShiftDropdown } from './ShiftDropdown';
@@ -359,7 +361,7 @@ export const DayCell = React.memo<DayCellProps>(({
 
     const dateNumberColor = isHoliday || isWeekend
         ? isPaperSketch
-            ? 'text-[#ff4747] font-[\'Gochi_Hand\'] font-bold text-base sm:text-lg'
+            ? 'text-[#ff4747] font-[\'Gochi_Hand\'] font-bold text-lg sm:text-xl lg:text-2xl'
             : isTechnical
             ? 'text-[#BE1A1A] font-[\'JetBrains_Mono\'] font-bold'
             : isEditorial
@@ -370,7 +372,7 @@ export const DayCell = React.memo<DayCellProps>(({
             ? 'text-[#BE1A1A] font-[\'Inter\'] font-bold'
             : 'text-rose-500 font-black'
         : isPaperSketch
-        ? 'text-[#2b2b2b] font-[\'Gochi_Hand\'] font-bold text-base sm:text-lg'
+        ? 'text-[#2b2b2b] font-[\'Gochi_Hand\'] font-bold text-lg sm:text-xl lg:text-2xl'
         : isTechnical
         ? 'text-[#111113] font-[\'JetBrains_Mono\'] font-bold'
         : isEditorial
@@ -388,6 +390,42 @@ export const DayCell = React.memo<DayCellProps>(({
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const expandedCardRef = useRef<HTMLDivElement>(null);
 
+    // State untuk Bagian Folded Perubahan (Cuti, ST, Geser Off) pada kartu expanded desktop
+    const [isPerubahanOpen, setIsPerubahanOpen] = useState(false);
+    const [perubahanTab, setPerubahanTab] = useState<'cuti' | 'st' | 'geser_off'>('cuti');
+    const [selectedLeaveType, setSelectedLeaveType] = useState<string>(() => data?.leaveInfo?.leaveType || 'Cuti Tahunan');
+    const [selectedHalfDay, setSelectedHalfDay] = useState<'pagi' | 'siang'>(() => data?.leaveInfo?.halfDayType || 'pagi');
+    const [selectedStType, setSelectedStType] = useState<string>(() => data?.stInfo?.stType || 'Pemeriksaan Luar Kawasan Pabean');
+    const [isStTentative, setIsStTentative] = useState<boolean>(() => data?.stInfo?.isTentative ?? false);
+    const [stRewardType, setStRewardType] = useState<'Cuti Bersama' | 'Off Pengganti' | 'None'>(() => data?.stInfo?.rewardType || 'Off Pengganti');
+    const [geserSourceDate, setGeserSourceDate] = useState<string>(() => data?.geserOffInfo?.sourceDate || '');
+    const [geserEarnedDays, setGeserEarnedDays] = useState<number>(() => data?.geserOffInfo?.earnedDays || 1);
+
+    // Sinkronkan state lokal saat data tanggal berubah
+    useEffect(() => {
+        if (data?.leaveInfo) {
+            setSelectedLeaveType(data.leaveInfo.leaveType || 'Cuti Tahunan');
+            setSelectedHalfDay(data.leaveInfo.halfDayType || 'pagi');
+        }
+        if (data?.stInfo) {
+            setSelectedStType(data.stInfo.stType || 'Pemeriksaan Luar Kawasan Pabean');
+            setIsStTentative(data.stInfo.isTentative ?? false);
+            setStRewardType(data.stInfo.rewardType || 'Off Pengganti');
+        }
+        if (data?.geserOffInfo) {
+            setGeserSourceDate(data.geserOffInfo.sourceDate || '');
+            setGeserEarnedDays(data.geserOffInfo.earnedDays || 1);
+        }
+    }, [data]);
+
+    const generalSettings = useMemo(() => {
+        try {
+            const saved = localStorage.getItem('jadwalpriok_general_settings');
+            if (saved) return JSON.parse(saved);
+        } catch {}
+        return { gridShiftOnly: false };
+    }, []);
+
     const dayOfWeekIndex = (dayOfWeek + 6) % 7; // 0 for Monday (Senin) -> 6 for Sunday (Minggu)
     const dropdownAlign: 'left' | 'right' | 'center' =
         dayOfWeekIndex >= 4 ? 'right' : dayOfWeekIndex >= 2 ? 'center' : 'left';
@@ -396,6 +434,8 @@ export const DayCell = React.memo<DayCellProps>(({
 
     // Helper to render attendance times (jamMasuk / jamPulang / absenCeisa) in Bell Centennial Address font right under shift
     const renderAttendanceTimeBadge = (customContainerClass?: string) => {
+        if (generalSettings.gridShiftOnly) return null;
+
         const hasMasuk = Boolean(data?.jamMasuk);
         const hasPulang = Boolean(data?.jamPulang);
         const hasCeisa = Boolean(data?.absenCeisa);
@@ -734,7 +774,43 @@ export const DayCell = React.memo<DayCellProps>(({
                                     );
                                 }
 
-                                return icons.slice(0, 2);
+                                if (data?.geserOffInfo?.isGeserOff) {
+                                    icons.push(
+                                        <span
+                                            key="geser"
+                                            className="inline-flex items-center text-[9px] font-bold px-1 rounded bg-emerald-500 text-white shrink-0 shadow-2xs"
+                                            title="Geser Off (Tabungan Piket)"
+                                        >
+                                            🔄
+                                        </span>
+                                    );
+                                }
+
+                                if (data?.stInfo?.isSt) {
+                                    icons.push(
+                                        <span
+                                            key="st"
+                                            className="inline-flex items-center text-[9px] font-bold px-1 rounded bg-amber-500 text-white shrink-0 shadow-2xs"
+                                            title={`ST: ${data.stInfo.stType}`}
+                                        >
+                                            📋
+                                        </span>
+                                    );
+                                }
+
+                                if (data?.leaveInfo?.isLeave) {
+                                    icons.push(
+                                        <span
+                                            key="leave"
+                                            className="inline-flex items-center text-[9px] font-bold px-1 rounded bg-indigo-500 text-white shrink-0 shadow-2xs"
+                                            title={`Cuti: ${data.leaveInfo.leaveType}`}
+                                        >
+                                            🌴
+                                        </span>
+                                    );
+                                }
+
+                                return icons.slice(0, 3);
                             })()}
                         </div>
                     </div>
@@ -827,7 +903,7 @@ export const DayCell = React.memo<DayCellProps>(({
                 }}
                 className={`hidden md:flex flex-col justify-between absolute ${verticalPositionClass} ${horizontalPositionClass} transition-[width,height,min-height,box-shadow,border-color,background] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] select-none transform-gpu outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                     isExpandedDesktop
-                        ? `overflow-visible w-[calc(200%+0.375rem)] min-h-[max(270px,calc(200%+0.375rem))] p-3 sm:p-3.5 cursor-default ${
+                        ? `overflow-visible ${isPerubahanOpen ? 'w-[calc(220%+0.5rem)] min-h-[max(360px,calc(220%+0.5rem))]' : 'w-[calc(200%+0.375rem)] min-h-[max(270px,calc(200%+0.375rem))]'} p-3 sm:p-3.5 cursor-default ${
                             isDashboard ? 'rounded-none' : ''
                         }`
                         : `overflow-hidden w-full h-full px-1.5 py-1 sm:px-2 sm:py-1.5 cursor-pointer hover:scale-[1.015] active:scale-[0.99] hover:z-40 focus-within:z-40 ${
@@ -1227,6 +1303,343 @@ export const DayCell = React.memo<DayCellProps>(({
                                         }
                                     />
                                 </div>
+                            </div>
+
+                            {/* Tombol Bagian Folded Perubahan (Cuti, ST, Geser Off) */}
+                            <div className="pt-1">
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsPerubahanOpen(!isPerubahanOpen);
+                                    }}
+                                    className={`w-full py-1.5 px-2 rounded-[6px] text-[11px] font-bold transition-all flex items-center justify-between cursor-pointer ${
+                                        isPerubahanOpen
+                                            ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
+                                            : 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                        <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                                        <span className="truncate">Perubahan</span>
+                                        {(data?.leaveInfo?.isLeave || data?.stInfo?.isSt || data?.geserOffInfo?.isGeserOff) && (
+                                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" title="Ada Perubahan Aktif" />
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-[9.5px] opacity-75 shrink-0">
+                                        <span>{isPerubahanOpen ? 'Sembunyikan' : 'Buka'}</span>
+                                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isPerubahanOpen ? 'rotate-180' : ''}`} />
+                                    </div>
+                                </button>
+
+                                {/* Seamless Unfolded Drawer - Tampak seamless tanpa terlihat lipatan/pembatas kasar */}
+                                <AnimatePresence>
+                                    {isPerubahanOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                                            className="overflow-hidden pt-1.5 space-y-2 w-full"
+                                        >
+                                            {/* 3 Subtabs Header */}
+                                            <div className="grid grid-cols-3 gap-1 bg-black/5 dark:bg-white/5 p-0.5 rounded-[6px]">
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setPerubahanTab('cuti');
+                                                    }}
+                                                    className={`py-1 text-[10px] font-bold rounded-[5px] transition-all cursor-pointer ${
+                                                        perubahanTab === 'cuti'
+                                                            ? 'bg-indigo-600 text-white shadow-xs'
+                                                            : 'hover:bg-black/5 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300'
+                                                    }`}
+                                                >
+                                                    🌴 Cuti
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setPerubahanTab('st');
+                                                    }}
+                                                    className={`py-1 text-[10px] font-bold rounded-[5px] transition-all cursor-pointer ${
+                                                        perubahanTab === 'st'
+                                                            ? 'bg-amber-600 text-white shadow-xs'
+                                                            : 'hover:bg-black/5 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300'
+                                                    }`}
+                                                >
+                                                    📋 ST
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setPerubahanTab('geser_off');
+                                                    }}
+                                                    className={`py-1 text-[10px] font-bold rounded-[5px] transition-all cursor-pointer ${
+                                                        perubahanTab === 'geser_off'
+                                                            ? 'bg-emerald-600 text-white shadow-xs'
+                                                            : 'hover:bg-black/5 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300'
+                                                    }`}
+                                                >
+                                                    🔄 Geser Off
+                                                </button>
+                                            </div>
+
+                                            {/* Subtab 1: Cuti */}
+                                            {perubahanTab === 'cuti' && (
+                                                <div className="space-y-1.5 p-2 rounded-[6px] bg-indigo-500/10 text-xs">
+                                                    <div className="flex items-center justify-between">
+                                                        <label className="text-[9.5px] font-bold block text-indigo-700 dark:text-indigo-300">
+                                                            Jenis Cuti:
+                                                        </label>
+                                                        {data?.leaveInfo?.isLeave && (
+                                                            <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 bg-indigo-500/20 px-1.5 py-0.2 rounded">
+                                                                Aktif
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <select
+                                                        value={selectedLeaveType}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            setSelectedLeaveType(val);
+                                                            handleUpdate({
+                                                                shift: 'CUTI',
+                                                                leaveInfo: {
+                                                                    isLeave: true,
+                                                                    leaveType: val,
+                                                                    halfDayType: val.includes('Setengah Hari') ? selectedHalfDay : undefined,
+                                                                },
+                                                            });
+                                                        }}
+                                                        className="w-full py-1 px-1.5 text-xs rounded border border-indigo-300/50 dark:border-indigo-700/50 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                    >
+                                                        <option value="Cuti Tahunan">Cuti Tahunan</option>
+                                                        <option value="Cuti Setengah Hari Pagi">Cuti Setengah Hari (Pagi)</option>
+                                                        <option value="Cuti Setengah Hari Siang">Cuti Setengah Hari (Siang)</option>
+                                                        <option value="Cuti Sakit">Cuti Sakit</option>
+                                                        <option value="Cuti Alasan Penting (CAP)">Cuti Alasan Penting (CAP)</option>
+                                                        <option value="Cuti Besar">Cuti Besar</option>
+                                                        <option value="Cuti Melahirkan">Cuti Melahirkan</option>
+                                                        <option value="Cuti Bersama ST">Cuti Bersama ST</option>
+                                                        <option value="Cuti di Luar Tanggungan Negara">Cuti di Luar Tanggungan Negara</option>
+                                                    </select>
+
+                                                    {selectedLeaveType.includes('Setengah Hari') && (
+                                                        <div className="flex items-center justify-between text-[10px] pt-0.5">
+                                                            <span className="opacity-75 font-semibold text-indigo-700 dark:text-indigo-300">Waktu:</span>
+                                                            <div className="flex gap-1">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedHalfDay('pagi');
+                                                                        handleUpdate({
+                                                                            shift: 'CUTI',
+                                                                            leaveInfo: { isLeave: true, leaveType: selectedLeaveType, halfDayType: 'pagi' },
+                                                                        });
+                                                                    }}
+                                                                    className={`px-2 py-0.5 rounded text-[9.5px] font-bold cursor-pointer ${
+                                                                        selectedHalfDay === 'pagi' ? 'bg-indigo-600 text-white' : 'bg-black/10 dark:bg-white/10 text-slate-700 dark:text-slate-300'
+                                                                    }`}
+                                                                >
+                                                                    Pagi
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedHalfDay('siang');
+                                                                        handleUpdate({
+                                                                            shift: 'CUTI',
+                                                                            leaveInfo: { isLeave: true, leaveType: selectedLeaveType, halfDayType: 'siang' },
+                                                                        });
+                                                                    }}
+                                                                    className={`px-2 py-0.5 rounded text-[9.5px] font-bold cursor-pointer ${
+                                                                        selectedHalfDay === 'siang' ? 'bg-indigo-600 text-white' : 'bg-black/10 dark:bg-white/10 text-slate-700 dark:text-slate-300'
+                                                                    }`}
+                                                                >
+                                                                    Siang
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Subtab 2: ST (Penugasan) */}
+                                            {perubahanTab === 'st' && (
+                                                <div className="space-y-1.5 p-2 rounded-[6px] bg-amber-500/10 text-xs">
+                                                    <div className="flex items-center justify-between">
+                                                        <label className="text-[9.5px] font-bold block text-amber-700 dark:text-amber-300">
+                                                            Jenis Surat Tugas (ST):
+                                                        </label>
+                                                        {data?.stInfo?.isSt && (
+                                                            <span className="text-[9px] font-black text-amber-600 dark:text-amber-400 bg-amber-500/20 px-1.5 py-0.2 rounded">
+                                                                Aktif
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <select
+                                                        value={selectedStType}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            setSelectedStType(val);
+                                                            handleUpdate({
+                                                                stInfo: {
+                                                                    isSt: true,
+                                                                    stType: val,
+                                                                    isTentative: isStTentative,
+                                                                    rewardType: stRewardType,
+                                                                },
+                                                            });
+                                                        }}
+                                                        className="w-full py-1 px-1.5 text-xs rounded border border-amber-300/50 dark:border-amber-700/50 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                                    >
+                                                        <option value="Pemeriksaan Luar Kawasan Pabean">Pemeriksaan Luar Kawasan Pabean</option>
+                                                        <option value="Pelayanan ATA Carnet">Pelayanan ATA Carnet</option>
+                                                        <option value="Hanggar Pabean Khusus">Hanggar Pabean Khusus</option>
+                                                        <option value="Pengawasan Khusus / Patroli">Pengawasan Khusus / Patroli</option>
+                                                        <option value="Diklat / Pelatihan Resmi">Diklat / Pelatihan Resmi</option>
+                                                        <option value="Penugasan Dinas Lainnya">Penugasan Dinas Lainnya</option>
+                                                    </select>
+
+                                                    <div className="flex items-center justify-between text-[10px] pt-0.5">
+                                                        <span className="opacity-75 font-semibold text-amber-700 dark:text-amber-300">Status Kepastian:</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const nextTentative = !isStTentative;
+                                                                setIsStTentative(nextTentative);
+                                                                handleUpdate({
+                                                                    stInfo: {
+                                                                        isSt: true,
+                                                                        stType: selectedStType,
+                                                                        isTentative: nextTentative,
+                                                                        rewardType: stRewardType,
+                                                                    },
+                                                                });
+                                                            }}
+                                                            className={`px-2 py-0.5 rounded text-[9.5px] font-bold cursor-pointer ${
+                                                                isStTentative ? 'bg-amber-600 text-white' : 'bg-black/10 dark:bg-white/10 text-slate-700 dark:text-slate-300'
+                                                            }`}
+                                                        >
+                                                            {isStTentative ? 'Tentatif' : 'Pasti (Resmi)'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Subtab 3: Geser Off */}
+                                            {perubahanTab === 'geser_off' && (
+                                                <div className="space-y-1.5 p-2 rounded-[6px] bg-emerald-500/10 text-xs">
+                                                    <div className="flex items-center justify-between">
+                                                        <label className="text-[9.5px] font-bold block text-emerald-700 dark:text-emerald-300">
+                                                            Tanggal Asal Piket (YYYY-MM-DD):
+                                                        </label>
+                                                        {data?.geserOffInfo?.isGeserOff && (
+                                                            <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/20 px-1.5 py-0.2 rounded">
+                                                                Aktif
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Contoh: 2026-05-12"
+                                                        value={geserSourceDate}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            setGeserSourceDate(val);
+                                                            handleUpdate({
+                                                                shift: 'OFF',
+                                                                geserOffInfo: {
+                                                                    isGeserOff: true,
+                                                                    sourceDate: val,
+                                                                    earnedDays: geserEarnedDays,
+                                                                },
+                                                            });
+                                                        }}
+                                                        className="w-full py-1 px-1.5 text-xs font-mono rounded border border-emerald-300/50 dark:border-emerald-700/50 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                    />
+
+                                                    <div className="flex items-center justify-between text-[10px] pt-0.5">
+                                                        <span className="opacity-75 font-semibold text-emerald-700 dark:text-emerald-300">Jatah Off:</span>
+                                                        <div className="flex gap-1">
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setGeserEarnedDays(1);
+                                                                    handleUpdate({
+                                                                        shift: 'OFF',
+                                                                        geserOffInfo: { isGeserOff: true, sourceDate: geserSourceDate, earnedDays: 1 },
+                                                                    });
+                                                                }}
+                                                                className={`px-2 py-0.5 rounded text-[9.5px] font-bold cursor-pointer ${
+                                                                    geserEarnedDays === 1 ? 'bg-emerald-600 text-white' : 'bg-black/10 dark:bg-white/10 text-slate-700 dark:text-slate-300'
+                                                                }`}
+                                                            >
+                                                                1 Hari
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setGeserEarnedDays(2);
+                                                                    handleUpdate({
+                                                                        shift: 'OFF',
+                                                                        geserOffInfo: { isGeserOff: true, sourceDate: geserSourceDate, earnedDays: 2 },
+                                                                    });
+                                                                }}
+                                                                className={`px-2 py-0.5 rounded text-[9.5px] font-bold cursor-pointer ${
+                                                                    geserEarnedDays === 2 ? 'bg-emerald-600 text-white' : 'bg-black/10 dark:bg-white/10 text-slate-700 dark:text-slate-300'
+                                                                }`}
+                                                            >
+                                                                2 Hari
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Reset / Hapus Perubahan Button jika ada perubahan aktif */}
+                                            {(data?.leaveInfo?.isLeave || data?.stInfo?.isSt || data?.geserOffInfo?.isGeserOff) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleUpdate({
+                                                            leaveInfo: undefined,
+                                                            stInfo: undefined,
+                                                            geserOffInfo: undefined,
+                                                        });
+                                                    }}
+                                                    className="w-full py-1 rounded text-[9.5px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                                                >
+                                                    Hapus / Reset Status Perubahan
+                                                </button>
+                                            )}
+
+                                            {/* Link cepat ke Form Modal Detail Lengkap jika ingin opsi lebih lanjut */}
+                                            {onOpenDetail && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onOpenDetail(dayNumber);
+                                                    }}
+                                                    className="w-full py-0.5 text-center text-[9px] font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors cursor-pointer"
+                                                >
+                                                    Buka Form Modal Lengkap ↗
+                                                </button>
+                                            )}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
 
                             {/* Footer: Tombol Selesai */}
