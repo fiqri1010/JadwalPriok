@@ -1,0 +1,48 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Berjalan setiap hari pada pukul 00:00 UTC (07:00 WIB)
+    # Supabase free tier pause setelah 7 hari tidak ada aktivitas, cron harian memastikan selalu aktif
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    # Memungkinkan trigger manual kapan saja dari tab GitHub Actions
+
+jobs:
+  ping-supabase:
+    name: Ping Supabase Database & Auth API
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase Endpoints
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "❌ Error: Secret SUPABASE_URL atau SUPABASE_ANON_KEY belum diatur di GitHub Secrets!"
+            echo "Harap tambahkan secret di Repository Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+          # Normalisasi URL (hapus trailing slash jika ada)
+          BASE_URL="${SUPABASE_URL%/}"
+
+          echo "🚀 Menghubungi Supabase REST API..."
+          REST_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$BASE_URL/rest/v1/" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+
+          echo "Status respons REST API: $REST_STATUS"
+
+          echo "🚀 Menghubungi Supabase Auth Health..."
+          AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$BASE_URL/auth/v1/health" \
+            -H "apikey: $SUPABASE_ANON_KEY")
+
+          echo "Status respons Auth Health: $AUTH_STATUS"
+
+          if [ "$REST_STATUS" -ge 200 ] && [ "$REST_STATUS" -lt 500 ]; then
+            echo "✅ Sukses: Supabase menerima request aktif pada $(date -u)!"
+          else
+            echo "⚠️ Peringatan: Status HTTP tidak terduga ($REST_STATUS). Cek kembali konfigurasi URL/Key."
+            exit 1
+          fi

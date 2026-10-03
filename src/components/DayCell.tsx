@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { DayData, normalizeShift, getMobileShiftLabel, SHIFT_COLORS, LiburNasional, isPiketShift } from '../types';
+import { DayData, normalizeShift, getMobileShiftLabel, SHIFT_COLORS, LiburNasional, isPiketShift, isDayDataFilled } from '../types';
 import { PiketMatchInfo, OffMatchInfo } from '../utils/piket';
 import { calculateDayLembur } from '../utils/lembur';
 import {
@@ -237,12 +237,17 @@ export const DayCell = React.memo<DayCellProps>(({
     onRequestTimePickDay,
 }) => {
     const handleUpdate = React.useCallback((partial: Partial<DayData>) => {
+        // Prevent modification of existing schedules if the partial update changes the shift
+        if (isDayDataFilled(data) && partial.shift && partial.shift !== data.shift) {
+            console.warn("Update blocked: Schedule already exists for this day.");
+            return;
+        }
         if (onUpdateDay && dateKey) {
             onUpdateDay(dateKey, partial);
         } else if (onUpdate) {
             onUpdate(partial);
         }
-    }, [onUpdateDay, dateKey, onUpdate]);
+    }, [onUpdateDay, dateKey, onUpdate, data]);
 
     const handleRequestTimePick = React.useCallback((field: 'jamMasuk' | 'jamPulang' | 'absenCeisa', title: string, currentVal: string) => {
         if (onRequestTimePickDay && dateKey) {
