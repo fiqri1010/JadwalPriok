@@ -30,6 +30,7 @@ import { UserAccount, ScheduleCopyTarget } from '../../types/admin';
 import { DayData, AppTheme, ShiftType, SHIFT_COLORS, EXCEL_SHIFT_MAPPING, SHIFT_OPTIONS } from '../../types';
 import { SYSTEM_DEFAULT_EXCEL_MAP } from '../../data/excelMappings';
 import { getCurrentUserPermissions } from '../../utils/adminStorage';
+import { saveServerSchedules } from '../../utils/serverSync';
 import {
     loadSavedExcelColorMap,
     saveExcelColorMap,
@@ -913,14 +914,14 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
         );
     };
 
-    const handleExecuteImport = () => {
+    const handleExecuteImport = async () => {
         const permissions = getCurrentUserPermissions();
         if (!permissions.canBroadcastSchedule) {
             onShowToast('Akses dibatasi: Role Anda tidak memiliki izin broadcast / impor jadwal pengguna (canBroadcastSchedule).');
             return;
         }
-        const selectedCount = targets.filter((t) => t.selected).length;
-        if (selectedCount === 0) {
+        const selectedTargets = targets.filter((t) => t.selected);
+        if (selectedTargets.length === 0) {
             onShowToast('Pilih minimal satu target pengguna/posko untuk mengimpor jadwal.');
             return;
         }
@@ -933,15 +934,82 @@ export const AdminScheduleBroadcastTab: React.FC<AdminScheduleBroadcastTabProps>
         setIsImporting(true);
         setImportSuccess(null);
 
-        setTimeout(() => {
-            setIsImporting(false);
-            const externalCount = targets.filter((t) => t.selected && t.isExternal).length;
-            const appUserCount = selectedCount - externalCount;
+        try {
+            const LOCAL_STORAGE_PEER_SCHEDULES_KEY = 'jadwalpriok_peer_schedules_v1';
+            let existingSchedules: Record<string, Record<string, string>> = {};
+            try {
+                const raw = localStorage.getItem(LOCAL_STORAGE_PEER_SCHEDULES_KEY);
+                if (raw) existingSchedules = JSON.parse(raw);
+            } catch {}
+
+            const updatedSchedules: Record<string, Record<string, string>> = { ...existingSchedules };
+
+            selectedTargets.forEach((target, targetIndex) => {
+                if (!target.nip) return;
+                if (!updatedSchedules[target.nip]) {
+                    updatedSchedules[target.nip] = {};
+                }
+
+                // Cari baris yang cocok di gridData:
+                // 1. Berdasarkan NIP (kolom indeks 1)
+                // 2. Berdasarkan Nama (kolom indeks 0)
+                // 3. Fallback berdasarkan urutan baris
+                let matchedRowIdx = gridData.findIndex((row) => {
+                    const cellNip = (row[1]?.value || '').replace(/\D/g, '');
+                    return cellNip && target.nip.replace(/\D/g, '').includes(cellNip);
+                });
+
+                if (matchedRowIdx === -1) {
+                    matchedRowIdx = gridData.findIndex((row) => {
+                        const cellName = (row[0]?.value || '').trim().toLowerCase();
+                        return cellName && (cellName.includes(target.name.toLowerCase()) || target.name.toLowerCase().includes(cellName));
+                    });
+                }
+
+                if (matchedRowIdx === -1 && targetIndex < gridData.length) {
+                    matchedRowIdx = targetIndex;
+                }
+
+                if (matchedRowIdx !== -1 && gridData[matchedRowIdx]) {
+                    const rowCells = gridData[matchedRowIdx];
+                    for (let d = 1; d <= daysInSelectedMonth; d++) {
+                        // Kolom tanggal dimulai dari indeks 2 (0: Nama, 1: NIP, 2: Tgl 1, dst.)
+                        const cell = rowCells[d + 1];
+                        if (cell) {
+                            const cellVal = cell.value || '';
+                            const shiftResolved = resolveShiftFromCell(cellVal, cell.bgColor, customColorMap, cell.textColor);
+                            const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                            if (shiftResolved) {
+                                updatedSchedules[target.nip][dateStr] = shiftResolved;
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Simpan secara permanen ke localStorage & server backend
+            try {
+                localStorage.setItem(LOCAL_STORAGE_PEER_SCHEDULES_KEY, JSON.stringify(updatedSchedules));
+            } catch {}
+
+            await saveServerSchedules(updatedSchedules);
+
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('peer-schedules-updated'));
+            }
+
+            const externalCount = selectedTargets.filter((t) => t.isExternal).length;
+            const appUserCount = selectedTargets.length - externalCount;
             const monthName = MONTH_NAMES_ID[selectedMonth - 1];
-            const msg = `Berhasil mengimpor jadwal dari Grid Excel ke ${selectedCount} target (${appUserCount} Pengguna App, ${externalCount} Personel Posko Luar) untuk periode ${monthName} ${selectedYear}.`;
+            const msg = `Berhasil mengimpor & menerapkan jadwal resmi dari Grid Excel ke ${selectedTargets.length} target (${appUserCount} Pengguna App, ${externalCount} Personel Posko Luar) untuk periode ${monthName} ${selectedYear}.`;
             setImportSuccess(msg);
             onShowToast(msg);
-        }, 700);
+        } catch (err) {
+            console.error('Gagal memproses impor jadwal', err);
+            onShowToast('Gagal memproses dan menyimpan impor jadwal.');
+        } finally {
+            setIsImporting(false);
+        }
     };
 
     const filteredTargets = targets.filter((t) => {

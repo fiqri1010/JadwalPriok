@@ -4,6 +4,7 @@
   "version": "0.5.8",
   "type": "module",
   "scripts": {
+    "start": "node server.ts",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
@@ -69,6 +70,8 @@
     "@firebase/util@1.15.3": true,
     "core-js@3.50.0": true,
     "esbuild@0.25.12": true,
+    "@google/genai@2.21.0": true,
+    "@google/genai@2.22.0": true,
     "@google/genai@2.26.0": true
   },
   "lavamoat": {

@@ -10,7 +10,11 @@ const __dirname = path.dirname(__filename);
 async function startServer() {
     const app = express();
     const port = Number(process.env.PORT) || 3000;
-    const isDev = process.env.NODE_ENV !== 'production' && !fs.existsSync(path.join(__dirname, 'dist', 'index.html'));
+    const isProduction =
+        process.env.NODE_ENV === 'production' ||
+        Boolean(process.env.K_SERVICE) ||
+        fs.existsSync(path.join(__dirname, 'dist', 'index.html'));
+    const isDev = !isProduction && process.env.NODE_ENV === 'development';
 
     // 1. Health check endpoints
     app.get(['/healthz', '/_health', '/health', '/api/health'], (req, res) => {

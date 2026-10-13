@@ -21,14 +21,13 @@ import {
     Info,
     Smartphone,
     Share2,
-    Server,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { AppTheme, DayData, SHIFT_COLORS, normalizeShift, LiburNasional } from '../../types';
 import { ThemeConfig } from '../../themeConfig';
 import { UserAccount, UserRole } from '../../types/admin';
 import { getAdminUsers } from '../../utils/adminStorage';
-import { fetchServerUsers, resetServerMasterData } from '../../utils/serverSync';
+import { fetchServerUsers, fetchServerSchedules } from '../../utils/serverSync';
 import { saveFileWithDialog } from '../../lib/fileDownload';
 import { DEFAULT_HOLIDAYS, getIndonesianHoliday, INDONESIAN_HOLIDAYS } from '../../data/holidays';
 import { SubToolbarHeader } from '../SubToolbarHeader';
@@ -44,16 +43,6 @@ const INDONESIAN_DAYS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 const LOCAL_STORAGE_PINNED_PEERS_KEY = 'jadwalpriok_pinned_peers';
 const LOCAL_STORAGE_PEER_SCHEDULES_KEY = 'jadwalpriok_peer_schedules_v1';
 const LOCAL_STORAGE_PEER_SWAPS_KEY = 'jadwalpriok_peer_swaps_v1';
-
-// Pola shift standar operasional Tanjung Priok
-const SHIFT_ROTATION_PATTERNS = [
-    ['Graha', 'SM', 'Malam', 'OFF', 'Graha', 'Graha', 'OFF'],
-    ['SM', 'Malam', 'OFF', 'Graha', 'SM', 'SM', 'OFF'],
-    ['Malam', 'OFF', 'Graha', 'SM', 'Malam', 'Malam', 'OFF'],
-    ['OFF', 'Graha', 'SM', 'Malam', 'OFF', 'OFF', 'TPSL'],
-    ['TPSL', 'TPSL', 'OFF', 'NPCT', 'NPCT', 'OFF', 'Graha'],
-    ['NPCT', 'OFF', 'Graha', 'SM', 'OFF', 'Malam', 'OFF'],
-];
 
 // Helper singkat untuk jam kerja shift
 const SHIFT_HOURS_MAP: Record<string, string> = {
@@ -150,7 +139,6 @@ export const TeamScheduleView: React.FC<TeamScheduleViewProps> = ({
 
     // Load admin / staff users (didukung sinkronisasi server lokal & self-healing)
     const [usersList, setUsersList] = useState<UserAccount[]>(() => getAdminUsers());
-    const [isSyncingServer, setIsSyncingServer] = useState(false);
 
     useEffect(() => {
         // Initial load dari penyimpanan lokal / self-healed
@@ -169,21 +157,6 @@ export const TeamScheduleView: React.FC<TeamScheduleViewProps> = ({
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
-
-    const handleSyncFromServer = async () => {
-        setIsSyncingServer(true);
-        try {
-            const data = await resetServerMasterData();
-            setUsersList(data);
-            onShowToast('Sinkronisasi Berhasil! 120 staf resmi di 5 posko telah dimuat dari server lokal.');
-        } catch {
-            const fallback = getAdminUsers();
-            setUsersList(fallback);
-            onShowToast('Data master 120 staf resmi dimuat dari penyimpanan lokal.');
-        } finally {
-            setIsSyncingServer(false);
-        }
-    };
 
     // Filter Posko options (selalu menjamin 5 posko resmi tercantum penuh)
     const poskoOptions = useMemo(() => {
@@ -246,7 +219,7 @@ export const TeamScheduleView: React.FC<TeamScheduleViewProps> = ({
         return dateList;
     }, [dateList, mobileScope]);
 
-    // Custom peer schedules from localStorage
+    // Custom peer schedules dari localStorage & sinkronisasi server lokal
     const [customPeerSchedules, setCustomPeerSchedules] = useState<Record<string, Record<string, string>>>(() => {
         try {
             const raw = localStorage.getItem(LOCAL_STORAGE_PEER_SCHEDULES_KEY);
@@ -256,36 +229,53 @@ export const TeamScheduleView: React.FC<TeamScheduleViewProps> = ({
         }
     });
 
-    // Helper deterministik generator shift (hanya aktif untuk bulan Oktober 2026, bulan lain kosong jika belum diisi)
+    useEffect(() => {
+        // Ambil data jadwal tersimpan dari server lokal
+        fetchServerSchedules().then((serverData) => {
+            if (serverData && typeof serverData === 'object' && Object.keys(serverData).length > 0) {
+                setCustomPeerSchedules((prev) => {
+                    const merged = { ...prev, ...serverData };
+                    try {
+                        localStorage.setItem(LOCAL_STORAGE_PEER_SCHEDULES_KEY, JSON.stringify(merged));
+                    } catch {}
+                    return merged;
+                });
+            }
+        }).catch(() => {});
+
+        const reloadSchedules = () => {
+            try {
+                const raw = localStorage.getItem(LOCAL_STORAGE_PEER_SCHEDULES_KEY);
+                if (raw) setCustomPeerSchedules(JSON.parse(raw));
+            } catch {}
+        };
+
+        window.addEventListener('storage', reloadSchedules);
+        window.addEventListener('peer-schedules-updated', reloadSchedules);
+        return () => {
+            window.removeEventListener('storage', reloadSchedules);
+            window.removeEventListener('peer-schedules-updated', reloadSchedules);
+        };
+    }, []);
+
+    // Helper pengambilan shift:
+    // HANYA membaca data nyata (Jadwal saya dari daysState, atau Jadwal Rekan resmi dari customPeerSchedules yang diinput oleh Admin).
+    // Dilarang ada sistem otomatis yang mengacak/mengarang jadwal tanpa input dari admin.
     const getShiftForUserAndDate = (user: UserAccount, dateStr: string, dayNum: number): string => {
-        // 1. Jika ini akun pengguna aktif yang sedang login, baca dari daysState
+        // 1. Jika ini akun pengguna aktif yang sedang login, baca dari daysState (kalender kerja personal)
         if (user.nip === currentUserNip) {
             const live = daysState[dateStr]?.shift;
             if (live) return live;
         }
 
-        // 2. Jika ada override spesifik di customPeerSchedules
+        // 2. Jika ada data jadwal resmi di customPeerSchedules (diinput/diimpor oleh admin atau tersimpan di sistem)
         if (customPeerSchedules[user.nip]?.[dateStr]) {
             return customPeerSchedules[user.nip][dateStr];
         }
 
-        // 3. Batasi fallback deterministik otomatis hanya untuk Bulan Oktober 2026 (2026-10).
-        // Untuk bulan lain yang belum diisi oleh pengguna, kembalikan string kosong agar tampil '-' (belum diisi).
-        const [yearStr, monthStr] = dateStr.split('-');
-        const y = parseInt(yearStr, 10);
-        const m = parseInt(monthStr, 10);
-        if (y !== 2026 || m !== 10) {
-            return '';
-        }
-
-        // Fallback deterministik khusus untuk Oktober 2026
-        const nipHash = user.nip
-            .split('')
-            .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const patternIndex = (nipHash + (user.unitPosko.length || 0)) % SHIFT_ROTATION_PATTERNS.length;
-        const pattern = SHIFT_ROTATION_PATTERNS[patternIndex];
-        const dayOffset = (dayNum + nipHash) % pattern.length;
-        return pattern[dayOffset];
+        // 3. Tanpa input atau data resmi dari admin, kembalikan string kosong ('') agar tabel menampilkan tanda '-' (belum ada jadwal/non-dinas).
+        // Tidak ada sistem yang boleh memaksakan atau mengacak jadwal tanpa input admin.
+        return '';
     };
 
     // Filtered & Sorted Users
@@ -608,27 +598,6 @@ export const TeamScheduleView: React.FC<TeamScheduleViewProps> = ({
                             </select>
                         </div>
 
-                        {/* Tombol Sinkronisasi Server Lokal */}
-                        <button
-                            type="button"
-                            onClick={handleSyncFromServer}
-                            disabled={isSyncingServer}
-                            className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg border flex items-center space-x-1.5 transition-colors cursor-pointer ${
-                                themeConfig.isIndustrial
-                                    ? 'bg-[#15181E] border-[rgba(226,232,240,0.15)] text-emerald-400 hover:bg-[#1A1D23]'
-                                    : themeConfig.isPaperSketch
-                                    ? 'bg-white border-2 border-[#2b2b2b] text-[#2b2b2b] rounded-none'
-                                    : themeConfig.isDashboard
-                                    ? 'bg-[#FFF0BE] border-[#4D2A00]/30 text-[#4D2A00] hover:bg-[#FFE8A3]'
-                                    : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100/50'
-                            }`}
-                            title="Sinkronkan data 120 personel di 5 posko resmi langsung dari server lokal"
-                        >
-                            <Server className={`w-3.5 h-3.5 ${isSyncingServer ? 'animate-spin text-emerald-500' : 'text-emerald-600 dark:text-emerald-400'}`} />
-                            <span className="hidden sm:inline">Server Lokal (120 Staf)</span>
-                            <span className="sm:hidden">Server</span>
-                        </button>
-
                         {/* Tombol Filter Hanya Pinned / Favorit */}
                         <button
                             type="button"
@@ -710,7 +679,7 @@ export const TeamScheduleView: React.FC<TeamScheduleViewProps> = ({
             )}
 
             {/* 2. Spreadsheet Matrix Table Container (Sticky Freeze Panes) */}
-            <div className={`relative border overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)] min-h-[420px] rounded-xl shadow-xs ${
+            <div className={`relative border overflow-x-auto overflow-y-auto max-h-[calc(100vh-275px)] min-h-[360px] sm:min-h-[420px] rounded-xl shadow-xs ${
                 themeConfig.isIndustrial
                     ? 'border-[rgba(226,232,240,0.12)] bg-[#111317]'
                     : themeConfig.isPaperSketch
@@ -950,7 +919,7 @@ export const TeamScheduleView: React.FC<TeamScheduleViewProps> = ({
             </div>
 
             {/* 3. Ringkasan & Legenda Kode Shift */}
-            <div className={`p-3 rounded-xl border flex flex-wrap items-center justify-between gap-2.5 text-xs ${
+            <div className={`p-2.5 sm:p-3 rounded-xl border flex flex-wrap items-center justify-between gap-2.5 text-xs shrink-0 ${
                 themeConfig.isIndustrial
                     ? 'bg-[#1A1D23] border-[rgba(226,232,240,0.12)] text-[#E2E8F0]'
                     : themeConfig.isPaperSketch
@@ -1003,7 +972,7 @@ export const TeamScheduleView: React.FC<TeamScheduleViewProps> = ({
                     <Info className={`w-3.5 h-3.5 shrink-0 ${
                         themeConfig.isDashboard ? 'text-[#78350F]' : 'text-teal-600 dark:text-teal-400'
                     }`} />
-                    <span>Klik sel mana saja untuk detail & ajakan tukar shift.</span>
+                    <span>Klik sel untuk detail & ajakan tukar shift. Tanda (-) berarti belum ada input jadwal resmi dari admin.</span>
                 </div>
             </div>
 
